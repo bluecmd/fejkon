@@ -16,6 +16,8 @@ set_instance_parameter_value clk_0 {resetSynchronousEdges} {NONE}
 
 add_instance fcport0 fejkon_fcport 1.0
 
+add_instance sfp0 sfp_port 1.0
+
 # exported interfaces
 add_interface clk clock sink
 set_interface_property clk EXPORT_OF clk_0.clk_in
@@ -25,11 +27,17 @@ add_interface fcxcvr_0_line_tx conduit end
 set_interface_property fcxcvr_0_line_tx EXPORT_OF fcport0.fcxcvr_line_tx
 add_interface reset reset sink
 set_interface_property reset EXPORT_OF clk_0.clk_in_reset
+add_interface sfp0 conduit end
+set_interface_property sfp0 EXPORT_OF sfp0.sfp
 
 # connections and connection parameters
 add_connection clk_0.clk fcport0.clk
 
+add_connection clk_0.clk sfp0.clk
+
 add_connection clk_0.clk_reset fcport0.rst
+
+add_connection clk_0.clk_reset sfp0.reset
 
 # interconnect requirements
 set_interconnect_requirement {$system} {qsys_mm.clockCrossingAdapter} {HANDSHAKE}

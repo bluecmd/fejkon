@@ -6,9 +6,9 @@ qemu:
 	git clone https://github.com/qemu/qemu
 
 build-qemu/x86_64-softmmu/qemu-system-x86_64: qemu
-	(mkdir -p build-qemu; \
-		cd build-qemu; \
-		../qemu/configure --target-list=x86_64-softmmu --enable-virtfs; \
+	(mkdir -p build-qemu && \
+		cd build-qemu && \
+		../qemu/configure --target-list=x86_64-softmmu --enable-virtfs && \
 		make -j$(shell nproc))
 
 linux:
@@ -17,12 +17,13 @@ linux:
 	mv linux-$(KERNEL) linux
 
 root/sbin/init: $(wildcard test/*.go)
-	go test -c -o root/sbin/init ./test
+	go get -t ./test/...
+	go test -ldflags '-extldflags -static' -c -o root/sbin/init ./test
 
 root:
 
 root/lib/modules/5.3.1/extra/fejkon.ko: $(wildcard src/*.c)
-	(cd src/; make; make install)
+	(cd src/ && make && make install)
 
 menuconfig: linux
 	make KCONFIG_CONFIG=$(PWD)/linux.config menuconfig -C linux/

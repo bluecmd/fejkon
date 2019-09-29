@@ -26,6 +26,7 @@ module sfp_port (
 		input  wire [7:0] mm_writedata,     //      .writedata
 		output wire       mm_readdatavalid, //      .readdatavalid
 		output wire       mm_waitrequest    //      .waitrequest
+		output wire [1:0] mm_response       //      .response
 	);
 
 	// TODO: Auto-generated HDL template
@@ -37,5 +38,7 @@ module sfp_port (
 	assign mm_waitrequest = 1'b0;
 
 	assign mm_readdatavalid = 1'b0;
+
+	assign mm_response = 2'b11;
 
 endmodule

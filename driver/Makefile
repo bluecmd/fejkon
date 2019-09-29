@@ -15,7 +15,7 @@ linux:
 	mv linux-5.3.1 linux
 
 root/sbin/init: $(wildcard test/*.go)
-	go test -o root/sbin/init ./test
+	go test -c -o root/sbin/init ./test
 
 root:
 
@@ -34,4 +34,5 @@ test: build-qemu/x86_64-softmmu/qemu-system-x86_64 linux/arch/x86/boot/bzImage r
 		-fsdev local,id=root,path=$(PWD)/root,security_model=none,writeout=immediate \
 		-device virtio-9p-pci,fsdev=root,mount_tag=/dev/root \
 		-kernel linux/arch/x86/boot/bzImage \
+		-device edu \
 		-append "root=hostfs rootfstype=9p rootflags=trans=virtio noinitrd console=ttyS0"

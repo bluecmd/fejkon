@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"testing"
 	"os"
 	"golang.org/x/sys/unix"
@@ -11,8 +12,9 @@ func TestTest(t *testing.T) {
 }
 
 func TestMain(m *testing.M) {
-	m.Run()
-	if os.Getpid() == 1 && os.Getuid() == 0 {
-		unix.Reboot(unix.LINUX_REBOOT_CMD_POWER_OFF)
+	if os.Getpid() != 1 || os.Getuid() != 0 {
+		log.Fatalf("Test should be run inside VM as init")
 	}
+	m.Run()
+	unix.Reboot(unix.LINUX_REBOOT_CMD_POWER_OFF)
 }

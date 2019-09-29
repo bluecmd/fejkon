@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/google/gopacket"
+	"github.com/google/gopacket/layers"
 	"github.com/google/gopacket/pcap"
 	"github.com/mdlayher/raw"
 	"github.com/u-root/u-root/pkg/kmodule"
@@ -48,6 +49,11 @@ func TestReadPacket(t *testing.T) {
 	handle, err := pcap.OpenLive("fc0", 4096, true, pcap.BlockForever)
 	if err != nil {
 		t.Fatalf("OpenLive: %v", err)
+	}
+	// TODO: https://github.com/google/gopacket/pull/712
+	err = handle.SetLinkType(layers.LinkType(225))
+	if err != nil {
+		t.Fatalf("SetLinkType: %v", err)
 	}
 	ps := gopacket.NewPacketSource(handle, handle.LinkType())
 	for packet := range ps.Packets() {

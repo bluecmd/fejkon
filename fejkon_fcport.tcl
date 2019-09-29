@@ -13,6 +13,10 @@ add_instance clk0 altera_clock_bridge 18.1
 set_instance_parameter_value clk0 {EXPLICIT_CLOCK_RATE} {0.0}
 set_instance_parameter_value clk0 {NUM_CLOCK_OUTPUTS} {1}
 
+add_instance fc_add_idle_0 fc_add_idle 1.0
+
+add_instance fc_remove_idle_0 fc_remove_idle 1.0
+
 add_instance fcrx_dma altera_msgdma 18.1
 set_instance_parameter_value fcrx_dma {BURST_ENABLE} {0}
 set_instance_parameter_value fcrx_dma {BURST_WRAPPING_SUPPORT} {0}
@@ -97,6 +101,8 @@ add_interface fcrx_dma_csr_irq interrupt sender
 set_interface_property fcrx_dma_csr_irq EXPORT_OF fcrx_dma.csr_irq
 add_interface fcrx_dma_mm_write avalon master
 set_interface_property fcrx_dma_mm_write EXPORT_OF fcrx_dma.mm_write
+add_interface fctx_dma_csr_irq interrupt sender
+set_interface_property fctx_dma_csr_irq EXPORT_OF fctx_dma.csr_irq
 add_interface fctx_dma_mm_read avalon master
 set_interface_property fctx_dma_mm_read EXPORT_OF fctx_dma.mm_read
 add_interface fcxcvr_line_rx conduit end
@@ -109,6 +115,10 @@ add_interface setup avalon slave
 set_interface_property setup EXPORT_OF setup_bridge.s0
 
 # connections and connection parameters
+add_connection clk0.out_clk fc_add_idle_0.clk
+
+add_connection clk0.out_clk fc_remove_idle_0.clk
+
 add_connection clk0.out_clk fcrx_dma.clock
 
 add_connection clk0.out_clk fctx_dma.clock
@@ -119,9 +129,17 @@ add_connection clk0.out_clk rst0.clk
 
 add_connection clk0.out_clk setup_bridge.clk
 
-add_connection fctx_dma.st_source fcxcvr.tx
+add_connection fc_add_idle_0.out fcxcvr.tx
 
-add_connection fcxcvr.rx fcrx_dma.st_sink
+add_connection fc_remove_idle_0.out fcrx_dma.st_sink
+
+add_connection fctx_dma.st_source fc_add_idle_0.in
+
+add_connection fcxcvr.rx fc_remove_idle_0.in
+
+add_connection rst0.out_reset fc_add_idle_0.reset
+
+add_connection rst0.out_reset fc_remove_idle_0.reset
 
 add_connection rst0.out_reset fcrx_dma.reset_n
 

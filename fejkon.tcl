@@ -26,6 +26,11 @@ set_interface_property fcxcvr_0_line_tx EXPORT_OF fcport0.fcxcvr_line_tx
 add_interface reset reset sink
 set_interface_property reset EXPORT_OF clk_0.clk_in_reset
 
+# connections and connection parameters
+add_connection clk_0.clk fcport0.clk
+
+add_connection clk_0.clk_reset fcport0.rst
+
 # interconnect requirements
 set_interconnect_requirement {$system} {qsys_mm.clockCrossingAdapter} {HANDSHAKE}
 set_interconnect_requirement {$system} {qsys_mm.enableEccProtection} {FALSE}

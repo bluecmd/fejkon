@@ -39,7 +39,7 @@ add_fileset QUARTUS_SYNTH QUARTUS_SYNTH "" ""
 set_fileset_property QUARTUS_SYNTH TOP_LEVEL 8g_fc_xcvr
 set_fileset_property QUARTUS_SYNTH ENABLE_RELATIVE_INCLUDE_PATHS false
 set_fileset_property QUARTUS_SYNTH ENABLE_FILE_OVERWRITE_MODE true
-add_fileset_file 8g_fc_xcvr.v VERILOG PATH 8g_fc_xcvr.v TOP_LEVEL_FILE
+add_fileset_file 8g_fc_xcvr.sv VERILOG PATH 8g_fc_xcvr.sv TOP_LEVEL_FILE
 
 
 # 

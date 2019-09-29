@@ -4,7 +4,7 @@
 
 
 # 
-# 8g_fc_xcvr "Fibre Chnannel 8G Transceiver" v1.0
+# fc_8g_xcvr "Fibre Chnannel 8G Transceiver" v1.0
 # bluecmd 2019.09.29.12:04:03
 # 
 # 
@@ -16,10 +16,10 @@ package require -exact qsys 16.1
 
 
 # 
-# module 8g_fc_xcvr
+# module fc_8g_xcvr
 # 
 set_module_property DESCRIPTION ""
-set_module_property NAME 8g_fc_xcvr
+set_module_property NAME fc_8g_xcvr
 set_module_property VERSION 1.0
 set_module_property INTERNAL false
 set_module_property OPAQUE_ADDRESS_MAP true
@@ -36,10 +36,10 @@ set_module_property REPORT_HIERARCHY false
 # file sets
 # 
 add_fileset QUARTUS_SYNTH QUARTUS_SYNTH "" ""
-set_fileset_property QUARTUS_SYNTH TOP_LEVEL 8g_fc_xcvr
+set_fileset_property QUARTUS_SYNTH TOP_LEVEL fc_8g_xcvr
 set_fileset_property QUARTUS_SYNTH ENABLE_RELATIVE_INCLUDE_PATHS false
 set_fileset_property QUARTUS_SYNTH ENABLE_FILE_OVERWRITE_MODE true
-add_fileset_file 8g_fc_xcvr.sv VERILOG PATH 8g_fc_xcvr.sv TOP_LEVEL_FILE
+add_fileset_file fc_8g_xcvr.sv VERILOG PATH fc_8g_xcvr.sv TOP_LEVEL_FILE
 
 
 # 

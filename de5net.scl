@@ -1,0 +1,1 @@
+create_clock -period "50.00 MHz" [get_ports clk_clk]

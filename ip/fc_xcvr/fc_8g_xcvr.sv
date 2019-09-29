@@ -9,7 +9,7 @@
 // to your version control system if you want to keep it.
 
 `timescale 1 ps / 1 ps
-module 8g_fc_xcvr (
+module fc_8g_xcvr (
 		input  wire [31:0] tx_data,  //      tx.data
 		output wire        tx_ready, //        .ready
 		output wire [31:0] rx_data,  //      rx.data

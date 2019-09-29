@@ -4,7 +4,7 @@ package require -exact qsys 16.0
 create_system {fejkon}
 
 set_project_property DEVICE_FAMILY {Stratix V}
-set_project_property DEVICE {5SEE9F45C2}
+set_project_property DEVICE {5SGXEA7N2F45C2}
 set_project_property HIDE_FROM_IP_CATALOG {false}
 
 # Instances and instance parameters
@@ -35,7 +35,7 @@ set_instance_parameter_value chipmem0 {useShallowMemBlocks} {0}
 set_instance_parameter_value chipmem0 {writable} {1}
 
 add_instance ext0 clock_source 18.1
-set_instance_parameter_value ext0 {clockFrequency} {100000000.0}
+set_instance_parameter_value ext0 {clockFrequency} {50000000.0}
 set_instance_parameter_value ext0 {clockFrequencyKnown} {1}
 set_instance_parameter_value ext0 {resetSynchronousEdges} {NONE}
 

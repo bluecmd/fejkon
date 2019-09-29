@@ -25,7 +25,7 @@ module sfp_port (
 		input  wire       mm_write,         //      .write
 		input  wire [7:0] mm_writedata,     //      .writedata
 		output wire       mm_readdatavalid, //      .readdatavalid
-		output wire       mm_waitrequest    //      .waitrequest
+		output wire       mm_waitrequest,   //      .waitrequest
 		output wire [1:0] mm_response       //      .response
 	);
 

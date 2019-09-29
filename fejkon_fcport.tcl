@@ -73,7 +73,7 @@ set_instance_parameter_value fctx_dma {STRIDE_ENABLE} {0}
 set_instance_parameter_value fctx_dma {TRANSFER_TYPE} {Full Word Accesses Only}
 set_instance_parameter_value fctx_dma {USE_FIX_ADDRESS_WIDTH} {0}
 
-add_instance fcxcvr 8g_fc_xcvr 1.0
+add_instance fcxcvr fc_8g_xcvr 1.0
 
 add_instance rst0 altera_reset_bridge 18.1
 set_instance_parameter_value rst0 {ACTIVE_LOW_RESET} {0}

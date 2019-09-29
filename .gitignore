@@ -2,3 +2,4 @@
 *.qsys
 **/.*.swp
 .qsys_edit
+gen/

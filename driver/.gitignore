@@ -1,0 +1,7 @@
+build-qemu/
+linux/
+qemu/
+*.tar.xz
+linux.config.old
+root/
+

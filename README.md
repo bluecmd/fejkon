@@ -38,12 +38,12 @@ The memory map is as follows. This is all very much TODO.
 | 0x10100 | 256   | Port 0 | SFP Port I2C  |                              |
 | 0x10200 | 512   | Port 0 | RX XCVR Mgmt  | V-Series Transceiver PHY (3) |
 | 0x10400 | 512   | Port 0 | TX XCVR Mgmt  | V-Series Transceiver PHY (3) |
-| 0x11000 | 32    | Port 0 | RX Descr 0    | DMA descriptor               |
+| 0x12000 | 32    | Port 0 | RX Descr 0    | DMA descriptor               |
 | ...     | 32    | Port 0 | RX Descr n    | ...                          |
-| 0x11FE0 | 32    | Port 0 | RX Descr 127  | ...                          |
-| 0x19000 | 32    | Port 0 | TX Descr 0    | ...                          |
+| 0x12FE0 | 32    | Port 0 | RX Descr 127  | ...                          |
+| 0x13000 | 32    | Port 0 | TX Descr 0    | ...                          |
 | ...     | 32    | Port 0 | TX Descr n    | ...                          |
-| 0x19FE0 | 32    | Port 0 | TX Descr 127  | ...                          |
+| 0x13FE0 | 32    | Port 0 | TX Descr 127  | ...                          |
 | 0x2xxxx | ...   | Port 1 | ...           |                              |
 | 0x3xxxx | ...   | Port 2 | ...           |                              |
 | 0x4xxxx | ...   | Port 3 | ...           |                              |

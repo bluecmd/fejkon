@@ -5,7 +5,6 @@ import (
 	"log"
 	"net"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"testing"
 	"time"
@@ -99,13 +98,6 @@ func TestMain(m *testing.M) {
 
 	insmod()
 	ifup("fc0")
-
-	/* TODO: Remove */
-	out, err := exec.Command("/sbin/ip", "link").CombinedOutput()
-	log.Printf("Output: %v", string(out))
-	if err != nil {
-		log.Fatalf("iproute2: %s", err)
-	}
 
 	m.Run()
 	unix.Reboot(unix.LINUX_REBOOT_CMD_POWER_OFF)

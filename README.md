@@ -22,3 +22,34 @@ using "Export System as Platform Designer script (.tcl)" under the "File" menu. 
 have updated any subsystems you need to this for those systems as well.
 
 Finally review any changes to the \*.tcl files and commit them if they look reasonable.
+
+## PCIe specification
+
+The PCIe bus has a single Base Address Register (BAR), index 0.
+The memory map is as follows. This is all very much TODO.
+
+| Addr    | Width | Part   | Name          | Description                  |
+|---------|-------|--------|---------------|------------------------------|
+| 0x00000 | 4     | Card   | Version       | Version of the Fejkon card   |
+| 0x00004 | 2     | Card   | Temperature   | Local die temperature (1)    |
+| 0x00006 | 2     | Card   | Temperature   | Board temperature (1)        |
+| 0x10000 | 4     | Port 0 | RX DMA        | DMA status (2)               |
+| 0x10010 | 4     | Port 0 | TX DMA        | DMA status (2)               |
+| 0x10100 | 256   | Port 0 | SFP Port I2C  |                              |
+| 0x10200 | 512   | Port 0 | RX XCVR Mgmt  | V-Series Transceiver PHY (3) |
+| 0x10400 | 512   | Port 0 | TX XCVR Mgmt  | V-Series Transceiver PHY (3) |
+| 0x11000 | 32    | Port 0 | RX Descr 0    | DMA descriptor               |
+| ...     | 32    | Port 0 | RX Descr n    | ...                          |
+| 0x11FE0 | 32    | Port 0 | RX Descr 127  | ...                          |
+| 0x19000 | 32    | Port 0 | TX Descr 0    | ...                          |
+| ...     | 32    | Port 0 | TX Descr n    | ...                          |
+| 0x19FE0 | 32    | Port 0 | TX Descr 127  | ...                          |
+| 0x2xxxx | ...   | Port 1 | ...           |                              |
+| 0x3xxxx | ...   | Port 2 | ...           |                              |
+| 0x4xxxx | ...   | Port 3 | ...           |                              |
+
+
+1) Temperature is signed 16-bit integer in 1/256 scale
+2) See DMA the details for "Scatter-Gather DMA Controller Core" in
+[Embedded Peripherals IP User Guide](https://www.intel.com/content/dam/www/programmable/us/en/pdfs/literature/ug/ug_embedded_ip.pdf)
+3) See "Custom PHY" in [V-Series Transceiver PHY IP Core User Guide](https://www.intel.com/content/dam/www/programmable/us/en/pdfs/literature/ug/xcvr_user_guide.pdf)

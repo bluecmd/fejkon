@@ -2,6 +2,15 @@
 
 KERNEL=5.3.1
 
+test: build-qemu/x86_64-softmmu/qemu-system-x86_64 linux/arch/x86/boot/bzImage root/sbin/init root/lib/modules/$(KERNEL)/extra/fejkon.ko
+	build-qemu/x86_64-softmmu/qemu-system-x86_64 \
+	 	-nographic -machine q35 \
+		-fsdev local,id=root,path=$(PWD)/root,security_model=none,writeout=immediate \
+		-device virtio-9p-pci,fsdev=root,mount_tag=/dev/root \
+		-kernel linux/arch/x86/boot/bzImage \
+		-device edu \
+		-append "root=hostfs rootfstype=9p rootflags=trans=virtio noinitrd console=ttyS0 loglevel=8"
+
 qemu:
 	git clone https://github.com/qemu/qemu
 
@@ -33,12 +42,3 @@ linux/arch/x86/boot/bzImage: linux linux.config root
 	make KCONFIG_CONFIG=$(PWD)/linux.config -j$(shell nproc) -C linux/
 	make KCONFIG_CONFIG=$(PWD)/linux.config INSTALL_MOD_PATH=$(PWD)/root/ modules_install -C linux/
 	touch $@
-
-test: build-qemu/x86_64-softmmu/qemu-system-x86_64 linux/arch/x86/boot/bzImage root/sbin/init root/lib/modules/$(KERNEL)/extra/fejkon.ko
-	build-qemu/x86_64-softmmu/qemu-system-x86_64 \
-	 	-nographic -machine q35 \
-		-fsdev local,id=root,path=$(PWD)/root,security_model=none,writeout=immediate \
-		-device virtio-9p-pci,fsdev=root,mount_tag=/dev/root \
-		-kernel linux/arch/x86/boot/bzImage \
-		-device edu \
-		-append "root=hostfs rootfstype=9p rootflags=trans=virtio noinitrd console=ttyS0 loglevel=8"

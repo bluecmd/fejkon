@@ -10,7 +10,7 @@ clean:
 	rm -f fejkon.sof
 	rm -fr gen
 
-fejkon.sof: ip/altera_fc_phy/fc_phy.qip fejkon.qsys
+fejkon.sof: ip/altera_fc_phy/fc_phy.qip fejkon.qsys de5net.sdc de5net.tcl
 	(mkdir -p gen; cd gen; $(QPATH)/bin/quartus_sh -t ../quartus.tcl)
 
 ip/altera_fc_phy/fc_phy.qip: ip/altera_fc_phy/fc_phy.v

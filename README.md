@@ -34,8 +34,11 @@ The memory map is as follows. This is all very much TODO.
 | 0x00004 | 2     | Card   | Temperature   | Local die temperature (1)    |
 | 0x00006 | 2     | Card   | Temperature   | Board temperature (1)        |
 | 0x10000 | 4     | Port 0 | RX DMA        | DMA status (2)               |
-| 0x10010 | 4     | Port 0 | TX DMA        | DMA status (2)               |
-| 0x10100 | 256   | Port 0 | SFP Port I2C  |                              |
+| 0x10040 | 4     | Port 0 | TX DMA        | DMA status (2)               |
+| 0x01000 | 256   | Port 0 | SFP Port I2C  |                              |
+| 0x02000 | 256   | Port 1 | SFP Port I2C  |                              |
+| 0x03000 | 256   | Port 2 | SFP Port I2C  |                              |
+| 0x04000 | 256   | Port 3 | SFP Port I2C  |                              |
 | 0x10200 | 512   | Port 0 | RX XCVR Mgmt  | V-Series Transceiver PHY (3) |
 | 0x10400 | 512   | Port 0 | TX XCVR Mgmt  | V-Series Transceiver PHY (3) |
 | 0x12000 | 32    | Port 0 | RX Descr 0    | DMA descriptor               |

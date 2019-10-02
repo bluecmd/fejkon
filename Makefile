@@ -1,4 +1,4 @@
-QPATH ?= /home/bluecmd/intelFPGA/18.1/quartus
+QPATH ?= "$(HOME)/intelFPGA/19.1/quartus"
 
 .DELETE_ON_ERROR:
 
@@ -10,7 +10,7 @@ clean:
 	rm -f fejkon.sof
 	rm -fr gen
 
-fejkon.sof: ip/altera_fc_phy/fc_phy.qip
+fejkon.sof: ip/altera_fc_phy/fc_phy.qip fejkon.qsys
 	(mkdir -p gen; cd gen; $(QPATH)/bin/quartus_sh -t ../quartus.tcl)
 
 ip/altera_fc_phy/fc_phy.qip: ip/altera_fc_phy/fc_phy.v

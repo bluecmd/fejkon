@@ -9,7 +9,7 @@ set_project_property HIDE_FROM_IP_CATALOG {false}
 
 # Instances and instance parameters
 # (disabled instances are intentionally culled)
-add_instance chipmem0 altera_avalon_onchip_memory2 18.1
+add_instance chipmem0 altera_avalon_onchip_memory2 19.1
 set_instance_parameter_value chipmem0 {allowInSystemMemoryContentEditor} {0}
 set_instance_parameter_value chipmem0 {blockType} {AUTO}
 set_instance_parameter_value chipmem0 {copyInitFile} {0}
@@ -34,20 +34,20 @@ set_instance_parameter_value chipmem0 {useNonDefaultInitFile} {0}
 set_instance_parameter_value chipmem0 {useShallowMemBlocks} {0}
 set_instance_parameter_value chipmem0 {writable} {1}
 
-add_instance ext0 clock_source 18.1
+add_instance ext0 clock_source 19.1
 set_instance_parameter_value ext0 {clockFrequency} {50000000.0}
 set_instance_parameter_value ext0 {clockFrequencyKnown} {1}
 set_instance_parameter_value ext0 {resetSynchronousEdges} {NONE}
 
 add_instance fcport0 fejkon_fcport 1.0
 
-add_instance jtagm altera_jtag_avalon_master 18.1
+add_instance jtagm altera_jtag_avalon_master 19.1
 set_instance_parameter_value jtagm {FAST_VER} {0}
 set_instance_parameter_value jtagm {FIFO_DEPTHS} {2}
 set_instance_parameter_value jtagm {PLI_PORT} {50000}
 set_instance_parameter_value jtagm {USE_PLI} {0}
 
-add_instance rstctrl altera_reset_controller 18.1
+add_instance rstctrl altera_reset_controller 19.1
 set_instance_parameter_value rstctrl {MIN_RST_ASSERTION_TIME} {3}
 set_instance_parameter_value rstctrl {NUM_RESET_INPUTS} {2}
 set_instance_parameter_value rstctrl {OUTPUT_RESET_SYNC_EDGES} {deassert}
@@ -78,10 +78,10 @@ add_instance sfp0 sfp_port 1.0
 # exported interfaces
 add_interface clk clock sink
 set_interface_property clk EXPORT_OF ext0.clk_in
-add_interface fcxcvr_0_line_rx conduit end
-set_interface_property fcxcvr_0_line_rx EXPORT_OF fcport0.fcxcvr_line_rx
-add_interface fcxcvr_0_line_tx conduit end
-set_interface_property fcxcvr_0_line_tx EXPORT_OF fcport0.fcxcvr_line_tx
+add_interface fcport0_xcvr_line_rx conduit end
+set_interface_property fcport0_xcvr_line_rx EXPORT_OF fcport0.xcvr_line_rx
+add_interface fcport0_xcvr_line_tx conduit end
+set_interface_property fcport0_xcvr_line_tx EXPORT_OF fcport0.xcvr_line_tx
 add_interface reset reset sink
 set_interface_property reset EXPORT_OF ext0.clk_in_reset
 add_interface sfp0 conduit end
@@ -104,24 +104,24 @@ add_connection ext0.clk_reset jtagm.clk_reset
 
 add_connection ext0.clk_reset rstctrl.reset_in0
 
-add_connection fcport0.fcrx_dma_mm_write chipmem0.s2
-set_connection_parameter_value fcport0.fcrx_dma_mm_write/chipmem0.s2 arbitrationPriority {1}
-set_connection_parameter_value fcport0.fcrx_dma_mm_write/chipmem0.s2 baseAddress {0x0000}
-set_connection_parameter_value fcport0.fcrx_dma_mm_write/chipmem0.s2 defaultConnection {0}
+add_connection fcport0.rx_dma_m chipmem0.s2
+set_connection_parameter_value fcport0.rx_dma_m/chipmem0.s2 arbitrationPriority {1}
+set_connection_parameter_value fcport0.rx_dma_m/chipmem0.s2 baseAddress {0x000f0000}
+set_connection_parameter_value fcport0.rx_dma_m/chipmem0.s2 defaultConnection {0}
 
-add_connection fcport0.fctx_dma_mm_read chipmem0.s1
-set_connection_parameter_value fcport0.fctx_dma_mm_read/chipmem0.s1 arbitrationPriority {1}
-set_connection_parameter_value fcport0.fctx_dma_mm_read/chipmem0.s1 baseAddress {0x0000}
-set_connection_parameter_value fcport0.fctx_dma_mm_read/chipmem0.s1 defaultConnection {0}
+add_connection fcport0.tx_dma_m chipmem0.s2
+set_connection_parameter_value fcport0.tx_dma_m/chipmem0.s2 arbitrationPriority {1}
+set_connection_parameter_value fcport0.tx_dma_m/chipmem0.s2 baseAddress {0x000f0000}
+set_connection_parameter_value fcport0.tx_dma_m/chipmem0.s2 defaultConnection {0}
 
 add_connection jtagm.master chipmem0.s1
 set_connection_parameter_value jtagm.master/chipmem0.s1 arbitrationPriority {1}
-set_connection_parameter_value jtagm.master/chipmem0.s1 baseAddress {0x0000}
+set_connection_parameter_value jtagm.master/chipmem0.s1 baseAddress {0x000f0000}
 set_connection_parameter_value jtagm.master/chipmem0.s1 defaultConnection {0}
 
 add_connection jtagm.master fcport0.setup
 set_connection_parameter_value jtagm.master/fcport0.setup arbitrationPriority {1}
-set_connection_parameter_value jtagm.master/fcport0.setup baseAddress {0x1400}
+set_connection_parameter_value jtagm.master/fcport0.setup baseAddress {0x00010000}
 set_connection_parameter_value jtagm.master/fcport0.setup defaultConnection {0}
 
 add_connection jtagm.master sfp0.mm

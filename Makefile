@@ -12,6 +12,7 @@ clean:
 
 fejkon.sof: ip/altera_fc_phy/fc_phy.qip fejkon.qsys de5net.sdc de5net.tcl
 	(mkdir -p gen; cd gen; $(QPATH)/bin/quartus_sh -t ../quartus.tcl)
+	cp gen/output_files/fejkon.sof $@
 
 ip/altera_fc_phy/fc_phy.qip: ip/altera_fc_phy/fc_phy.v
 	(cd ip/altera_fc_phy; $(QPATH)/bin/qmegawiz  -silent $(PWD)/$<)

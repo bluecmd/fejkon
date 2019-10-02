@@ -47,6 +47,19 @@ set_instance_parameter_value jtagm {FIFO_DEPTHS} {2}
 set_instance_parameter_value jtagm {PLI_PORT} {50000}
 set_instance_parameter_value jtagm {USE_PLI} {0}
 
+add_instance led altera_avalon_pio 19.1
+set_instance_parameter_value led {bitClearingEdgeCapReg} {0}
+set_instance_parameter_value led {bitModifyingOutReg} {0}
+set_instance_parameter_value led {captureEdge} {0}
+set_instance_parameter_value led {direction} {Output}
+set_instance_parameter_value led {edgeType} {RISING}
+set_instance_parameter_value led {generateIRQ} {0}
+set_instance_parameter_value led {irqType} {LEVEL}
+set_instance_parameter_value led {resetValue} {15.0}
+set_instance_parameter_value led {simDoTestBenchWiring} {0}
+set_instance_parameter_value led {simDrivenValue} {0.0}
+set_instance_parameter_value led {width} {4}
+
 add_instance rstctrl altera_reset_controller 19.1
 set_instance_parameter_value rstctrl {MIN_RST_ASSERTION_TIME} {3}
 set_instance_parameter_value rstctrl {NUM_RESET_INPUTS} {2}
@@ -82,6 +95,8 @@ add_interface fcport0_xcvr_line_rx conduit end
 set_interface_property fcport0_xcvr_line_rx EXPORT_OF fcport0.xcvr_line_rx
 add_interface fcport0_xcvr_line_tx conduit end
 set_interface_property fcport0_xcvr_line_tx EXPORT_OF fcport0.xcvr_line_tx
+add_interface led conduit end
+set_interface_property led EXPORT_OF led.external_connection
 add_interface reset reset sink
 set_interface_property reset EXPORT_OF ext0.clk_in_reset
 add_interface sfp0 conduit end
@@ -95,6 +110,8 @@ add_connection ext0.clk chipmem0.clk2
 add_connection ext0.clk fcport0.clk
 
 add_connection ext0.clk jtagm.clk
+
+add_connection ext0.clk led.clk
 
 add_connection ext0.clk rstctrl.clk
 
@@ -124,6 +141,11 @@ set_connection_parameter_value jtagm.master/fcport0.setup arbitrationPriority {1
 set_connection_parameter_value jtagm.master/fcport0.setup baseAddress {0x00010000}
 set_connection_parameter_value jtagm.master/fcport0.setup defaultConnection {0}
 
+add_connection jtagm.master led.s1
+set_connection_parameter_value jtagm.master/led.s1 arbitrationPriority {1}
+set_connection_parameter_value jtagm.master/led.s1 baseAddress {0x000e0000}
+set_connection_parameter_value jtagm.master/led.s1 defaultConnection {0}
+
 add_connection jtagm.master sfp0.mm
 set_connection_parameter_value jtagm.master/sfp0.mm arbitrationPriority {1}
 set_connection_parameter_value jtagm.master/sfp0.mm baseAddress {0x1000}
@@ -136,6 +158,8 @@ add_connection rstctrl.reset_out chipmem0.reset1
 add_connection rstctrl.reset_out chipmem0.reset2
 
 add_connection rstctrl.reset_out fcport0.rst
+
+add_connection rstctrl.reset_out led.reset
 
 add_connection rstctrl.reset_out sfp0.reset
 

@@ -2,7 +2,7 @@ QPATH ?= "$(HOME)/intelFPGA/19.1/quartus"
 
 .DELETE_ON_ERROR:
 
-.PHONY: all
+.PHONY: all syscon
 
 all: fejkon.sof
 
@@ -23,3 +23,5 @@ fejkon.qsys: fejkon.tcl fejkon_fcport.qsys
 %.qsys: %.tcl
 	$(QPATH)/sopc_builder/bin/qsys-script --script=$< --search-path='$(wildcard ip/**/*_hw.tcl),$$'
 
+syscon:
+	$(QPATH)/sopc_builder/bin/system-console --desktop_script=syscon.tcl -debug

@@ -17,3 +17,13 @@ if {![jtag_debug_sense_clock $m]} {
 puts " E.g:"
 puts " - master_write_32 \$m 0x000e0000 5"
 puts " - jtag_debug_reset_system \$m"
+
+puts ""
+puts [format " SFP A status: %s" [master_read_8 $m 0x1000 1]]
+# TODO: Verify that there is an SFP in the slot
+master_write_32 $m 0x1040 0x2A0
+master_write_32 $m 0x1040 0x000
+master_write_32 $m 0x1040 0x100
+master_write_32 $m 0x1048 1
+
+puts [format " SFP A data: %s" [master_read_32 $m 0x1044 1]]

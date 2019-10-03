@@ -55,7 +55,7 @@ set_instance_parameter_value led {direction} {Output}
 set_instance_parameter_value led {edgeType} {RISING}
 set_instance_parameter_value led {generateIRQ} {0}
 set_instance_parameter_value led {irqType} {LEVEL}
-set_instance_parameter_value led {resetValue} {15.0}
+set_instance_parameter_value led {resetValue} {10.0}
 set_instance_parameter_value led {simDoTestBenchWiring} {0}
 set_instance_parameter_value led {simDrivenValue} {0.0}
 set_instance_parameter_value led {width} {4}
@@ -86,7 +86,7 @@ set_instance_parameter_value rstctrl {USE_RESET_REQUEST_IN8} {0}
 set_instance_parameter_value rstctrl {USE_RESET_REQUEST_IN9} {0}
 set_instance_parameter_value rstctrl {USE_RESET_REQUEST_INPUT} {0}
 
-add_instance sfp0 sfp_port 1.0
+add_instance sfp0 fejkon_sfp 1.0
 
 # exported interfaces
 add_interface clk clock sink
@@ -99,8 +99,8 @@ add_interface led conduit end
 set_interface_property led EXPORT_OF led.external_connection
 add_interface reset reset sink
 set_interface_property reset EXPORT_OF ext0.clk_in_reset
-add_interface sfp0 conduit end
-set_interface_property sfp0 EXPORT_OF sfp0.sfp
+add_interface sfp0_sfp conduit end
+set_interface_property sfp0_sfp EXPORT_OF sfp0.sfp
 
 # connections and connection parameters
 add_connection ext0.clk chipmem0.clk1

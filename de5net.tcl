@@ -1447,26 +1447,26 @@ set_location_assignment PIN_BC37 -to reset_reset_n ; # CPU_RESET_n
 #============================================================
 # SFP+ A
 #============================================================
-set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp0_los                       ; # SFPA_LOS
-set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp0_prsnt_n                   ; # SFPA_MOD0_PRSNT_n
-set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp0_scl                       ; # SFPA_MOD1_SCL
-set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp0_sda                       ; # SFPA_MOD2_SDA
-set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp0_ratesel[0]                ; # SFPA_RATESEL[0]
-set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp0_ratesel[1]                ; # SFPA_RATESEL[1]
+set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp0_sfp_los                   ; # SFPA_LOS
+set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp0_sfp_prsnt_n               ; # SFPA_MOD0_PRSNT_n
+set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp0_sfp_scl                   ; # SFPA_MOD1_SCL
+set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp0_sfp_sda                   ; # SFPA_MOD2_SDA
+set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp0_sfp_ratesel[0]            ; # SFPA_RATESEL[0]
+set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp0_sfp_ratesel[1]            ; # SFPA_RATESEL[1]
 # set_instance_assignment -name IO_STANDARD "1.5-V PCML" -to fcport0_xcvr_line_rx_lvds     ; # SFPA_RX_p
-set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp0_txdis                     ; # SFPA_TXDISABLE
-set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp0_txfail                    ; # SFPA_TXFAULT
+set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp0_sfp_txdis                 ; # SFPA_TXDISABLE
+set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp0_sfp_txfail                ; # SFPA_TXFAULT
 # set_instance_assignment -name IO_STANDARD "1.5-V PCML" -to fcport0_xcvr_line_tx_lvds     ; # SFPA_TX_p
-set_location_assignment PIN_F22 -to sfp0_los                                         ; # SFPA_LOS
-set_location_assignment PIN_E21 -to sfp0_prsnt_n                                     ; # SFPA_MOD0_PRSNT_n
-set_location_assignment PIN_B20 -to sfp0_scl                                         ; # SFPA_MOD1_SCL
-set_location_assignment PIN_A20 -to sfp0_sda                                         ; # SFPA_MOD2_SDA
-set_location_assignment PIN_E20 -to sfp0_ratesel[0]                                  ; # SFPA_RATESEL[0]
-set_location_assignment PIN_G22 -to sfp0_ratesel[1]                                  ; # SFPA_RATESEL[1]
-# set_location_assignment PIN_AK2 -to fcport0_xcvr_line_rx_lvds                        ; # SFPA_RX_p
-set_location_assignment PIN_B22 -to sfp0_txdis                                       ; # SFPA_TXDISABLE
-set_location_assignment PIN_A22 -to sfp0_txfail                                      ; # SFPA_TXFAULT
-# set_location_assignment PIN_AG4 -to fcport0_xcvr_line_tx_lvds                        ; # SFPA_TX_p
+set_location_assignment PIN_F22 -to sfp0_sfp_los                                     ; # SFPA_LOS
+set_location_assignment PIN_E21 -to sfp0_sfp_prsnt_n                                 ; # SFPA_MOD0_PRSNT_n
+set_location_assignment PIN_B20 -to sfp0_sfp_scl                                     ; # SFPA_MOD1_SCL
+set_location_assignment PIN_A20 -to sfp0_sfp_sda                                     ; # SFPA_MOD2_SDA
+set_location_assignment PIN_E20 -to sfp0_sfp_ratesel[0]                              ; # SFPA_RATESEL[0]
+set_location_assignment PIN_G22 -to sfp0_sfp_ratesel[1]                              ; # SFPA_RATESEL[1]
+# set_location_assignment PIN_AK2 -to fcport0_xcvr_line_rx_lvds                      ; # SFPA_RX_p
+set_location_assignment PIN_B22 -to sfp0_sfp_txdis                                   ; # SFPA_TXDISABLE
+set_location_assignment PIN_A22 -to sfp0_sfp_txfail                                  ; # SFPA_TXFAULT
+# set_location_assignment PIN_AG4 -to fcport0_xcvr_line_tx_lvds                      ; # SFPA_TX_p
 
 #============================================================
 # SFP+ B

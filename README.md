@@ -35,12 +35,13 @@ The memory map is as follows. This is all very much TODO.
 | 0x00006 | 2     | Card   | Temperature   | Board temperature (1)        |
 | 0x10000 | 4     | Port 0 | RX DMA        | DMA status (2)               |
 | 0x10040 | 4     | Port 0 | TX DMA        | DMA status (2)               |
-| 0x01000 | 256   | Port 0 | SFP Port I2C  |                              |
-| 0x02000 | 256   | Port 1 | SFP Port I2C  |                              |
-| 0x03000 | 256   | Port 2 | SFP Port I2C  |                              |
-| 0x04000 | 256   | Port 3 | SFP Port I2C  |                              |
-| 0x10200 | 512   | Port 0 | RX XCVR Mgmt  | V-Series Transceiver PHY (3) |
-| 0x10400 | 512   | Port 0 | TX XCVR Mgmt  | V-Series Transceiver PHY (3) |
+| 0x01000 | 1     | Port 0 | SFP Status    | SFP Status Word (3)          |
+| 0x01100 | 256   | Port 0 | SFP Port I2C  |                              |
+| 0x02x00 | ...   | Port 1 | SFP Port      |                              |
+| 0x03x00 | ...   | Port 2 | SFP Port      |                              |
+| 0x04x00 | ...   | Port 3 | SFP Port      |                              |
+| 0x10200 | 512   | Port 0 | RX XCVR Mgmt  | V-Series Transceiver PHY (4) |
+| 0x10400 | 512   | Port 0 | TX XCVR Mgmt  | V-Series Transceiver PHY (4) |
 | 0x12000 | 32    | Port 0 | RX Descr 0    | DMA descriptor               |
 | ...     | 32    | Port 0 | RX Descr n    | ...                          |
 | 0x12FE0 | 32    | Port 0 | RX Descr 127  | ...                          |
@@ -55,4 +56,14 @@ The memory map is as follows. This is all very much TODO.
 1) Temperature is signed 16-bit integer in 1/256 scale
 2) See DMA the details for "Scatter-Gather DMA Controller Core" in
 [Embedded Peripherals IP User Guide](https://www.intel.com/content/dam/www/programmable/us/en/pdfs/literature/ug/ug_embedded_ip.pdf)
-3) See "Custom PHY" in [V-Series Transceiver PHY IP Core User Guide](https://www.intel.com/content/dam/www/programmable/us/en/pdfs/literature/ug/xcvr_user_guide.pdf)
+3) See below
+4) See "Custom PHY" in [V-Series Transceiver PHY IP Core User Guide](https://www.intel.com/content/dam/www/programmable/us/en/pdfs/literature/ug/xcvr_user_guide.pdf)
+
+### SFP Port Status
+
+| Bit(s) | Direction   | Description      |
+| 0      | Read only   | Present          |
+| 1      | Read only   | Loss of Signal   |
+| 2      | Read only   | TX Fault         |
+| 3      | Read/Write  | TX Disable       |
+| 4:5    | Read/Write  | Rate Select      |

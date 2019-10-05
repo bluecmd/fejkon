@@ -25,24 +25,29 @@ Finally review any changes to the \*.tcl files and commit them if they look reas
 
 ## PCIe specification
 
+The board uses vendor/device ID `f1c0:0de5`. Mnemonic is **FICO**n **DE5**-net.
+
 The PCIe bus has a single Base Address Register (BAR), index 0.
 The memory map is as follows. This is all very much TODO.
 
+Accesses need to be 4 byte wide.
+
 | Addr    | Width | Part   | Name          | Description                  |
 |---------|-------|--------|---------------|------------------------------|
-| 0x00000 | 2     | Card   | Version       | Version of the Fejkon card   |
-| 0x00002 | 2     | Card   | Port options  | Number of ports              |
+| 0x00000 | 2     | Card   | Version       | The constant 0x0DE5          |
+| 0x00002 | 1     | Card   | Version       | Version of the Fejkon card   |
+| 0x00003 | 1     | Card   | Port options  | Number of ports              |
 | 0x00004 | 2     | Card   | Temperature   | Local die temperature (1)    |
 | 0x00006 | 2     | Card   | Temperature   | Board temperature (1)        |
 | 0x10000 | 4     | Port 0 | RX DMA        | DMA status (2)               |
 | 0x10040 | 4     | Port 0 | TX DMA        | DMA status (2)               |
 | 0x01000 | 1     | Port 0 | SFP Status    | SFP Status Word (3)          |
-| 0x01100 | 256   | Port 0 | SFP Port I2C  |                              |
+| 0x01040 | 64    | Port 0 | SFP Port I2C  | SFP I2C core (4)             |
 | 0x02x00 | ...   | Port 1 | SFP Port      |                              |
 | 0x03x00 | ...   | Port 2 | SFP Port      |                              |
 | 0x04x00 | ...   | Port 3 | SFP Port      |                              |
-| 0x10200 | 512   | Port 0 | RX XCVR Mgmt  | V-Series Transceiver PHY (4) |
-| 0x10400 | 512   | Port 0 | TX XCVR Mgmt  | V-Series Transceiver PHY (4) |
+| 0x10200 | 512   | Port 0 | RX XCVR Mgmt  | V-Series Transceiver PHY (5) |
+| 0x10400 | 512   | Port 0 | TX XCVR Mgmt  | V-Series Transceiver PHY (5) |
 | 0x12000 | 32    | Port 0 | RX Descr 0    | DMA descriptor               |
 | ...     | 32    | Port 0 | RX Descr n    | ...                          |
 | 0x12FE0 | 32    | Port 0 | RX Descr 127  | ...                          |
@@ -54,11 +59,12 @@ The memory map is as follows. This is all very much TODO.
 | 0x4xxxx | ...   | Port 3 | ...           |                              |
 
 
-1) Temperature is signed 16-bit integer in 1/256 scale
+1) Temperature is signed 16-bit integer in 1/256 scale in Celcius
 2) See DMA the details for "Scatter-Gather DMA Controller Core" in
 [Embedded Peripherals IP User Guide](https://www.intel.com/content/dam/www/programmable/us/en/pdfs/literature/ug/ug_embedded_ip.pdf)
 3) See below
-4) See "Custom PHY" in [V-Series Transceiver PHY IP Core User Guide](https://www.intel.com/content/dam/www/programmable/us/en/pdfs/literature/ug/xcvr_user_guide.pdf)
+4) See "Intel FPGA Avalon I2C (Master) Core" in [Embedded Peripherals IP User Guide](https://www.intel.com/content/dam/www/programmable/us/en/pdfs/literature/ug/ug_embedded_ip.pdf)
+5) See "Custom PHY" in [V-Series Transceiver PHY IP Core User Guide](https://www.intel.com/content/dam/www/programmable/us/en/pdfs/literature/ug/xcvr_user_guide.pdf)
 
 ### SFP Port Status
 

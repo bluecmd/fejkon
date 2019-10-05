@@ -10,17 +10,25 @@ test: build-qemu/x86_64-softmmu/qemu-system-x86_64 linux/arch/x86/boot/bzImage r
 		-fsdev local,id=root,path=$(PWD)/root,security_model=none,writeout=immediate \
 		-device virtio-9p-pci,fsdev=root,mount_tag=/dev/root \
 		-kernel linux/arch/x86/boot/bzImage \
-		-device edu \
+		-device fejkon \
 		-append "root=hostfs rootfstype=9p rootflags=trans=virtio noinitrd console=ttyS0 loglevel=8"
 
 qemu:
 	git clone https://github.com/qemu/qemu
 
-build-qemu/x86_64-softmmu/qemu-system-x86_64: qemu
+qemu/hw/fejkon/Makefile.objs: qemu
+	ln -sf $(PWD)/qemu-device $@
+	echo "devices-dirs-y += fejkon/" >> qemu/hw/Makefile.objs
+	echo "common-obj-y += fejkon/" >> qemu/hw/Makefile.objs
+	echo "obj-y += fejkon/" >> qemu/hw/Makefile.objs
+
+build-qemu/config-all-devices.mak: qemu qemu/hw/fejkon/Makefile.objs qemu-device/Makefile.objs
 	(mkdir -p build-qemu && \
 		cd build-qemu && \
-		../qemu/configure --target-list=x86_64-softmmu --enable-virtfs && \
-		make -j$(shell nproc))
+		../qemu/configure --target-list=x86_64-softmmu --enable-virtfs)
+
+build-qemu/x86_64-softmmu/qemu-system-x86_64: build-qemu/config-all-devices.mak $(wildcard qemu-device/*.c)
+	(cd build-qemu && make -j$(shell nproc))
 
 linux:
 	wget https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-$(KERNEL).tar.xz

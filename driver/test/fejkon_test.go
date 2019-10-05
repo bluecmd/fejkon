@@ -111,7 +111,7 @@ func TestMain(m *testing.M) {
 		log.Fatalf("unable to mount /proc: %v", err)
 	}
 
-	out, err := exec.Command("/bin/lspci", "-vv", "-d", "1234:11e8").CombinedOutput()
+	out, err := exec.Command("/bin/lspci", "-vv", "-d", "f1c0:0de5").CombinedOutput()
 	if err != nil {
 		log.Fatalf("lspci: %s", err)
 	}
@@ -119,7 +119,7 @@ func TestMain(m *testing.M) {
 
 	insmod()
 
-	out, err = exec.Command("/bin/lspci", "-vv", "-d", "1234:11e8").CombinedOutput()
+	out, err = exec.Command("/bin/lspci", "-vv", "-d", "f1c0:0de5").CombinedOutput()
 	if err != nil {
 		log.Fatalf("lspci: %s", err)
 	}

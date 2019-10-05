@@ -14,11 +14,10 @@
 #endif
 #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
 
-#define MMIO_AREA_SIZE 0x100
+#define MMIO_AREA_SIZE 0x5000
 
-/* TODO: Change */
-#define EDU_DEVICE_ID 0x11e8
-#define QEMU_VENDOR_ID 0x1234
+#define FEJKON_VENDOR_ID 0xf1c0
+#define FEJKON_DEVICE_ID 0x0de5
 
 struct fejkon_card {
   struct pci_dev *pci;
@@ -54,7 +53,7 @@ static netdev_tx_t net_tx(struct sk_buff *skb, struct net_device *net)
 {
   netdev_notice(net, "%s tx len %d, bytes: %02x %02x %02x %02x\n",
       net->name, skb->len, skb->data[0], skb->data[1], skb->data[2], skb->data[3]);
-  // Loop the packet back for now
+  /* Loop the packet back for now */
   netif_rx(skb);
   return NETDEV_TX_OK;
 }
@@ -134,13 +133,20 @@ static int probe(struct pci_dev *pcidev, const struct pci_device_id *id)
   card->pci = pcidev;
   card->bar0 = pci_iomap(pcidev, 0 /* bar */, MMIO_AREA_SIZE);
 
-  /* TODO: Read version and ports */
-  ports = 4;
+  version = ioread32(card->bar0 + 0x0);
+  if ((version & 0xffff) != 0x0de5) {
+    dev_dbg(&pcidev->dev, "ignoring card with unknown magic: %04x", version & 0xffff);
+    goto error;
+  }
+
+  ports = version >> 24;
+  version = (version >> 16) & 0xff;
+  dev_notice(&pcidev->dev, "found card with version %d, ports = %d\n", version, ports);
 
   irqs = 1 + 4 * ports;
   ret = pci_alloc_irq_vectors(pcidev, irqs, irqs, PCI_IRQ_ALL_TYPES);
   if (ret < 0) {
-    // See the README.md for fejkon for more details about this
+    /* See the README.md for fejkon for more details about this */
     dev_err(&pcidev->dev, "pci_alloc_irq_vectors failed, is multiple "
         "MSI interrupts support enabled for your platform?\n");
     goto error;
@@ -153,14 +159,6 @@ static int probe(struct pci_dev *pcidev, const struct pci_device_id *id)
     dev_err(&pcidev->dev, "request_irq\n");
     goto error;
   }
-
-  version = ioread32(card->bar0 + 0x0);
-  if ((version & 0xff) != 0xed) {
-    dev_dbg(&pcidev->dev, "tried to load driver for unknown card: %02x", version & 0xff);
-    goto error;
-  }
-
-  dev_notice(&pcidev->dev, "found card with version %d.%d\n", version >> 24, (version >> 16) & 0xff);
 
   /* card initialized, register netdev for ports */
   for (i = 0; i < ports; i++) {
@@ -219,7 +217,7 @@ static void remove(struct pci_dev *dev)
 }
 
 static struct pci_device_id id_table[] = {
-  { PCI_DEVICE(QEMU_VENDOR_ID, EDU_DEVICE_ID), },
+  { PCI_DEVICE(FEJKON_VENDOR_ID, FEJKON_DEVICE_ID), },
   { 0, }
 };
 

@@ -1,5 +1,6 @@
 obj-m += fejkon.o
 ccflags-y := -Wall -DDEBUG
+fejkon-objs := i2c.o board.o
 
 .PHONY: all clean
 

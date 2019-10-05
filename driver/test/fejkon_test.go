@@ -2,8 +2,8 @@ package main
 
 import (
 	"golang.org/x/sys/unix"
-	"log"
 	"io/ioutil"
+	"log"
 	"net"
 	"os"
 	"os/exec"
@@ -11,6 +11,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/bluecmd/go-sff"
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
 	"github.com/google/gopacket/pcap"
@@ -40,7 +41,7 @@ func TestSemdPacket(t *testing.T) {
 	go func() {
 		for {
 			if _, err := c.WriteTo(b, addr); err != nil {
-				log.Fatalf("failed to write frame: %v", err)
+				log.Printf("failed to write frame: %v", err)
 			}
 			time.Sleep(time.Millisecond * 100)
 		}
@@ -58,9 +59,65 @@ func TestReadPacket(t *testing.T) {
 		t.Fatalf("SetLinkType: %v", err)
 	}
 	ps := gopacket.NewPacketSource(handle, handle.LinkType())
+
+	i := 0
 	for packet := range ps.Packets() {
 		log.Printf("Packet: %v", packet)
+		i++
+		if i > 10 {
+			return
+		}
 	}
+}
+
+func TestDumpLinkState(t *testing.T) {
+	out, err := exec.Command("/bin/ip", "link").CombinedOutput()
+	if err != nil {
+		log.Fatalf("ip: %s", err)
+	}
+	log.Printf("ip link:\n%v", string(out))
+}
+
+func TestDumpInterrupts(t *testing.T) {
+	out, err := ioutil.ReadFile("/proc/interrupts")
+	if err != nil {
+		log.Fatalf("/proc/interrupts: %s", err)
+	}
+	log.Printf("interrupts:\n%v", string(out))
+}
+
+func TestDumpDevices(t *testing.T) {
+	out, err := ioutil.ReadFile("/proc/devices")
+	if err != nil {
+		log.Fatalf("/proc/devices: %s", err)
+	}
+	log.Printf("devices:\n%v", string(out))
+}
+
+func TestDumpI2C(t *testing.T) {
+	m, err := filepath.Glob("/sys/class/i2c-dev/i2c-*/name")
+	if err != nil {
+		t.Fatalf("glob: %v", err)
+	}
+	fi2c := []string{}
+	for _, f := range m {
+		b, _ := ioutil.ReadFile(f)
+		if string(b) == "fejkon\n" {
+			fi2c = append(fi2c, f)
+		}
+	}
+
+	if len(fi2c) != 2 {
+		t.Fatalf("Expected 2 I2C buses, got %v", fi2c)
+	}
+}
+
+func TestSFPPort(t *testing.T) {
+	p, err := sff.Read("/dev/i2c-1")
+	if err != nil {
+		t.Fatalf("sff.Read failed: %v", err)
+	}
+	log.Printf("SFP: %v", p)
 }
 
 func ifup(iface string) {
@@ -75,6 +132,21 @@ func ifup(iface string) {
 	defer h.Delete()
 	if err := h.LinkSetUp(l); err != nil {
 		log.Fatalf("handle.LinkSetUp: %v", err)
+	}
+}
+
+func ifdown(iface string) {
+	l, err := netlink.LinkByName(iface)
+	if err != nil {
+		log.Fatalf("Unable to get interface %s: %v", iface, err)
+	}
+	h, err := netlink.NewHandle(unix.NETLINK_ROUTE)
+	if err != nil {
+		log.Fatalf("netlink.NewHandle: %v", err)
+	}
+	defer h.Delete()
+	if err := h.LinkSetDown(l); err != nil {
+		log.Fatalf("handle.LinkSetDown: %v", err)
 	}
 }
 
@@ -94,23 +166,33 @@ func insmod() {
 	}
 }
 
+func rmmod() {
+	out, err := ioutil.ReadFile("/proc/modules")
+	if err != nil {
+		log.Fatalf("/proc/modules: %s", err)
+	}
+	log.Printf("modules:\n%v", string(out))
+
+	if err := kmodule.Delete("fejkon", 0); err != nil {
+		log.Fatalf("rmmod: could not unload: %v", err)
+	}
+}
+
 func TestMain(m *testing.M) {
 	if os.Getpid() != 1 || os.Getuid() != 0 {
 		log.Fatalf("Test should be run inside VM as init")
 	}
 
-	if err := mount.Mount("none", "/dev", "tmpfs", "", 0); err != nil {
-		log.Fatalf("unable to mount tmpfs on /dev: %v", err)
-	}
+	// Set up environment
+	mount.Mount("none", "/dev", "tmpfs", "", 0)
+	mount.Mount("none", "/sys", "sysfs", "", 0)
+	mount.Mount("none", "/proc", "proc", "", 0)
 
-	if err := unix.Mknod("/dev/null", unix.S_IFCHR|0600, 0x0103); err != nil && err != os.ErrExist{
-		log.Fatalf("unable to create /dev/null: %v", err)
-	}
+	unix.Mknod("/dev/null", unix.S_IFCHR|0600, 0x0103)
+	unix.Mknod("/dev/i2c-1", unix.S_IFCHR|0600, 0x5901)
+	unix.Mknod("/dev/i2c-2", unix.S_IFCHR|0600, 0x5902)
 
-	if err := mount.Mount("none", "/proc", "proc", "", 0); err != nil {
-		log.Fatalf("unable to mount /proc: %v", err)
-	}
-
+	// Dump PCI state before module load
 	out, err := exec.Command("/bin/lspci", "-vv", "-d", "f1c0:0de5").CombinedOutput()
 	if err != nil {
 		log.Fatalf("lspci: %s", err)
@@ -119,6 +201,7 @@ func TestMain(m *testing.M) {
 
 	insmod()
 
+	// Dump PCI state after module load
 	out, err = exec.Command("/bin/lspci", "-vv", "-d", "f1c0:0de5").CombinedOutput()
 	if err != nil {
 		log.Fatalf("lspci: %s", err)
@@ -127,18 +210,12 @@ func TestMain(m *testing.M) {
 
 	ifup("fc0")
 
-	out, err = exec.Command("/bin/ip", "link").CombinedOutput()
-	if err != nil {
-		log.Fatalf("ip: %s", err)
-	}
-	log.Printf("ip link:\n%v", string(out))
-
-	out, err = ioutil.ReadFile("/proc/interrupts")
-	if err != nil {
-		log.Fatalf("/proc/interrupts: %s", err)
-	}
-	log.Printf("interrupts:\n%v", string(out))
-
+	// Run tests
 	m.Run()
+
+	// Test removing the module
+	ifdown("fc0")
+	rmmod()
+
 	unix.Reboot(unix.LINUX_REBOOT_CMD_POWER_OFF)
 }

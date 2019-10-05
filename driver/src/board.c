@@ -1,12 +1,13 @@
+#include "fejkon.h"
+
 #include <linux/cdev.h>
 #include <linux/fs.h>
+#include <linux/if_arp.h>
 #include <linux/init.h>
 #include <linux/interrupt.h>
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/netdevice.h>
-#include <linux/if_arp.h>
-#include <linux/pci.h>
 #include <asm/uaccess.h>
 
 #ifdef pr_fmt
@@ -14,28 +15,18 @@
 #endif
 #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
 
-#define MMIO_AREA_SIZE 0x5000
+#define BAR0_AREA_SIZE 0x50000
 
 #define FEJKON_VENDOR_ID 0xf1c0
 #define FEJKON_DEVICE_ID 0x0de5
-
-struct fejkon_card {
-  struct pci_dev *pci;
-  void __iomem *bar0;
-  struct net_device *net[4];
-  struct altr_i2c_dev *i2c[4];
-};
-
-struct fejkon_port {
-  struct fejkon_card *card;
-  int id;
-};
 
 static const struct header_ops net_header_ops = {
 };
 
 static const struct ethtool_ops net_ethtool_ops = {
 };
+
+struct class *fejkon_class;
 
 static int net_open(struct net_device *net)
 {
@@ -51,8 +42,8 @@ static int net_stop(struct net_device *net)
 
 static netdev_tx_t net_tx(struct sk_buff *skb, struct net_device *net)
 {
-  netdev_notice(net, "%s tx len %d, bytes: %02x %02x %02x %02x\n",
-      net->name, skb->len, skb->data[0], skb->data[1], skb->data[2], skb->data[3]);
+  netdev_notice(net, "tx len %d, bytes: %02x %02x %02x %02x\n",
+      skb->len, skb->data[0], skb->data[1], skb->data[2], skb->data[3]);
   /* Loop the packet back for now */
   netif_rx(skb);
   return NETDEV_TX_OK;
@@ -131,7 +122,7 @@ static int probe(struct pci_dev *pcidev, const struct pci_device_id *id)
   if (!card)
     return -ENOMEM;
   card->pci = pcidev;
-  card->bar0 = pci_iomap(pcidev, 0 /* bar */, MMIO_AREA_SIZE);
+  card->bar0 = pci_iomap(pcidev, 0 /* bar */, BAR0_AREA_SIZE);
 
   version = ioread32(card->bar0 + 0x0);
   if ((version & 0xffff) != 0x0de5) {
@@ -139,7 +130,11 @@ static int probe(struct pci_dev *pcidev, const struct pci_device_id *id)
     goto error;
   }
 
-  ports = version >> 24;
+  ports = (version >> 24) & 0xff;
+  if (ports > MAX_PORTS) {
+    dev_err(&pcidev->dev, "card has too many ports: %d\n", ports);
+    goto error;
+  }
   version = (version >> 16) & 0xff;
   dev_notice(&pcidev->dev, "found card with version %d, ports = %d\n", version, ports);
 
@@ -169,41 +164,53 @@ static int probe(struct pci_dev *pcidev, const struct pci_device_id *id)
       return -ENOMEM;
     }
 
-    SET_NETDEV_DEV(net, &pcidev->dev);
     port = netdev_priv(net);
     port->id = i;
     port->card = card;
+    port->dev = device_create(
+        fejkon_class, &pcidev->dev, MKDEV(0, 0), NULL,
+        "%s port%d", dev_name(&pcidev->dev), port->id);
+    SET_NETDEV_DEV(net, port->dev);
 
-    irq = pci_irq_vector(pcidev, 1 + i * 4);
+    irq = pci_irq_vector(pcidev, PORT_RX_IRQ(i));
     ret = request_irq(irq, port_rx_irq, IRQF_SHARED, KBUILD_MODNAME, port);
     if (ret < 0) {
-      dev_err(&pcidev->dev, "request_irq for port_rx_irq\n");
+      dev_err(port->dev, "request_irq for port_rx_irq\n");
       goto error;
     }
 
-    irq = pci_irq_vector(pcidev, 2 + i * 4);
+    irq = pci_irq_vector(pcidev, PORT_TX_IRQ(i));
     ret = request_irq(irq, port_tx_irq, IRQF_SHARED, KBUILD_MODNAME, port);
     if (ret < 0) {
-      dev_err(&pcidev->dev, "request_irq for port_tx_irq\n");
+      dev_err(port->dev, "request_irq for port_tx_irq\n");
       goto error;
     }
 
-    irq = pci_irq_vector(pcidev, 3 + i * 4);
+    irq = pci_irq_vector(pcidev, PORT_SFP_IRQ(i));
     ret = request_irq(irq, port_sfp_irq, IRQF_SHARED, KBUILD_MODNAME, port);
     if (ret < 0) {
-      dev_err(&pcidev->dev, "request_irq for port_sfp_irq\n");
+      dev_err(port->dev, "request_irq for port_sfp_irq\n");
+      goto error;
+    }
+
+    irq = pci_irq_vector(pcidev, PORT_SFP_I2C_IRQ(i));
+    ret = fejkon_i2c_probe(port);
+    if (ret < 0) {
+      dev_err(port->dev, "fejkon_i2c_probe failed\n");
       goto error;
     }
 
     ret = register_netdev(net);
     if (ret) {
-      dev_err(&pcidev->dev, "unable to register netdev\n");
+      dev_err(port->dev, "unable to register netdev\n");
       goto error;
     }
 
     card->net[i] = net;
-    dev_notice(&pcidev->dev, "registered port %d netdev %s\n", i, net->name);
+    dev_notice(port->dev, "registered port %d netdev %s\n", i, net->name);
   }
+
+  pci_set_drvdata(pcidev, card);
 
   return 0;
 error:
@@ -212,8 +219,18 @@ error:
 
 static void remove(struct pci_dev *dev)
 {
+  struct fejkon_card *card = pci_get_drvdata(dev);
+  int i;
   pci_free_irq_vectors(dev);
   pci_release_region(dev, 0 /* bar */);
+  for (i = 0; i < MAX_PORTS; i++) {
+    if (card->i2c[i]) {
+      fejkon_i2c_remove(card->i2c[i]);
+    }
+    if (card->port[i]) {
+      device_unregister(card->port[i]->dev);
+    }
+  }
 }
 
 static struct pci_device_id id_table[] = {
@@ -232,6 +249,10 @@ static struct pci_driver pci_driver = {
 
 static int minit(void)
 {
+  fejkon_class = class_create(THIS_MODULE, "fejkon");
+  if (IS_ERR(fejkon_class)) {
+    return PTR_ERR(fejkon_class);
+  }
   if (pci_register_driver(&pci_driver) < 0) {
     return 1;
   }
@@ -241,6 +262,7 @@ static int minit(void)
 static void mexit(void)
 {
   pci_unregister_driver(&pci_driver);
+  class_destroy(fejkon_class);
 }
 
 module_init(minit);

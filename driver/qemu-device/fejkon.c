@@ -67,7 +67,7 @@ static uint32_t fejkon_temperature(void)
 static uint64_t fejkon_mmio_read(void *opaque, hwaddr addr, unsigned size)
 {
   /* FejkonState *card = opaque; */
-  uint64_t val = ~0ULL;
+  uint64_t val = 0ULL;
 
   if (size != 4) {
     return val;
@@ -82,6 +82,9 @@ static uint64_t fejkon_mmio_read(void *opaque, hwaddr addr, unsigned size)
       /* Temperature */
       val = fejkon_temperature();
       break;
+    default:
+      printf("fejkon: Read from unknown bar0 space: 0x%lx\n", addr);
+      break;
   }
 
   return val;
@@ -91,6 +94,7 @@ static void fejkon_mmio_write(void *opaque, hwaddr addr, uint64_t val,
     unsigned size)
 {
   /* TODO */
+  printf("fejkon: Write to unknown bar0 space: 0x%lx\n", addr);
 }
 
 static const MemoryRegionOps fejkon_mmio_ops = {
@@ -120,7 +124,7 @@ static void pci_fejkon_realize(PCIDevice *pdev, Error **errp)
   }
 
   memory_region_init_io(&card->mmio, OBJECT(card), &fejkon_mmio_ops, card,
-      "fejkon-mmio", 16 * KiB);
+      "fejkon-mmio", 512 * KiB);
   pci_register_bar(pdev, 0, PCI_BASE_ADDRESS_SPACE_MEMORY, &card->mmio);
 }
 

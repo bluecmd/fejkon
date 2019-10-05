@@ -27,7 +27,7 @@ build-qemu/config-all-devices.mak: qemu qemu/hw/fejkon/Makefile.objs qemu-device
 		cd build-qemu && \
 		../qemu/configure --target-list=x86_64-softmmu --enable-virtfs)
 
-build-qemu/x86_64-softmmu/qemu-system-x86_64: build-qemu/config-all-devices.mak $(wildcard qemu-device/*.c)
+build-qemu/x86_64-softmmu/qemu-system-x86_64: build-qemu/config-all-devices.mak $(wildcard qemu-device/*.c qemu-device/*.h)
 	(cd build-qemu && make -j$(shell nproc))
 
 linux:
@@ -39,7 +39,7 @@ root/sbin/init: $(wildcard test/*.go)
 	go get -t ./test/...
 	go test -ldflags '-extldflags -static' -c -o root/sbin/init ./test
 
-root: root/dev root/proc
+root: root/dev root/proc root/sys
 
 root/dev:
 	mkdir -p $@
@@ -47,7 +47,10 @@ root/dev:
 root/proc:
 	mkdir -p $@
 
-root/lib/modules/5.3.1/extra/fejkon.ko: $(wildcard src/*.c)
+root/sys:
+	mkdir -p $@
+
+root/lib/modules/5.3.1/extra/fejkon.ko: $(wildcard src/*.c src/*.h)
 	(cd src/ && make && make install)
 
 menuconfig: linux

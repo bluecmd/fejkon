@@ -20,8 +20,16 @@
 #define EDU_DEVICE_ID 0x11e8
 #define QEMU_VENDOR_ID 0x1234
 
-struct fejkon_net {
-  struct pci_dev *dev;
+struct fejkon_card {
+  struct pci_dev *pci;
+  void __iomem *bar0;
+  struct net_device *net[4];
+  struct altr_i2c_dev *i2c[4];
+};
+
+struct fejkon_port {
+  struct fejkon_card *card;
+  int id;
 };
 
 static const struct header_ops net_header_ops = {
@@ -57,13 +65,31 @@ static const struct net_device_ops net_netdev_ops = {
   .ndo_start_xmit = net_tx,
 };
 
-static struct pci_dev *pdev;
-static void __iomem *mmio;
-
-static irqreturn_t irq_handler(int irq, void *dev)
+static irqreturn_t card_irq(int irq, void *dev)
 {
-  pr_info("irq_handler irq = %d dev = %d\n", irq, *(int *)dev);
-  iowrite32(0, mmio + 4);
+  struct fejkon_card *card = dev;
+  pr_info("card_irq irq = %d dev = %p\n", irq, card);
+  return IRQ_HANDLED;
+}
+
+static irqreturn_t port_rx_irq(int irq, void *dev)
+{
+  struct fejkon_port *port = dev;
+  pr_info("port_rx_irq port = %d, irq = %d dev = %d\n", port->id, irq, *(int *)dev);
+  return IRQ_HANDLED;
+}
+
+static irqreturn_t port_tx_irq(int irq, void *dev)
+{
+  struct fejkon_port *port = dev;
+  pr_info("port_tx_irq port = %d, irq = %d dev = %d\n", port->id, irq, *(int *)dev);
+  return IRQ_HANDLED;
+}
+
+static irqreturn_t port_sfp_irq(int irq, void *dev)
+{
+  struct fejkon_port *port = dev;
+  pr_info("port_sfp_irq port = %d, irq = %d dev = %d\n", port->id, irq, *(int *)dev);
   return IRQ_HANDLED;
 }
 
@@ -80,59 +106,105 @@ static void init_netdev(struct net_device *net)
   memset(net->broadcast, 0xff, 3);
 }
 
-static int probe(struct pci_dev *dev, const struct pci_device_id *id)
+static int probe(struct pci_dev *pcidev, const struct pci_device_id *id)
 {
   unsigned int version;
   int ret;
+  int irqs;
+  int irq;
   int i;
-  struct net_device *net;
+  int ports;
+  struct fejkon_card *card;
 
-  pdev = dev;
-  ret = pci_enable_device(dev);
+  ret = pci_enable_device(pcidev);
   if (ret < 0) {
-    dev_err(&pdev->dev, "pci_enable_device\n");
+    dev_err(&pcidev->dev, "pci_enable_device\n");
     goto error;
   }
 
-  ret = pci_request_region(dev, 0 /* bar */, KBUILD_MODNAME);
+  ret = pci_request_region(pcidev, 0 /* bar */, KBUILD_MODNAME);
   if (ret < 0) {
-    dev_err(&pdev->dev, "pci_request_region\n");
+    dev_err(&pcidev->dev, "pci_request_region\n");
     goto error;
   }
 
-  mmio = pci_iomap(pdev, 0 /* bar */, MMIO_AREA_SIZE);
-  ret = request_irq(dev->irq, irq_handler, IRQF_SHARED, KBUILD_MODNAME, dev);
+  card = devm_kzalloc(&pcidev->dev, sizeof(*card), GFP_KERNEL);
+  if (!card)
+    return -ENOMEM;
+  card->pci = pcidev;
+  card->bar0 = pci_iomap(pcidev, 0 /* bar */, MMIO_AREA_SIZE);
+
+  /* TODO: Read version and ports */
+  ports = 4;
+
+  irqs = 1 + 4 * ports;
+  ret = pci_alloc_irq_vectors(pcidev, irqs, irqs, PCI_IRQ_ALL_TYPES);
   if (ret < 0) {
-    dev_err(&dev->dev, "request_irq\n");
+    // See the README.md for fejkon for more details about this
+    dev_err(&pcidev->dev, "pci_alloc_irq_vectors failed, is multiple "
+        "MSI interrupts support enabled for your platform?\n");
+    goto error;
+  }
+  dev_notice(&pcidev->dev, "pci_alloc_irq_vectors: %d", ret);
+
+  irq = pci_irq_vector(pcidev, 0);
+  ret = request_irq(irq, card_irq, IRQF_SHARED, KBUILD_MODNAME, card);
+  if (ret < 0) {
+    dev_err(&pcidev->dev, "request_irq\n");
     goto error;
   }
 
-  version = ioread32(mmio + 0x0);
+  version = ioread32(card->bar0 + 0x0);
   if ((version & 0xff) != 0xed) {
-    dev_dbg(&dev->dev, "tried to load driver for unknown card: %02x", version & 0xff);
+    dev_dbg(&pcidev->dev, "tried to load driver for unknown card: %02x", version & 0xff);
     goto error;
   }
 
-  dev_notice(&dev->dev, "found card with version %d.%d\n", version >> 24, (version >> 16) & 0xff);
+  dev_notice(&pcidev->dev, "found card with version %d.%d\n", version >> 24, (version >> 16) & 0xff);
 
   /* card initialized, register netdev for ports */
-  /* TODO: Read from card */
-  for (i = 0; i < 1; i++) {
-    net = alloc_netdev(sizeof(*dev), "fc%d", NET_NAME_UNKNOWN, init_netdev);
+  for (i = 0; i < ports; i++) {
+    struct net_device *net;
+    struct fejkon_port *port;
+    net = alloc_netdev(sizeof(*port), "fc%d", NET_NAME_UNKNOWN, init_netdev);
     if (net == NULL) {
       return -ENOMEM;
     }
 
-    SET_NETDEV_DEV(net, &dev->dev);
-    ((struct fejkon_net *)netdev_priv(net))->dev = dev;
+    SET_NETDEV_DEV(net, &pcidev->dev);
+    port = netdev_priv(net);
+    port->id = i;
+    port->card = card;
 
-    ret = register_netdev(net);
-    if (ret) {
-      dev_err(&dev->dev, "unable to register netdev\n");
+    irq = pci_irq_vector(pcidev, 1 + i * 4);
+    ret = request_irq(irq, port_rx_irq, IRQF_SHARED, KBUILD_MODNAME, port);
+    if (ret < 0) {
+      dev_err(&pcidev->dev, "request_irq for port_rx_irq\n");
       goto error;
     }
 
-    dev_notice(&dev->dev, "registered port %d netdev %s\n", i, net->name);
+    irq = pci_irq_vector(pcidev, 2 + i * 4);
+    ret = request_irq(irq, port_tx_irq, IRQF_SHARED, KBUILD_MODNAME, port);
+    if (ret < 0) {
+      dev_err(&pcidev->dev, "request_irq for port_tx_irq\n");
+      goto error;
+    }
+
+    irq = pci_irq_vector(pcidev, 3 + i * 4);
+    ret = request_irq(irq, port_sfp_irq, IRQF_SHARED, KBUILD_MODNAME, port);
+    if (ret < 0) {
+      dev_err(&pcidev->dev, "request_irq for port_sfp_irq\n");
+      goto error;
+    }
+
+    ret = register_netdev(net);
+    if (ret) {
+      dev_err(&pcidev->dev, "unable to register netdev\n");
+      goto error;
+    }
+
+    card->net[i] = net;
+    dev_notice(&pcidev->dev, "registered port %d netdev %s\n", i, net->name);
   }
 
   return 0;
@@ -142,7 +214,7 @@ error:
 
 static void remove(struct pci_dev *dev)
 {
-  free_irq(dev->irq, dev);
+  pci_free_irq_vectors(dev);
   pci_release_region(dev, 0 /* bar */);
 }
 

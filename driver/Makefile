@@ -4,7 +4,9 @@ KERNEL=5.3.1
 
 test: build-qemu/x86_64-softmmu/qemu-system-x86_64 linux/arch/x86/boot/bzImage root/sbin/init root/lib/modules/$(KERNEL)/extra/fejkon.ko
 	build-qemu/x86_64-softmmu/qemu-system-x86_64 \
-	 	-nographic -machine q35 \
+		-nographic -m 1G \
+		-machine q35,kernel-irqchip=split \
+		-device intel-iommu,intremap=on,device-iotlb=on \
 		-fsdev local,id=root,path=$(PWD)/root,security_model=none,writeout=immediate \
 		-device virtio-9p-pci,fsdev=root,mount_tag=/dev/root \
 		-kernel linux/arch/x86/boot/bzImage \
@@ -29,7 +31,13 @@ root/sbin/init: $(wildcard test/*.go)
 	go get -t ./test/...
 	go test -ldflags '-extldflags -static' -c -o root/sbin/init ./test
 
-root:
+root: root/dev root/proc
+
+root/dev:
+	mkdir -p $@
+
+root/proc:
+	mkdir -p $@
 
 root/lib/modules/5.3.1/extra/fejkon.ko: $(wildcard src/*.c)
 	(cd src/ && make && make install)

@@ -30,7 +30,8 @@ The memory map is as follows. This is all very much TODO.
 
 | Addr    | Width | Part   | Name          | Description                  |
 |---------|-------|--------|---------------|------------------------------|
-| 0x00000 | 4     | Card   | Version       | Version of the Fejkon card   |
+| 0x00000 | 2     | Card   | Version       | Version of the Fejkon card   |
+| 0x00002 | 2     | Card   | Port options  | Number of ports              |
 | 0x00004 | 2     | Card   | Temperature   | Local die temperature (1)    |
 | 0x00006 | 2     | Card   | Temperature   | Board temperature (1)        |
 | 0x10000 | 4     | Port 0 | RX DMA        | DMA status (2)               |
@@ -62,8 +63,54 @@ The memory map is as follows. This is all very much TODO.
 ### SFP Port Status
 
 | Bit(s) | Direction   | Description      |
+|--------|-------------|------------------|
 | 0      | Read only   | Present          |
 | 1      | Read only   | Loss of Signal   |
 | 2      | Read only   | TX Fault         |
 | 3      | Read/Write  | TX Disable       |
 | 4:5    | Read/Write  | Rate Select      |
+
+### MSI Interrupts
+
+Currently fejkon is using multiple MSI interrupts, not MSI-X. MSI-X is a bit
+more complicated to implement, and the benefits of MSI-X over MSI isn't very
+documented when you don't need the thousands interrupts that MSI-X offers.
+
+During development it was discovered that e.g. QEMU does not do multiple MSI
+interrupts by default, and some kernel options are needed as well. The symptom
+of the platform not being setup correctly is that
+`pci_alloc_irq_vectors(pcidev, 1, irqs, PCI_IRQ_ALL_TYPES);` only returns one
+available vector instead of the requested number. There appears to be other
+people that have ran into the
+[same issue](https://stackoverflow.com/questions/34406632/is-multi-message-msi-implemented-on-linux-x86).
+In the kernel this support for multiple MSI interrupts seems to be gated by
+`MSI_FLAG_MULTI_PCI_MSI`.
+
+To enable the kernel support, enable `CONFIG_IRQ_REMAP`. On Intel, you should
+see mentions of `DMAR` in your dmesg. The equivalent on AMD seems to be just
+IOMMU support, but that has not been verified.
+
+The configuration for QEMU is something like:
+```
+-machine q35,kernel-irqchip=split \
+-device intel-iommu,intremap=on,device-iotlb=on \
+```
+
+Since the card only uses MSI interrupts, legacy interrupts are disabled.
+
+So if you are designing something from scratch and have the option to use MSI
+or MSI-X, this information above should tell you that maybe using MSI-X will
+be easier. However, it is quite likely MSI-X has its own pitfalls.
+
+#### Interrupts
+
+| Vector | Description        |
+|--------|--------------------|
+| 0      | Card status        |
+| 1      | Port 0 RX DMA      |
+| 2      | Port 0 TX DMA      |
+| 3      | Port 0 SFP status  |
+| 4      | Port 0 SFP I2C     |
+| 5-8    | Port 1 ...         |
+| 9-12   | Port 2 ...         |
+| 13-16  | Port 3 ...         |

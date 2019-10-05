@@ -3,5 +3,6 @@ linux/
 qemu/
 *.tar.xz
 linux.config.old
-root/
-
+root/sbin/
+root/dev/
+root/lib/

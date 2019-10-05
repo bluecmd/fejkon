@@ -3,8 +3,10 @@ package main
 import (
 	"golang.org/x/sys/unix"
 	"log"
+	"io/ioutil"
 	"net"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"testing"
 	"time"
@@ -14,6 +16,7 @@ import (
 	"github.com/google/gopacket/pcap"
 	"github.com/mdlayher/raw"
 	"github.com/u-root/u-root/pkg/kmodule"
+	"github.com/u-root/u-root/pkg/mount"
 	"github.com/vishvananda/netlink"
 )
 
@@ -96,8 +99,45 @@ func TestMain(m *testing.M) {
 		log.Fatalf("Test should be run inside VM as init")
 	}
 
+	if err := mount.Mount("none", "/dev", "tmpfs", "", 0); err != nil {
+		log.Fatalf("unable to mount tmpfs on /dev: %v", err)
+	}
+
+	if err := unix.Mknod("/dev/null", unix.S_IFCHR|0600, 0x0103); err != nil && err != os.ErrExist{
+		log.Fatalf("unable to create /dev/null: %v", err)
+	}
+
+	if err := mount.Mount("none", "/proc", "proc", "", 0); err != nil {
+		log.Fatalf("unable to mount /proc: %v", err)
+	}
+
+	out, err := exec.Command("/bin/lspci", "-vv", "-d", "1234:11e8").CombinedOutput()
+	if err != nil {
+		log.Fatalf("lspci: %s", err)
+	}
+	log.Printf("lspci before module load:\n%v", string(out))
+
 	insmod()
+
+	out, err = exec.Command("/bin/lspci", "-vv", "-d", "1234:11e8").CombinedOutput()
+	if err != nil {
+		log.Fatalf("lspci: %s", err)
+	}
+	log.Printf("lspci after module load:\n%v", string(out))
+
 	ifup("fc0")
+
+	out, err = exec.Command("/bin/ip", "link").CombinedOutput()
+	if err != nil {
+		log.Fatalf("ip: %s", err)
+	}
+	log.Printf("ip link:\n%v", string(out))
+
+	out, err = ioutil.ReadFile("/proc/interrupts")
+	if err != nil {
+		log.Fatalf("/proc/interrupts: %s", err)
+	}
+	log.Printf("interrupts:\n%v", string(out))
 
 	m.Run()
 	unix.Reboot(unix.LINUX_REBOOT_CMD_POWER_OFF)

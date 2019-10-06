@@ -14,7 +14,7 @@ set_instance_parameter_value clk {EXPLICIT_CLOCK_RATE} {0.0}
 set_instance_parameter_value clk {NUM_CLOCK_OUTPUTS} {1}
 
 add_instance i2c altera_avalon_i2c 19.1
-set_instance_parameter_value i2c {FIFO_DEPTH} {4}
+set_instance_parameter_value i2c {FIFO_DEPTH} {64}
 set_instance_parameter_value i2c {USE_AV_ST} {0}
 
 add_instance mm altera_avalon_mm_bridge 19.1
@@ -76,11 +76,11 @@ set_connection_parameter_value mm.m0/sfp.mm arbitrationPriority {1}
 set_connection_parameter_value mm.m0/sfp.mm baseAddress {0x0000}
 set_connection_parameter_value mm.m0/sfp.mm defaultConnection {0}
 
-add_connection reset.out_reset i2c.reset_sink
-
 add_connection reset.out_reset mm.reset
 
 add_connection reset.out_reset sfp.reset
+
+add_connection sfp.i2c_reset i2c.reset_sink
 
 # interconnect requirements
 set_interconnect_requirement {$system} {qsys_mm.clockCrossingAdapter} {HANDSHAKE}

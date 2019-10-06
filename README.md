@@ -85,6 +85,7 @@ Accesses need to be 4 byte wide.
 | 2      | Read only   | TX Fault         |
 | 3      | Read/Write  | TX Disable       |
 | 4:5    | Read/Write  | Rate Select      |
+| 6      | Read/Write  | I2C Reset        |
 
 ### MSI Interrupts
 

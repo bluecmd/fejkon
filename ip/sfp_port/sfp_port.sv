@@ -18,6 +18,7 @@
 module sfp_port (
     input  wire       clk,              //   clk.clk
     input  wire       reset,            // reset.reset
+    output wire       i2c_reset,        // i2c_reset.reset
     input  wire       los,              //   sfp.los
     input  wire       mod0_prsnt_n,     //      .prsnt_n
     output wire       tx_disable,       //      .txdis
@@ -39,44 +40,28 @@ module sfp_port (
     input  wire scl_oe
   );
 
-  reg [7:0] rd_data;
-  reg [1:0] rd_response;
+  wire [7:0] rd_data;
+  wire [1:0] rd_response;
 
-  reg [1:0] wr_response;
+  wire [1:0] wr_response;
 
   reg       tx_disable_r;
   reg [1:0] ratesel_r;
+  reg       i2c_reset_r;
+  reg       mod0_prsnt_n_r;
 
   // Reader
-  always @(posedge clk or posedge reset)
-    begin
-      if (reset)
-        begin
-          rd_data <= 8'b0;
-          rd_response <= 2'b10;
-        end
-      else if (mm_read)
-        begin
-          // Status register
-          // TODO(bluecmd): Seems to be some delay here where state
-          // transitions lag one clock cycle, probably due to Avalon needing
-          // the data the same clock cycle or something?
-          if (mm_address == 4'h0)
-            begin
-              rd_data <= {2'b00, ratesel, tx_disable_r, tx_fault, los, ~mod0_prsnt_n};
-              rd_response <= 2'b00;
-            end
-          else
-            rd_response <= 2'b11;
-        end
-    end
+  assign rd_data = {1'b0, i2c_reset_r, ratesel, tx_disable_r, tx_fault, los, ~mod0_prsnt_n};
+  assign rd_response = mm_address == 4'h0 ? 2'b00 : 2'b11;
 
   // Writer
   always @(posedge clk or posedge reset)
   begin
     if (reset)
       begin
-        wr_response <= 2'b10;
+        tx_disable_r <= 1;
+        ratesel_r <= 2'b00;
+        i2c_reset_r <= 0;
       end
     else if (mm_write)
       begin
@@ -85,12 +70,22 @@ module sfp_port (
           begin
             tx_disable_r <= mm_writedata[3];
             ratesel_r <= mm_writedata[5:4];
-            wr_response <= 2'b00;
+            i2c_reset_r <= mm_writedata[6];
           end
-        else
-          wr_response <= 2'b11;
       end
+    else
+    begin
+      // Only reset for one clock cycle
+      i2c_reset_r <= 0;
+    end
   end
+
+  always @(posedge clk)
+  begin
+    mod0_prsnt_n_r <= mod0_prsnt_n;
+  end
+
+  assign wr_response = mm_address == 4'h0 ? 2'b00 : 2'b11;
 
   assign ratesel = ratesel_r;
   assign tx_disable = tx_disable_r;
@@ -98,6 +93,11 @@ module sfp_port (
   assign mm_response = mm_read ? rd_response : wr_response ;
   assign mm_readdata = rd_data;
 
+  // Reset the I2C core when:
+  // - the host tells us to (i2c_reset_r)
+  // - the system is being reset (rest)
+  // - a SFP module was just plugged in (mod0_prsnt_n 1->0)
+  assign i2c_reset = i2c_reset_r | reset | (~mod0_prsnt_n & mod0_prsnt_n_r);
 
   // Altera I2C master bus driver
   assign scl_in = mod1_scl;

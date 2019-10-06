@@ -1,6 +1,15 @@
-set masters [get_service_paths master]
-set m [lindex $masters 0]
+set d [lindex [get_service_paths device] 0]
+set sof [file join fejkon.sof]
 
+set masters [get_service_paths master]
+
+if {[llength $masters] == 0} {
+  puts " ==> WARNING: No masters found <=="
+  puts "To program the device, run 'device_download_sof \$d \$sof'"
+  return
+}
+
+set m [lindex $masters 0]
 open_service master $m
 
 puts ""

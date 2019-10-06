@@ -9,31 +9,6 @@ set_project_property HIDE_FROM_IP_CATALOG {false}
 
 # Instances and instance parameters
 # (disabled instances are intentionally culled)
-add_instance chipmem0 altera_avalon_onchip_memory2 19.1
-set_instance_parameter_value chipmem0 {allowInSystemMemoryContentEditor} {0}
-set_instance_parameter_value chipmem0 {blockType} {AUTO}
-set_instance_parameter_value chipmem0 {copyInitFile} {0}
-set_instance_parameter_value chipmem0 {dataWidth} {32}
-set_instance_parameter_value chipmem0 {dataWidth2} {32}
-set_instance_parameter_value chipmem0 {dualPort} {1}
-set_instance_parameter_value chipmem0 {ecc_enabled} {0}
-set_instance_parameter_value chipmem0 {enPRInitMode} {0}
-set_instance_parameter_value chipmem0 {enableDiffWidth} {0}
-set_instance_parameter_value chipmem0 {initMemContent} {0}
-set_instance_parameter_value chipmem0 {initializationFileName} {onchip_mem.hex}
-set_instance_parameter_value chipmem0 {instanceID} {NONE}
-set_instance_parameter_value chipmem0 {memorySize} {4096.0}
-set_instance_parameter_value chipmem0 {readDuringWriteMode} {DONT_CARE}
-set_instance_parameter_value chipmem0 {resetrequest_enabled} {0}
-set_instance_parameter_value chipmem0 {simAllowMRAMContentsFile} {0}
-set_instance_parameter_value chipmem0 {simMemInitOnlyFilename} {0}
-set_instance_parameter_value chipmem0 {singleClockOperation} {0}
-set_instance_parameter_value chipmem0 {slave1Latency} {2}
-set_instance_parameter_value chipmem0 {slave2Latency} {2}
-set_instance_parameter_value chipmem0 {useNonDefaultInitFile} {0}
-set_instance_parameter_value chipmem0 {useShallowMemBlocks} {0}
-set_instance_parameter_value chipmem0 {writable} {1}
-
 add_instance ext0 clock_source 19.1
 set_instance_parameter_value ext0 {clockFrequency} {50000000.0}
 set_instance_parameter_value ext0 {clockFrequencyKnown} {1}
@@ -59,6 +34,8 @@ set_instance_parameter_value led {resetValue} {10.0}
 set_instance_parameter_value led {simDoTestBenchWiring} {0}
 set_instance_parameter_value led {simDrivenValue} {0.0}
 set_instance_parameter_value led {width} {4}
+
+add_instance pcie fejkon_pcie 1.0
 
 add_instance rstctrl altera_reset_controller 19.1
 set_instance_parameter_value rstctrl {MIN_RST_ASSERTION_TIME} {3}
@@ -97,21 +74,31 @@ add_interface fcport0_xcvr_line_tx conduit end
 set_interface_property fcport0_xcvr_line_tx EXPORT_OF fcport0.xcvr_line_tx
 add_interface led conduit end
 set_interface_property led EXPORT_OF led.external_connection
+add_interface pcie_refclk clock sink
+set_interface_property pcie_refclk EXPORT_OF pcie.pcie_refclk
+add_interface pcie_reset_pin conduit end
+set_interface_property pcie_reset_pin EXPORT_OF pcie.pcie_reset_pin
+add_interface pcie_serial conduit end
+set_interface_property pcie_serial EXPORT_OF pcie.phy_serial
 add_interface reset reset sink
 set_interface_property reset EXPORT_OF ext0.clk_in_reset
 add_interface sfp0_sfp conduit end
 set_interface_property sfp0_sfp EXPORT_OF sfp0.sfp
 
 # connections and connection parameters
-add_connection ext0.clk chipmem0.clk1
-
-add_connection ext0.clk chipmem0.clk2
-
 add_connection ext0.clk fcport0.clk
 
 add_connection ext0.clk jtagm.clk
 
 add_connection ext0.clk led.clk
+
+add_connection ext0.clk pcie.bar2_clk
+
+add_connection ext0.clk pcie.mgmt_clk
+
+add_connection ext0.clk pcie.read_mem_clk
+
+add_connection ext0.clk pcie.write_mem_clk
 
 add_connection ext0.clk rstctrl.clk
 
@@ -120,21 +107,6 @@ add_connection ext0.clk sfp0.clk
 add_connection ext0.clk_reset jtagm.clk_reset
 
 add_connection ext0.clk_reset rstctrl.reset_in0
-
-add_connection fcport0.rx_dma_m chipmem0.s2
-set_connection_parameter_value fcport0.rx_dma_m/chipmem0.s2 arbitrationPriority {1}
-set_connection_parameter_value fcport0.rx_dma_m/chipmem0.s2 baseAddress {0x000f0000}
-set_connection_parameter_value fcport0.rx_dma_m/chipmem0.s2 defaultConnection {0}
-
-add_connection fcport0.tx_dma_m chipmem0.s2
-set_connection_parameter_value fcport0.tx_dma_m/chipmem0.s2 arbitrationPriority {1}
-set_connection_parameter_value fcport0.tx_dma_m/chipmem0.s2 baseAddress {0x000f0000}
-set_connection_parameter_value fcport0.tx_dma_m/chipmem0.s2 defaultConnection {0}
-
-add_connection jtagm.master chipmem0.s1
-set_connection_parameter_value jtagm.master/chipmem0.s1 arbitrationPriority {1}
-set_connection_parameter_value jtagm.master/chipmem0.s1 baseAddress {0x000f0000}
-set_connection_parameter_value jtagm.master/chipmem0.s1 defaultConnection {0}
 
 add_connection jtagm.master fcport0.setup
 set_connection_parameter_value jtagm.master/fcport0.setup arbitrationPriority {1}
@@ -146,6 +118,16 @@ set_connection_parameter_value jtagm.master/led.s1 arbitrationPriority {1}
 set_connection_parameter_value jtagm.master/led.s1 baseAddress {0x000e0000}
 set_connection_parameter_value jtagm.master/led.s1 defaultConnection {0}
 
+add_connection jtagm.master pcie.read_mem_mm
+set_connection_parameter_value jtagm.master/pcie.read_mem_mm arbitrationPriority {1}
+set_connection_parameter_value jtagm.master/pcie.read_mem_mm baseAddress {0x00800000}
+set_connection_parameter_value jtagm.master/pcie.read_mem_mm defaultConnection {0}
+
+add_connection jtagm.master pcie.write_mem_mm
+set_connection_parameter_value jtagm.master/pcie.write_mem_mm arbitrationPriority {1}
+set_connection_parameter_value jtagm.master/pcie.write_mem_mm baseAddress {0x00c00000}
+set_connection_parameter_value jtagm.master/pcie.write_mem_mm defaultConnection {0}
+
 add_connection jtagm.master sfp0.mm
 set_connection_parameter_value jtagm.master/sfp0.mm arbitrationPriority {1}
 set_connection_parameter_value jtagm.master/sfp0.mm baseAddress {0x1000}
@@ -153,20 +135,38 @@ set_connection_parameter_value jtagm.master/sfp0.mm defaultConnection {0}
 
 add_connection jtagm.master_reset rstctrl.reset_in1
 
-add_connection rstctrl.reset_out chipmem0.reset1
+add_connection pcie.bar2_mm fcport0.setup
+set_connection_parameter_value pcie.bar2_mm/fcport0.setup arbitrationPriority {1}
+set_connection_parameter_value pcie.bar2_mm/fcport0.setup baseAddress {0x00010000}
+set_connection_parameter_value pcie.bar2_mm/fcport0.setup defaultConnection {0}
 
-add_connection rstctrl.reset_out chipmem0.reset2
+add_connection pcie.bar2_mm sfp0.mm
+set_connection_parameter_value pcie.bar2_mm/sfp0.mm arbitrationPriority {1}
+set_connection_parameter_value pcie.bar2_mm/sfp0.mm baseAddress {0x1000}
+set_connection_parameter_value pcie.bar2_mm/sfp0.mm defaultConnection {0}
 
 add_connection rstctrl.reset_out fcport0.rst
 
 add_connection rstctrl.reset_out led.reset
+
+add_connection rstctrl.reset_out pcie.bar2_reset
+
+add_connection rstctrl.reset_out pcie.mgmt_rst
 
 add_connection rstctrl.reset_out sfp0.reset
 
 # interconnect requirements
 set_interconnect_requirement {$system} {qsys_mm.clockCrossingAdapter} {HANDSHAKE}
 set_interconnect_requirement {$system} {qsys_mm.enableEccProtection} {FALSE}
+set_interconnect_requirement {$system} {qsys_mm.enableInstrumentation} {TRUE}
 set_interconnect_requirement {$system} {qsys_mm.insertDefaultSlave} {FALSE}
 set_interconnect_requirement {$system} {qsys_mm.maxAdditionalLatency} {1}
+set_interconnect_requirement {fcport0.rx_dma_m} {qsys_mm.insertPerformanceMonitor} {TRUE}
+set_interconnect_requirement {fcport0.setup} {qsys_mm.insertPerformanceMonitor} {TRUE}
+set_interconnect_requirement {fcport0.tx_dma_m} {qsys_mm.insertPerformanceMonitor} {TRUE}
+set_interconnect_requirement {pcie.bar2_mm} {qsys_mm.insertPerformanceMonitor} {TRUE}
+set_interconnect_requirement {pcie.read_mem_mm} {qsys_mm.insertPerformanceMonitor} {TRUE}
+set_interconnect_requirement {pcie.write_mem_mm} {qsys_mm.insertPerformanceMonitor} {TRUE}
+set_interconnect_requirement {sfp0.mm} {qsys_mm.insertPerformanceMonitor} {TRUE}
 
 save_system {fejkon.qsys}

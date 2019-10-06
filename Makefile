@@ -18,7 +18,7 @@ ip/altera_fc_phy/fc_phy.qip: ip/altera_fc_phy/fc_phy.v
 	(cd ip/altera_fc_phy; $(QPATH)/bin/qmegawiz  -silent $(PWD)/$<)
 	touch $@
 
-fejkon.qsys: fejkon.tcl fejkon_fcport.qsys fejkon_sfp.qsys
+fejkon.qsys: fejkon.tcl fejkon_fcport.qsys fejkon_sfp.qsys fejkon_pcie.qsys
 
 %.qsys: %.tcl
 	$(QPATH)/sopc_builder/bin/qsys-script --script=$< --search-path='$(wildcard ip/**/*_hw.tcl),$$'

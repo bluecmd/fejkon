@@ -130,3 +130,28 @@ be easier. However, it is quite likely MSI-X has its own pitfalls.
 | 5-8    | Port 1 ...         |
 | 9-12   | Port 2 ...         |
 | 13-16  | Port 3 ...         |
+
+## Debugging
+
+Use `make syscon` to launch Intel's System Console. It will guide you through
+the debug commands, but here is an example of reading the SFP data from port 1:
+
+```
+=> Fejkon system console initialized
+
+ Master is available at $m
+
+ E.g:
+ - master_write_32 $m 0x000e0000 5
+ - jtag_debug_reset_system $m
+ - sfp 1
+
+% sfp 1
+ SFP status: 0x02
+ SFP identifier: 0x03
+ SFP ext. identifier: 0x04
+ SFP connector: 0x07
+ SFP vendor: 'JDS UNIPHASE    '
+ SFP vendor PN: 'JSM-21S0AA1     '
+ SFP vendor SN: 'F44939581059    '
+```

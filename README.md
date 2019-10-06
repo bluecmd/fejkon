@@ -4,6 +4,8 @@ fejkon is a basic host bus adapter (HBA) for Fibre Channel (and thus, FICON) imp
 The aim is to provide easy access to add or consume Fibre Channel services, such as FCP or FICON
 from an ordinary server.
 
+![DE5-Net running Fejkon](images/fejkon.jpg)
+
 Fejkon, which was born out of the need for a fake FICON HBA, is a Swedish pun playing on the word "fejk" which
 translates "fake". It is pronounced similarly to the "FIC" in "FICON".
 

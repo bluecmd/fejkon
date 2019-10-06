@@ -12,6 +12,14 @@ translates "fake". It is pronounced similarly to the "FIC" in "FICON".
 Target board right now is the DE5-Net from Terasic. They are available for $300 - $600 on eBay as of this writing
 and are capable of implementing 4x 8 Gbit/s Fibre Channel ports on a PCIe Gen 3 x8 port.
 
+There are a few modifications to the board that are recommended.
+
+ * Remove DDR3 SODIMMs, they are not needed and contribute to power drain
+ * Add a 100 Ohm resistor to the stock cooler for a better noise level, cooling performance is fine anyway
+ * Add a [heatsink](https://www.mouser.ch/ProductDetail/532-375424B00034G) onto of the LTM4601V
+
+![DE5-Net Voltage Regulators](images/de5-net-vrs.jpg)
+
 ## Developing
 
 The recommended flow is using Quartus Platform Designer to make changes.

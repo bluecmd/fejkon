@@ -16,6 +16,8 @@ set_instance_parameter_value ext0 {resetSynchronousEdges} {NONE}
 
 add_instance fcport0 fejkon_fcport 1.0
 
+add_instance ident fejkon_identity 1.0
+
 add_instance jtagm altera_jtag_avalon_master 19.1
 set_instance_parameter_value jtagm {FAST_VER} {0}
 set_instance_parameter_value jtagm {FIFO_DEPTHS} {2}
@@ -88,6 +90,8 @@ set_interface_property sfp0_sfp EXPORT_OF sfp0.sfp
 # connections and connection parameters
 add_connection ext0.clk fcport0.clk
 
+add_connection ext0.clk ident.clk
+
 add_connection ext0.clk jtagm.clk
 
 add_connection ext0.clk led.clk
@@ -112,6 +116,11 @@ add_connection jtagm.master fcport0.setup
 set_connection_parameter_value jtagm.master/fcport0.setup arbitrationPriority {1}
 set_connection_parameter_value jtagm.master/fcport0.setup baseAddress {0x00010000}
 set_connection_parameter_value jtagm.master/fcport0.setup defaultConnection {0}
+
+add_connection jtagm.master ident.mm
+set_connection_parameter_value jtagm.master/ident.mm arbitrationPriority {1}
+set_connection_parameter_value jtagm.master/ident.mm baseAddress {0x0000}
+set_connection_parameter_value jtagm.master/ident.mm defaultConnection {0}
 
 add_connection jtagm.master led.s1
 set_connection_parameter_value jtagm.master/led.s1 arbitrationPriority {1}
@@ -140,12 +149,19 @@ set_connection_parameter_value pcie.bar2_mm/fcport0.setup arbitrationPriority {1
 set_connection_parameter_value pcie.bar2_mm/fcport0.setup baseAddress {0x00010000}
 set_connection_parameter_value pcie.bar2_mm/fcport0.setup defaultConnection {0}
 
+add_connection pcie.bar2_mm ident.mm
+set_connection_parameter_value pcie.bar2_mm/ident.mm arbitrationPriority {1}
+set_connection_parameter_value pcie.bar2_mm/ident.mm baseAddress {0x0000}
+set_connection_parameter_value pcie.bar2_mm/ident.mm defaultConnection {0}
+
 add_connection pcie.bar2_mm sfp0.mm
 set_connection_parameter_value pcie.bar2_mm/sfp0.mm arbitrationPriority {1}
 set_connection_parameter_value pcie.bar2_mm/sfp0.mm baseAddress {0x1000}
 set_connection_parameter_value pcie.bar2_mm/sfp0.mm defaultConnection {0}
 
 add_connection rstctrl.reset_out fcport0.rst
+
+add_connection rstctrl.reset_out ident.reset
 
 add_connection rstctrl.reset_out led.reset
 

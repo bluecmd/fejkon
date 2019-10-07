@@ -58,19 +58,31 @@ Accesses need to be 4 byte wide.
 | 0x00003 | 1     | Card   | Port options  | Number of ports              |
 | 0x00004 | 2     | Card   | Temperature   | Local die temperature (1)    |
 | 0x00006 | 2     | Card   | Temperature   | Board temperature (1)        |
-| 0x01000 | 1     | Port 0 | SFP Status    | SFP Status Word (2)          |
-| 0x01040 | 64    | Port 0 | SFP Port I2C  | SFP I2C core (3)             |
-| 0x01200 | 512   | Port 0 | RX XCVR Mgmt  | V-Series Transceiver PHY (4) |
-| 0x01400 | 512   | Port 0 | TX XCVR Mgmt  | V-Series Transceiver PHY (4) |
-| 0x02xxx | ...   | Port 1 | SFP Port      |                              |
-| 0x03xxx | ...   | Port 2 | SFP Port      |                              |
-| 0x04xxx | ...   | Port 3 | SFP Port      |                              |
-
+| 0x01000 | 1     | Port 0 | SFP Status    | SFP Status Word (3)          |
+| 0x01040 | 64    | Port 0 | SFP Port I2C  | SFP I2C core (4)             |
+| 0x02x00 | ...   | Port 1 | SFP Port      |                              |
+| 0x03x00 | ...   | Port 2 | SFP Port      |                              |
+| 0x04x00 | ...   | Port 3 | SFP Port      |                              |
+| 0x10000 | 4     | Port 0 | RX DMA        | DMA status (2)               |
+| 0x10040 | 4     | Port 0 | TX DMA        | DMA status (2)               |
+| 0x10200 | 512   | Port 0 | RX XCVR Mgmt  | V-Series Transceiver PHY (5) |
+| 0x10400 | 512   | Port 0 | TX XCVR Mgmt  | V-Series Transceiver PHY (5) |
+| 0x12000 | 32    | Port 0 | RX Descr 0    | DMA descriptor               |
+| ...     | 32    | Port 0 | RX Descr n    | ...                          |
+| 0x12FE0 | 32    | Port 0 | RX Descr 127  | ...                          |
+| 0x13000 | 32    | Port 0 | TX Descr 0    | ...                          |
+| ...     | 32    | Port 0 | TX Descr n    | ...                          |
+| 0x13FE0 | 32    | Port 0 | TX Descr 127  | ...                          |
+| 0x2xxxx | ...   | Port 1 | ...           |                              |
+| 0x3xxxx | ...   | Port 2 | ...           |                              |
+| 0x4xxxx | ...   | Port 3 | ...           |                              |
 
 1) Temperature is signed 16-bit integer in 1/256 scale in Celcius
-2) See below
-3) See "Intel FPGA Avalon I2C (Master) Core" in [Embedded Peripherals IP User Guide](https://www.intel.com/content/dam/www/programmable/us/en/pdfs/literature/ug/ug_embedded_ip.pdf)
-4) See "Custom PHY" in [V-Series Transceiver PHY IP Core User Guide](https://www.intel.com/content/dam/www/programmable/us/en/pdfs/literature/ug/xcvr_user_guide.pdf)
+2) See DMA the details for "Scatter-Gather DMA Controller Core" in
+[Embedded Peripherals IP User Guide](https://www.intel.com/content/dam/www/programmable/us/en/pdfs/literature/ug/ug_embedded_ip.pdf)
+3) See below
+4) See "Intel FPGA Avalon I2C (Master) Core" in [Embedded Peripherals IP User Guide](https://www.intel.com/content/dam/www/programmable/us/en/pdfs/literature/ug/ug_embedded_ip.pdf)
+5) See "Custom PHY" in [V-Series Transceiver PHY IP Core User Guide](https://www.intel.com/content/dam/www/programmable/us/en/pdfs/literature/ug/xcvr_user_guide.pdf)
 
 #### SFP Port Status
 
@@ -156,3 +168,10 @@ the debug commands, but here is an example of reading the SFP data from port 1:
  SFP vendor PN: 'JSM-21S0AA1     '
  SFP vendor SN: 'F44939581059    '
 ```
+
+The design has been compiled with instrumentation of some key data buses which
+you can inspect using `make syscon` by loading the `fejkon.sof` and using
+"Bus Analyzer (Beta)".
+
+If you need to debug a particular component, then using Signal Tap is
+recommended.

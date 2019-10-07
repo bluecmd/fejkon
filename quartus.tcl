@@ -21,6 +21,7 @@ set_global_assignment -name SDC_FILE ../de5net.sdc
 set_global_assignment -name NUM_PARALLEL_PROCESSORS 8
 set_global_assignment -name RAPID_RECOMPILE_MODE ON
 set_global_assignment -name TIMEQUEST_REPORT_SCRIPT ../timing.tcl
+set_global_assignment -name OPTIMIZATION_MODE "AGGRESSIVE PERFORMANCE"
 
 set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
 set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top

@@ -26,7 +26,7 @@ set_instance_parameter_value alt_xcvr_reconfig_0 {number_of_reconfig_interfaces}
 
 add_instance bar2_cdc altera_avalon_mm_clock_crossing_bridge 19.1
 set_instance_parameter_value bar2_cdc {ADDRESS_UNITS} {SYMBOLS}
-set_instance_parameter_value bar2_cdc {ADDRESS_WIDTH} {24}
+set_instance_parameter_value bar2_cdc {ADDRESS_WIDTH} {20}
 set_instance_parameter_value bar2_cdc {COMMAND_FIFO_DEPTH} {4}
 set_instance_parameter_value bar2_cdc {DATA_WIDTH} {32}
 set_instance_parameter_value bar2_cdc {MASTER_SYNC_DEPTH} {2}
@@ -34,7 +34,7 @@ set_instance_parameter_value bar2_cdc {MAX_BURST_SIZE} {1}
 set_instance_parameter_value bar2_cdc {RESPONSE_FIFO_DEPTH} {4}
 set_instance_parameter_value bar2_cdc {SLAVE_SYNC_DEPTH} {2}
 set_instance_parameter_value bar2_cdc {SYMBOL_WIDTH} {8}
-set_instance_parameter_value bar2_cdc {USE_AUTO_ADDRESS_WIDTH} {1}
+set_instance_parameter_value bar2_cdc {USE_AUTO_ADDRESS_WIDTH} {0}
 
 add_instance dma_descr altera_avalon_onchip_memory2 19.1
 set_instance_parameter_value dma_descr {allowInSystemMemoryContentEditor} {0}
@@ -639,7 +639,14 @@ set_connection_parameter_value write_s2_pipeline.m0/write_mem.s2 defaultConnecti
 # interconnect requirements
 set_interconnect_requirement {$system} {qsys_mm.clockCrossingAdapter} {HANDSHAKE}
 set_interconnect_requirement {$system} {qsys_mm.enableEccProtection} {FALSE}
+set_interconnect_requirement {$system} {qsys_mm.enableInstrumentation} {TRUE}
 set_interconnect_requirement {$system} {qsys_mm.insertDefaultSlave} {FALSE}
 set_interconnect_requirement {$system} {qsys_mm.maxAdditionalLatency} {1}
+set_interconnect_requirement {dma_descr.s1} {qsys_mm.insertPerformanceMonitor} {FALSE}
+set_interconnect_requirement {dma_descr.s2} {qsys_mm.insertPerformanceMonitor} {FALSE}
+set_interconnect_requirement {dma_rd_pipeline.m0} {qsys_mm.insertPerformanceMonitor} {FALSE}
+set_interconnect_requirement {dma_wr_pipeline.m0} {qsys_mm.insertPerformanceMonitor} {FALSE}
+set_interconnect_requirement {phy.dma_rd_master} {qsys_mm.insertPerformanceMonitor} {TRUE}
+set_interconnect_requirement {phy.dma_wr_master} {qsys_mm.insertPerformanceMonitor} {TRUE}
 
 save_system {fejkon_pcie.qsys}

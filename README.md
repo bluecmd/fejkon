@@ -116,8 +116,9 @@ In the kernel this support for multiple MSI interrupts seems to be gated by
 `MSI_FLAG_MULTI_PCI_MSI`.
 
 To enable the kernel support, enable `CONFIG_IRQ_REMAP`. On Intel, you should
-see mentions of `DMAR` in your dmesg. The equivalent on AMD seems to be just
-IOMMU support, but that has not been verified.
+see mentions of `DMAR` in your dmesg. This is usually enabled by enabling VT-d.
+The equivalent on AMD seems to be just IOMMU support, but that has not been verified.
+PCIe hotplug has been known to cause issues, so you might want to disable that.
 
 The configuration for QEMU is something like:
 ```

@@ -40,7 +40,7 @@
 
 typedef struct {
   PCIDevice pdev;
-  MemoryRegion mmio;
+  MemoryRegion bar2;
 } FejkonState;
 
 #if 0
@@ -64,7 +64,7 @@ static uint32_t fejkon_temperature(void)
   return (remote & 0xffff) << 16 | (local & 0xffff);
 }
 
-static uint64_t fejkon_mmio_read(void *opaque, hwaddr addr, unsigned size)
+static uint64_t fejkon_bar2_read(void *opaque, hwaddr addr, unsigned size)
 {
   /* FejkonState *card = opaque; */
   uint64_t val = 0ULL;
@@ -83,23 +83,23 @@ static uint64_t fejkon_mmio_read(void *opaque, hwaddr addr, unsigned size)
       val = fejkon_temperature();
       break;
     default:
-      printf("fejkon: Read from unknown bar0 space: 0x%lx\n", addr);
+      printf("fejkon: Read from unknown bar2 space: 0x%lx\n", addr);
       break;
   }
 
   return val;
 }
 
-static void fejkon_mmio_write(void *opaque, hwaddr addr, uint64_t val,
+static void fejkon_bar2_write(void *opaque, hwaddr addr, uint64_t val,
     unsigned size)
 {
   /* TODO */
-  printf("fejkon: Write to unknown bar0 space: 0x%lx\n", addr);
+  printf("fejkon: Write to unknown bar2 space: 0x%lx\n", addr);
 }
 
-static const MemoryRegionOps fejkon_mmio_ops = {
-  .read = fejkon_mmio_read,
-  .write = fejkon_mmio_write,
+static const MemoryRegionOps fejkon_bar2_ops = {
+  .read = fejkon_bar2_read,
+  .write = fejkon_bar2_write,
   .endianness = DEVICE_NATIVE_ENDIAN,
   .valid = {
     .min_access_size = 4,
@@ -123,9 +123,9 @@ static void pci_fejkon_realize(PCIDevice *pdev, Error **errp)
     return;
   }
 
-  memory_region_init_io(&card->mmio, OBJECT(card), &fejkon_mmio_ops, card,
-      "fejkon-mmio", 512 * KiB);
-  pci_register_bar(pdev, 0, PCI_BASE_ADDRESS_SPACE_MEMORY, &card->mmio);
+  memory_region_init_io(&card->bar2, OBJECT(card), &fejkon_bar2_ops, card,
+      "fejkon-bar2", 512 * KiB);
+  pci_register_bar(pdev, 2, PCI_BASE_ADDRESS_SPACE_MEMORY, &card->bar2);
 }
 
 static void pci_fejkon_uninit(PCIDevice *pdev)

@@ -15,7 +15,7 @@
 #endif
 #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
 
-#define BAR0_AREA_SIZE 0x50000
+#define BAR2_AREA_SIZE 0x50000
 
 #define FEJKON_VENDOR_ID 0xf1c0
 #define FEJKON_DEVICE_ID 0x0de5
@@ -112,7 +112,7 @@ static int probe(struct pci_dev *pcidev, const struct pci_device_id *id)
     goto error;
   }
 
-  ret = pci_request_region(pcidev, 0 /* bar */, KBUILD_MODNAME);
+  ret = pci_request_region(pcidev, 2 /* bar */, KBUILD_MODNAME);
   if (ret < 0) {
     dev_err(&pcidev->dev, "pci_request_region\n");
     goto error;
@@ -122,9 +122,9 @@ static int probe(struct pci_dev *pcidev, const struct pci_device_id *id)
   if (!card)
     return -ENOMEM;
   card->pci = pcidev;
-  card->bar0 = pci_iomap(pcidev, 0 /* bar */, BAR0_AREA_SIZE);
+  card->bar2 = pci_iomap(pcidev, 2 /* bar */, BAR2_AREA_SIZE);
 
-  version = ioread32(card->bar0 + 0x0);
+  version = ioread32(card->bar2 + 0x0);
   if ((version & 0xffff) != 0x0de5) {
     dev_dbg(&pcidev->dev, "ignoring card with unknown magic: %04x", version & 0xffff);
     goto error;
@@ -193,7 +193,6 @@ static int probe(struct pci_dev *pcidev, const struct pci_device_id *id)
       goto error;
     }
 
-    irq = pci_irq_vector(pcidev, PORT_SFP_I2C_IRQ(i));
     ret = fejkon_i2c_probe(port);
     if (ret < 0) {
       dev_err(port->dev, "fejkon_i2c_probe failed\n");
@@ -207,6 +206,7 @@ static int probe(struct pci_dev *pcidev, const struct pci_device_id *id)
     }
 
     card->net[i] = net;
+    card->port[i] = port;
     dev_notice(port->dev, "registered port %d netdev %s\n", i, net->name);
   }
 
@@ -221,16 +221,23 @@ static void remove(struct pci_dev *dev)
 {
   struct fejkon_card *card = pci_get_drvdata(dev);
   int i;
-  pci_free_irq_vectors(dev);
-  pci_release_region(dev, 0 /* bar */);
+  if (!card) {
+    return;
+  }
   for (i = 0; i < MAX_PORTS; i++) {
     if (card->i2c[i]) {
       fejkon_i2c_remove(card->i2c[i]);
     }
     if (card->port[i]) {
       device_unregister(card->port[i]->dev);
+      free_irq(pci_irq_vector(dev, PORT_RX_IRQ(i)), card->port[i]);
+      free_irq(pci_irq_vector(dev, PORT_TX_IRQ(i)), card->port[i]);
+      free_irq(pci_irq_vector(dev, PORT_SFP_IRQ(i)), card->port[i]);
     }
   }
+  free_irq(pci_irq_vector(dev, 0), card);
+  pci_free_irq_vectors(dev);
+  pci_release_region(dev, 0 /* bar */);
 }
 
 static struct pci_device_id id_table[] = {

@@ -74,6 +74,7 @@
  * @lock: spinlock for IRQ synchronization.
  */
 struct i2c_dev {
+  struct fejkon_port *port;
   void __iomem *base;
   struct i2c_msg *msg;
   size_t msg_len;
@@ -386,7 +387,6 @@ int fejkon_i2c_probe(struct fejkon_port *port)
   struct pci_dev *pdev = card->pci;
   struct i2c_dev *idev = NULL;
   int irq, ret;
-  u32 val;
 
   idev = devm_kzalloc(port->dev, sizeof(*idev), GFP_KERNEL);
   if (!idev)
@@ -395,7 +395,8 @@ int fejkon_i2c_probe(struct fejkon_port *port)
   irq = pci_irq_vector(pdev, PORT_SFP_I2C_IRQ(port->id));
   card->i2c[port->id] = idev;
 
-  idev->base = card->bar0 + BAR0_SFP_I2C_OFFSET(port->id);
+  idev->port = port;
+  idev->base = card->bar2 + BAR2_SFP_I2C_OFFSET(port->id);
   if (IS_ERR(idev->base))
     return PTR_ERR(idev->base);
 
@@ -405,14 +406,7 @@ int fejkon_i2c_probe(struct fejkon_port *port)
   init_completion(&idev->msg_complete);
   spin_lock_init(&idev->lock);
 
-  val = device_property_read_u32(idev->dev, "fifo-size",
-               &idev->fifo_size);
-  if (val) {
-    dev_err(idev->dev, "FIFO size set to default of %d\n",
-      ALTR_I2C_DFLT_FIFO_SZ);
-    idev->fifo_size = ALTR_I2C_DFLT_FIFO_SZ;
-  }
-
+  idev->fifo_size = 64;
   idev->bus_clk_rate = 100000;  /* 100 kHz */
   ret = devm_request_threaded_irq(port->dev, irq, altr_i2c_isr_quick,
           altr_i2c_isr, IRQF_ONESHOT, KBUILD_MODNAME, idev);
@@ -437,5 +431,6 @@ int fejkon_i2c_remove(struct i2c_dev *idev)
 {
   i2c_del_adapter(&idev->adapter);
   device_unregister(idev->dev);
+  free_irq(pci_irq_vector(idev->port->card->pci, PORT_SFP_I2C_IRQ(idev->port->id)), idev);
   return 0;
 }

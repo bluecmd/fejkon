@@ -176,3 +176,35 @@ you can inspect using `make syscon` by loading the `fejkon.sof` and using
 
 If you need to debug a particular component, then using Signal Tap is
 recommended.
+
+## Known Issues
+
+These are some changes you might need to make to build under Quartus 19.1.
+
+### MSI limit to 32
+
+For some reason the limit is set to 16 in the stock IP. Change it to 32.
+
+```patch
+--- /home/bluecmd/intelFPGA/19.1/ip/altera/altera_pcie/altera_pcie_hip_256_avmm/pcie_256_avmm_parameters.tcl.org	2019-10-07 22:32:09.828337496 +0200
++++ /home/bluecmd/intelFPGA/19.1/ip/altera/altera_pcie/altera_pcie_hip_256_avmm/pcie_256_avmm_parameters.tcl	2019-10-07 22:32:18.536266216 +0200
+@@ -731,7 +731,7 @@
+ 
+    add_parameter          msi_multi_message_capable_hwtcl string        "4"
+    set_parameter_property msi_multi_message_capable_hwtcl DISPLAY_NAME "Number of MSI messages requested"
+-   set_parameter_property msi_multi_message_capable_hwtcl ALLOWED_RANGES { "1" "2" "4" "8" "16"}
++   set_parameter_property msi_multi_message_capable_hwtcl ALLOWED_RANGES { "1" "2" "4" "8" "16" "32"}
+    set_parameter_property msi_multi_message_capable_hwtcl GROUP $group_name
+    set_parameter_property msi_multi_message_capable_hwtcl VISIBLE true
+    set_parameter_property msi_multi_message_capable_hwtcl HDL_PARAMETER true
+```
+
+### Confused Perl
+
+The temporary LED driver will not generate without this pretty weird hack.
+This issue appeared in 19.1 and hopefully will be patched by Intel soon.
+
+```
+sudo mkdir -p /tools/perl/5.28.1/linux64/
+sudo ln -sf /home/bluecmd/intelFPGA/19.1/quartus/linux64/perl/lib /tools/perl/5.28.1/linux64/
+```

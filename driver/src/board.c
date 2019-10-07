@@ -214,6 +214,7 @@ static int probe(struct pci_dev *pcidev, const struct pci_device_id *id)
 
   return 0;
 error:
+  pci_release_region(pcidev, 2 /* bar */);
   return ret;
 }
 
@@ -237,7 +238,7 @@ static void remove(struct pci_dev *dev)
   }
   free_irq(pci_irq_vector(dev, 0), card);
   pci_free_irq_vectors(dev);
-  pci_release_region(dev, 0 /* bar */);
+  pci_release_region(dev, 2 /* bar */);
 }
 
 static struct pci_device_id id_table[] = {

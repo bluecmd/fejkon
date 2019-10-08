@@ -193,14 +193,15 @@ func insmod() {
 }
 
 func rmmod() {
+	if err := kmodule.Delete("fejkon", 0); err != nil {
+		log.Fatalf("rmmod: could not unload: %v", err)
+	}
 	out, err := ioutil.ReadFile("/proc/modules")
 	if err != nil {
 		log.Fatalf("/proc/modules: %s", err)
 	}
-	log.Printf("modules:\n%v", string(out))
-
-	if err := kmodule.Delete("fejkon", 0); err != nil {
-		log.Fatalf("rmmod: could not unload: %v", err)
+	if string(out) != "" {
+		log.Fatalf("/proc/modules expected to be empty, contained:\n:%s", out)
 	}
 }
 
@@ -227,6 +228,15 @@ func TestMain(m *testing.M) {
 
 	insmod()
 
+	// Try to remove and re-load
+	log.Printf("Removing module")
+	rmmod()
+	if _, err := netlink.LinkByName("fc0"); err == nil {
+		log.Fatalf("fc0 interface still around after module unloaded")
+	}
+	log.Printf("Re-loading module")
+	insmod()
+
 	// Dump PCI state after module load
 	out, err = exec.Command("/bin/lspci", "-vv", "-d", "f1c0:0de5").CombinedOutput()
 	if err != nil {
@@ -234,6 +244,10 @@ func TestMain(m *testing.M) {
 	}
 	log.Printf("lspci after module load:\n%v", string(out))
 
+	ifup("fc0")
+
+	// Try dowin and up
+	ifdown("fc0")
 	ifup("fc0")
 
 	// Run tests

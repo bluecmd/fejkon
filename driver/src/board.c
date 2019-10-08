@@ -8,6 +8,7 @@
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/netdevice.h>
+#include <linux/rtnetlink.h>
 #include <asm/uaccess.h>
 
 #ifdef pr_fmt
@@ -250,18 +251,18 @@ static void remove(struct pci_dev *dev)
   }
   i2c_unregister_device(card->hwmon_client);
   fejkon_i2c_remove(card->temp_i2c);
+  rtnl_lock();
   for (i = 0; i < MAX_PORTS; i++) {
-    if (card->i2c[i]) {
-      fejkon_i2c_remove(card->i2c[i]);
-      free_irq(pci_irq_vector(dev, PORT_SFP_I2C_IRQ(i)), card->port[i]);
-    }
     if (card->port[i]) {
-      device_unregister(card->port[i]->dev);
+      unregister_netdevice(card->net[i]);
+      fejkon_i2c_remove(card->i2c[i]);
       free_irq(pci_irq_vector(dev, PORT_RX_IRQ(i)), card->port[i]);
       free_irq(pci_irq_vector(dev, PORT_TX_IRQ(i)), card->port[i]);
       free_irq(pci_irq_vector(dev, PORT_SFP_IRQ(i)), card->port[i]);
+      device_unregister(card->port[i]->dev);
     }
   }
+  rtnl_unlock();
   free_irq(pci_irq_vector(dev, 0), card);
   pci_free_irq_vectors(dev);
   pci_release_region(dev, 2 /* bar */);

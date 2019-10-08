@@ -44,6 +44,7 @@ struct fejkon_port {
  */
 struct i2c_dev {
   void __iomem *base;
+  int irq;
   struct i2c_msg *msg;
   size_t msg_len;
   int msg_err;

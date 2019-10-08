@@ -357,6 +357,7 @@ struct i2c_dev * fejkon_i2c_probe(struct device *dev, void __iomem *base, int ir
     return NULL;
 
   idev->base = base;
+  idev->irq = irq;
   idev->dev = device_create(
       fejkon_class, dev, MKDEV(0, 0), NULL, "%s i2c", dev_name(dev));
   init_completion(&idev->msg_complete);
@@ -364,7 +365,7 @@ struct i2c_dev * fejkon_i2c_probe(struct device *dev, void __iomem *base, int ir
 
   idev->fifo_size = 64;
   idev->bus_clk_rate = 100000;  /* 100 kHz */
-  ret = devm_request_threaded_irq(dev, irq, altr_i2c_isr_quick,
+  ret = devm_request_threaded_irq(idev->dev, irq, altr_i2c_isr_quick,
           altr_i2c_isr, IRQF_ONESHOT, KBUILD_MODNAME, idev);
   if (ret) {
     dev_err(idev->dev, "failed to claim IRQ %d\n", irq);
@@ -389,6 +390,7 @@ struct i2c_dev * fejkon_i2c_probe(struct device *dev, void __iomem *base, int ir
 int fejkon_i2c_remove(struct i2c_dev *idev)
 {
   i2c_del_adapter(&idev->adapter);
+  devm_free_irq(idev->dev, idev->irq, idev);
   device_unregister(idev->dev);
   return 0;
 }

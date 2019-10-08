@@ -96,6 +96,10 @@ static void init_netdev(struct net_device *net)
   memset(net->broadcast, 0xff, 3);
 }
 
+static const struct i2c_board_info fejkon_hwmon_info = {
+  I2C_BOARD_INFO("max1619", 0x30),
+};
+
 static int probe(struct pci_dev *pcidev, const struct pci_device_id *id)
 {
   unsigned int version;
@@ -146,7 +150,7 @@ static int probe(struct pci_dev *pcidev, const struct pci_device_id *id)
   version = (version >> 16) & 0xff;
   dev_notice(&pcidev->dev, "found card with version %d, ports = %d\n", version, ports);
 
-  irqs = 1 + 4 * ports;
+  irqs = 2 + 4 * ports;
   ret = pci_alloc_irq_vectors(pcidev, irqs, irqs, PCI_IRQ_ALL_TYPES);
   if (ret < 0) {
     /* See the README.md for fejkon for more details about this */
@@ -162,6 +166,15 @@ static int probe(struct pci_dev *pcidev, const struct pci_device_id *id)
     dev_err(&pcidev->dev, "request_irq\n");
     goto error;
   }
+
+  irq = pci_irq_vector(pcidev, 1);
+  card->temp_i2c = fejkon_i2c_probe(&pcidev->dev, card->bar2 + 0x40, irq);
+  if (card->temp_i2c == NULL) {
+    dev_err(&pcidev->dev, "fejkon_i2c_probe\n");
+    goto error;
+  }
+  card->hwmon_client = i2c_new_device(
+      &card->temp_i2c->adapter, &fejkon_hwmon_info);
 
   /* card initialized, register netdev for ports */
   for (i = 0; i < ports; i++) {
@@ -201,8 +214,10 @@ static int probe(struct pci_dev *pcidev, const struct pci_device_id *id)
       goto error;
     }
 
-    ret = fejkon_i2c_probe(port);
-    if (ret < 0) {
+    irq = pci_irq_vector(pcidev, PORT_SFP_I2C_IRQ(port->id));
+    card->i2c[i] = fejkon_i2c_probe(
+        port->dev, card->bar2 + BAR2_SFP_I2C_OFFSET(port->id), irq);
+    if (card->i2c[i] == NULL) {
       dev_err(port->dev, "fejkon_i2c_probe failed\n");
       goto error;
     }
@@ -233,9 +248,12 @@ static void remove(struct pci_dev *dev)
   if (!card) {
     return;
   }
+  i2c_unregister_device(card->hwmon_client);
+  fejkon_i2c_remove(card->temp_i2c);
   for (i = 0; i < MAX_PORTS; i++) {
     if (card->i2c[i]) {
       fejkon_i2c_remove(card->i2c[i]);
+      free_irq(pci_irq_vector(dev, PORT_SFP_I2C_IRQ(i)), card->port[i]);
     }
     if (card->port[i]) {
       device_unregister(card->port[i]->dev);

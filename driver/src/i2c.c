@@ -57,39 +57,6 @@
 #define ALTR_I2C_TIMEOUT  100000  /* 100ms */
 #define ALTR_I2C_XFER_TIMEOUT (msecs_to_jiffies(250))
 
-/**
- * i2c_dev - I2C device context
- * @base: pointer to register struct
- * @msg: pointer to current message
- * @msg_len: number of bytes transferred in msg
- * @msg_err: error code for completed message
- * @msg_complete: xfer completion object
- * @dev: device reference
- * @adapter: core i2c abstraction
- * @bus_clk_rate: current i2c bus clock rate
- * @buf: ptr to msg buffer for easier use.
- * @fifo_size: size of the FIFO passed in.
- * @isr_mask: cached copy of local ISR enables.
- * @isr_status: cached copy of local ISR status.
- * @lock: spinlock for IRQ synchronization.
- */
-struct i2c_dev {
-  struct fejkon_port *port;
-  void __iomem *base;
-  struct i2c_msg *msg;
-  size_t msg_len;
-  int msg_err;
-  struct completion msg_complete;
-  struct device *dev;
-  struct i2c_adapter adapter;
-  u32 bus_clk_rate;
-  u8 *buf;
-  u32 fifo_size;
-  u32 isr_mask;
-  u32 isr_status;
-  spinlock_t lock;  /* IRQ synchronization */
-};
-
 static void
 altr_i2c_int_enable(struct i2c_dev *idev, u32 mask, bool enable)
 {
@@ -301,7 +268,6 @@ static irqreturn_t altr_i2c_isr(int irq, void *_dev)
     altr_i2c_int_enable(idev, ALTR_I2C_ALL_IRQ, false);
     altr_i2c_int_clear(idev, ALTR_I2C_ALL_IRQ);
     complete(&idev->msg_complete);
-    dev_dbg(idev->dev, "Message Complete\n");
   }
 
   return IRQ_HANDLED;
@@ -381,38 +347,28 @@ static const struct i2c_algorithm altr_i2c_algo = {
   .functionality = altr_i2c_func,
 };
 
-int fejkon_i2c_probe(struct fejkon_port *port)
+struct i2c_dev * fejkon_i2c_probe(struct device *dev, void __iomem *base, int irq)
 {
-  struct fejkon_card *card = port->card;
-  struct pci_dev *pdev = card->pci;
   struct i2c_dev *idev = NULL;
-  int irq, ret;
+  int ret;
 
-  idev = devm_kzalloc(port->dev, sizeof(*idev), GFP_KERNEL);
+  idev = devm_kzalloc(dev, sizeof(*idev), GFP_KERNEL);
   if (!idev)
-    return -ENOMEM;
+    return NULL;
 
-  irq = pci_irq_vector(pdev, PORT_SFP_I2C_IRQ(port->id));
-  card->i2c[port->id] = idev;
-
-  idev->port = port;
-  idev->base = card->bar2 + BAR2_SFP_I2C_OFFSET(port->id);
-  if (IS_ERR(idev->base))
-    return PTR_ERR(idev->base);
-
+  idev->base = base;
   idev->dev = device_create(
-      fejkon_class, port->dev, MKDEV(0, 0), NULL,
-      "%s sfp-i2c", dev_name(port->dev));
+      fejkon_class, dev, MKDEV(0, 0), NULL, "%s i2c", dev_name(dev));
   init_completion(&idev->msg_complete);
   spin_lock_init(&idev->lock);
 
   idev->fifo_size = 64;
   idev->bus_clk_rate = 100000;  /* 100 kHz */
-  ret = devm_request_threaded_irq(port->dev, irq, altr_i2c_isr_quick,
+  ret = devm_request_threaded_irq(dev, irq, altr_i2c_isr_quick,
           altr_i2c_isr, IRQF_ONESHOT, KBUILD_MODNAME, idev);
   if (ret) {
     dev_err(idev->dev, "failed to claim IRQ %d\n", irq);
-    return ret;
+    return NULL;
   }
 
   altr_i2c_init(idev);
@@ -421,16 +377,18 @@ int fejkon_i2c_probe(struct fejkon_port *port)
   strlcpy(idev->adapter.name, KBUILD_MODNAME, sizeof(idev->adapter.name));
   idev->adapter.owner = THIS_MODULE;
   idev->adapter.algo = &altr_i2c_algo;
-  idev->adapter.dev.parent = port->dev;
-  idev->adapter.dev.of_node = pdev->dev.of_node;
+  idev->adapter.dev.parent = dev;
+  idev->adapter.dev.of_node = dev->of_node;
 
-  return i2c_add_adapter(&idev->adapter);
+  if (i2c_add_adapter(&idev->adapter) < 0) {
+    return NULL;
+  }
+  return idev;
 }
 
 int fejkon_i2c_remove(struct i2c_dev *idev)
 {
   i2c_del_adapter(&idev->adapter);
   device_unregister(idev->dev);
-  free_irq(pci_irq_vector(idev->port->card->pci, PORT_SFP_I2C_IRQ(idev->port->id)), idev);
   return 0;
 }

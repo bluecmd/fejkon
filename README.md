@@ -56,8 +56,7 @@ Accesses need to be 4 byte wide.
 | 0x00000 | 2     | Card   | Version       | The constant 0x0DE5          |
 | 0x00002 | 1     | Card   | Version       | Version of the Fejkon card   |
 | 0x00003 | 1     | Card   | Port options  | Number of ports              |
-| 0x00004 | 2     | Card   | Temperature   | Local die temperature (1)    |
-| 0x00006 | 2     | Card   | Temperature   | Board temperature (1)        |
+| 0x00040 | 64    | Card   | Temp. I2C     | MAX1619 I2C Temp. Sensor     |
 | 0x01000 | 1     | Port 0 | SFP Status    | SFP Status Word (3)          |
 | 0x01040 | 64    | Port 0 | SFP Port I2C  | SFP I2C core (4)             |
 | 0x02x00 | ...   | Port 1 | SFP Port      |                              |
@@ -137,13 +136,14 @@ be easier. However, it is quite likely MSI-X has its own pitfalls.
 | Vector | Description        |
 |--------|--------------------|
 | 0      | Card status        |
-| 1      | Port 0 RX DMA      |
-| 2      | Port 0 TX DMA      |
-| 3      | Port 0 SFP status  |
-| 4      | Port 0 SFP I2C     |
-| 5-8    | Port 1 ...         |
-| 9-12   | Port 2 ...         |
-| 13-16  | Port 3 ...         |
+| 1      | Temp Sensor I2C    |
+| 2      | Port 0 RX DMA      |
+| 3      | Port 0 TX DMA      |
+| 4      | Port 0 SFP status  |
+| 5      | Port 0 SFP I2C     |
+| 6-9    | Port 1 ...         |
+| 10-13  | Port 2 ...         |
+| 14-17  | Port 3 ...         |
 
 ## Debugging
 

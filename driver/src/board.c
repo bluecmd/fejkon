@@ -118,6 +118,14 @@ static int probe(struct pci_dev *pcidev, const struct pci_device_id *id)
     goto error;
   }
 
+  ret = pci_set_dma_mask(pcidev, DMA_BIT_MASK(64));
+  if (ret < 0) {
+    dev_err(&pcidev->dev, "pci_set_dma_mask\n");
+    goto error;
+  }
+
+  pci_set_master(pcidev);
+
   card = devm_kzalloc(&pcidev->dev, sizeof(*card), GFP_KERNEL);
   if (!card)
     return -ENOMEM;

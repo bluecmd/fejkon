@@ -17,7 +17,7 @@ qemu:
 	git clone https://github.com/qemu/qemu
 
 qemu/hw/fejkon/Makefile.objs: qemu
-	ln -sf $(PWD)/qemu-device $@
+	ln -sf $(PWD)/qemu-device qemu/hw/fejkon
 	echo "devices-dirs-y += fejkon/" >> qemu/hw/Makefile.objs
 	echo "common-obj-y += fejkon/" >> qemu/hw/Makefile.objs
 	echo "obj-y += fejkon/" >> qemu/hw/Makefile.objs

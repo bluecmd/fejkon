@@ -1,1 +1,1 @@
-common-obj-y += fejkon.o
+common-obj-y += fejkon.o i2c.o

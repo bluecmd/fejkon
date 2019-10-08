@@ -32,6 +32,8 @@
 #include "qemu/module.h"
 #include "qapi/visitor.h"
 
+#include "i2c.h"
+
 #define TYPE_PCI_FEJKON_DEVICE "fejkon"
 #define FEJKON(obj) OBJECT_CHECK(FejkonState, obj, TYPE_PCI_FEJKON_DEVICE)
 
@@ -41,14 +43,32 @@
 typedef struct {
   PCIDevice pdev;
   MemoryRegion bar2;
+  struct avalon_i2c sfp1_i2c;
+  struct avalon_i2c sfp2_i2c;
 } FejkonState;
 
-#if 0
 static bool fejkon_msi_enabled(FejkonState *card)
 {
   return msi_enabled(&card->pdev);
 }
-#endif
+
+static void sfp1_intr(void *opaque) {
+  FejkonState *card = opaque;
+  if (!fejkon_msi_enabled(card)) {
+    printf("fejkon: SFP1 interrupt without MSI enabled\n");
+    return;
+  }
+  msi_notify(&card->pdev, 4);
+}
+
+static void sfp2_intr(void *opaque) {
+  FejkonState *card = opaque;
+  if (!fejkon_msi_enabled(card)) {
+    printf("fejkon: SFP1 interrupt without MSI enabled\n");
+    return;
+  }
+  msi_notify(&card->pdev, 8);
+}
 
 static uint32_t fejkon_temperature(void)
 {
@@ -66,11 +86,20 @@ static uint32_t fejkon_temperature(void)
 
 static uint64_t fejkon_bar2_read(void *opaque, hwaddr addr, unsigned size)
 {
-  /* FejkonState *card = opaque; */
+  FejkonState *card = opaque;
   uint64_t val = 0ULL;
 
   if (size != 4) {
+    printf("fejkon: Read from 0x%lx not QW: %d\n", addr, size);
     return val;
+  }
+
+  /* SFP I2C */
+  if (addr >= 0x1040 && addr <= 0x1068) {
+    return avalon_i2c_read(&card->sfp1_i2c, addr - 0x1040);
+  }
+  if (addr >= 0x2040 && addr <= 0x2068) {
+    return avalon_i2c_read(&card->sfp2_i2c, addr - 0x2040);
   }
 
   switch (addr) {
@@ -93,6 +122,22 @@ static uint64_t fejkon_bar2_read(void *opaque, hwaddr addr, unsigned size)
 static void fejkon_bar2_write(void *opaque, hwaddr addr, uint64_t val,
     unsigned size)
 {
+  FejkonState *card = opaque;
+  if (size != 4) {
+    printf("fejkon: Write to 0x%lx not QW: %d\n", addr, size);
+    return;
+  }
+
+  /* SFP I2C */
+  if (addr >= 0x1040 && addr <= 0x1068) {
+    avalon_i2c_write(&card->sfp1_i2c, addr - 0x1040, val);
+    return;
+  }
+  if (addr >= 0x2040 && addr <= 0x2068) {
+    avalon_i2c_write(&card->sfp2_i2c, addr - 0x2040, val);
+    return;
+  }
+
   /* TODO */
   printf("fejkon: Write to unknown bar2 space: 0x%lx\n", addr);
 }
@@ -126,6 +171,17 @@ static void pci_fejkon_realize(PCIDevice *pdev, Error **errp)
   memory_region_init_io(&card->bar2, OBJECT(card), &fejkon_bar2_ops, card,
       "fejkon-bar2", 512 * KiB);
   pci_register_bar(pdev, 2, PCI_BASE_ADDRESS_SPACE_MEMORY, &card->bar2);
+
+  card->sfp1_i2c.name = "sfp1";
+  card->sfp1_i2c.intr = sfp1_intr;
+  card->sfp1_i2c.extra = card;
+  card->sfp1_i2c.data[0] = 0x3;
+  card->sfp1_i2c.data[1] = 0x4;
+  strcpy((char*)&card->sfp1_i2c.data[20], "FEJKON TEST");
+  card->sfp2_i2c.name = "sfp2";
+  card->sfp2_i2c.intr = sfp2_intr;
+  card->sfp2_i2c.extra = card;
+  memcpy(&card->sfp2_i2c.data[0], &card->sfp1_i2c.data[0], 256);
 }
 
 static void pci_fejkon_uninit(PCIDevice *pdev)

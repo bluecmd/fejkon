@@ -117,7 +117,13 @@ func TestSFPPort(t *testing.T) {
 	if err != nil {
 		t.Fatalf("sff.Read failed: %v", err)
 	}
-	log.Printf("SFP: %v", p)
+	log.Printf("SFP 1: %v", p)
+
+	p, err = sff.Read("/dev/i2c-2")
+	if err != nil {
+		t.Fatalf("sff.Read failed: %v", err)
+	}
+	log.Printf("SFP 2: %v", p)
 }
 
 func ifup(iface string) {

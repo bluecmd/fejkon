@@ -156,7 +156,7 @@ static int probe(struct pci_dev *pcidev, const struct pci_device_id *id)
   if (ret < 0) {
     /* See the README.md for fejkon for more details about this */
     dev_err(&pcidev->dev, "pci_alloc_irq_vectors failed, is multiple "
-        "MSI interrupts support enabled for your platform?\n");
+        "MSI interrupts support enabled for your platform?");
     goto error;
   }
   dev_notice(&pcidev->dev, "pci_alloc_irq_vectors: %d", ret);
@@ -266,6 +266,7 @@ static void remove(struct pci_dev *dev)
   free_irq(pci_irq_vector(dev, 0), card);
   pci_free_irq_vectors(dev);
   pci_release_region(dev, 2 /* bar */);
+  pci_disable_device(dev);
 }
 
 static struct pci_device_id id_table[] = {

@@ -229,6 +229,8 @@ func TestMain(m *testing.M) {
 	insmod()
 
 	// Try to remove and re-load
+	ifup("fc0")
+	ifdown("fc0")
 	log.Printf("Removing module")
 	rmmod()
 	if _, err := netlink.LinkByName("fc0"); err == nil {
@@ -244,10 +246,6 @@ func TestMain(m *testing.M) {
 	}
 	log.Printf("lspci after module load:\n%v", string(out))
 
-	ifup("fc0")
-
-	// Try dowin and up
-	ifdown("fc0")
 	ifup("fc0")
 
 	// Run tests

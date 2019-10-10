@@ -2,7 +2,7 @@ QPATH ?= "$(HOME)/intelFPGA/19.1/quartus"
 
 .DELETE_ON_ERROR:
 
-.PHONY: all syscon program flash
+.PHONY: all syscon program flash editor sim
 
 all: fejkon.sof
 
@@ -35,3 +35,16 @@ fejkon.qsys: fejkon.tcl fejkon_fcport.qsys fejkon_sfp.qsys fejkon_pcie.qsys
 
 syscon:
 	$(QPATH)/sopc_builder/bin/system-console --desktop_script=syscon.tcl -debug
+
+editor: fejkon.qsys
+	$(QPATH)/sopc_builder/bin/qsys-edit fejkon.qsys
+
+testbench: fejkon.qsys
+	$(QPATH)/sopc_builder/bin/qsys-generate \
+		--testbench=STANDARD \
+		--testbench-simulation=VERILOG \
+		--output-directory=$(PWD) \
+		fejkon.qsys
+
+sim: testbench
+	vsim -do msim.do

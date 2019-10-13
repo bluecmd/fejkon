@@ -146,6 +146,21 @@ func TestSFPPort(t *testing.T) {
 	log.Printf("SFP 2: %v", p)
 }
 
+func TestLOSIsNoCarrier(t *testing.T) {
+	// fc1 is set up to have a loss-of-signal
+	fc0, _ := netlink.LinkByName("fc0")
+	// TODO(bluecmd): Not really sure what the expected sequence to get to OPER_UP
+	// is supposed to be, for now accept the default of OPER_UNKNOWN which seems
+	// common enough on other interfaces.
+	if fc0.Attrs().OperState != netlink.OperUnknown {
+		t.Fatalf("fc0 expected to be unknown, is %s", fc0.Attrs().OperState)
+	}
+	fc1, _ := netlink.LinkByName("fc1")
+	if fc1.Attrs().OperState != netlink.OperDown {
+		t.Fatalf("fc1 expected to be down, is %s", fc1.Attrs().OperState)
+	}
+}
+
 func ifup(iface string) {
 	l, err := netlink.LinkByName(iface)
 	if err != nil {

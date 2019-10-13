@@ -13,8 +13,6 @@ struct fejkon_port;
 struct fejkon_card {
   struct pci_dev *pci;
   void __iomem *bar2;
-  struct net_device *net[MAX_PORTS];
-  struct i2c_dev *i2c[MAX_PORTS];
   struct fejkon_port *port[MAX_PORTS];
   struct i2c_dev *temp_i2c;
 	struct i2c_client *hwmon_client;
@@ -23,6 +21,8 @@ struct fejkon_card {
 struct fejkon_port {
   struct fejkon_card *card;
   struct device *dev;
+  struct net_device *net;
+  struct i2c_dev *i2c;
   int id;
 };
 
@@ -31,9 +31,17 @@ struct fejkon_port {
 #define PORT_SFP_IRQ(x)     (4 + x * 4)
 #define PORT_SFP_I2C_IRQ(x) (5 + x * 4)
 
+#define SFP_PRESENT    (1 << 0)
+#define SFP_LOS        (1 << 1)
+#define SFP_TX_FAIL    (1 << 2)
+#define SFP_TX_DISABLE (1 << 3)
+#define SFP_RATE_SEL   (1 << 4)
+#define SFP_I2C_RESET  (1 << 6)
+
 #define CLK 50 * 1000 * 1000
 
-#define BAR2_SFP_I2C_OFFSET(x) (0x1000 * (x + 1) + 0x40)
+#define BAR2_SFP_I2C_OFFSET(x)    (0x1000 * (x + 1) + 0x40)
+#define BAR2_SFP_STATUS_OFFSET(x) (0x1000 * (x + 1) + 0x0)
 
 struct i2c_dev * fejkon_i2c_probe(struct device *dev, void __iomem *base, int irq);
 

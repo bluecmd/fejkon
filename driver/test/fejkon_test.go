@@ -247,6 +247,7 @@ func TestMain(m *testing.M) {
 	log.Printf("lspci after module load:\n%v", string(out))
 
 	ifup("fc0")
+	ifup("fc1")
 
 	// Run tests
 	if m.Run() != 0 {

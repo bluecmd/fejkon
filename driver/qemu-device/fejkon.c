@@ -126,6 +126,14 @@ static uint64_t fejkon_bar2_read(void *opaque, hwaddr addr, unsigned size)
       /* Temperature */
       val = fejkon_temperature();
       break;
+    case 0x1000:
+      /* Port status, SFP present and link OK */
+      val = 0x1;
+      break;
+    case 0x2000:
+      /* Port status, SFP present but link not present */
+      val = 0x3;
+      break;
     default:
       printf("fejkon: Read from unknown bar2 space: 0x%lx\n", addr);
       break;

@@ -56,6 +56,17 @@ static const struct net_device_ops net_netdev_ops = {
   .ndo_start_xmit = net_tx,
 };
 
+static void port_refresh_status(struct fejkon_port *port)
+{
+  int status;
+  status = ioread32(port->card->bar2 + BAR2_SFP_STATUS_OFFSET(port->id));
+  if ((status & SFP_PRESENT) == 0 || status & SFP_LOS || status & SFP_TX_FAIL) {
+    netif_carrier_off(port->net);
+  } else {
+    netif_carrier_on(port->net);
+  }
+}
+
 static irqreturn_t card_irq(int irq, void *dev)
 {
   struct fejkon_card *card = dev;
@@ -80,7 +91,9 @@ static irqreturn_t port_tx_irq(int irq, void *dev)
 static irqreturn_t port_sfp_irq(int irq, void *dev)
 {
   struct fejkon_port *port = dev;
-  pr_info("port_sfp_irq port = %d, irq = %d dev = %d\n", port->id, irq, *(int *)dev);
+  pr_info("port_sfp_irq port = %d, irq = %d dev = %d\n",
+      port->id, irq, *(int *)dev);
+  port_refresh_status(port);
   return IRQ_HANDLED;
 }
 
@@ -189,6 +202,7 @@ static int probe(struct pci_dev *pcidev, const struct pci_device_id *id)
     port = netdev_priv(net);
     port->id = i;
     port->card = card;
+    port->net = net;
     port->dev = device_create(
         fejkon_class, &pcidev->dev, MKDEV(0, 0), NULL,
         "%s port%d", dev_name(&pcidev->dev), port->id);
@@ -216,9 +230,9 @@ static int probe(struct pci_dev *pcidev, const struct pci_device_id *id)
     }
 
     irq = pci_irq_vector(pcidev, PORT_SFP_I2C_IRQ(port->id));
-    card->i2c[i] = fejkon_i2c_probe(
+    port->i2c = fejkon_i2c_probe(
         port->dev, card->bar2 + BAR2_SFP_I2C_OFFSET(port->id), irq);
-    if (card->i2c[i] == NULL) {
+    if (port->i2c == NULL) {
       dev_err(port->dev, "fejkon_i2c_probe failed\n");
       goto error;
     }
@@ -229,8 +243,8 @@ static int probe(struct pci_dev *pcidev, const struct pci_device_id *id)
       goto error;
     }
 
-    card->net[i] = net;
     card->port[i] = port;
+    port_refresh_status(port);
     dev_notice(port->dev, "registered port %d netdev %s\n", i, net->name);
   }
 
@@ -253,14 +267,16 @@ static void remove(struct pci_dev *dev)
   fejkon_i2c_remove(card->temp_i2c);
   rtnl_lock();
   for (i = 0; i < MAX_PORTS; i++) {
-    if (card->port[i]) {
-      unregister_netdevice(card->net[i]);
-      fejkon_i2c_remove(card->i2c[i]);
-      free_irq(pci_irq_vector(dev, PORT_RX_IRQ(i)), card->port[i]);
-      free_irq(pci_irq_vector(dev, PORT_TX_IRQ(i)), card->port[i]);
-      free_irq(pci_irq_vector(dev, PORT_SFP_IRQ(i)), card->port[i]);
-      device_unregister(card->port[i]->dev);
+    struct fejkon_port *port = card->port[i];
+    if (port == NULL) {
+      continue;
     }
+    unregister_netdevice(port->net);
+    fejkon_i2c_remove(port->i2c);
+    free_irq(pci_irq_vector(dev, PORT_RX_IRQ(i)), port);
+    free_irq(pci_irq_vector(dev, PORT_TX_IRQ(i)), port);
+    free_irq(pci_irq_vector(dev, PORT_SFP_IRQ(i)), port);
+    device_unregister(port->dev);
   }
   rtnl_unlock();
   free_irq(pci_irq_vector(dev, 0), card);

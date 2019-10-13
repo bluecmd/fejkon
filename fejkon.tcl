@@ -67,6 +67,20 @@ set_instance_parameter_value rstctrl {USE_RESET_REQUEST_INPUT} {0}
 
 add_instance sfp0 fejkon_sfp 1.0
 
+add_instance temp intel_temp 1.0
+
+add_instance temp_sense altera_temp_sense 19.1
+set_instance_parameter_value temp_sense {CBX_AUTO_BLACKBOX} {ALL}
+set_instance_parameter_value temp_sense {CE_CHECK} {0}
+set_instance_parameter_value temp_sense {CLK_FREQUENCY} {50.0}
+set_instance_parameter_value temp_sense {CLOCK_DIVIDER_VALUE} {80}
+set_instance_parameter_value temp_sense {CLR_CHECK} {0}
+set_instance_parameter_value temp_sense {NUMBER_OF_SAMPLES} {128}
+set_instance_parameter_value temp_sense {POI_CAL_TEMPERATURE} {85}
+set_instance_parameter_value temp_sense {SIM_TSDCALO} {0}
+set_instance_parameter_value temp_sense {USER_OFFSET_ENABLE} {off}
+set_instance_parameter_value temp_sense {USE_WYS} {on}
+
 # exported interfaces
 add_interface clk clock sink
 set_interface_property clk EXPORT_OF ext0.clk_in
@@ -106,6 +120,10 @@ add_connection ext0.clk rstctrl.clk
 
 add_connection ext0.clk sfp0.clk
 
+add_connection ext0.clk temp.clk
+
+add_connection ext0.clk temp_sense.clk
+
 add_connection ext0.clk_reset jtagm.clk_reset
 
 add_connection ext0.clk_reset rstctrl.reset_in0
@@ -140,6 +158,11 @@ set_connection_parameter_value jtagm.master/sfp0.mm arbitrationPriority {1}
 set_connection_parameter_value jtagm.master/sfp0.mm baseAddress {0x1000}
 set_connection_parameter_value jtagm.master/sfp0.mm defaultConnection {0}
 
+add_connection jtagm.master temp.temp_mm
+set_connection_parameter_value jtagm.master/temp.temp_mm arbitrationPriority {1}
+set_connection_parameter_value jtagm.master/temp.temp_mm baseAddress {0x0010}
+set_connection_parameter_value jtagm.master/temp.temp_mm defaultConnection {0}
+
 add_connection jtagm.master_reset rstctrl.reset_in1
 
 add_connection pcie.bar2_mm fcport0.mgmt_mm
@@ -157,6 +180,11 @@ set_connection_parameter_value pcie.bar2_mm/sfp0.mm arbitrationPriority {1}
 set_connection_parameter_value pcie.bar2_mm/sfp0.mm baseAddress {0x1000}
 set_connection_parameter_value pcie.bar2_mm/sfp0.mm defaultConnection {0}
 
+add_connection pcie.bar2_mm temp.temp_mm
+set_connection_parameter_value pcie.bar2_mm/temp.temp_mm arbitrationPriority {1}
+set_connection_parameter_value pcie.bar2_mm/temp.temp_mm baseAddress {0x0010}
+set_connection_parameter_value pcie.bar2_mm/temp.temp_mm defaultConnection {0}
+
 add_connection rstctrl.reset_out fcport0.reset
 
 add_connection rstctrl.reset_out ident.reset
@@ -168,6 +196,22 @@ add_connection rstctrl.reset_out pcie.bar2_reset
 add_connection rstctrl.reset_out pcie.mgmt_rst
 
 add_connection rstctrl.reset_out sfp0.reset
+
+add_connection rstctrl.reset_out temp.reset
+
+add_connection temp.tsdcaldone temp_sense.tsdcaldone
+set_connection_parameter_value temp.tsdcaldone/temp_sense.tsdcaldone endPort {}
+set_connection_parameter_value temp.tsdcaldone/temp_sense.tsdcaldone endPortLSB {0}
+set_connection_parameter_value temp.tsdcaldone/temp_sense.tsdcaldone startPort {}
+set_connection_parameter_value temp.tsdcaldone/temp_sense.tsdcaldone startPortLSB {0}
+set_connection_parameter_value temp.tsdcaldone/temp_sense.tsdcaldone width {0}
+
+add_connection temp_sense.tsdcalo temp.tsdcalo
+set_connection_parameter_value temp_sense.tsdcalo/temp.tsdcalo endPort {}
+set_connection_parameter_value temp_sense.tsdcalo/temp.tsdcalo endPortLSB {0}
+set_connection_parameter_value temp_sense.tsdcalo/temp.tsdcalo startPort {}
+set_connection_parameter_value temp_sense.tsdcalo/temp.tsdcalo startPortLSB {0}
+set_connection_parameter_value temp_sense.tsdcalo/temp.tsdcalo width {0}
 
 # interconnect requirements
 set_interconnect_requirement {$system} {qsys_mm.clockCrossingAdapter} {HANDSHAKE}

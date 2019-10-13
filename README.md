@@ -68,11 +68,20 @@ Accesses need to be 4 byte wide.
 | 0x3xxxx | ...   | Port 2 | ...           |                              |
 | 0x4xxxx | ...   | Port 3 | ...           |                              |
 
-1) See Temperature decoding details in [FPGA Temperature Sensor IP Core User Guide](https://www.intel.com/content/dam/www/programmable/us/en/pdfs/literature/ug/ug_alttemp_sense.pdf)
-2) See below
+1) Details in section below
+2) Details in section below
 3) See "Intel FPGA Avalon I2C (Master) Core" in [Embedded Peripherals IP User Guide](https://www.intel.com/content/dam/www/programmable/us/en/pdfs/literature/ug/ug_embedded_ip.pdf)
-4) See below
+4) Details in section below
 5) See "Custom PHY" in [V-Series Transceiver PHY IP Core User Guide](https://www.intel.com/content/dam/www/programmable/us/en/pdfs/literature/ug/xcvr_user_guide.pdf)
+
+#### Temperature
+
+See Temperature decoding details in [FPGA Temperature Sensor IP Core User Guide](https://www.intel.com/content/dam/www/programmable/us/en/pdfs/literature/ug/ug_alttemp_sense.pdf)
+
+| Bit(s) | Direction   | Description      |
+|--------|-------------|------------------|
+| 7:0    | Read only   | A/D conv. value  |
+| 8      | Read only   | A/D complete     |
 
 #### SFP Port Status
 

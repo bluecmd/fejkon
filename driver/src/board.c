@@ -175,7 +175,7 @@ static int probe(struct pci_dev *pcidev, const struct pci_device_id *id)
     goto error;
   }
   card->hwmon_client = i2c_new_device(
-      &card->temp_i2c->adapter, &fejkon_hwmon_info);
+      fejkon_i2c_adapter(card->temp_i2c), &fejkon_hwmon_info);
 
   /* card initialized, register netdev for ports */
   for (i = 0; i < ports; i++) {

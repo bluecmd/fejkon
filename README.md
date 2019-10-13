@@ -56,7 +56,7 @@ Accesses need to be 4 byte wide.
 | 0x00000 | 2     | Card   | Version       | The constant 0x0DE5          |
 | 0x00002 | 1     | Card   | Version       | Version of the Fejkon card   |
 | 0x00003 | 1     | Card   | Port options  | Number of ports              |
-| 0x00040 | 64    | Card   | Temp. I2C     | MAX1619 I2C Temp. Sensor     |
+| 0x00010 | 1     | Card   | Temprature    | FPGA Core Temperature (1)    |
 | 0x01000 | 1     | Port 0 | SFP Status    | SFP Status Word (3)          |
 | 0x01040 | 64    | Port 0 | SFP Port I2C  | SFP I2C core (4)             |
 | 0x02x00 | ...   | Port 1 | SFP Port      |                              |
@@ -76,7 +76,7 @@ Accesses need to be 4 byte wide.
 | 0x3xxxx | ...   | Port 2 | ...           |                              |
 | 0x4xxxx | ...   | Port 3 | ...           |                              |
 
-1) Temperature is signed 16-bit integer in 1/256 scale in Celcius
+1) See Temperature decoding details in [FPGA Temperature Sensor IP Core User Guide](https://www.intel.com/content/dam/www/programmable/us/en/pdfs/literature/ug/ug_alttemp_sense.pdf)
 2) See DMA the details for "Scatter-Gather DMA Controller Core" in
 [Embedded Peripherals IP User Guide](https://www.intel.com/content/dam/www/programmable/us/en/pdfs/literature/ug/ug_embedded_ip.pdf)
 3) See below
@@ -208,3 +208,24 @@ This issue appeared in 19.1 and hopefully will be patched by Intel soon.
 sudo mkdir -p /tools/perl/5.28.1/linux64/
 sudo ln -sf /home/bluecmd/intelFPGA/19.1/quartus/linux64/perl/lib /tools/perl/5.28.1/linux64/
 ```
+
+## Possible future work
+
+ * Integrate the MAX1619 sensor
+
+The MAX1619 is an SMBus temperature sensor supported by the Linux kernel. It
+would allow for more temperature data. However, SMBus seems to be incompatible
+with the Intel I2C core, and no replacement core seems to be easily avaiable.
+This means writing an SMBus controller, QEMU model, Linux and driver for it.
+
+An alternative is to re-use Terasic's NIOS drivers and create an enviromental
+processor that controls not only the temperature sensor but also the fan.
+However, this breaks the "keep it simple" methodology currently in use.
+
+ * Over-temperature auto-shutdown
+
+The Intel FPGAs do not feature a protective auto-shutdown as Xilinx FPGAs do.
+It would be useful to enter some kind of low-power mode if an over-temperature
+condition is detected.
+
+Possibly integrated with the above work.

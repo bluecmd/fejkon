@@ -17,14 +17,12 @@ module fc_add_idle (
     input  wire        in_endofpacket,    //      .endofpacket
     input  wire        in_startofpacket,  //      .startofpacket
     output wire [31:0] out_data,          //   out.data
-    output wire        out_valid          //      .valid
+    input  wire        out_ready          //      .ready
   );
 
   // TODO: Auto-generated HDL template
 
   assign in_ready = 1'b0;
-
-  assign out_valid = 1'b0;
 
   assign out_data = 32'b00000000000000000000000000000000;
 

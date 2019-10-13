@@ -13,7 +13,7 @@ module fc_remove_idle (
     input  wire        reset,             // reset.reset
     input  wire        clk,               //   clk.clk
     input  wire [31:0] in_data,           //    in.data
-    output wire        in_ready,          //      .ready
+    input  wire        in_valid,          //      .valid
     output wire [31:0] out_data,          //   out.data
     output wire        out_valid,         //      .valid
     input  wire        out_endofpacket,   //      .endofpacket
@@ -21,8 +21,6 @@ module fc_remove_idle (
   );
 
   // TODO: Auto-generated HDL template
-
-  assign in_ready = 1'b0;
 
   assign out_valid = 1'b0;
 

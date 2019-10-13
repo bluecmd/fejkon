@@ -70,10 +70,8 @@ add_instance sfp0 fejkon_sfp 1.0
 # exported interfaces
 add_interface clk clock sink
 set_interface_property clk EXPORT_OF ext0.clk_in
-add_interface fcport0_xcvr_line_rx conduit end
-set_interface_property fcport0_xcvr_line_rx EXPORT_OF fcport0.xcvr_line_rx
-add_interface fcport0_xcvr_line_tx conduit end
-set_interface_property fcport0_xcvr_line_tx EXPORT_OF fcport0.xcvr_line_tx
+add_interface fcport0_line conduit end
+set_interface_property fcport0_line EXPORT_OF fcport0.line
 add_interface led conduit end
 set_interface_property led EXPORT_OF led.external_connection
 add_interface pcie_refclk clock sink
@@ -88,7 +86,7 @@ add_interface sfp0_sfp conduit end
 set_interface_property sfp0_sfp EXPORT_OF sfp0.sfp
 
 # connections and connection parameters
-add_connection ext0.clk fcport0.clk
+add_connection ext0.clk fcport0.mgmt_clk
 
 add_connection ext0.clk ident.clk
 
@@ -112,10 +110,10 @@ add_connection ext0.clk_reset jtagm.clk_reset
 
 add_connection ext0.clk_reset rstctrl.reset_in0
 
-add_connection jtagm.master fcport0.setup
-set_connection_parameter_value jtagm.master/fcport0.setup arbitrationPriority {1}
-set_connection_parameter_value jtagm.master/fcport0.setup baseAddress {0x00010000}
-set_connection_parameter_value jtagm.master/fcport0.setup defaultConnection {0}
+add_connection jtagm.master fcport0.mgmt_mm
+set_connection_parameter_value jtagm.master/fcport0.mgmt_mm arbitrationPriority {1}
+set_connection_parameter_value jtagm.master/fcport0.mgmt_mm baseAddress {0x00010000}
+set_connection_parameter_value jtagm.master/fcport0.mgmt_mm defaultConnection {0}
 
 add_connection jtagm.master ident.mm
 set_connection_parameter_value jtagm.master/ident.mm arbitrationPriority {1}
@@ -144,10 +142,10 @@ set_connection_parameter_value jtagm.master/sfp0.mm defaultConnection {0}
 
 add_connection jtagm.master_reset rstctrl.reset_in1
 
-add_connection pcie.bar2_mm fcport0.setup
-set_connection_parameter_value pcie.bar2_mm/fcport0.setup arbitrationPriority {1}
-set_connection_parameter_value pcie.bar2_mm/fcport0.setup baseAddress {0x00010000}
-set_connection_parameter_value pcie.bar2_mm/fcport0.setup defaultConnection {0}
+add_connection pcie.bar2_mm fcport0.mgmt_mm
+set_connection_parameter_value pcie.bar2_mm/fcport0.mgmt_mm arbitrationPriority {1}
+set_connection_parameter_value pcie.bar2_mm/fcport0.mgmt_mm baseAddress {0x00010000}
+set_connection_parameter_value pcie.bar2_mm/fcport0.mgmt_mm defaultConnection {0}
 
 add_connection pcie.bar2_mm ident.mm
 set_connection_parameter_value pcie.bar2_mm/ident.mm arbitrationPriority {1}
@@ -159,7 +157,7 @@ set_connection_parameter_value pcie.bar2_mm/sfp0.mm arbitrationPriority {1}
 set_connection_parameter_value pcie.bar2_mm/sfp0.mm baseAddress {0x1000}
 set_connection_parameter_value pcie.bar2_mm/sfp0.mm defaultConnection {0}
 
-add_connection rstctrl.reset_out fcport0.rst
+add_connection rstctrl.reset_out fcport0.reset
 
 add_connection rstctrl.reset_out ident.reset
 
@@ -177,9 +175,11 @@ set_interconnect_requirement {$system} {qsys_mm.enableEccProtection} {FALSE}
 set_interconnect_requirement {$system} {qsys_mm.enableInstrumentation} {TRUE}
 set_interconnect_requirement {$system} {qsys_mm.insertDefaultSlave} {FALSE}
 set_interconnect_requirement {$system} {qsys_mm.maxAdditionalLatency} {1}
+set_interconnect_requirement {fcport0.mgmt_mm} {qsys_mm.insertPerformanceMonitor} {TRUE}
 set_interconnect_requirement {fcport0.rx_dma_m} {qsys_mm.insertPerformanceMonitor} {TRUE}
 set_interconnect_requirement {fcport0.setup} {qsys_mm.insertPerformanceMonitor} {TRUE}
 set_interconnect_requirement {fcport0.tx_dma_m} {qsys_mm.insertPerformanceMonitor} {TRUE}
+set_interconnect_requirement {jtagm.master} {qsys_mm.insertPerformanceMonitor} {FALSE}
 set_interconnect_requirement {pcie.bar2_mm} {qsys_mm.insertPerformanceMonitor} {TRUE}
 set_interconnect_requirement {pcie.read_mem_mm} {qsys_mm.insertPerformanceMonitor} {TRUE}
 set_interconnect_requirement {pcie.write_mem_mm} {qsys_mm.insertPerformanceMonitor} {TRUE}

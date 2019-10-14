@@ -8,6 +8,8 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
+	"strings"
 	"testing"
 	"time"
 
@@ -101,16 +103,14 @@ func TestTestTempSensor(t *testing.T) {
 	if err != nil {
 		t.Fatalf("temp1_input: %v", err)
 	}
-	temp2, err := ioutil.ReadFile("/sys/class/hwmon/hwmon0/temp2_input")
-	if err != nil {
-		t.Fatalf("temp1_input: %v", err)
-	}
 
-	if (string(temp1) != "0\n") {
-		t.Fatalf("temp1 expected to be 0, got '%v'", string(temp1))
+	c, err := strconv.Atoi(strings.TrimSpace(string(temp1)))
+	c = c / 1000
+	if err != nil {
+		t.Fatalf("temp1_input strconv: %v", err)
 	}
-	if (string(temp2) != "0\n") {
-		t.Fatalf("temp2 expected to be 0, got '%v'", string(temp2))
+	if (c < 50 || c > 80) {
+		t.Fatalf("temp1 expected to be between 50 and 80, got %d", c)
 	}
 }
 
@@ -127,19 +127,19 @@ func TestDumpI2C(t *testing.T) {
 		}
 	}
 
-	if len(fi2c) != 3 {
+	if len(fi2c) != 2 {
 		t.Fatalf("Expected 2 I2C buses, got %v", fi2c)
 	}
 }
 
 func TestSFPPort(t *testing.T) {
-	p, err := sff.Read("/dev/i2c-2")
+	p, err := sff.Read("/dev/i2c-1")
 	if err != nil {
 		t.Fatalf("sff.Read failed: %v", err)
 	}
 	log.Printf("SFP 1: %v", p)
 
-	p, err = sff.Read("/dev/i2c-3")
+	p, err = sff.Read("/dev/i2c-2")
 	if err != nil {
 		t.Fatalf("sff.Read failed: %v", err)
 	}
@@ -231,8 +231,8 @@ func TestMain(m *testing.M) {
 	mount.Mount("none", "/proc", "proc", "", 0)
 
 	unix.Mknod("/dev/null", unix.S_IFCHR|0600, 0x0103)
+	unix.Mknod("/dev/i2c-1", unix.S_IFCHR|0600, 0x5901)
 	unix.Mknod("/dev/i2c-2", unix.S_IFCHR|0600, 0x5902)
-	unix.Mknod("/dev/i2c-3", unix.S_IFCHR|0600, 0x5903)
 
 	// Dump PCI state before module load
 	out, err := exec.Command("/bin/lspci", "-vv", "-d", "f1c0:0de5").CombinedOutput()

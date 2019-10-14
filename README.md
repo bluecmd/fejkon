@@ -140,14 +140,13 @@ be easier. However, it is quite likely MSI-X has its own pitfalls.
 | Vector | Description        |
 |--------|--------------------|
 | 0      | Card status        |
-| 1      | Temp Sensor I2C    |
-| 2      | Port 0 RX DMA      |
-| 3      | Port 0 TX DMA      |
-| 4      | Port 0 SFP status  |
-| 5      | Port 0 SFP I2C     |
-| 6-9    | Port 1 ...         |
-| 10-13  | Port 2 ...         |
-| 14-17  | Port 3 ...         |
+| 1      | Port 0 RX DMA      |
+| 2      | Port 0 TX DMA      |
+| 3      | Port 0 SFP status  |
+| 4      | Port 0 SFP I2C     |
+| 5-8    | Port 1 ...         |
+| 9-12   | Port 2 ...         |
+| 13-16  | Port 3 ...         |
 
 ## Debugging
 

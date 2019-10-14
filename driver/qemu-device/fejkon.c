@@ -43,7 +43,6 @@
 typedef struct {
   PCIDevice pdev;
   MemoryRegion bar2;
-  struct avalon_i2c temp_i2c;
   struct avalon_i2c sfp1_i2c;
   struct avalon_i2c sfp2_i2c;
 } FejkonState;
@@ -53,22 +52,13 @@ static bool fejkon_msi_enabled(FejkonState *card)
   return msi_enabled(&card->pdev);
 }
 
-static void temp_intr(void *opaque) {
-  FejkonState *card = opaque;
-  if (!fejkon_msi_enabled(card)) {
-    printf("fejkon: Temperature interrupt without MSI enabled\n");
-    return;
-  }
-  msi_notify(&card->pdev, 1);
-}
-
 static void sfp1_intr(void *opaque) {
   FejkonState *card = opaque;
   if (!fejkon_msi_enabled(card)) {
     printf("fejkon: SFP1 interrupt without MSI enabled\n");
     return;
   }
-  msi_notify(&card->pdev, 5);
+  msi_notify(&card->pdev, 4);
 }
 
 static void sfp2_intr(void *opaque) {
@@ -77,21 +67,14 @@ static void sfp2_intr(void *opaque) {
     printf("fejkon: SFP1 interrupt without MSI enabled\n");
     return;
   }
-  msi_notify(&card->pdev, 9);
+  msi_notify(&card->pdev, 8);
 }
 
 static uint32_t fejkon_temperature(void)
 {
-  // Center around 50 C
-  int base = 50 * 128;
-
-  // Add up to +30 C for in-die sensor
-  int local = base + rand() % (10 * 128);
-
-  // Add up to +10 C for remote sensor
-  int remote = base + rand() % (30 * 128);
-
-  return (remote & 0xffff) << 16 | (local & 0xffff);
+  // 65 +/- 15 C
+  int local = 50 + rand() % 30;
+  return (1 << 8) | ((128 + local) & 0xff);
 }
 
 static uint64_t fejkon_bar2_read(void *opaque, hwaddr addr, unsigned size)
@@ -102,11 +85,6 @@ static uint64_t fejkon_bar2_read(void *opaque, hwaddr addr, unsigned size)
   if (size != 4) {
     printf("fejkon: Read from 0x%lx not QW: %d\n", addr, size);
     return val;
-  }
-
-  /* Temp I2C */
-  if (addr >= 0x40 && addr <= 0x68) {
-    return avalon_i2c_read(&card->temp_i2c, addr - 0x40);
   }
 
   /* SFP I2C */
@@ -122,7 +100,7 @@ static uint64_t fejkon_bar2_read(void *opaque, hwaddr addr, unsigned size)
       /* Version and card options */
       val = 0x02010de5u;
       break;
-    case 0x04:
+    case 0x10:
       /* Temperature */
       val = fejkon_temperature();
       break;
@@ -148,12 +126,6 @@ static void fejkon_bar2_write(void *opaque, hwaddr addr, uint64_t val,
   FejkonState *card = opaque;
   if (size != 4) {
     printf("fejkon: Write to 0x%lx not QW: %d\n", addr, size);
-    return;
-  }
-
-  /* Temp I2C */
-  if (addr >= 0x40 && addr <= 0x68) {
-    avalon_i2c_write(&card->temp_i2c, addr - 0x40, val);
     return;
   }
 
@@ -201,9 +173,6 @@ static void pci_fejkon_realize(PCIDevice *pdev, Error **errp)
       "fejkon-bar2", 512 * KiB);
   pci_register_bar(pdev, 2, PCI_BASE_ADDRESS_SPACE_MEMORY, &card->bar2);
 
-  card->temp_i2c.name = "temp";
-  card->temp_i2c.intr = temp_intr;
-  card->temp_i2c.extra = card;
   card->sfp1_i2c.name = "sfp1";
   card->sfp1_i2c.intr = sfp1_intr;
   card->sfp1_i2c.extra = card;

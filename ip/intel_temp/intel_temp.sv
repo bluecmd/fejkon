@@ -13,7 +13,7 @@ module intel_temp (
     begin
       if (reset)
         readdata_r <= 0;
-      else
+      else if (tsdcaldone)
         readdata_r <= {tsdcaldone, tsdcalo};
     end
 

@@ -14,8 +14,6 @@ struct fejkon_card {
   struct pci_dev *pci;
   void __iomem *bar2;
   struct fejkon_port *port[MAX_PORTS];
-  struct i2c_dev *temp_i2c;
-	struct i2c_client *hwmon_client;
 };
 
 struct fejkon_port {
@@ -26,10 +24,10 @@ struct fejkon_port {
   int id;
 };
 
-#define PORT_RX_IRQ(x)      (2 + x * 4)
-#define PORT_TX_IRQ(x)      (3 + x * 4)
-#define PORT_SFP_IRQ(x)     (4 + x * 4)
-#define PORT_SFP_I2C_IRQ(x) (5 + x * 4)
+#define PORT_RX_IRQ(x)      (1 + x * 4)
+#define PORT_TX_IRQ(x)      (2 + x * 4)
+#define PORT_SFP_IRQ(x)     (3 + x * 4)
+#define PORT_SFP_I2C_IRQ(x) (4 + x * 4)
 
 #define SFP_PRESENT    (1 << 0)
 #define SFP_LOS        (1 << 1)

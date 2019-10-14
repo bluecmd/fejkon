@@ -2,6 +2,7 @@
 
 #include <linux/cdev.h>
 #include <linux/fs.h>
+#include <linux/hwmon.h>
 #include <linux/if_arp.h>
 #include <linux/init.h>
 #include <linux/interrupt.h>
@@ -110,8 +111,79 @@ static void init_netdev(struct net_device *net)
   memset(net->broadcast, 0xff, 3);
 }
 
-static const struct i2c_board_info fejkon_hwmon_info = {
-  I2C_BOARD_INFO("max1619", 0x30),
+static int fejkon_hwmon_read(struct device *dev, enum hwmon_sensor_types type,
+    u32 attr, int channel, long *val)
+{
+  struct fejkon_card *card = dev_get_drvdata(dev);
+  int reg;
+  switch (type) {
+  case hwmon_chip:
+    switch (attr) {
+    case hwmon_chip_update_interval:
+      // We are refreshing faster than 1 kHz but this is how fast we can say
+      *val = 1;
+      break;
+    default:
+      return -EINVAL;
+    }
+    break;
+  case hwmon_temp:
+    switch (attr) {
+    case hwmon_temp_input:
+      // Unit is millidegree C
+      reg = ioread16(card->bar2 + 0x10);
+      if ((reg & (1<<8)) == 0) {
+        // No value available
+        return -ERANGE;
+      }
+      *val = ((ioread16(card->bar2 + 0x10) & 0xff) - 128) * 1000;
+      break;
+    default:
+      return -EINVAL;
+    }
+    break;
+  default:
+    return -EINVAL;
+  }
+  return 0;
+}
+
+static umode_t fejkon_hwmon_is_visible(const void *data,
+    enum hwmon_sensor_types type, u32 attr, int channel)
+{
+  switch (type) {
+    case hwmon_chip:
+      switch (attr) {
+        case hwmon_chip_update_interval:
+          return 0444;
+      }
+      break;
+    case hwmon_temp:
+      switch (attr) {
+        case hwmon_temp_input:
+          return 0444;
+      }
+      break;
+    default:
+      break;
+  }
+  return 0;
+}
+
+static const struct hwmon_channel_info *fejkon_hwmon_info[] = {
+  HWMON_CHANNEL_INFO(chip, HWMON_C_REGISTER_TZ | HWMON_C_UPDATE_INTERVAL),
+  HWMON_CHANNEL_INFO(temp, HWMON_T_INPUT | HWMON_T_MAX | HWMON_T_MAX_HYST),
+  NULL
+};
+
+static const struct hwmon_ops fejkon_hwmon_ops = {
+  .is_visible = fejkon_hwmon_is_visible,
+  .read = fejkon_hwmon_read,
+};
+
+static const struct hwmon_chip_info fejkon_hwmon_chip_info = {
+  .ops = &fejkon_hwmon_ops,
+  .info = fejkon_hwmon_info,
 };
 
 static int probe(struct pci_dev *pcidev, const struct pci_device_id *id)
@@ -123,6 +195,7 @@ static int probe(struct pci_dev *pcidev, const struct pci_device_id *id)
   int i;
   int ports;
   struct fejkon_card *card;
+  struct device *hwm;
 
   ret = pci_enable_device(pcidev);
   if (ret < 0) {
@@ -181,14 +254,12 @@ static int probe(struct pci_dev *pcidev, const struct pci_device_id *id)
     goto error;
   }
 
-  irq = pci_irq_vector(pcidev, 1);
-  card->temp_i2c = fejkon_i2c_probe(&pcidev->dev, card->bar2 + 0x40, irq);
-  if (card->temp_i2c == NULL) {
-    dev_err(&pcidev->dev, "fejkon_i2c_probe\n");
-    goto error;
+  hwm = devm_hwmon_device_register_with_info(
+      &pcidev->dev, "fejkon", card, &fejkon_hwmon_chip_info, NULL);
+  if (IS_ERR(hwm)) {
+    dev_err(&pcidev->dev, "devm_hwmon_device_register_with_info\n");
+    return PTR_ERR(hwm);
   }
-  card->hwmon_client = i2c_new_device(
-      fejkon_i2c_adapter(card->temp_i2c), &fejkon_hwmon_info);
 
   /* card initialized, register netdev for ports */
   for (i = 0; i < ports; i++) {
@@ -263,8 +334,6 @@ static void remove(struct pci_dev *dev)
   if (!card) {
     return;
   }
-  i2c_unregister_device(card->hwmon_client);
-  fejkon_i2c_remove(card->temp_i2c);
   rtnl_lock();
   for (i = 0; i < MAX_PORTS; i++) {
     struct fejkon_port *port = card->port[i];

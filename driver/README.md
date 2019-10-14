@@ -9,4 +9,3 @@ These are known requirements for fejkon:
 
  * `CONFIG_I2C_CHARDEV`
  * `CONFIG_IRQ_REMAP`
- * `CONFIG_SENSORS_MAX1619` for temperature sensor

@@ -9,6 +9,9 @@ from an ordinary server.
 Fejkon, which was born out of the need for a fake FICON HBA, is a Swedish pun playing on the word "fejk" which
 translates "fake". It is pronounced similarly to the "FIC" in "FICON".
 
+It is meant to be one of the possible access ports to [fikonfarm](https://github.com/bluecmd/fikonfarm) enabling
+IBM mainframes to e.g. use [Hercules](https://en.wikipedia.org/wiki/Hercules_(emulator)) disks natively.
+
 ## Board
 
 Target board right now is the DE5-Net from Terasic. They are available for $300 - $600 on eBay as of this writing

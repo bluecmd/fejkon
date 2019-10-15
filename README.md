@@ -59,6 +59,7 @@ Accesses need to be 4 byte wide.
 | 0x00000 | 2     | Card   | Version       | The constant 0x0DE5          |
 | 0x00002 | 1     | Card   | Version       | Version of the Fejkon card   |
 | 0x00003 | 1     | Card   | Port options  | Number of ports              |
+| 0x00004 | 4     | Card   | Git hash      | Git hash of HDL built        |
 | 0x00010 | 1     | Card   | Temprature    | FPGA Core Temperature (1)    |
 | 0x01000 | 1     | Port 0 | SFP Status    | SFP Status Word (2)          |
 | 0x01040 | 64    | Port 0 | SFP Port I2C  | SFP I2C core (3)             |

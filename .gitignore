@@ -7,6 +7,7 @@
 # Compilation output
 gen/
 fejkon.sof
+ip/fejkon_identity/version.sv
 
 # Directories for the local user to clobber
 stps/

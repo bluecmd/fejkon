@@ -189,6 +189,7 @@ static const struct hwmon_chip_info fejkon_hwmon_chip_info = {
 static int probe(struct pci_dev *pcidev, const struct pci_device_id *id)
 {
   unsigned int version;
+  unsigned int githash;
   int ret;
   int irqs;
   int irq;
@@ -235,7 +236,9 @@ static int probe(struct pci_dev *pcidev, const struct pci_device_id *id)
     goto error;
   }
   version = (version >> 16) & 0xff;
-  dev_notice(&pcidev->dev, "found card with version %d, ports = %d\n", version, ports);
+  githash = ioread32(card->bar2 + 0x4);
+  dev_notice(&pcidev->dev, "found card with version %d (%08x), ports = %d\n",
+      version, githash, ports);
 
   irqs = 2 + 4 * ports;
   ret = pci_alloc_irq_vectors(pcidev, irqs, irqs, PCI_IRQ_ALL_TYPES);

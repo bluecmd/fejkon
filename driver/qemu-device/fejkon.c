@@ -100,6 +100,10 @@ static uint64_t fejkon_bar2_read(void *opaque, hwaddr addr, unsigned size)
       /* Version and card options */
       val = 0x02010de5u;
       break;
+    case 0x04:
+      /* Git hash */
+      val = 0xdeadbeef;
+      break;
     case 0x10:
       /* Temperature */
       val = fejkon_temperature();

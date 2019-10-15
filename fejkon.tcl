@@ -74,7 +74,7 @@ set_instance_parameter_value temp_sense {CBX_AUTO_BLACKBOX} {ALL}
 set_instance_parameter_value temp_sense {CE_CHECK} {0}
 set_instance_parameter_value temp_sense {CLK_FREQUENCY} {50.0}
 set_instance_parameter_value temp_sense {CLOCK_DIVIDER_VALUE} {80}
-set_instance_parameter_value temp_sense {CLR_CHECK} {0}
+set_instance_parameter_value temp_sense {CLR_CHECK} {1}
 set_instance_parameter_value temp_sense {NUMBER_OF_SAMPLES} {128}
 set_instance_parameter_value temp_sense {POI_CAL_TEMPERATURE} {85}
 set_instance_parameter_value temp_sense {SIM_TSDCALO} {0}
@@ -198,6 +198,8 @@ add_connection rstctrl.reset_out pcie.mgmt_rst
 add_connection rstctrl.reset_out sfp0.reset
 
 add_connection rstctrl.reset_out temp.reset
+
+add_connection temp.clr temp_sense.clr
 
 add_connection temp.tsdcaldone temp_sense.tsdcaldone
 set_connection_parameter_value temp.tsdcaldone/temp_sense.tsdcaldone endPort {}

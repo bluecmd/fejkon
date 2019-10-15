@@ -18,7 +18,7 @@ set_global_assignment -name EDA_GENERATE_FUNCTIONAL_NETLIST OFF -section_id eda_
 set_global_assignment -name EDA_GENERATE_FUNCTIONAL_NETLIST OFF -section_id eda_board_design_boundary_scan
 set_global_assignment -name QSYS_FILE ../fejkon.qsys
 set_global_assignment -name SDC_FILE ../de5net.sdc
-set_global_assignment -name NUM_PARALLEL_PROCESSORS 8
+set_global_assignment -name NUM_PARALLEL_PROCESSORS [exec nproc]
 set_global_assignment -name RAPID_RECOMPILE_MODE ON
 set_global_assignment -name TIMEQUEST_REPORT_SCRIPT ../timing.tcl
 set_global_assignment -name OPTIMIZATION_MODE "AGGRESSIVE PERFORMANCE"

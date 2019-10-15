@@ -14,8 +14,17 @@ fejkon.sof: ip/altera_fc_phy/fc_phy.qip fejkon.qsys de5net.sdc de5net.tcl $(wild
 	echo "\`define FEJKON_GIT_HASH 32'h$(shell git describe --long --always --abbrev=8)" > ip/fejkon_identity/version.sv
 	(mkdir -p gen; cd gen; rm -f *.txt *.html; $(QPATH)/bin/quartus_sh -t ../quartus.tcl)
 	cp gen/output_files/fejkon.sof $@
-	cat gen/fmax.txt | grep -v Thi
-	cat gen/violated_paths.txt
+	touch $@
+	@echo
+	@echo '  ==> Generation report <=='
+	@echo
+	@grep -B1 '; I/O Assignment Warnings' gen/output_files/fejkon.fit.rpt \
+		| grep -- '---'
+	@awk '/; I\/O Assignment Warnings/,/^$$/' gen/output_files/fejkon.fit.rpt
+	@cat gen/fmax.txt | grep -v Thi
+	@echo
+	@cat gen/violated_paths.txt
+	@echo
 
 # Temporarily program over JTAG
 program: fejkon.sof

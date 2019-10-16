@@ -16,7 +16,113 @@ set_instance_parameter_value ext0 {resetSynchronousEdges} {NONE}
 
 add_instance fc0 fc_framer 1.0
 
+add_instance fc0_256_rx altera_avalon_st_adapter 19.1
+set_instance_parameter_value fc0_256_rx {inBitsPerSymbol} {8}
+set_instance_parameter_value fc0_256_rx {inChannelWidth} {0}
+set_instance_parameter_value fc0_256_rx {inDataWidth} {32}
+set_instance_parameter_value fc0_256_rx {inErrorDescriptor} {}
+set_instance_parameter_value fc0_256_rx {inErrorWidth} {0}
+set_instance_parameter_value fc0_256_rx {inMaxChannel} {0}
+set_instance_parameter_value fc0_256_rx {inReadyLatency} {0}
+set_instance_parameter_value fc0_256_rx {inUseEmptyPort} {0}
+set_instance_parameter_value fc0_256_rx {inUsePackets} {1}
+set_instance_parameter_value fc0_256_rx {inUseReady} {1}
+set_instance_parameter_value fc0_256_rx {inUseValid} {1}
+set_instance_parameter_value fc0_256_rx {outChannelWidth} {0}
+set_instance_parameter_value fc0_256_rx {outDataWidth} {256}
+set_instance_parameter_value fc0_256_rx {outErrorDescriptor} {}
+set_instance_parameter_value fc0_256_rx {outErrorWidth} {0}
+set_instance_parameter_value fc0_256_rx {outMaxChannel} {0}
+set_instance_parameter_value fc0_256_rx {outReadyLatency} {0}
+set_instance_parameter_value fc0_256_rx {outUseEmptyPort} {1}
+set_instance_parameter_value fc0_256_rx {outUseReady} {1}
+set_instance_parameter_value fc0_256_rx {outUseValid} {1}
+
+add_instance fc0_pcie_tx altera_avalon_dc_fifo 19.1
+set_instance_parameter_value fc0_pcie_tx {BITS_PER_SYMBOL} {8}
+set_instance_parameter_value fc0_pcie_tx {CHANNEL_WIDTH} {0}
+set_instance_parameter_value fc0_pcie_tx {ENABLE_EXPLICIT_MAXCHANNEL} {0}
+set_instance_parameter_value fc0_pcie_tx {ERROR_WIDTH} {0}
+set_instance_parameter_value fc0_pcie_tx {EXPLICIT_MAXCHANNEL} {0}
+set_instance_parameter_value fc0_pcie_tx {FIFO_DEPTH} {512}
+set_instance_parameter_value fc0_pcie_tx {RD_SYNC_DEPTH} {3}
+set_instance_parameter_value fc0_pcie_tx {SYMBOLS_PER_BEAT} {32}
+set_instance_parameter_value fc0_pcie_tx {USE_IN_FILL_LEVEL} {1}
+set_instance_parameter_value fc0_pcie_tx {USE_OUT_FILL_LEVEL} {0}
+set_instance_parameter_value fc0_pcie_tx {USE_PACKETS} {1}
+set_instance_parameter_value fc0_pcie_tx {WR_SYNC_DEPTH} {3}
+
+add_instance fc0_rx altera_avalon_st_splitter 19.1
+set_instance_parameter_value fc0_rx {BITS_PER_SYMBOL} {8}
+set_instance_parameter_value fc0_rx {CHANNEL_WIDTH} {1}
+set_instance_parameter_value fc0_rx {DATA_WIDTH} {32}
+set_instance_parameter_value fc0_rx {ERROR_DESCRIPTOR} {}
+set_instance_parameter_value fc0_rx {ERROR_WIDTH} {1}
+set_instance_parameter_value fc0_rx {MAX_CHANNELS} {1}
+set_instance_parameter_value fc0_rx {NUMBER_OF_OUTPUTS} {2}
+set_instance_parameter_value fc0_rx {QUALIFY_VALID_OUT} {1}
+set_instance_parameter_value fc0_rx {READY_LATENCY} {0}
+set_instance_parameter_value fc0_rx {USE_CHANNEL} {0}
+set_instance_parameter_value fc0_rx {USE_DATA} {1}
+set_instance_parameter_value fc0_rx {USE_ERROR} {0}
+set_instance_parameter_value fc0_rx {USE_PACKETS} {1}
+set_instance_parameter_value fc0_rx {USE_READY} {1}
+set_instance_parameter_value fc0_rx {USE_VALID} {1}
+
 add_instance fc1 fc_framer 1.0
+
+add_instance fc1_256_rx altera_avalon_st_adapter 19.1
+set_instance_parameter_value fc1_256_rx {inBitsPerSymbol} {8}
+set_instance_parameter_value fc1_256_rx {inChannelWidth} {0}
+set_instance_parameter_value fc1_256_rx {inDataWidth} {32}
+set_instance_parameter_value fc1_256_rx {inErrorDescriptor} {}
+set_instance_parameter_value fc1_256_rx {inErrorWidth} {0}
+set_instance_parameter_value fc1_256_rx {inMaxChannel} {0}
+set_instance_parameter_value fc1_256_rx {inReadyLatency} {0}
+set_instance_parameter_value fc1_256_rx {inUseEmptyPort} {0}
+set_instance_parameter_value fc1_256_rx {inUsePackets} {1}
+set_instance_parameter_value fc1_256_rx {inUseReady} {1}
+set_instance_parameter_value fc1_256_rx {inUseValid} {1}
+set_instance_parameter_value fc1_256_rx {outChannelWidth} {0}
+set_instance_parameter_value fc1_256_rx {outDataWidth} {256}
+set_instance_parameter_value fc1_256_rx {outErrorDescriptor} {}
+set_instance_parameter_value fc1_256_rx {outErrorWidth} {0}
+set_instance_parameter_value fc1_256_rx {outMaxChannel} {0}
+set_instance_parameter_value fc1_256_rx {outReadyLatency} {0}
+set_instance_parameter_value fc1_256_rx {outUseEmptyPort} {1}
+set_instance_parameter_value fc1_256_rx {outUseReady} {1}
+set_instance_parameter_value fc1_256_rx {outUseValid} {1}
+
+add_instance fc1_pcie_tx altera_avalon_dc_fifo 19.1
+set_instance_parameter_value fc1_pcie_tx {BITS_PER_SYMBOL} {8}
+set_instance_parameter_value fc1_pcie_tx {CHANNEL_WIDTH} {0}
+set_instance_parameter_value fc1_pcie_tx {ENABLE_EXPLICIT_MAXCHANNEL} {0}
+set_instance_parameter_value fc1_pcie_tx {ERROR_WIDTH} {0}
+set_instance_parameter_value fc1_pcie_tx {EXPLICIT_MAXCHANNEL} {0}
+set_instance_parameter_value fc1_pcie_tx {FIFO_DEPTH} {512}
+set_instance_parameter_value fc1_pcie_tx {RD_SYNC_DEPTH} {3}
+set_instance_parameter_value fc1_pcie_tx {SYMBOLS_PER_BEAT} {32}
+set_instance_parameter_value fc1_pcie_tx {USE_IN_FILL_LEVEL} {1}
+set_instance_parameter_value fc1_pcie_tx {USE_OUT_FILL_LEVEL} {0}
+set_instance_parameter_value fc1_pcie_tx {USE_PACKETS} {1}
+set_instance_parameter_value fc1_pcie_tx {WR_SYNC_DEPTH} {3}
+
+add_instance fc1_rx altera_avalon_st_splitter 19.1
+set_instance_parameter_value fc1_rx {BITS_PER_SYMBOL} {8}
+set_instance_parameter_value fc1_rx {CHANNEL_WIDTH} {1}
+set_instance_parameter_value fc1_rx {DATA_WIDTH} {32}
+set_instance_parameter_value fc1_rx {ERROR_DESCRIPTOR} {}
+set_instance_parameter_value fc1_rx {ERROR_WIDTH} {1}
+set_instance_parameter_value fc1_rx {MAX_CHANNELS} {1}
+set_instance_parameter_value fc1_rx {NUMBER_OF_OUTPUTS} {2}
+set_instance_parameter_value fc1_rx {QUALIFY_VALID_OUT} {1}
+set_instance_parameter_value fc1_rx {READY_LATENCY} {0}
+set_instance_parameter_value fc1_rx {USE_CHANNEL} {0}
+set_instance_parameter_value fc1_rx {USE_DATA} {1}
+set_instance_parameter_value fc1_rx {USE_ERROR} {0}
+set_instance_parameter_value fc1_rx {USE_PACKETS} {1}
+set_instance_parameter_value fc1_rx {USE_READY} {1}
+set_instance_parameter_value fc1_rx {USE_VALID} {1}
 
 add_instance fifo_0to1 altera_avalon_dc_fifo 19.1
 set_instance_parameter_value fifo_0to1 {BITS_PER_SYMBOL} {8}
@@ -47,6 +153,7 @@ set_instance_parameter_value fifo_1to0 {USE_PACKETS} {1}
 set_instance_parameter_value fifo_1to0 {WR_SYNC_DEPTH} {3}
 
 add_instance ident fejkon_identity 1.0
+set_instance_parameter_value ident {Ports} {2}
 
 add_instance jtagm altera_jtag_avalon_master 19.1
 set_instance_parameter_value jtagm {FAST_VER} {0}
@@ -57,6 +164,17 @@ set_instance_parameter_value jtagm {USE_PLI} {0}
 add_instance led fejkon_led 1.0
 
 add_instance pcie fejkon_pcie 1.0
+
+add_instance pcie_data_tx_multiplex multiplexer 19.1
+set_instance_parameter_value pcie_data_tx_multiplex {bitsPerSymbol} {8}
+set_instance_parameter_value pcie_data_tx_multiplex {errorWidth} {0}
+set_instance_parameter_value pcie_data_tx_multiplex {numInputInterfaces} {4}
+set_instance_parameter_value pcie_data_tx_multiplex {outChannelWidth} {2}
+set_instance_parameter_value pcie_data_tx_multiplex {packetScheduling} {1}
+set_instance_parameter_value pcie_data_tx_multiplex {schedulingSize} {2}
+set_instance_parameter_value pcie_data_tx_multiplex {symbolsPerBeat} {32}
+set_instance_parameter_value pcie_data_tx_multiplex {useHighBitsOfChannel} {1}
+set_instance_parameter_value pcie_data_tx_multiplex {usePackets} {1}
 
 add_instance phy_clk altera_clock_bridge 19.1
 set_instance_parameter_value phy_clk {EXPLICIT_CLOCK_RATE} {106250000.0}
@@ -179,13 +297,7 @@ add_connection ext0.clk jtagm.clk
 
 add_connection ext0.clk led.clk
 
-add_connection ext0.clk pcie.bar2_clk
-
 add_connection ext0.clk pcie.mgmt_clk
-
-add_connection ext0.clk pcie.read_mem_clk
-
-add_connection ext0.clk pcie.write_mem_clk
 
 add_connection ext0.clk phy_clk_gauge.ref_clk
 
@@ -222,7 +334,15 @@ set_connection_parameter_value fc0.active/led.fcport0_active width {0}
 
 add_connection fc0.avtx xcvr0.avtx
 
-add_connection fc0.userrx fifo_0to1.in
+add_connection fc0.userrx fc0_rx.in
+
+add_connection fc0_256_rx.out_0 fc0_pcie_tx.in
+
+add_connection fc0_pcie_tx.out pcie_data_tx_multiplex.in0
+
+add_connection fc0_rx.out0 fifo_0to1.in
+
+add_connection fc0_rx.out1 fc0_256_rx.in_0
 
 add_connection fc1.active led.fcport1_active
 set_connection_parameter_value fc1.active/led.fcport1_active endPort {}
@@ -233,7 +353,15 @@ set_connection_parameter_value fc1.active/led.fcport1_active width {0}
 
 add_connection fc1.avtx xcvr1.avtx
 
-add_connection fc1.userrx fifo_1to0.in
+add_connection fc1.userrx fc1_rx.in
+
+add_connection fc1_256_rx.out_0 fc1_pcie_tx.in
+
+add_connection fc1_pcie_tx.out pcie_data_tx_multiplex.in1
+
+add_connection fc1_rx.out0 fifo_1to0.in
+
+add_connection fc1_rx.out1 fc1_256_rx.in_0
 
 add_connection fifo_0to1.out fc1.usertx
 
@@ -244,25 +372,25 @@ set_connection_parameter_value jtagm.master/fc0.mgmt_mm arbitrationPriority {1}
 set_connection_parameter_value jtagm.master/fc0.mgmt_mm baseAddress {0x00012000}
 set_connection_parameter_value jtagm.master/fc0.mgmt_mm defaultConnection {0}
 
+add_connection jtagm.master fc0_pcie_tx.in_csr
+set_connection_parameter_value jtagm.master/fc0_pcie_tx.in_csr arbitrationPriority {1}
+set_connection_parameter_value jtagm.master/fc0_pcie_tx.in_csr baseAddress {0xffff1000}
+set_connection_parameter_value jtagm.master/fc0_pcie_tx.in_csr defaultConnection {0}
+
 add_connection jtagm.master fc1.mgmt_mm
 set_connection_parameter_value jtagm.master/fc1.mgmt_mm arbitrationPriority {1}
 set_connection_parameter_value jtagm.master/fc1.mgmt_mm baseAddress {0x00022000}
 set_connection_parameter_value jtagm.master/fc1.mgmt_mm defaultConnection {0}
 
+add_connection jtagm.master fc1_pcie_tx.in_csr
+set_connection_parameter_value jtagm.master/fc1_pcie_tx.in_csr arbitrationPriority {1}
+set_connection_parameter_value jtagm.master/fc1_pcie_tx.in_csr baseAddress {0xffff2000}
+set_connection_parameter_value jtagm.master/fc1_pcie_tx.in_csr defaultConnection {0}
+
 add_connection jtagm.master ident.mm
 set_connection_parameter_value jtagm.master/ident.mm arbitrationPriority {1}
 set_connection_parameter_value jtagm.master/ident.mm baseAddress {0x0000}
 set_connection_parameter_value jtagm.master/ident.mm defaultConnection {0}
-
-add_connection jtagm.master pcie.read_mem_mm
-set_connection_parameter_value jtagm.master/pcie.read_mem_mm arbitrationPriority {1}
-set_connection_parameter_value jtagm.master/pcie.read_mem_mm baseAddress {0x00800000}
-set_connection_parameter_value jtagm.master/pcie.read_mem_mm defaultConnection {0}
-
-add_connection jtagm.master pcie.write_mem_mm
-set_connection_parameter_value jtagm.master/pcie.write_mem_mm arbitrationPriority {1}
-set_connection_parameter_value jtagm.master/pcie.write_mem_mm baseAddress {0x00c00000}
-set_connection_parameter_value jtagm.master/pcie.write_mem_mm defaultConnection {0}
 
 add_connection jtagm.master phy_clk_gauge.mm
 set_connection_parameter_value jtagm.master/phy_clk_gauge.mm arbitrationPriority {1}
@@ -346,6 +474,26 @@ set_connection_parameter_value pcie.bar2_mm/xcvr1.mgmt_mm arbitrationPriority {1
 set_connection_parameter_value pcie.bar2_mm/xcvr1.mgmt_mm baseAddress {0x00020000}
 set_connection_parameter_value pcie.bar2_mm/xcvr1.mgmt_mm defaultConnection {0}
 
+add_connection pcie.data_clk fc0_pcie_tx.out_clk
+
+add_connection pcie.data_clk fc1_pcie_tx.out_clk
+
+add_connection pcie.data_clk pcie_data_tx_multiplex.clk
+
+add_connection pcie.irq sfp0.i2c_irq
+set_connection_parameter_value pcie.irq/sfp0.i2c_irq irqNumber {0}
+
+add_connection pcie.irq sfp0.sfp_irq
+set_connection_parameter_value pcie.irq/sfp0.sfp_irq irqNumber {4}
+
+add_connection pcie.irq sfp1.i2c_irq
+set_connection_parameter_value pcie.irq/sfp1.i2c_irq irqNumber {1}
+
+add_connection pcie.irq sfp1.sfp_irq
+set_connection_parameter_value pcie.irq/sfp1.sfp_irq irqNumber {5}
+
+add_connection pcie_data_tx_multiplex.out pcie.data_tx
+
 add_connection phy_clk.out_clk phy_clk_gauge.probe_clk
 
 add_connection phy_clk.out_clk phy_clk_out.in_clk
@@ -356,7 +504,23 @@ add_connection phy_clk.out_clk xcvr1.phy_clk
 
 add_connection reset_ctrl.reset_out fc0.reset
 
+add_connection reset_ctrl.reset_out fc0_256_rx.in_rst_0
+
+add_connection reset_ctrl.reset_out fc0_pcie_tx.in_clk_reset
+
+add_connection reset_ctrl.reset_out fc0_pcie_tx.out_clk_reset
+
+add_connection reset_ctrl.reset_out fc0_rx.reset
+
 add_connection reset_ctrl.reset_out fc1.reset
+
+add_connection reset_ctrl.reset_out fc1_256_rx.in_rst_0
+
+add_connection reset_ctrl.reset_out fc1_pcie_tx.in_clk_reset
+
+add_connection reset_ctrl.reset_out fc1_pcie_tx.out_clk_reset
+
+add_connection reset_ctrl.reset_out fc1_rx.reset
 
 add_connection reset_ctrl.reset_out fifo_0to1.in_clk_reset
 
@@ -368,9 +532,9 @@ add_connection reset_ctrl.reset_out fifo_1to0.out_clk_reset
 
 add_connection reset_ctrl.reset_out ident.reset
 
-add_connection reset_ctrl.reset_out pcie.bar2_reset
-
 add_connection reset_ctrl.reset_out pcie.mgmt_rst
+
+add_connection reset_ctrl.reset_out pcie_data_tx_multiplex.reset
 
 add_connection reset_ctrl.reset_out phy_clk_gauge.reset
 
@@ -429,6 +593,12 @@ set_connection_parameter_value xcvr0.reconfig_to_xcvr/xcvr_reconfig.ch0_1_to_xcv
 
 add_connection xcvr0.rx_clk fc0.rx_clk
 
+add_connection xcvr0.rx_clk fc0_256_rx.in_clk_0
+
+add_connection xcvr0.rx_clk fc0_pcie_tx.in_clk
+
+add_connection xcvr0.rx_clk fc0_rx.clk
+
 add_connection xcvr0.rx_clk fifo_0to1.in_clk
 
 add_connection xcvr0.tx_clk fc0.tx_clk
@@ -445,6 +615,12 @@ set_connection_parameter_value xcvr1.aligned/led.fcport1_aligned width {0}
 add_connection xcvr1.avrx fc1.avrx
 
 add_connection xcvr1.rx_clk fc1.rx_clk
+
+add_connection xcvr1.rx_clk fc1_256_rx.in_clk_0
+
+add_connection xcvr1.rx_clk fc1_pcie_tx.in_clk
+
+add_connection xcvr1.rx_clk fc1_rx.clk
 
 add_connection xcvr1.rx_clk fifo_1to0.in_clk
 

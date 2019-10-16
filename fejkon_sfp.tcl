@@ -49,6 +49,8 @@ add_interface reset reset sink
 set_interface_property reset EXPORT_OF reset.in_reset
 add_interface sfp conduit end
 set_interface_property sfp EXPORT_OF sfp.sfp
+add_interface sfp_irq interrupt sender
+set_interface_property sfp_irq EXPORT_OF sfp.intr
 
 # connections and connection parameters
 add_connection clk.out_clk i2c.clock

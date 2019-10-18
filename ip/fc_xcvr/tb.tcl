@@ -24,20 +24,29 @@ set_instance_parameter_value alt_xcvr_reconfig_0 {gui_enable_pll} {0}
 set_instance_parameter_value alt_xcvr_reconfig_0 {gui_split_sizes} {}
 set_instance_parameter_value alt_xcvr_reconfig_0 {number_of_reconfig_interfaces} {2}
 
-add_instance clk_0 clock_source 19.1
-set_instance_parameter_value clk_0 {clockFrequency} {50000000.0}
-set_instance_parameter_value clk_0 {clockFrequencyKnown} {1}
-set_instance_parameter_value clk_0 {resetSynchronousEdges} {NONE}
-
 add_instance fc_8g_xcvr_0 fc_8g_xcvr 1.0
+
+add_instance mgmt_clk clock_source 19.1
+set_instance_parameter_value mgmt_clk {clockFrequency} {50000000.0}
+set_instance_parameter_value mgmt_clk {clockFrequencyKnown} {1}
+set_instance_parameter_value mgmt_clk {resetSynchronousEdges} {NONE}
+
+add_instance phy_clk clock_source 19.1
+set_instance_parameter_value phy_clk {clockFrequency} {106250000.0}
+set_instance_parameter_value phy_clk {clockFrequencyKnown} {1}
+set_instance_parameter_value phy_clk {resetSynchronousEdges} {NONE}
 
 # exported interfaces
 add_interface clk clock sink
-set_interface_property clk EXPORT_OF clk_0.clk_in
+set_interface_property clk EXPORT_OF mgmt_clk.clk_in
+add_interface phy_clk clock sink
+set_interface_property phy_clk EXPORT_OF phy_clk.clk_in
+add_interface phy_reset reset sink
+set_interface_property phy_reset EXPORT_OF phy_clk.clk_in_reset
 add_interface reset reset sink
-set_interface_property reset EXPORT_OF clk_0.clk_in_reset
-add_interface xcvr_line conduit end
-set_interface_property xcvr_line EXPORT_OF fc_8g_xcvr_0.line
+set_interface_property reset EXPORT_OF mgmt_clk.clk_in_reset
+add_interface xcvr_mgmt_mm avalon slave
+set_interface_property xcvr_mgmt_mm EXPORT_OF fc_8g_xcvr_0.mgmt_mm
 add_interface xcvr_rx avalon_streaming source
 set_interface_property xcvr_rx EXPORT_OF fc_8g_xcvr_0.rx
 add_interface xcvr_rx_clk clock source
@@ -48,13 +57,36 @@ add_interface xcvr_tx_clk clock source
 set_interface_property xcvr_tx_clk EXPORT_OF fc_8g_xcvr_0.tx_clk
 
 # connections and connection parameters
-add_connection clk_0.clk alt_xcvr_reconfig_0.mgmt_clk_clk
+add_connection alt_xcvr_reconfig_0.reconfig_to_xcvr fc_8g_xcvr_0.reconfig_to_xcvr
+set_connection_parameter_value alt_xcvr_reconfig_0.reconfig_to_xcvr/fc_8g_xcvr_0.reconfig_to_xcvr endPort {}
+set_connection_parameter_value alt_xcvr_reconfig_0.reconfig_to_xcvr/fc_8g_xcvr_0.reconfig_to_xcvr endPortLSB {0}
+set_connection_parameter_value alt_xcvr_reconfig_0.reconfig_to_xcvr/fc_8g_xcvr_0.reconfig_to_xcvr startPort {}
+set_connection_parameter_value alt_xcvr_reconfig_0.reconfig_to_xcvr/fc_8g_xcvr_0.reconfig_to_xcvr startPortLSB {0}
+set_connection_parameter_value alt_xcvr_reconfig_0.reconfig_to_xcvr/fc_8g_xcvr_0.reconfig_to_xcvr width {0}
 
-add_connection clk_0.clk fc_8g_xcvr_0.mgmt_clk
+add_connection fc_8g_xcvr_0.line_td fc_8g_xcvr_0.line_rd
+set_connection_parameter_value fc_8g_xcvr_0.line_td/fc_8g_xcvr_0.line_rd endPort {}
+set_connection_parameter_value fc_8g_xcvr_0.line_td/fc_8g_xcvr_0.line_rd endPortLSB {0}
+set_connection_parameter_value fc_8g_xcvr_0.line_td/fc_8g_xcvr_0.line_rd startPort {}
+set_connection_parameter_value fc_8g_xcvr_0.line_td/fc_8g_xcvr_0.line_rd startPortLSB {0}
+set_connection_parameter_value fc_8g_xcvr_0.line_td/fc_8g_xcvr_0.line_rd width {0}
 
-add_connection clk_0.clk_reset alt_xcvr_reconfig_0.mgmt_rst_reset
+add_connection fc_8g_xcvr_0.reconfig_from_xcvr alt_xcvr_reconfig_0.reconfig_from_xcvr
+set_connection_parameter_value fc_8g_xcvr_0.reconfig_from_xcvr/alt_xcvr_reconfig_0.reconfig_from_xcvr endPort {}
+set_connection_parameter_value fc_8g_xcvr_0.reconfig_from_xcvr/alt_xcvr_reconfig_0.reconfig_from_xcvr endPortLSB {0}
+set_connection_parameter_value fc_8g_xcvr_0.reconfig_from_xcvr/alt_xcvr_reconfig_0.reconfig_from_xcvr startPort {}
+set_connection_parameter_value fc_8g_xcvr_0.reconfig_from_xcvr/alt_xcvr_reconfig_0.reconfig_from_xcvr startPortLSB {0}
+set_connection_parameter_value fc_8g_xcvr_0.reconfig_from_xcvr/alt_xcvr_reconfig_0.reconfig_from_xcvr width {0}
 
-add_connection clk_0.clk_reset fc_8g_xcvr_0.reset
+add_connection mgmt_clk.clk alt_xcvr_reconfig_0.mgmt_clk_clk
+
+add_connection mgmt_clk.clk fc_8g_xcvr_0.mgmt_clk
+
+add_connection mgmt_clk.clk_reset alt_xcvr_reconfig_0.mgmt_rst_reset
+
+add_connection mgmt_clk.clk_reset fc_8g_xcvr_0.reset
+
+add_connection phy_clk.clk fc_8g_xcvr_0.phy_clk
 
 # interconnect requirements
 set_interconnect_requirement {$system} {qsys_mm.clockCrossingAdapter} {HANDSHAKE}

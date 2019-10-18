@@ -1,0 +1,23 @@
+QPATH ?= "$(HOME)/intelFPGA/19.1/quartus"
+
+.DELETE_ON_ERROR:
+
+.PHONY: editor sim
+
+%.qsys: %.tcl
+	$(QPATH)/sopc_builder/bin/qsys-script --script=$<
+
+editor: tb.qsys
+	$(QPATH)/sopc_builder/bin/qsys-edit $<
+
+testbench/tb_tb.qsys: tb.qsys fc_8g_xcvr.sv fc_8g_xcvr_hw.tcl
+	# Force re-compilation in the simulator
+	rm -fr libraries
+	$(QPATH)/sopc_builder/bin/qsys-generate \
+		--testbench=STANDARD \
+		--testbench-simulation=VERILOG \
+		--output-directory=$(PWD) \
+		$<
+
+sim: testbench/tb_tb.qsys
+	vsim -do msim.do

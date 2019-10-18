@@ -18,9 +18,39 @@ module fc_8g_xcvr (
     output wire        rx_clk          //   rx_clk.clk
   );
 
-  // TODO: Auto-generated HDL template
+   fc_phy dut(
+    .phy_mgmt_clk(mgmt_clk),           //                phy_mgmt_clk.clk
+    .phy_mgmt_clk_reset(reset),        //          phy_mgmt_clk_reset.reset
+    .phy_mgmt_address(),               //                    phy_mgmt.address
+    .phy_mgmt_read(),                  //                            .read
+    .phy_mgmt_readdata(),              //                            .readdata
+    .phy_mgmt_waitrequest(),           //                            .waitrequest
+    .phy_mgmt_write(),                 //                            .write
+    .phy_mgmt_writedata(),             //                            .writedata
+    .tx_ready(tx_ready),               //                    tx_ready.export
+    .rx_ready(),                       //                    rx_ready.export
+    .pll_ref_clk(mgmt_clk),            //                 pll_ref_clk.clk
+    .tx_serial_data(),                 //              tx_serial_data.export
+    .pll_locked(pll_locked),           //                  pll_locked.export
+    .rx_serial_data(),                 //              rx_serial_data.export
+    .rx_runningdisp(),                 //              rx_runningdisp.export
+    .rx_disperr(),                     //                  rx_disperr.export
+    .rx_errdetect(),                   //                rx_errdetect.export
+    .rx_patterndetect(),               //            rx_patterndetect.export
+    .rx_syncstatus(),                  //               rx_syncstatus.export
+    .rx_bitslipboundaryselectout(),    // rx_bitslipboundaryselectout.export
+    .tx_clkout0(tx_clk),               //                  tx_clkout0.clk
+    .rx_clkout0(rx_clk),               //                  rx_clkout0.clk
+    .tx_parallel_data0(),              //           tx_parallel_data0.data
+    .tx_datak0(),                      //                   tx_datak0.data
+    .tx_dispval0(),                    //                 tx_dispval0.data
+    .tx_forcedisp0(),                  //               tx_forcedisp0.data
+    .rx_parallel_data0(),              //           rx_parallel_data0.data
+    .rx_datak0(),                      //                   rx_datak0.data
+    .reconfig_from_xcvr(),             //          reconfig_from_xcvr.reconfig_from_xcvr
+    .reconfig_to_xcvr()                //            reconfig_to_xcvr.reconfig_to_xcvr
+  );
 
-  assign tx_ready = 1'b0;
 
   assign rx_valid = 1'b0;
 
@@ -29,9 +59,5 @@ module fc_8g_xcvr (
   assign mm_waitrequest = 1'b0;
 
   assign mm_readdata = 32'b00000000000000000000000000000000;
-
-  assign tx_clk = 1'b0;
-
-  assign rx_clk = 1'b0;
 
 endmodule

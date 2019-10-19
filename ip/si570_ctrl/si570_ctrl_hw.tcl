@@ -53,22 +53,31 @@ add_fileset_file si570_ctrl.v SYSTEM_VERILOG PATH si570_ctrl.sv
 # 
 add_parameter InputClock POSITIVE 50000000 ""
 set_parameter_property InputClock DEFAULT_VALUE 50000000
-set_parameter_property InputClock DISPLAY_NAME InputClock
+set_parameter_property InputClock DISPLAY_NAME {Input Clock}
 set_parameter_property InputClock WIDTH ""
 set_parameter_property InputClock TYPE POSITIVE
 set_parameter_property InputClock UNITS None
 set_parameter_property InputClock ALLOWED_RANGES 1:2147483647
 set_parameter_property InputClock DESCRIPTION ""
 set_parameter_property InputClock AFFECTS_GENERATION false
-add_parameter RecallFrequency POSITIVE 640000000 ""
-set_parameter_property RecallFrequency DEFAULT_VALUE 640000000
-set_parameter_property RecallFrequency DISPLAY_NAME RecallFrequency
+add_parameter RecallFrequency POSITIVE 100000000 ""
+set_parameter_property RecallFrequency DEFAULT_VALUE 100000000
+set_parameter_property RecallFrequency DISPLAY_NAME {Recall Frequency}
 set_parameter_property RecallFrequency WIDTH ""
 set_parameter_property RecallFrequency TYPE POSITIVE
 set_parameter_property RecallFrequency UNITS None
 set_parameter_property RecallFrequency ALLOWED_RANGES 1:2147483647
 set_parameter_property RecallFrequency DESCRIPTION ""
 set_parameter_property RecallFrequency AFFECTS_GENERATION false
+add_parameter I2CAddress POSITIVE 0 ""
+set_parameter_property I2CAddress DEFAULT_VALUE 0
+set_parameter_property I2CAddress DISPLAY_NAME {I2C Address}
+set_parameter_property I2CAddress WIDTH ""
+set_parameter_property I2CAddress TYPE INTEGER
+set_parameter_property I2CAddress UNITS None
+set_parameter_property I2CAddress ALLOWED_RANGES 0:127
+set_parameter_property I2CAddress DESCRIPTION ""
+set_parameter_property I2CAddress AFFECTS_GENERATION false
 
 
 # 

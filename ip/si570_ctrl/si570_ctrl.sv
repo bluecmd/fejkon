@@ -1,7 +1,8 @@
 `timescale 1 ps / 1 ps
 module si570_ctrl #(
     parameter InputClock      = 50000000,
-    parameter RecallFrequency = 640000000
+    parameter RecallFrequency = 100000000,
+    parameter I2CAddress      = 0
   ) (
     input  wire  clk,       //       clk.clk
     input  wire  reset,     //     reset.reset

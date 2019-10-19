@@ -43,33 +43,37 @@ add_instance phy_clk altera_clock_bridge 19.1
 set_instance_parameter_value phy_clk {EXPLICIT_CLOCK_RATE} {106250000.0}
 set_instance_parameter_value phy_clk {NUM_CLOCK_OUTPUTS} {1}
 
-add_instance rstctrl altera_reset_controller 19.1
-set_instance_parameter_value rstctrl {MIN_RST_ASSERTION_TIME} {3}
-set_instance_parameter_value rstctrl {NUM_RESET_INPUTS} {2}
-set_instance_parameter_value rstctrl {OUTPUT_RESET_SYNC_EDGES} {deassert}
-set_instance_parameter_value rstctrl {RESET_REQUEST_PRESENT} {0}
-set_instance_parameter_value rstctrl {RESET_REQ_EARLY_DSRT_TIME} {1}
-set_instance_parameter_value rstctrl {RESET_REQ_WAIT_TIME} {1}
-set_instance_parameter_value rstctrl {SYNC_DEPTH} {2}
-set_instance_parameter_value rstctrl {USE_RESET_REQUEST_IN0} {0}
-set_instance_parameter_value rstctrl {USE_RESET_REQUEST_IN1} {0}
-set_instance_parameter_value rstctrl {USE_RESET_REQUEST_IN10} {0}
-set_instance_parameter_value rstctrl {USE_RESET_REQUEST_IN11} {0}
-set_instance_parameter_value rstctrl {USE_RESET_REQUEST_IN12} {0}
-set_instance_parameter_value rstctrl {USE_RESET_REQUEST_IN13} {0}
-set_instance_parameter_value rstctrl {USE_RESET_REQUEST_IN14} {0}
-set_instance_parameter_value rstctrl {USE_RESET_REQUEST_IN15} {0}
-set_instance_parameter_value rstctrl {USE_RESET_REQUEST_IN2} {0}
-set_instance_parameter_value rstctrl {USE_RESET_REQUEST_IN3} {0}
-set_instance_parameter_value rstctrl {USE_RESET_REQUEST_IN4} {0}
-set_instance_parameter_value rstctrl {USE_RESET_REQUEST_IN5} {0}
-set_instance_parameter_value rstctrl {USE_RESET_REQUEST_IN6} {0}
-set_instance_parameter_value rstctrl {USE_RESET_REQUEST_IN7} {0}
-set_instance_parameter_value rstctrl {USE_RESET_REQUEST_IN8} {0}
-set_instance_parameter_value rstctrl {USE_RESET_REQUEST_IN9} {0}
-set_instance_parameter_value rstctrl {USE_RESET_REQUEST_INPUT} {0}
+add_instance reset_ctrl altera_reset_controller 19.1
+set_instance_parameter_value reset_ctrl {MIN_RST_ASSERTION_TIME} {3}
+set_instance_parameter_value reset_ctrl {NUM_RESET_INPUTS} {3}
+set_instance_parameter_value reset_ctrl {OUTPUT_RESET_SYNC_EDGES} {deassert}
+set_instance_parameter_value reset_ctrl {RESET_REQUEST_PRESENT} {0}
+set_instance_parameter_value reset_ctrl {RESET_REQ_EARLY_DSRT_TIME} {1}
+set_instance_parameter_value reset_ctrl {RESET_REQ_WAIT_TIME} {1}
+set_instance_parameter_value reset_ctrl {SYNC_DEPTH} {2}
+set_instance_parameter_value reset_ctrl {USE_RESET_REQUEST_IN0} {0}
+set_instance_parameter_value reset_ctrl {USE_RESET_REQUEST_IN1} {0}
+set_instance_parameter_value reset_ctrl {USE_RESET_REQUEST_IN10} {0}
+set_instance_parameter_value reset_ctrl {USE_RESET_REQUEST_IN11} {0}
+set_instance_parameter_value reset_ctrl {USE_RESET_REQUEST_IN12} {0}
+set_instance_parameter_value reset_ctrl {USE_RESET_REQUEST_IN13} {0}
+set_instance_parameter_value reset_ctrl {USE_RESET_REQUEST_IN14} {0}
+set_instance_parameter_value reset_ctrl {USE_RESET_REQUEST_IN15} {0}
+set_instance_parameter_value reset_ctrl {USE_RESET_REQUEST_IN2} {0}
+set_instance_parameter_value reset_ctrl {USE_RESET_REQUEST_IN3} {0}
+set_instance_parameter_value reset_ctrl {USE_RESET_REQUEST_IN4} {0}
+set_instance_parameter_value reset_ctrl {USE_RESET_REQUEST_IN5} {0}
+set_instance_parameter_value reset_ctrl {USE_RESET_REQUEST_IN6} {0}
+set_instance_parameter_value reset_ctrl {USE_RESET_REQUEST_IN7} {0}
+set_instance_parameter_value reset_ctrl {USE_RESET_REQUEST_IN8} {0}
+set_instance_parameter_value reset_ctrl {USE_RESET_REQUEST_IN9} {0}
+set_instance_parameter_value reset_ctrl {USE_RESET_REQUEST_INPUT} {0}
 
 add_instance sfp0 fejkon_sfp 1.0
+
+add_instance si570_ctrl si570_ctrl 1.0
+set_instance_parameter_value si570_ctrl {InputClock} {50000000}
+set_instance_parameter_value si570_ctrl {RecallFrequency} {640000000}
 
 add_instance temp intel_temp 1.0
 
@@ -106,6 +110,8 @@ add_interface reset reset sink
 set_interface_property reset EXPORT_OF ext0.clk_in_reset
 add_interface sfp0_sfp conduit end
 set_interface_property sfp0_sfp EXPORT_OF sfp0.sfp
+add_interface si570_i2c conduit end
+set_interface_property si570_i2c EXPORT_OF si570_ctrl.si570_i2c
 
 # connections and connection parameters
 add_connection ext0.clk fcport0.mgmt_clk
@@ -124,9 +130,11 @@ add_connection ext0.clk pcie.read_mem_clk
 
 add_connection ext0.clk pcie.write_mem_clk
 
-add_connection ext0.clk rstctrl.clk
+add_connection ext0.clk reset_ctrl.clk
 
 add_connection ext0.clk sfp0.clk
+
+add_connection ext0.clk si570_ctrl.clk
 
 add_connection ext0.clk temp.clk
 
@@ -134,7 +142,9 @@ add_connection ext0.clk temp_sense.clk
 
 add_connection ext0.clk_reset jtagm.clk_reset
 
-add_connection ext0.clk_reset rstctrl.reset_in0
+add_connection ext0.clk_reset reset_ctrl.reset_in0
+
+add_connection ext0.clk_reset si570_ctrl.reset
 
 add_connection jtagm.master fcport0.mgmt_mm
 set_connection_parameter_value jtagm.master/fcport0.mgmt_mm arbitrationPriority {1}
@@ -171,7 +181,7 @@ set_connection_parameter_value jtagm.master/temp.temp_mm arbitrationPriority {1}
 set_connection_parameter_value jtagm.master/temp.temp_mm baseAddress {0x0010}
 set_connection_parameter_value jtagm.master/temp.temp_mm defaultConnection {0}
 
-add_connection jtagm.master_reset rstctrl.reset_in1
+add_connection jtagm.master_reset reset_ctrl.reset_in1
 
 add_connection pcie.bar2_mm fcport0.mgmt_mm
 set_connection_parameter_value pcie.bar2_mm/fcport0.mgmt_mm arbitrationPriority {1}
@@ -195,19 +205,21 @@ set_connection_parameter_value pcie.bar2_mm/temp.temp_mm defaultConnection {0}
 
 add_connection phy_clk.out_clk fcport0.phy_clk
 
-add_connection rstctrl.reset_out fcport0.reset
+add_connection reset_ctrl.reset_out fcport0.reset
 
-add_connection rstctrl.reset_out ident.reset
+add_connection reset_ctrl.reset_out ident.reset
 
-add_connection rstctrl.reset_out led.reset
+add_connection reset_ctrl.reset_out led.reset
 
-add_connection rstctrl.reset_out pcie.bar2_reset
+add_connection reset_ctrl.reset_out pcie.bar2_reset
 
-add_connection rstctrl.reset_out pcie.mgmt_rst
+add_connection reset_ctrl.reset_out pcie.mgmt_rst
 
-add_connection rstctrl.reset_out sfp0.reset
+add_connection reset_ctrl.reset_out sfp0.reset
 
-add_connection rstctrl.reset_out temp.reset
+add_connection reset_ctrl.reset_out temp.reset
+
+add_connection si570_ctrl.reset_out reset_ctrl.reset_in2
 
 add_connection temp.clr temp_sense.clr
 

@@ -24,4 +24,4 @@ testbench/tb_tb.qsys: tb.qsys fc_8g_xcvr_hw.tcl
 		testbench/tb_tb/simulation/submodules/fc_8g_xcvr.sv
 
 sim: testbench/tb_tb.qsys
-	vsim -do msim.do
+	vsim -msgmode both -displaymsgmode both -do msim.do

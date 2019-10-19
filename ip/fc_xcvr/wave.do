@@ -17,7 +17,7 @@ add wave -noupdate -expand -group XCVR -expand -group {Mgmt Avalon} -label readd
 add wave -noupdate -expand -group XCVR -expand -group {Mgmt Avalon} -label writedata /top_tb/tb/tb_inst/fc_8g_xcvr_0/mm_writedata
 add wave -noupdate -expand -group XCVR -expand -group LVDS -color Yellow -label {Ref. 8G Clock} /top_tb/ref_8g_clk
 add wave -noupdate -expand -group XCVR -expand -group LVDS -label {Ref. 10B} -radix hexadecimal /top_tb/symbol_rr
-add wave -noupdate -expand -group XCVR -expand -group LVDS -label {Ref. Symbol Name} -radix string /top_tb/symbol
+add wave -noupdate -expand -group XCVR -expand -group LVDS -label {Ref. Symbol Name}  /top_tb/symbol
 add wave -noupdate -expand -group XCVR -expand -group LVDS -label rd_p /top_tb/tb/tb_inst/fc_8g_xcvr_0/rd_p
 add wave -noupdate -expand -group XCVR -expand -group LVDS -label td_p /top_tb/tb/tb_inst/fc_8g_xcvr_0/td_p
 add wave -noupdate -expand -group XCVR -label pll_locked /top_tb/tb/tb_inst/fc_8g_xcvr_0/pll_locked

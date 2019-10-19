@@ -48,9 +48,9 @@ set_fileset_property SIM_VERILOG ENABLE_FILE_OVERWRITE_MODE true
 add_fileset_file fc_8g_xcvr.sv VERILOG PATH fc_8g_xcvr.sv
 add_fileset_file fc_phy.v VERILOG PATH ../altera_fc_phy/fc_phy_sim/fc_phy.v
 add_fileset_file altera_xcvr_functions.sv VERILOG PATH ../altera_fc_phy/fc_phy_sim/altera_xcvr_custom_phy/mentor/altera_xcvr_functions.sv MENTOR_SPECIFIC
-add_fileset_file altera_xcvr_custom.sv VERILOG PATH ../altera_fc_phy/fc_phy_sim/altera_xcvr_custom_phy/mentor/altera_xcvr_custom.sv MENTOR_SPECIFIC
-add_fileset_file sv_xcvr_custom_nr.sv VERILOG PATH ../altera_fc_phy/fc_phy_sim/altera_xcvr_custom_phy/mentor/sv_xcvr_custom_nr.sv MENTOR_SPECIFIC
-add_fileset_file sv_xcvr_custom_native.sv VERILOG PATH ../altera_fc_phy/fc_phy_sim/altera_xcvr_custom_phy/mentor/sv_xcvr_custom_native.sv MENTOR_SPECIFIC
+add_fileset_file altera_xcvr_custom.sv VERILOG PATH ../altera_fc_phy/fc_phy_sim/altera_xcvr_custom_phy/altera_xcvr_custom.sv
+add_fileset_file sv_xcvr_custom_nr.sv VERILOG PATH ../altera_fc_phy/fc_phy_sim/altera_xcvr_custom_phy/sv_xcvr_custom_nr.sv
+add_fileset_file sv_xcvr_custom_native.sv VERILOG PATH ../altera_fc_phy/fc_phy_sim/altera_xcvr_custom_phy/sv_xcvr_custom_native.sv
 add_fileset_file alt_xcvr_resync.sv VERILOG PATH ../altera_fc_phy/fc_phy_sim/altera_xcvr_custom_phy/mentor/alt_xcvr_resync.sv MENTOR_SPECIFIC
 add_fileset_file alt_xcvr_csr_common_h.sv VERILOG PATH ../altera_fc_phy/fc_phy_sim/altera_xcvr_custom_phy/mentor/alt_xcvr_csr_common_h.sv MENTOR_SPECIFIC
 add_fileset_file alt_xcvr_csr_common.sv VERILOG PATH ../altera_fc_phy/fc_phy_sim/altera_xcvr_custom_phy/mentor/alt_xcvr_csr_common.sv MENTOR_SPECIFIC

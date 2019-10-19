@@ -59,10 +59,9 @@ module fc_8g_xcvr (
     .reconfig_to_xcvr(reconfig_to_xcvr)        //            reconfig_to_xcvr.reconfig_to_xcvr
   );
 
-  // TODO: Handle running disparity
+  // TODO: Handle running disparity if default is not good enough
 
   // TODO: Send only IDLE (K28.5 D21.4 D21.5 D21.5) for now
-  // TODO: Verify bit order
   //
   // From FC-FS-5, 5.2.7.1 General
   // Characters within 8B/10B Ordered Sets shall be transmitted sequentially

@@ -5,9 +5,11 @@ set USER_DEFINED_ELAB_OPTIONS ""
 set TOP_LEVEL_NAME top_tb
 
 # Keep signals in the testbench
+append USER_DEFINED_ELAB_OPTIONS " -voptargs=+acc=rn+top_tb"
 append USER_DEFINED_ELAB_OPTIONS " -voptargs=+acc=rn+top_tb/tb/tb_inst"
 append USER_DEFINED_ELAB_OPTIONS " -voptargs=+acc=rn+top_tb/tb/tb_inst/fc_8g_xcvr_0"
 append USER_DEFINED_ELAB_OPTIONS " -voptargs=+acc=rn+top_tb/tb/tb_inst/fc_8g_xcvr_0/phy"
+append USER_DEFINED_ELAB_OPTIONS " -voptargs=+acc=rn+sv_xcvr_custom_native"
 
 set compile_all ![file isdirectory "libraries"]
 

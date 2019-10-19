@@ -2,6 +2,7 @@
 `define MGMT_RESET_N tb.tb_inst_reset_bfm
 `define XCVR tb.tb_inst.fc_8g_xcvr_0
 `define PHY tb.tb_inst.fc_8g_xcvr_0.phy
+`define TX tb.tb_inst_xcvr_tx_bfm
 `define PMA_CLK tb.tb_inst.fc_8g_xcvr_0.phy.fc_phy_inst.genblk1.S5.transceiver_core.pll_out_clk
 
 `timescale 1ps / 1fs
@@ -17,7 +18,18 @@ module top_tb();
     wait(`PHY.rx_syncstatus != 0);
     $sformat(message, "%m: Test passed");
     print(VERBOSITY_INFO, message);
+    // Run one 1 us more for more wave data
+    #1000000
     $stop();
+  end
+
+  initial begin
+    wait(`TX.reset == 0);
+    // Send IDLE (K28.5 D21.4 D21.5 D21.5)
+    `TX.init();
+    `TX.set_response_timeout(0);
+    `TX.set_transaction_data({1'b0, 8'hB5, 1'b0, 8'hB5, 1'b0, 8'h95, 1'b1, 8'hBC});
+    repeat (1000) `TX.push_transaction();
   end
 
   initial begin

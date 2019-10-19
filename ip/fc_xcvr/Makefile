@@ -2,7 +2,10 @@ QPATH ?= "$(HOME)/intelFPGA/19.1/quartus"
 
 .DELETE_ON_ERROR:
 
-.PHONY: editor sim
+.PHONY: editor sim lint
+
+lint:
+	verilator --lint-only fc_8g_xcvr.sv fc_phy_bbox.sv
 
 %.qsys: %.tcl
 	$(QPATH)/sopc_builder/bin/qsys-script --script=$<

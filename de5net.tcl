@@ -1545,10 +1545,10 @@ set_location_assignment PIN_AG4 -to fcport0_line_td_lvds                        
 #============================================================
 # set_instance_assignment -name IO_STANDARD "2.5 V" -to CLOCK_SCL
 # set_instance_assignment -name IO_STANDARD "2.5 V" -to CLOCK_SDA
-# set_instance_assignment -name IO_STANDARD "HCSL" -to SFP_REFCLK_p
+set_instance_assignment -name IO_STANDARD "HCSL" -to phy_clk_clk ; # SFP_REFCLK_p
 # set_location_assignment PIN_AE15 -to CLOCK_SCL
 # set_location_assignment PIN_AE16 -to CLOCK_SDA
-# set_location_assignment PIN_AK7 -to SFP_REFCLK_p
+set_location_assignment PIN_AK7 -to phy_clk_clk ; # SFP_REFCLK_p
 
 #============================================================
 # SFP+ 1G Referece Clock

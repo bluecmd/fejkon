@@ -15,6 +15,9 @@ add wave -noupdate -expand -group XCVR -expand -group {Mgmt Avalon} -label read 
 add wave -noupdate -expand -group XCVR -expand -group {Mgmt Avalon} -label write /top_tb/tb/tb_inst/fc_8g_xcvr_0/mm_write
 add wave -noupdate -expand -group XCVR -expand -group {Mgmt Avalon} -label readdata /top_tb/tb/tb_inst/fc_8g_xcvr_0/mm_readdata
 add wave -noupdate -expand -group XCVR -expand -group {Mgmt Avalon} -label writedata /top_tb/tb/tb_inst/fc_8g_xcvr_0/mm_writedata
+add wave -noupdate -expand -group XCVR -expand -group LVDS -color Yellow -label {Ref. 8G Clock} /top_tb/ref_8g_clk
+add wave -noupdate -expand -group XCVR -expand -group LVDS -label {Ref. 10B} -radix hexadecimal /top_tb/symbol_rr
+add wave -noupdate -expand -group XCVR -expand -group LVDS -label {Ref. Symbol Name} -radix string /top_tb/symbol
 add wave -noupdate -expand -group XCVR -expand -group LVDS -label rd_p /top_tb/tb/tb_inst/fc_8g_xcvr_0/rd_p
 add wave -noupdate -expand -group XCVR -expand -group LVDS -label td_p /top_tb/tb/tb_inst/fc_8g_xcvr_0/td_p
 add wave -noupdate -expand -group XCVR -label pll_locked /top_tb/tb/tb_inst/fc_8g_xcvr_0/pll_locked
@@ -28,7 +31,7 @@ add wave -noupdate -expand -group XCVR -expand -group PHY -label rx_parallel_dat
 add wave -noupdate -expand -group XCVR -expand -group PHY -label rx_datak /top_tb/tb/tb_inst/fc_8g_xcvr_0/phy/rx_datak
 add wave -noupdate -expand -group XCVR -expand -group PHY -label rx_ready /top_tb/tb/tb_inst/fc_8g_xcvr_0/phy/rx_ready
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {53628695 ps} 0}
+WaveRestoreCursors {{Cursor 1} {1096515 ps} 0}
 quietly wave cursor active 1
 configure wave -namecolwidth 150
 configure wave -valuecolwidth 100
@@ -44,4 +47,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ns
 update
-WaveRestoreZoom {52775827 ps} {54481563 ps}
+WaveRestoreZoom {1093097 ps} {1099933 ps}

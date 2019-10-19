@@ -63,6 +63,13 @@ module fc_8g_xcvr (
 
   // TODO: Send only IDLE (K28.5 D21.4 D21.5 D21.5) for now
   // TODO: Verify bit order
+  //
+  // From FC-FS-5, 5.2.7.1 General
+  // Characters within 8B/10B Ordered Sets shall be transmitted sequentially
+  // beginning with the special character used to distinguish the Ordered Set
+  // (e.g., K28.5) and proceeding character by character from left to right
+  // within the definition of the Ordered Set until all characters of the
+  // Ordered Set are transmitted.
   assign tx_parallel_data = 32'hB5B595BC;
   assign tx_datak = 4'b0001;
 

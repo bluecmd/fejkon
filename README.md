@@ -188,6 +188,24 @@ recommended.
 
 These are some changes you might need to make to build under Quartus 19.1.
 
+### Si570
+
+The Si570 on board appears to have the following specs:
+
+```
+Part Number: 570FAB000433DG
+Product	Si570
+Description:	Differential/single-ended; I2C programmable XO; 10-1417 MHz
+Frequency A:	100 MHz
+I2C Address (Hex Format):	0
+Format:	LVDS
+Supply Voltage:	2.5 V
+OE Polarity:	OE active high
+Temperature Stability / Total Stability:	50 ppm / 61.5 ppm
+Frequency Range:	10 - 810 MHz
+Operating Temp Range (°C):	-40 to +85
+```
+
 ### MSI limit to 32
 
 For some reason the limit is set to 16 in the stock IP. Change it to 32.

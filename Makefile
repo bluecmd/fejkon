@@ -2,13 +2,16 @@ QPATH ?= "$(HOME)/intelFPGA/19.1/quartus"
 
 .DELETE_ON_ERROR:
 
-.PHONY: all syscon program flash editor sim
+.PHONY: all syscon program flash editor sim ports
 
 all: fejkon.sof
 
 clean:
 	rm -f fejkon.sof
 	rm -fr gen
+
+ports:
+	@cat gen/db/ip/fejkon/fejkon.v | awk '/module/,/\);/'
 
 fejkon.sof: ip/altera_fc_phy/fc_phy.qip fejkon.qsys de5net.sdc de5net.tcl $(wildcard ip/*/*.sv)
 	echo "\`define FEJKON_GIT_HASH 32'h$(shell git describe --long --always --abbrev=8)" > ip/fejkon_identity/version.sv

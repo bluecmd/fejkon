@@ -110,7 +110,4 @@ module fc_8g_xcvr (
   assign rx_data[34:27] = rx_parallel_data[31:24];
   assign rx_data[35] = rx_datak[3];
 
-  assign mm_waitrequest = 1'b0;
-  assign mm_readdata = 32'b00000000000000000000000000000000;
-
 endmodule

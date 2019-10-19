@@ -47,8 +47,8 @@ set_instance_assignment -name IO_STANDARD "2.5 V" -to led_export[0] ; # LED_BRAC
 set_instance_assignment -name IO_STANDARD "2.5 V" -to led_export[1] ; # LED_BRACKET[1]
 set_instance_assignment -name IO_STANDARD "2.5 V" -to led_export[2] ; # LED_BRACKET[2]
 set_instance_assignment -name IO_STANDARD "2.5 V" -to led_export[3] ; # LED_BRACKET[3]
-set_instance_assignment -name IO_STANDARD "2.5 V" -to fcport0_line_td_p ; # LED_RJ45_L
-set_instance_assignment -name IO_STANDARD "2.5 V" -to fcport0_line_rd_p ; # LED_RJ45_R
+# set_instance_assignment -name IO_STANDARD "2.5 V" -to LED_RJ45_L
+# set_instance_assignment -name IO_STANDARD "2.5 V" -to LED_RJ45_R
 # set_location_assignment PIN_AW37 -to LED[0]
 # set_location_assignment PIN_AV37 -to LED[1]
 # set_location_assignment PIN_BB36 -to LED[2]
@@ -57,8 +57,8 @@ set_location_assignment PIN_AH15 -to led_export[0] ; # LED_BRACKET[0]
 set_location_assignment PIN_AH13 -to led_export[1] ; # LED_BRACKET[1]
 set_location_assignment PIN_AJ13 -to led_export[2] ; # LED_BRACKET[2]
 set_location_assignment PIN_AJ14 -to led_export[3] ; # LED_BRACKET[3]
-set_location_assignment PIN_AG15 -to fcport0_line_td_p ; # LED_RJ45_L
-set_location_assignment PIN_AG16 -to fcport0_line_rd_p ; # LED_RJ45_R
+# set_location_assignment PIN_AG15 -to LED_RJ45_L
+# set_location_assignment PIN_AG16 -to LED_RJ45_R
 
 #============================================================
 # BUTTON x 4 and CPU_RESET_n
@@ -1453,20 +1453,20 @@ set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp0_sfp_scl              
 set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp0_sfp_sda                   ; # SFPA_MOD2_SDA
 set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp0_sfp_ratesel[0]            ; # SFPA_RATESEL[0]
 set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp0_sfp_ratesel[1]            ; # SFPA_RATESEL[1]
-# set_instance_assignment -name IO_STANDARD "1.5-V PCML" -to fcport0_xcvr_line_rx_lvds     ; # SFPA_RX_p
+set_instance_assignment -name IO_STANDARD "1.5-V PCML" -to fcport0_line_rd_lvds      ; # SFPA_RX_p
 set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp0_sfp_txdis                 ; # SFPA_TXDISABLE
 set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp0_sfp_txfail                ; # SFPA_TXFAULT
-# set_instance_assignment -name IO_STANDARD "1.5-V PCML" -to fcport0_xcvr_line_tx_lvds     ; # SFPA_TX_p
+set_instance_assignment -name IO_STANDARD "1.5-V PCML" -to fcport0_line_td_lvds      ; # SFPA_TX_p
 set_location_assignment PIN_F22 -to sfp0_sfp_los                                     ; # SFPA_LOS
 set_location_assignment PIN_E21 -to sfp0_sfp_prsnt_n                                 ; # SFPA_MOD0_PRSNT_n
 set_location_assignment PIN_B20 -to sfp0_sfp_scl                                     ; # SFPA_MOD1_SCL
 set_location_assignment PIN_A20 -to sfp0_sfp_sda                                     ; # SFPA_MOD2_SDA
 set_location_assignment PIN_E20 -to sfp0_sfp_ratesel[0]                              ; # SFPA_RATESEL[0]
 set_location_assignment PIN_G22 -to sfp0_sfp_ratesel[1]                              ; # SFPA_RATESEL[1]
-# set_location_assignment PIN_AK2 -to fcport0_xcvr_line_rx_lvds                      ; # SFPA_RX_p
+set_location_assignment PIN_AK2 -to fcport0_line_rd_lvds                             ; # SFPA_RX_p
 set_location_assignment PIN_B22 -to sfp0_sfp_txdis                                   ; # SFPA_TXDISABLE
 set_location_assignment PIN_A22 -to sfp0_sfp_txfail                                  ; # SFPA_TXFAULT
-# set_location_assignment PIN_AG4 -to fcport0_xcvr_line_tx_lvds                      ; # SFPA_TX_p
+set_location_assignment PIN_AG4 -to fcport0_line_td_lvds                             ; # SFPA_TX_p
 
 #============================================================
 # SFP+ B

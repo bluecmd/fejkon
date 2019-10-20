@@ -73,8 +73,8 @@ add_instance sfp0 fejkon_sfp 1.0
 
 add_instance si570_ctrl si570_ctrl 1.0
 set_instance_parameter_value si570_ctrl {I2CAddress} {0}
-set_instance_parameter_value si570_ctrl {InputClock} {50000000}
 set_instance_parameter_value si570_ctrl {RecallFrequency} {100000000}
+set_instance_parameter_value si570_ctrl {TargetFrequency} {106250000}
 
 add_instance temp intel_temp 1.0
 

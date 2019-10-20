@@ -2,6 +2,7 @@
 module si570_ctrl #(
     parameter InputClock      = 50000000,
     parameter RecallFrequency = 100000000,
+    parameter TargetFrequency = 125000000,
     parameter I2CAddress      = 0
   ) (
     input  wire  clk,       //       clk.clk
@@ -25,12 +26,12 @@ module si570_ctrl #(
   i2c_master i2c (
     .clk(clk),
     .rst(reset),
-    .cmd_address(),
-    .cmd_start(),
-    .cmd_read(),
-    .cmd_write(),
+    .cmd_address(I2CAddress[6:0]),
+    .cmd_start(1'b1),
+    .cmd_read(1'b1),
+    .cmd_write(1'b0),
     .cmd_write_multiple(1'b0),
-    .cmd_stop(),
+    .cmd_stop(1'b0),
     .cmd_valid(1'b0),
     .cmd_ready(),
     .data_in(),

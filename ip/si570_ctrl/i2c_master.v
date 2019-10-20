@@ -76,7 +76,7 @@ module i2c_master (
     /*
      * Configuration
      */
-    input  wire [25:0] prescale,
+    input  wire [31:0] prescale,
     input  wire        stop_on_idle
 );
 
@@ -236,7 +236,7 @@ reg mode_read_reg = 1'b0, mode_read_next;
 reg mode_write_multiple_reg = 1'b0, mode_write_multiple_next;
 reg mode_stop_reg = 1'b0, mode_stop_next;
 
-reg [25:0] delay_reg = 26'd0, delay_next;
+reg [31:0] delay_reg = 32'd0, delay_next;
 reg delay_scl_reg = 1'b0, delay_scl_next;
 reg delay_sda_reg = 1'b0, delay_sda_next;
 
@@ -619,7 +619,7 @@ always @* begin
         scl_o_next = 1'b1;
         delay_scl_next = 1'b0;
         delay_sda_next = 1'b0;
-        delay_next = 26'b0;
+        delay_next = 32'b0;
         phy_state_next = PHY_STATE_IDLE;
     end else if (delay_scl_reg) begin
         // wait for SCL to match command
@@ -836,7 +836,7 @@ always @(posedge clk) begin
     if (rst) begin
         state_reg <= STATE_IDLE;
         phy_state_reg <= PHY_STATE_IDLE;
-        delay_reg <= 26'd0;
+        delay_reg <= 32'd0;
         delay_scl_reg <= 1'b0;
         delay_sda_reg <= 1'b0;
         cmd_ready_reg <= 1'b0;

@@ -2,6 +2,8 @@
 
 Language: SystemVerilog
 
+Status: See https://github.com/bluecmd/fejkon/issues/8
+
 Supported platform tools: Quartus Platform Designer (Qsys)
 
 This IP core handles reset and configuration of an Si570 oscillator.

@@ -29,10 +29,8 @@ module top_tb;
 
   initial begin
     // Wait 12 ms for the measurement to be done
-    // TODO(bluecmd): First iteration seems to be off by some decimal,
-    // investigate why
     #12000000
-    assert(data == 'd106383500);
+    assert(data == 'd106383400);
     $display("If no asserts triggered, then eveything is good!");
     #1000
     $stop();

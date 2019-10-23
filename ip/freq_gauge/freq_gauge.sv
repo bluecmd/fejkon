@@ -19,9 +19,9 @@ module freq_gauge #(
   int countdown = MeasurementTime;
 
   logic measure = 1;
-  logic measure_cdc1;
-  logic measure_cdc2;
-  logic probe_measure;
+  logic measure_cdc1 = 0;
+  logic measure_cdc2 = 0;
+  logic probe_measure = 0;
 
   logic process;
   assign process = ~measure;
@@ -30,12 +30,13 @@ module freq_gauge #(
   logic [31:0] counter_cdc1;
   logic [31:0] counter_cdc2;
   logic [31:0] xfered_counter;
-  logic [31:0] last_count;
+  logic [31:0] last_count = -1;
 
   always @(posedge ref_clk) begin
     if (reset) begin
       countdown <= MeasurementTime;
       measure <= 1;
+      last_count <= -1;
     end else begin
       if (countdown == 0) begin
         measure <= ~measure;

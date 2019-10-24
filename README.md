@@ -234,6 +234,30 @@ sudo mkdir -p /tools/perl/5.28.1/linux64/
 sudo ln -sf /home/bluecmd/intelFPGA/19.1/quartus/linux64/perl/lib /tools/perl/5.28.1/linux64/
 ```
 
+### ModelSim Starter Edition
+
+If you're using Intel's ModelSim Starter Edition you might run into issues like the one below:
+
+```
+bluecmd]$ make sim
+mkdir -p libraries
+(cd libraries; vlib work)
+vlog -sv *.sv *.v
+Model Technology ModelSim - Intel FPGA Edition vlog 2019.2 Compiler 2019.04 Apr 17 2019
+Start time: 13:09:44 on Oct 24,2019
+vlog -sv i2c_util.sv si570_ctrl.sv top_tb.sv i2c_master.v 
+** Error: (vlog-66) Execution of vlib failed. Please check the error log for more details.
+sh: /home/bluecmd/intelFPGA_pro/19.3/modelsim_ase/linuxpe/vlib: No such file or directory
+End time: 13:09:44 on Oct 24,2019, Elapsed time: 0:00:00
+Errors: 1, Warnings: 0
+```
+
+To fix that, run:
+
+```
+ln -sf ${HOME}/intelFPGA_pro/19.3/modelsim_ase/linuxaloem ${HOME}/intelFPGA_pro/19.3/modelsim_ase/linuxpe 
+```
+
 ## Possible future work
 
  * Integrate the MAX1619 sensor

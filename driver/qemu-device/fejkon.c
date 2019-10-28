@@ -108,6 +108,10 @@ static uint64_t fejkon_bar2_read(void *opaque, hwaddr addr, unsigned size)
       /* Temperature */
       val = fejkon_temperature();
       break;
+    case 0x20:
+      /* PHY frequency, report running close to 106.25 MHz */
+      val = htonl(106249998);
+      break;
     case 0x1000:
       /* Port status, SFP present and link OK */
       val = 0x1;

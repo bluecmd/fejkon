@@ -98,7 +98,28 @@ func TestDumpDevices(t *testing.T) {
 	log.Printf("devices:\n%v", string(out))
 }
 
-func TestTestTempSensor(t *testing.T) {
+func TestPHYFrequency(t *testing.T) {
+	m, err := filepath.Glob("/sys/bus/pci/drivers/fejkon/*/phy_freq")
+	if err != nil {
+		t.Fatalf("glob: %v", err)
+	}
+	if len(m) != 1 {
+		t.Fatalf("expected exactly one match, got %v", m)
+	}
+	freq, err := ioutil.ReadFile(m[0])
+	if err != nil {
+		t.Fatalf("freq ReadFile: %v", err)
+	}
+	f, err := strconv.Atoi(strings.TrimSpace(string(freq)))
+	if err != nil {
+		t.Fatalf("freq strconv: %v", err)
+	}
+	if f < 106249900 || f > 106250100 {
+		t.Errorf("expected 106249900 < f < 106250100, got f = %v", f)
+	}
+}
+
+func TestTempSensor(t *testing.T) {
 	temp1, err := ioutil.ReadFile("/sys/class/hwmon/hwmon0/temp1_input")
 	if err != nil {
 		t.Fatalf("temp1_input: %v", err)
@@ -110,7 +131,7 @@ func TestTestTempSensor(t *testing.T) {
 		t.Fatalf("temp1_input strconv: %v", err)
 	}
 	if (c < 50 || c > 80) {
-		t.Fatalf("temp1 expected to be between 50 and 80, got %d", c)
+		t.Errorf("temp1 expected to be between 50 and 80, got %d", c)
 	}
 }
 
@@ -128,7 +149,7 @@ func TestDumpI2C(t *testing.T) {
 	}
 
 	if len(fi2c) != 2 {
-		t.Fatalf("Expected 2 I2C buses, got %v", fi2c)
+		t.Errorf("Expected 2 I2C buses, got %v", fi2c)
 	}
 }
 
@@ -153,11 +174,11 @@ func TestLOSIsNoCarrier(t *testing.T) {
 	// is supposed to be, for now accept the default of OPER_UNKNOWN which seems
 	// common enough on other interfaces.
 	if fc0.Attrs().OperState != netlink.OperUnknown {
-		t.Fatalf("fc0 expected to be unknown, is %s", fc0.Attrs().OperState)
+		t.Errorf("fc0 expected to be unknown, is %s", fc0.Attrs().OperState)
 	}
 	fc1, _ := netlink.LinkByName("fc1")
 	if fc1.Attrs().OperState != netlink.OperDown {
-		t.Fatalf("fc1 expected to be down, is %s", fc1.Attrs().OperState)
+		t.Errorf("fc1 expected to be down, is %s", fc1.Attrs().OperState)
 	}
 }
 

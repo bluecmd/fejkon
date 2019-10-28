@@ -61,6 +61,7 @@ Accesses need to be 4 byte wide.
 | 0x00003 | 1     | Card   | Port options  | Number of ports              |
 | 0x00004 | 4     | Card   | Git hash      | Git hash of HDL built        |
 | 0x00010 | 1     | Card   | Temprature    | FPGA Core Temperature (1)    |
+| 0x00020 | 4     | Card   | Freq. Gauge   | PHY effective clock gauge    |
 | 0x01000 | 1     | Port 0 | SFP Status    | SFP Status Word (2)          |
 | 0x01040 | 64    | Port 0 | SFP Port I2C  | SFP I2C core (3)             |
 | 0x02x00 | ...   | Port 1 | SFP Port      |                              |

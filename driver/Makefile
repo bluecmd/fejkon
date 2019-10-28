@@ -3,6 +3,7 @@
 KERNEL=5.3.1
 
 test: build-qemu/x86_64-softmmu/qemu-system-x86_64 linux/arch/x86/boot/bzImage root/sbin/init root/lib/modules/$(KERNEL)/extra/fejkon.ko
+	# The tail -n+9 is to skip the SeaBIOS clearing of the screen
 	build-qemu/x86_64-softmmu/qemu-system-x86_64 \
 		-nographic -m 1G \
 		-machine q35,kernel-irqchip=split \
@@ -11,7 +12,8 @@ test: build-qemu/x86_64-softmmu/qemu-system-x86_64 linux/arch/x86/boot/bzImage r
 		-device virtio-9p-pci,fsdev=root,mount_tag=/dev/root \
 		-kernel linux/arch/x86/boot/bzImage \
 		-device fejkon \
-		-append "root=hostfs rootfstype=9p rootflags=trans=virtio noinitrd console=ttyS0 loglevel=8"
+		-append "earlyprintk=serial root=hostfs rootfstype=9p rootflags=trans=virtio noinitrd console=ttyS0 loglevel=8" \
+		| tail -n+9
 
 qemu:
 	git clone https://github.com/qemu/qemu

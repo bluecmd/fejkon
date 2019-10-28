@@ -186,8 +186,18 @@ static const struct hwmon_chip_info fejkon_hwmon_chip_info = {
   .info = fejkon_hwmon_info,
 };
 
+static ssize_t phy_freq_show(struct device *dev, struct device_attribute *attr,
+    char *buf)
+{
+  struct fejkon_card *card = pci_get_drvdata(to_pci_dev(dev));
+  return sprintf(buf, "%u\n", ioread32be(card->bar2 + 0x20));
+}
+
+static DEVICE_ATTR_RO(phy_freq);
+
 static int probe(struct pci_dev *pcidev, const struct pci_device_id *id)
 {
+  unsigned int phy_clock;
   unsigned int version;
   unsigned int githash;
   int ret;
@@ -240,6 +250,10 @@ static int probe(struct pci_dev *pcidev, const struct pci_device_id *id)
   dev_notice(&pcidev->dev, "found card with version %d (%08x), ports = %d\n",
       version, githash, ports);
 
+  phy_clock = ioread32be(card->bar2 + 0x20);
+  dev_notice(&pcidev->dev, "PHY clock running at %d.%03d MHz",
+      phy_clock / 1000000, (phy_clock / 1000) % 1000);
+
   irqs = 2 + 4 * ports;
   ret = pci_alloc_irq_vectors(pcidev, irqs, irqs, PCI_IRQ_ALL_TYPES);
   if (ret < 0) {
@@ -248,7 +262,6 @@ static int probe(struct pci_dev *pcidev, const struct pci_device_id *id)
         "MSI interrupts support enabled for your platform?");
     goto error;
   }
-  dev_notice(&pcidev->dev, "pci_alloc_irq_vectors: %d", ret);
 
   irq = pci_irq_vector(pcidev, 0);
   ret = request_irq(irq, card_irq, IRQF_SHARED, KBUILD_MODNAME, card);
@@ -262,6 +275,12 @@ static int probe(struct pci_dev *pcidev, const struct pci_device_id *id)
   if (IS_ERR(hwm)) {
     dev_err(&pcidev->dev, "devm_hwmon_device_register_with_info\n");
     return PTR_ERR(hwm);
+  }
+
+  ret = device_create_file(&pcidev->dev, &dev_attr_phy_freq);
+  if (ret) {
+    dev_err(&pcidev->dev, "unable to create sysfs file\n");
+    goto error;
   }
 
   /* card initialized, register netdev for ports */
@@ -323,7 +342,6 @@ static int probe(struct pci_dev *pcidev, const struct pci_device_id *id)
   }
 
   pci_set_drvdata(pcidev, card);
-
   return 0;
 error:
   pci_release_region(pcidev, 2 /* bar */);
@@ -351,6 +369,7 @@ static void remove(struct pci_dev *dev)
     device_unregister(port->dev);
   }
   rtnl_unlock();
+  device_remove_file(&dev->dev, &dev_attr_phy_freq);
   free_irq(pci_irq_vector(dev, 0), card);
   pci_free_irq_vectors(dev);
   pci_release_region(dev, 2 /* bar */);

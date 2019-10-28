@@ -26,10 +26,12 @@ add wave -noupdate -expand -group {Si570 Parameters} -label new_n1 -radix unsign
 add wave -noupdate -expand -group {Si570 Parameters} -label new_rfreq -radix hexadecimal -radixshowbase 0 /top_tb/dut/new_rfreq
 add wave -noupdate -expand -group {Si570 Parameters} -label new_fdco -radix unsigned -radixshowbase 0 /top_tb/dut/new_fdco
 add wave -noupdate -expand -group {Si570 Parameters} -label config_valid /top_tb/dut/config_valid
-add wave -noupdate -expand -group {Si570 Parameters} -label fxtal_stable /top_tb/dut/fxtal_stable
+add wave -noupdate -expand -group {Si570 Parameters} -label fxtal_valid /top_tb/dut/fxtal_valid
+add wave -noupdate -expand -group {Si570 Parameters} -label new_rfreq_valid /top_tb/dut/new_rfreq_valid
+add wave -noupdate -expand -group {Si570 Parameters} -label div_delay_cntr /top_tb/dut/div_delay_cntr
 add wave -noupdate -expand -group {Si570 Parameters} -label f_XTAL -radix unsigned -radixshowbase 0 /top_tb/dut/fxtal
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {1.4 ms} 0}
+WaveRestoreCursors {{Cursor 1} {1400000000 ps} 0}
 quietly wave cursor active 1
 configure wave -namecolwidth 150
 configure wave -valuecolwidth 190
@@ -43,6 +45,6 @@ configure wave -gridoffset 0
 configure wave -gridperiod 1
 configure wave -griddelta 40
 configure wave -timeline 0
-configure wave -timelineunits ns
+configure wave -timelineunits us
 update
-WaveRestoreZoom {0 ps} {1.6 ms}
+WaveRestoreZoom {0 ps} {1600 us}

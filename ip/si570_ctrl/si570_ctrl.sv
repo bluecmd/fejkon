@@ -89,7 +89,6 @@ module si570_ctrl #(
 
   always @* begin
     orig_fdco = RecallFrequency * orig_hs_div * orig_n1;
-    fxtal = {orig_fdco, 28'b0}  / {24'b0, orig_rfreq};
   end
 
   logic [3:0]  new_hs_div = 4;
@@ -117,7 +116,10 @@ module si570_ctrl #(
 
   assign reset_out = reset_out_r;
 
-  logic fxtal_stable = 0;
+  logic calc_fxtal = 0;
+  logic fxtal_valid = 0;
+  logic calc_new_rfreq = 0;
+  logic new_rfreq_valid = 0;
   logic config_valid;
   logic fdco_too_low;
   logic fdco_too_high;
@@ -126,13 +128,13 @@ module si570_ctrl #(
   assign new_fdco = new_hs_div * new_n1 * TargetFrequency;
   assign fdco_too_low = new_fdco < 34'd4850000000;
   assign fdco_too_high = new_fdco > 34'd5670000000;
-  assign config_valid = ~fdco_too_high && ~fdco_too_low;
+  assign config_valid = fxtal_valid && ~fdco_too_high && ~fdco_too_low;
 
   always @(posedge clk) begin
     if (reset) begin
       new_hs_div <= 4;
       new_n1 <= 0;
-    end else if (fxtal_stable && ~config_valid) begin
+    end else if (fxtal_valid && ~config_valid) begin
       // Scan through possible configurations until a good one is found
       new_n1 <= new_n1 + 1;
       if (new_n1 == 7'd127 || fdco_too_high) begin
@@ -149,8 +151,50 @@ module si570_ctrl #(
     end
   end
 
-  always @* begin
-    new_rfreq = {new_fdco, 28'b0} / fxtal;
+  logic [61:0] fxtal_div_q;
+
+  divider fxtal_div (
+    .clock(clk),
+    .numer({orig_fdco, 28'b0}),
+    .denom({24'b0, orig_rfreq}),
+    .quotient(fxtal_div_q),
+    .remain()
+  );
+
+  logic [61:0] new_rfreq_div_q;
+
+  divider new_rfreq_div (
+    .clock(clk),
+    .numer({new_fdco, 28'b0}),
+    .denom(fxtal),
+    .quotient(new_rfreq_div_q),
+    .remain()
+  );
+
+  int div_delay_cntr = 0;
+  always @(posedge clk) begin
+    // Handle the division latency of 62 clock cycles
+    if (reset || startup) begin
+      fxtal_valid <= 0;
+      new_rfreq_valid <= 0;
+      div_delay_cntr <= 0;
+    end else if (calc_new_rfreq) begin
+      if (~new_rfreq_valid)
+        div_delay_cntr <= div_delay_cntr + 1;
+      if (div_delay_cntr > 61) begin
+        new_rfreq <= new_rfreq_div_q;
+        new_rfreq_valid <= 1;
+        div_delay_cntr <= 0;
+      end
+    end else if (calc_fxtal) begin
+      if (~fxtal_valid)
+        div_delay_cntr <= div_delay_cntr + 1;
+      if (div_delay_cntr > 61) begin
+        fxtal <= fxtal_div_q;
+        fxtal_valid <= 1;
+        div_delay_cntr <= 0;
+      end
+    end
   end
 
   int instr = 0, instr_next;
@@ -159,6 +203,8 @@ module si570_ctrl #(
     // Advance if I2C is marked as done and we are not computing configuration
     if (instr == 7)
       instr_next = config_valid ? instr + 1 : instr;
+    else if (instr == 8)
+      instr_next = new_rfreq_valid ? instr + 1 : instr;
     else
       instr_next = bus.done ? instr + 1 : instr;
   end
@@ -167,10 +213,13 @@ module si570_ctrl #(
     if (reset || startup) begin
       instr <= 0;
       startup <= 0;
-      fxtal_stable <= 0;
+      calc_fxtal <= 0;
+      calc_new_rfreq <= 0;
       reset_out_r <= 1'b1;
       si570_bus_reset(bus);
     end else begin
+      calc_fxtal <= 0;
+      calc_new_rfreq <= 0;
       case (instr_next)
         0: si570_bus_write(bus, 135, 8'h01); // Recall factory settings
         1: {raw_hs_div, raw_n1[6:2]} <= si570_bus_read(bus, 7);
@@ -179,16 +228,17 @@ module si570_ctrl #(
         4: raw_rfreq[23:16] <= si570_bus_read(bus, 10);
         5: raw_rfreq[15:8]  <= si570_bus_read(bus, 11);
         6: raw_rfreq[7:0]   <= si570_bus_read(bus, 12);
-        7: fxtal_stable <= 1;
-        8: si570_bus_write(bus, 137, 8'h10); // Freeze DCO
-        9: si570_bus_write(bus, 7, {out_hs_div, out_n1[6:2]});
-        10: si570_bus_write(bus, 8, {out_n1[1:0], out_rfreq[37:32]});
-        11: si570_bus_write(bus, 9, out_rfreq[31:24]);
-        12: si570_bus_write(bus, 10, out_rfreq[23:16]);
-        13: si570_bus_write(bus, 11, out_rfreq[15:8]);
-        14: si570_bus_write(bus, 12, out_rfreq[7:0]);
-        15: si570_bus_write(bus, 137, 8'h0); // Unfreeze DCO
-        16: si570_bus_write(bus, 135, 8'h40); // Assert NewFreq
+        7: calc_fxtal <= 1;
+        8: calc_new_rfreq <= 1;
+        9: si570_bus_write(bus, 137, 8'h10); // Freeze DCO
+        10: si570_bus_write(bus, 7, {out_hs_div, out_n1[6:2]});
+        11: si570_bus_write(bus, 8, {out_n1[1:0], out_rfreq[37:32]});
+        12: si570_bus_write(bus, 9, out_rfreq[31:24]);
+        13: si570_bus_write(bus, 10, out_rfreq[23:16]);
+        14: si570_bus_write(bus, 11, out_rfreq[15:8]);
+        15: si570_bus_write(bus, 12, out_rfreq[7:0]);
+        16: si570_bus_write(bus, 137, 8'h0); // Unfreeze DCO
+        17: si570_bus_write(bus, 135, 8'h40); // Assert NewFreq
         default: begin
           reset_out_r <= 1'b0;
           si570_bus_reset(bus);

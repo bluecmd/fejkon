@@ -42,7 +42,7 @@ module top_tb;
 
   initial begin
     // Values taken from example from datasheet
-    wait(dut.fxtal_stable);
+    wait(dut.fxtal_valid);
     assert(dut.orig_hs_div == 'd4);
     assert(dut.orig_n1 == 'd8);
     assert(dut.orig_rfreq == 'h2bc011eb8);
@@ -50,6 +50,8 @@ module top_tb;
     #20
     assert(dut.new_hs_div == 'd4);
     assert(dut.new_n1 == 'd8);
+    wait(dut.new_rfreq_valid);
+    #20
     assert(dut.new_rfreq == 'h2d1e12788);
     wait(dut.reset_out == 0);
     assert(regs[7] == 'h01);

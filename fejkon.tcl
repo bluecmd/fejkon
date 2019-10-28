@@ -43,6 +43,8 @@ add_instance phy_clk altera_clock_bridge 19.1
 set_instance_parameter_value phy_clk {EXPLICIT_CLOCK_RATE} {106250000.0}
 set_instance_parameter_value phy_clk {NUM_CLOCK_OUTPUTS} {1}
 
+add_instance phy_clk_gauge freq_gauge 1.0
+
 add_instance reset_ctrl altera_reset_controller 19.1
 set_instance_parameter_value reset_ctrl {MIN_RST_ASSERTION_TIME} {3}
 set_instance_parameter_value reset_ctrl {NUM_RESET_INPUTS} {3}
@@ -131,6 +133,8 @@ add_connection ext0.clk pcie.read_mem_clk
 
 add_connection ext0.clk pcie.write_mem_clk
 
+add_connection ext0.clk phy_clk_gauge.ref_clk
+
 add_connection ext0.clk reset_ctrl.clk
 
 add_connection ext0.clk sfp0.clk
@@ -172,6 +176,11 @@ set_connection_parameter_value jtagm.master/pcie.write_mem_mm arbitrationPriorit
 set_connection_parameter_value jtagm.master/pcie.write_mem_mm baseAddress {0x00c00000}
 set_connection_parameter_value jtagm.master/pcie.write_mem_mm defaultConnection {0}
 
+add_connection jtagm.master phy_clk_gauge.mm
+set_connection_parameter_value jtagm.master/phy_clk_gauge.mm arbitrationPriority {1}
+set_connection_parameter_value jtagm.master/phy_clk_gauge.mm baseAddress {0x0020}
+set_connection_parameter_value jtagm.master/phy_clk_gauge.mm defaultConnection {0}
+
 add_connection jtagm.master sfp0.mm
 set_connection_parameter_value jtagm.master/sfp0.mm arbitrationPriority {1}
 set_connection_parameter_value jtagm.master/sfp0.mm baseAddress {0x1000}
@@ -194,6 +203,11 @@ set_connection_parameter_value pcie.bar2_mm/ident.mm arbitrationPriority {1}
 set_connection_parameter_value pcie.bar2_mm/ident.mm baseAddress {0x0000}
 set_connection_parameter_value pcie.bar2_mm/ident.mm defaultConnection {0}
 
+add_connection pcie.bar2_mm phy_clk_gauge.mm
+set_connection_parameter_value pcie.bar2_mm/phy_clk_gauge.mm arbitrationPriority {1}
+set_connection_parameter_value pcie.bar2_mm/phy_clk_gauge.mm baseAddress {0x0020}
+set_connection_parameter_value pcie.bar2_mm/phy_clk_gauge.mm defaultConnection {0}
+
 add_connection pcie.bar2_mm sfp0.mm
 set_connection_parameter_value pcie.bar2_mm/sfp0.mm arbitrationPriority {1}
 set_connection_parameter_value pcie.bar2_mm/sfp0.mm baseAddress {0x1000}
@@ -206,6 +220,8 @@ set_connection_parameter_value pcie.bar2_mm/temp.temp_mm defaultConnection {0}
 
 add_connection phy_clk.out_clk fcport0.phy_clk
 
+add_connection phy_clk.out_clk phy_clk_gauge.probe_clk
+
 add_connection reset_ctrl.reset_out fcport0.reset
 
 add_connection reset_ctrl.reset_out ident.reset
@@ -215,6 +231,8 @@ add_connection reset_ctrl.reset_out led.reset
 add_connection reset_ctrl.reset_out pcie.bar2_reset
 
 add_connection reset_ctrl.reset_out pcie.mgmt_rst
+
+add_connection reset_ctrl.reset_out phy_clk_gauge.reset
 
 add_connection reset_ctrl.reset_out sfp0.reset
 

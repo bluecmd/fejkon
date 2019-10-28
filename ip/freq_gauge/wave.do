@@ -11,7 +11,7 @@ add wave -noupdate -expand -group CDC -label {Measure #1} /top_tb/dut/measure_cd
 add wave -noupdate -expand -group CDC -label {Measure #2} /top_tb/dut/measure_cdc2
 add wave -noupdate -expand -group CDC -label {Measure #3} /top_tb/dut/probe_measure
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {11 ms} 0}
+WaveRestoreCursors {{Cursor 1} {11000000000 ps} 0}
 quietly wave cursor active 1
 configure wave -namecolwidth 150
 configure wave -valuecolwidth 100
@@ -25,6 +25,6 @@ configure wave -gridoffset 0
 configure wave -gridperiod 1
 configure wave -griddelta 40
 configure wave -timeline 0
-configure wave -timelineunits ns
+configure wave -timelineunits ms
 update
-WaveRestoreZoom {0 ps} {12 ms}
+WaveRestoreZoom {601 us} {12601 us}

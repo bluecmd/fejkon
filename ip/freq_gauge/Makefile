@@ -10,3 +10,6 @@ work: $(wildcard *.sv)
 
 sim: work
 	vsim -msgmode both -displaymsgmode both -do msim.do
+
+test: work
+	vsim -c -do msim.do

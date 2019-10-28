@@ -42,6 +42,7 @@ set_fileset_property QUARTUS_SYNTH ENABLE_FILE_OVERWRITE_MODE true
 add_fileset_file si570_ctrl.sv SYSTEM_VERILOG PATH si570_ctrl.sv TOP_LEVEL_FILE
 add_fileset_file i2c_master.v VERILOG PATH i2c_master.v
 add_fileset_file i2c_util.sv SYSTEM_VERILOG PATH i2c_util.sv
+add_fileset_file divider_intel.v VERILOG PATH divider_intel.v
 
 add_fileset SIM_VERILOG SIM_VERILOG "" ""
 set_fileset_property SIM_VERILOG TOP_LEVEL si570_ctrl
@@ -50,6 +51,7 @@ set_fileset_property SIM_VERILOG ENABLE_FILE_OVERWRITE_MODE true
 add_fileset_file si570_ctrl.sv SYSTEM_VERILOG PATH si570_ctrl.sv
 add_fileset_file i2c_master.v VERILOG PATH i2c_master.v
 add_fileset_file i2c_util.sv SYSTEM_VERILOG PATH i2c_util.sv
+add_fileset_file divider_intel.v VERILOG PATH divider_intel.v
 
 
 # 

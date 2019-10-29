@@ -32,9 +32,9 @@ set_location_assignment PIN_AW35 -to clk_clk ; # OSC_50_B3B
 # SMA
 #============================================================
 # set_instance_assignment -name IO_STANDARD "2.5 V" -to SMA_CLKIN
-# set_instance_assignment -name IO_STANDARD "2.5 V" -to SMA_CLKOUT
+set_instance_assignment -name IO_STANDARD "2.5 V" -to phy_clk_out_clk ; # SMA_CLKOUT
 # set_location_assignment PIN_BB33 -to SMA_CLKIN
-# set_location_assignment PIN_AV34 -to SMA_CLKOUT
+set_location_assignment PIN_AV34 -to phy_clk_out_clk ; # SMA_CLKOUT
 
 #============================================================
 # LED x 10

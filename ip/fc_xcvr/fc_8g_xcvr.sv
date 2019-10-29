@@ -77,8 +77,18 @@ module fc_8g_xcvr (
 
   assign status_word = {15'b0, pll_locked, rx_disperr, rx_errdetect, rx_patterndetect, rx_syncstatus};
 
+  logic [31:0] status_word_cdc1 = 0;
+  logic [31:0] status_word_cdc2 = 0;
+  logic [31:0] status_word_xfered = 0;
+
+  always @(posedge mgmt_clk) begin
+    status_word_cdc1 <= status_word;
+    status_word_cdc2 <= status_word_cdc1;
+    status_word_xfered <= status_word_cdc2;
+  end
+
   assign mm_waitrequest = mm_address[9] ? mgmt_waitrequest : 1'b0;
-  assign mm_readdata    = mm_address[9] ? mgmt_readdata : status_word;
+  assign mm_readdata    = mm_address[9] ? mgmt_readdata : status_word_xfered;
   assign mgmt_read      = mm_address[9] ? mm_read  : 1'b0;
   assign mgmt_write     = mm_address[9] ? mm_write : 1'b0;
   assign mgmt_writedata = mm_address[9] ? mm_writedata : 32'b0;

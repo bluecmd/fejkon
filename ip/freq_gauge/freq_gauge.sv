@@ -32,8 +32,25 @@ module freq_gauge #(
   logic [31:0] xfered_counter;
   logic [31:0] last_count = -1;
 
+  // Reset synchronizer
+  logic reset_probe_r0 = 0;
+  logic reset_probe = 0;
+
+  logic reset_ref_r0 = 0;
+  logic reset_ref = 0;
+
   always @(posedge ref_clk) begin
-    if (reset) begin
+    reset_ref_r0 <= reset;
+    reset_ref <= reset_ref_r0;
+  end
+
+  always @(posedge probe_clk) begin
+    reset_probe_r0 <= reset;
+    reset_probe <= reset_probe_r0;
+  end
+
+  always @(posedge ref_clk) begin
+    if (reset_ref) begin
       countdown <= MeasurementTime;
       measure <= 1;
       last_count <= -1;
@@ -69,7 +86,7 @@ module freq_gauge #(
   logic probe_measure_r = 0;
 
   always @(posedge probe_clk) begin
-    if (reset) begin
+    if (reset_probe) begin
       counter <= 0;
       probe_measure_r <= 0;
     end else begin

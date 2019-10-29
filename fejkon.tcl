@@ -45,6 +45,10 @@ set_instance_parameter_value phy_clk {NUM_CLOCK_OUTPUTS} {1}
 
 add_instance phy_clk_gauge freq_gauge 1.0
 
+add_instance phy_clk_out altera_clock_bridge 19.1
+set_instance_parameter_value phy_clk_out {EXPLICIT_CLOCK_RATE} {0.0}
+set_instance_parameter_value phy_clk_out {NUM_CLOCK_OUTPUTS} {1}
+
 add_instance reset_ctrl altera_reset_controller 19.1
 set_instance_parameter_value reset_ctrl {MIN_RST_ASSERTION_TIME} {3}
 set_instance_parameter_value reset_ctrl {NUM_RESET_INPUTS} {3}
@@ -109,6 +113,8 @@ add_interface pcie_serial conduit end
 set_interface_property pcie_serial EXPORT_OF pcie.phy_serial
 add_interface phy_clk clock sink
 set_interface_property phy_clk EXPORT_OF phy_clk.in_clk
+add_interface phy_clk_out clock source
+set_interface_property phy_clk_out EXPORT_OF phy_clk_out.out_clk
 add_interface reset reset sink
 set_interface_property reset EXPORT_OF ext0.clk_in_reset
 add_interface sfp0_sfp conduit end
@@ -221,6 +227,8 @@ set_connection_parameter_value pcie.bar2_mm/temp.temp_mm defaultConnection {0}
 add_connection phy_clk.out_clk fcport0.phy_clk
 
 add_connection phy_clk.out_clk phy_clk_gauge.probe_clk
+
+add_connection phy_clk.out_clk phy_clk_out.in_clk
 
 add_connection reset_ctrl.reset_out fcport0.reset
 

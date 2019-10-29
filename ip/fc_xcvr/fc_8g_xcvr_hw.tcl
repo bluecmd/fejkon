@@ -40,6 +40,7 @@ set_fileset_property QUARTUS_SYNTH TOP_LEVEL fc_8g_xcvr
 set_fileset_property QUARTUS_SYNTH ENABLE_RELATIVE_INCLUDE_PATHS false
 set_fileset_property QUARTUS_SYNTH ENABLE_FILE_OVERWRITE_MODE true
 add_fileset_file fc_8g_xcvr.sv SYSTEM_VERILOG PATH fc_8g_xcvr.sv TOP_LEVEL_FILE
+add_fileset_file fc_8g_xcvr.sdc SDC PATH fc_8g_xcvr.sdc
 add_fileset_file fc_phy.v VERILOG PATH ../altera_fc_phy/fc_phy_sim/fc_phy.v
 add_fileset_file altera_xcvr_functions.sv SYSTEM_VERILOG PATH ../altera_fc_phy/fc_phy/altera_xcvr_functions.sv
 add_fileset_file altera_xcvr_custom.sv SYSTEM_VERILOG PATH ../altera_fc_phy/fc_phy/altera_xcvr_custom.sv

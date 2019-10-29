@@ -14,7 +14,7 @@ if [expr {![batch_mode]}] {
   do wave.do
 }
 
-run 3ms
+run 13ms
 
 if [batch_mode] {
   if [expr {!$broken}] {

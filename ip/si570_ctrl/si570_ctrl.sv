@@ -197,13 +197,30 @@ module si570_ctrl #(
     end
   end
 
+  // The Si570 datasheets says it can take 10 ms to power up the unit
+  localparam PowerUpCycles = InputClock / 100;
+  int power_up_cntr = PowerUpCycles;
+
+  always @(posedge clk) begin
+    if (reset) begin
+      power_up_cntr <= PowerUpCycles;
+    end else begin
+      power_up_cntr <= power_up_cntr - 1;
+    end
+  end
+
+  logic powered_up;
+  assign powered_up = power_up_cntr == 0;
+
   int instr = 0, instr_next;
 
   always @* begin
     // Advance if I2C is marked as done and we are not computing configuration
-    if (instr == 7)
-      instr_next = config_valid ? instr + 1 : instr;
+    if (instr == 0)
+      instr_next = powered_up ? instr + 1 : instr;
     else if (instr == 8)
+      instr_next = config_valid ? instr + 1 : instr;
+    else if (instr == 9)
       instr_next = new_rfreq_valid ? instr + 1 : instr;
     else
       instr_next = bus.done ? instr + 1 : instr;
@@ -221,24 +238,25 @@ module si570_ctrl #(
       calc_fxtal <= 0;
       calc_new_rfreq <= 0;
       case (instr_next)
-        0: si570_bus_write(bus, 135, 8'h01); // Recall factory settings
-        1: {raw_hs_div, raw_n1[6:2]} <= si570_bus_read(bus, 7);
-        2: {raw_n1[1:0], raw_rfreq[37:32]} <= si570_bus_read(bus, 8);
-        3: raw_rfreq[31:24] <= si570_bus_read(bus, 9);
-        4: raw_rfreq[23:16] <= si570_bus_read(bus, 10);
-        5: raw_rfreq[15:8]  <= si570_bus_read(bus, 11);
-        6: raw_rfreq[7:0]   <= si570_bus_read(bus, 12);
-        7: calc_fxtal <= 1;
-        8: calc_new_rfreq <= 1;
-        9: si570_bus_write(bus, 137, 8'h10); // Freeze DCO
-        10: si570_bus_write(bus, 7, {out_hs_div, out_n1[6:2]});
-        11: si570_bus_write(bus, 8, {out_n1[1:0], out_rfreq[37:32]});
-        12: si570_bus_write(bus, 9, out_rfreq[31:24]);
-        13: si570_bus_write(bus, 10, out_rfreq[23:16]);
-        14: si570_bus_write(bus, 11, out_rfreq[15:8]);
-        15: si570_bus_write(bus, 12, out_rfreq[7:0]);
-        16: si570_bus_write(bus, 137, 8'h0); // Unfreeze DCO
-        17: si570_bus_write(bus, 135, 8'h40); // Assert NewFreq
+        0: ; // Wait for bootup
+        1: si570_bus_write(bus, 135, 8'h01); // Recall factory settings
+        2: {raw_hs_div, raw_n1[6:2]} <= si570_bus_read(bus, 7);
+        3: {raw_n1[1:0], raw_rfreq[37:32]} <= si570_bus_read(bus, 8);
+        4: raw_rfreq[31:24] <= si570_bus_read(bus, 9);
+        5: raw_rfreq[23:16] <= si570_bus_read(bus, 10);
+        6: raw_rfreq[15:8]  <= si570_bus_read(bus, 11);
+        7: raw_rfreq[7:0]   <= si570_bus_read(bus, 12);
+        8: calc_fxtal <= 1;
+        9: calc_new_rfreq <= 1;
+        10: si570_bus_write(bus, 137, 8'h10); // Freeze DCO
+        11: si570_bus_write(bus, 7, {out_hs_div, out_n1[6:2]});
+        12: si570_bus_write(bus, 8, {out_n1[1:0], out_rfreq[37:32]});
+        13: si570_bus_write(bus, 9, out_rfreq[31:24]);
+        14: si570_bus_write(bus, 10, out_rfreq[23:16]);
+        15: si570_bus_write(bus, 11, out_rfreq[15:8]);
+        16: si570_bus_write(bus, 12, out_rfreq[7:0]);
+        17: si570_bus_write(bus, 137, 8'h0); // Unfreeze DCO
+        18: si570_bus_write(bus, 135, 8'h40); // Assert NewFreq
         default: begin
           reset_out_r <= 1'b0;
           si570_bus_reset(bus);

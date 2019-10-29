@@ -279,3 +279,14 @@ It would be useful to enter some kind of low-power mode if an over-temperature
 condition is detected.
 
 Possibly integrated with the above work.
+
+ * Replace Si570 with soft core CPU
+ 
+ Although writing the Si570 controller was useful, in the end it is less reliable
+ and much more expensive, than using a soft core to implement the equivalent logic.
+ Using a soft core like NIOS, RISC-V, or OpenRISC would make it possible to control
+ clock and reset networks from the firmware of the card instead of wiring it up in
+ Verilog. In the beginning I thought this would end up being simpler, and while
+ it ended up being a very good learning experience if I had to do it again I would
+ stick a soft core CPU on there and let it do temperature, fan, reset, and clock
+ control.

@@ -190,7 +190,7 @@ static ssize_t phy_freq_show(struct device *dev, struct device_attribute *attr,
     char *buf)
 {
   struct fejkon_card *card = pci_get_drvdata(to_pci_dev(dev));
-  return sprintf(buf, "%u\n", ioread32be(card->bar2 + 0x20));
+  return sprintf(buf, "%u\n", ioread32(card->bar2 + 0x20));
 }
 
 static DEVICE_ATTR_RO(phy_freq);
@@ -250,7 +250,7 @@ static int probe(struct pci_dev *pcidev, const struct pci_device_id *id)
   dev_notice(&pcidev->dev, "found card with version %d (%08x), ports = %d\n",
       version, githash, ports);
 
-  phy_clock = ioread32be(card->bar2 + 0x20);
+  phy_clock = ioread32(card->bar2 + 0x20);
   dev_notice(&pcidev->dev, "PHY clock running at %d.%03d MHz",
       phy_clock / 1000000, (phy_clock / 1000) % 1000);
 

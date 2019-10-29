@@ -283,7 +283,6 @@ func TestMain(m *testing.M) {
 	log.Printf("lspci after module load:\n%v", string(out))
 
 	ifup("fc0")
-	ifup("fc1")
 
 	// Run tests
 	if m.Run() != 0 {
@@ -293,6 +292,14 @@ func TestMain(m *testing.M) {
 
 	// Test removing the module
 	ifdown("fc0")
+
+	// Dump all open files to help with debugging if rmmod fails
+	ma, _ := filepath.Glob("/proc/self/fd/*")
+	for _, a := range ma {
+		f, _ := os.Readlink(a)
+		log.Printf("open file: %v", f)
+	}
+
 	rmmod()
 
 	unix.Reboot(unix.LINUX_REBOOT_CMD_POWER_OFF)

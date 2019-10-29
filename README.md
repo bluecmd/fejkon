@@ -101,7 +101,21 @@ See Temperature decoding details in [FPGA Temperature Sensor IP Core User Guide]
 
 #### Fejkon FC XCVR Core
 
-T.B.D.
+| Addr    | Width | Name          |
+|---------|-------|---------------|
+| 0x00000 | 4     | Port Status   |
+
+##### Port Status
+
+| Bit(s) | Description      | Values                 |
+|--------|------------------|------------------------|
+| 0:3    | Sync Status      | 0xf = fully synced     |
+| 4:7    | Pattern detect   | 0x1 = detected         |
+| 8:11   | Error detect     | >0 = error(s) detected |
+| 12:15  | Disparity error  | >0 = error(s) detected |
+| 16     | PLL Locked       | 1 = PLL locked         |
+
+A fully operational port has status `0x1001f`.
 
 ### BAR 3
 

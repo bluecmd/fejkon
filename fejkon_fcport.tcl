@@ -81,11 +81,11 @@ set_interface_property reset EXPORT_OF rst0.in_reset
 add_interface rx_clk clock source
 set_interface_property rx_clk EXPORT_OF rx_clk_bridge.out_clk
 add_interface rx_st avalon_streaming source
-set_interface_property rx_st EXPORT_OF xcvr.rx
+set_interface_property rx_st EXPORT_OF xcvr.avrx
 add_interface tx_clk clock source
 set_interface_property tx_clk EXPORT_OF tx_clk_bridge.out_clk
 add_interface tx_st avalon_streaming sink
-set_interface_property tx_st EXPORT_OF xcvr.tx
+set_interface_property tx_st EXPORT_OF xcvr.avtx
 
 # connections and connection parameters
 add_connection alt_xcvr_reconfig_0.reconfig_to_xcvr xcvr.reconfig_to_xcvr

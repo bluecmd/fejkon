@@ -45,7 +45,7 @@ package fc;
   } primitives_t;
 
   typedef enum integer {
-    STATE_AC,
+    STATE_AC = 0,
     STATE_LR1,
     STATE_LR2,
     STATE_LR3,

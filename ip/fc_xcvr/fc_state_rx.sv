@@ -47,8 +47,16 @@ module fc_state_rx (
     endcase
   end
 
+  logic reset_cdc1;
+  logic reset_r;
+
   always @(posedge clk) begin
-    if (reset) begin
+    reset_cdc1 <= reset;
+    reset_r <= reset_cdc1;
+  end
+
+  always @(posedge clk) begin
+    if (reset_r) begin
       state_r <= fc::STATE_OL1;
     end else begin
       state_r <= state_next;

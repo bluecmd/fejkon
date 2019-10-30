@@ -21,12 +21,12 @@ fejkon.sof: ip/altera_fc_phy/fc_phy.qip fejkon.qsys de5net.sdc de5net.tcl $(wild
 	@echo
 	@echo '  ==> Generation report <=='
 	@echo
+	@cat gen/violated_paths.txt
+	@echo
 	@grep -B1 '; I/O Assignment Warnings' gen/output_files/fejkon.fit.rpt \
 		| grep -- '---'
 	@awk '/; I\/O Assignment Warnings/,/^$$/' gen/output_files/fejkon.fit.rpt
 	@cat gen/fmax.txt | grep -v Thi
-	@echo
-	@cat gen/violated_paths.txt
 	@echo
 
 # Temporarily program over JTAG

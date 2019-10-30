@@ -9,8 +9,6 @@ set_project_property HIDE_FROM_IP_CATALOG {false}
 
 # Instances and instance parameters
 # (disabled instances are intentionally culled)
-add_instance add_idle_0 fc_add_idle 1.0
-
 add_instance alt_xcvr_reconfig_0 alt_xcvr_reconfig 19.1
 set_instance_parameter_value alt_xcvr_reconfig_0 {ber_en} {0}
 set_instance_parameter_value alt_xcvr_reconfig_0 {enable_adce} {0}
@@ -33,8 +31,6 @@ set_instance_parameter_value mgmt_clk {NUM_CLOCK_OUTPUTS} {1}
 add_instance phy_clk_bridge altera_clock_bridge 19.1
 set_instance_parameter_value phy_clk_bridge {EXPLICIT_CLOCK_RATE} {0.0}
 set_instance_parameter_value phy_clk_bridge {NUM_CLOCK_OUTPUTS} {1}
-
-add_instance remove_idle_0 fc_remove_idle 1.0
 
 add_instance rst0 altera_reset_bridge 19.1
 set_instance_parameter_value rst0 {ACTIVE_LOW_RESET} {0}
@@ -85,15 +81,13 @@ set_interface_property reset EXPORT_OF rst0.in_reset
 add_interface rx_clk clock source
 set_interface_property rx_clk EXPORT_OF rx_clk_bridge.out_clk
 add_interface rx_st avalon_streaming source
-set_interface_property rx_st EXPORT_OF remove_idle_0.out
+set_interface_property rx_st EXPORT_OF xcvr.rx
 add_interface tx_clk clock source
 set_interface_property tx_clk EXPORT_OF tx_clk_bridge.out_clk
 add_interface tx_st avalon_streaming sink
-set_interface_property tx_st EXPORT_OF add_idle_0.in
+set_interface_property tx_st EXPORT_OF xcvr.tx
 
 # connections and connection parameters
-add_connection add_idle_0.out xcvr.tx
-
 add_connection alt_xcvr_reconfig_0.reconfig_to_xcvr xcvr.reconfig_to_xcvr
 set_connection_parameter_value alt_xcvr_reconfig_0.reconfig_to_xcvr/xcvr.reconfig_to_xcvr endPort {}
 set_connection_parameter_value alt_xcvr_reconfig_0.reconfig_to_xcvr/xcvr.reconfig_to_xcvr endPortLSB {0}
@@ -111,11 +105,7 @@ add_connection mgmt_clk.out_clk xcvr.mgmt_clk
 
 add_connection phy_clk_bridge.out_clk xcvr.phy_clk
 
-add_connection rst0.out_reset add_idle_0.reset
-
 add_connection rst0.out_reset alt_xcvr_reconfig_0.mgmt_rst_reset
-
-add_connection rst0.out_reset remove_idle_0.reset
 
 add_connection rst0.out_reset setup_bridge.reset
 
@@ -133,13 +123,7 @@ set_connection_parameter_value xcvr.reconfig_from_xcvr/alt_xcvr_reconfig_0.recon
 set_connection_parameter_value xcvr.reconfig_from_xcvr/alt_xcvr_reconfig_0.reconfig_from_xcvr startPortLSB {0}
 set_connection_parameter_value xcvr.reconfig_from_xcvr/alt_xcvr_reconfig_0.reconfig_from_xcvr width {0}
 
-add_connection xcvr.rx remove_idle_0.in
-
-add_connection xcvr.rx_clk remove_idle_0.clk
-
 add_connection xcvr.rx_clk rx_clk_bridge.in_clk
-
-add_connection xcvr.tx_clk add_idle_0.clk
 
 add_connection xcvr.tx_clk tx_clk_bridge.in_clk
 

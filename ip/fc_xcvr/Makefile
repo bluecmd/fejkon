@@ -4,8 +4,10 @@ QPATH ?= "$(HOME)/intelFPGA/19.1/quartus"
 
 .PHONY: editor sim lint
 
-lint:
-	verilator --lint-only fc_8g_xcvr.sv fc_phy_bbox.sv
+lint: testbench/tb_tb.qsys
+	verilator --lint-only fc_util.sv fc_8g_xcvr.sv fc_phy_bbox.sv
+	vlog -lint -sv testbench/tb_tb/simulation/submodules/verbosity_pkg.sv \
+		fc_util.sv fc_8g_xcvr.sv fc_phy_bbox.sv top_tb.sv
 
 %.qsys: %.tcl
 	$(QPATH)/sopc_builder/bin/qsys-script --script=$<
@@ -16,6 +18,8 @@ editor: tb.qsys
 testbench/tb_tb.qsys: tb.qsys fc_8g_xcvr_hw.tcl
 	# Force re-compilation in the simulator
 	rm -fr libraries
+	mkdir -p libraries
+	(cd libraries; vlib work)
 	$(QPATH)/sopc_builder/bin/qsys-generate \
 		--testbench=STANDARD \
 		--testbench-simulation=VERILOG \

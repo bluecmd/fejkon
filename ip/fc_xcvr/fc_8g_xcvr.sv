@@ -1,15 +1,15 @@
 `timescale 1 ps / 1 ps
 module fc_8g_xcvr (
-    input  wire [31:0]  tx_data,                  //                     tx.data
-    output wire         tx_ready,                 //                       .ready
-    input  wire         tx_valid,                 //                       .valid
-    input  wire         tx_startofpacket,         //                       .startofpacket
-    input  wire         tx_endofpacket,           //                       .endofpacket
-    output wire [31:0]  rx_data,                  //                     rx.data
-    output wire         rx_valid,                 //                       .valid
-    input  wire         rx_ready,                 //                       .ready
-    output wire         rx_startofpacket,         //                       .startofpacket
-    output wire         rx_endofpacket,           //                       .endofpacket
+    input  wire [31:0]  avtx_data,                //                   avtx.data
+    output wire         avtx_ready,               //                       .ready
+    input  wire         avtx_valid,               //                       .valid
+    input  wire         avtx_startofpacket,       //                       .startofpacket
+    input  wire         avtx_endofpacket,         //                       .endofpacket
+    output wire [31:0]  avrx_data,                //                   avrx.data
+    output wire         avrx_valid,               //                       .valid
+    input  wire         avrx_ready,               //                       .ready
+    output wire         avrx_startofpacket,       //                       .startofpacket
+    output wire         avrx_endofpacket,         //                       .endofpacket
     input  wire         reset,                    //                  reset.reset
     input  wire         mgmt_clk,                 //               mgmt_clk.clk
     input  wire [9:0]   mm_address,               //                mgmt_mm.address
@@ -27,14 +27,20 @@ module fc_8g_xcvr (
     output wire  [91:0] reconfig_from_xcvr        //     reconfig_from_xcvr.
   );
 
+  import fc_util::*;
+
   wire        pll_locked;
 
   wire        rx_xcvr_ready;
   wire        tx_xcvr_ready;
-  wire [3:0]  tx_datak;
-  wire [31:0] tx_parallel_data;
-  wire [31:0] rx_parallel_data;
-  wire [3:0]  rx_datak;
+  wire [3:0]  tx_le_datak;
+  wire [31:0] tx_le_data;
+  wire [31:0] rx_le_data;
+  wire [3:0]  rx_le_datak;
+  wire [3:0]  tx_be_datak;
+  wire [31:0] tx_be_data;
+  wire [31:0] rx_be_data;
+  wire [3:0]  rx_be_datak;
   wire [3:0]  rx_disperr;
   wire [3:0]  rx_errdetect;
   wire [3:0]  rx_patterndetect;
@@ -72,12 +78,12 @@ module fc_8g_xcvr (
     .rx_bitslipboundaryselectout(),            // rx_bitslipboundaryselectout.export
     .tx_clkout(tx_clk),                        //                   tx_clkout.clk
     .rx_clkout(rx_clk),                        //                   rx_clkout.clk
-    .tx_parallel_data(tx_parallel_data),       //            tx_parallel_data.data
-    .tx_datak(tx_datak),                       //                    tx_datak.data
+    .tx_parallel_data(tx_le_data),             //            tx_parallel_data.data
+    .tx_datak(tx_le_datak),                    //                    tx_datak.data
     .tx_dispval(4'b0),                         //                  tx_dispval.data
     .tx_forcedisp(4'b0),                       //                tx_forcedisp.data
-    .rx_parallel_data(rx_parallel_data),       //            rx_parallel_data.data
-    .rx_datak(rx_datak),                       //                    rx_datak.data
+    .rx_parallel_data(rx_le_data),             //            rx_parallel_data.data
+    .rx_datak(rx_le_datak),                    //                    rx_datak.data
     .reconfig_from_xcvr(reconfig_from_xcvr),   //          reconfig_from_xcvr.reconfig_from_xcvr
     .reconfig_to_xcvr(reconfig_to_xcvr)        //            reconfig_to_xcvr.reconfig_to_xcvr
   );
@@ -94,38 +100,30 @@ module fc_8g_xcvr (
     status_word_xfered <= status_word_cdc2;
   end
 
-  typedef enum integer {
-    PRIM_IDLE = 0,
-    PRIM_R_RDY,
-    PRIM_BB_SCS,
-    PRIM_BB_SCR,
-    PRIM_SOFC1,
-    PRIM_SOFI1,
-    PRIM_SOFN1,
-    PRIM_SOFI2,
-    PRIM_SOFN2,
-    PRIM_SOFI3,
-    PRIM_SOFN3,
-    PRIM_SOFC4,
-    PRIM_SOFI4,
-    PRIM_SOFN4,
-    PRIM_SOFF,
-    PRIM_EOFT,
-    PRIM_EOFDT,
-    PRIM_EOFA,
-    PRIM_EOFN,
-    PRIM_EOFNI,
-    PRIM_EOFDTI,
-    PRIM_EOFRT,
-    PRIM_EOFRTI,
-    PRIM_NOS,
-    PRIM_OLS,
-    PRIM_LR,
-    PRIM_LRR,
-    PRIM_MAX
-  } primitives_t;
+  function bit [7:0] D(input int X, input int Y);
+    return {Y[2:0], X[4:0]};
+  endfunction
 
-  int primitive_cntrs [PRIM_MAX];
+  int tx_primitive_cntrs [PRIM_MAX];
+  int rx_primitive_cntrs [PRIM_MAX];
+
+  task automatic incr_primitve_cntrs(ref int cntrs [PRIM_MAX], input logic [31:0] data);
+    case(data)
+      SOFI3: cntrs[PRIM_SOFI3]++;
+      EOFT: cntrs[PRIM_EOFT]++;
+      default: ;
+    endcase
+  endtask
+
+  always @(posedge rx_clk) begin
+    if (rx_be_datak == 4'b1000)
+      incr_primitve_cntrs(rx_primitive_cntrs, rx_be_data);
+  end
+
+  always @(posedge tx_clk) begin
+    if (tx_be_datak == 4'b1000)
+      incr_primitve_cntrs(tx_primitive_cntrs, tx_be_data);
+  end
 
   assign mm_waitrequest = mm_address[9] ? mgmt_waitrequest : 1'b0;
   assign mm_readdata    = mm_address[9] ? mgmt_readdata : status_word_xfered;
@@ -143,30 +141,43 @@ module fc_8g_xcvr (
   // within the definition of the Ordered Set until all characters of the
   // Ordered Set are transmitted.
   //
-  // Transmission order is:
-  // - Byte 0 - bit 7:0
-  // - ...
-  // - Byte 3 - bit 31:24
-  assign tx_parallel_data = tx_data;
-  assign tx_datak = 4'b0000;
+  // Transmission order for the XCVR is little-endian (7:0 is first byte)
+  // while it makes much more sense to write logic using big-endian.
+  // Thus, we convert it before shipping it of to the XCVR.
+  assign tx_le_data[7:0]   = tx_be_data[31:24];
+  assign tx_le_data[15:8]  = tx_be_data[23:16];
+  assign tx_le_data[23:16] = tx_be_data[15:8];
+  assign tx_le_data[31:24] = tx_be_data[7:0];
+  assign tx_le_datak = {tx_be_datak[0], tx_be_datak[1], tx_be_datak[2], tx_be_datak[3]};
+  assign rx_be_data[7:0]   = rx_le_data[31:24];
+  assign rx_be_data[15:8]  = rx_le_data[23:16];
+  assign rx_be_data[23:16] = rx_le_data[15:8];
+  assign rx_be_data[31:24] = rx_le_data[7:0];
+  assign rx_be_datak = {rx_le_datak[0], rx_le_datak[1], rx_le_datak[2], rx_le_datak[3]};
 
-  typedef enum integer {
-    STATE_ACTIVE,
-    STATE_LR1,
-    STATE_LR2,
-    STATE_LR3,
-    STATE_LF1,
-    STATE_LF2,
-    STATE_OL1,
-    STATE_OL2,
-    STATE_OL3
-  } state_t;
+  assign tx_be_data = avtx_valid ? avtx_data : IDLE;
+  assign tx_be_datak = avtx_valid ? 4'b0000 : 4'b0001;
 
-  state_t state = STATE_OL1;
+  wire state_t state;
 
-  assign rx_valid = state == STATE_ACTIVE;
-  assign rx_data = rx_parallel_data;
+  fc_state_rx state_rx (
+    .clk(rx_clk),
+    .data(rx_parallel_data),
+    .datak(rx_datak),
+    .state_out(state)
+  );
 
-  assign tx_ready = tx_xcvr_ready;
+
+  fc_state_tx state_tx (
+    .clk(tx_clk),
+    .data(tx_parallel_data),
+    .datak(tx_datak),
+    .state_in(state)
+  );
+
+  assign avrx_valid = state == STATE_ACTIVE;
+  assign avrx_data = rx_be_data;
+
+  assign avtx_ready = tx_xcvr_ready;
 
 endmodule

@@ -1,13 +1,16 @@
-package fc_util;
+package fc;
 
   function bit [7:0] D(input int X, input int Y);
     return {Y[2:0], X[4:0]};
   endfunction
 
-  // NOTE: Reverse bit order
   const logic [31:0] IDLE =  {D(28,5), D(21,4), D(21,5), D(21,5)};
   const logic [31:0] SOFI3 = {D(28,5), D(21,5), D(21,2), D(21,2)};
   const logic [31:0] EOFT  = {D(28,5), D(21,4), D(21,3), D(21,3)};
+  const logic [31:0] NOS =   {D(28,5), D(21,2), D(31,5), D(5,2)};
+  const logic [31:0] OLS =   {D(28,5), D(21,1), D(10,4), D(21,2)};
+  const logic [31:0] LR  =   {D(28,5), D(9,2),  D(31,5), D(9,2)};
+  const logic [31:0] LRR =   {D(28,5), D(21,1), D(31,5), D(9,2)};
 
   typedef enum integer {
     PRIM_IDLE = 0,
@@ -37,11 +40,12 @@ package fc_util;
     PRIM_OLS,
     PRIM_LR,
     PRIM_LRR,
+    PRIM_UNKNOWN,
     PRIM_MAX
   } primitives_t;
 
   typedef enum integer {
-    STATE_ACTIVE,
+    STATE_AC,
     STATE_LR1,
     STATE_LR2,
     STATE_LR3,
@@ -51,5 +55,19 @@ package fc_util;
     STATE_OL2,
     STATE_OL3
   } state_t;
+
+  function primitives_t map_primitive(input logic [31:0] data);
+    case(data)
+      fc::SOFI3: return fc::PRIM_SOFI3;
+      fc::EOFT:  return fc::PRIM_EOFT;
+      fc::OLS:   return fc::PRIM_OLS;
+      fc::LRR:   return fc::PRIM_LRR;
+      fc::LR:    return fc::PRIM_LR;
+      fc::NOS:   return fc::PRIM_NOS;
+      fc::IDLE:  return fc::PRIM_IDLE;
+      default:   return fc::PRIM_UNKNOWN;
+    endcase
+    return fc::PRIM_UNKNOWN;
+  endfunction
 
 endpackage

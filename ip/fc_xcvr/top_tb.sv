@@ -15,7 +15,7 @@ module top_tb;
 
   initial begin
     set_verbosity(VERBOSITY_INFO);
-    wait(`PHY.rx_syncstatus != 0);
+    wait(`XCVR.state == fc::STATE_AC);
     $sformat(message, "%m: Test passed");
     print(VERBOSITY_INFO, message);
     // Run one 1 us more for more wave data
@@ -28,12 +28,12 @@ module top_tb;
     `TX.init();
     `TX.set_response_timeout(0);
     `TX.set_transaction_sop(1);
-    `TX.set_transaction_data(fc_util::SOFI3);
+    `TX.set_transaction_data(fc::SOFI3);
     `TX.push_transaction();
     `TX.set_transaction_data(32'b0);
     repeat (10) `TX.push_transaction();
     `TX.set_transaction_eop(1);
-    `TX.set_transaction_data(fc_util::EOFT);
+    `TX.set_transaction_data(fc::EOFT);
     `TX.push_transaction();
   end
 

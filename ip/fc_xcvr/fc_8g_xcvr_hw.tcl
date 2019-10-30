@@ -39,7 +39,9 @@ add_fileset QUARTUS_SYNTH QUARTUS_SYNTH "" ""
 set_fileset_property QUARTUS_SYNTH TOP_LEVEL fc_8g_xcvr
 set_fileset_property QUARTUS_SYNTH ENABLE_RELATIVE_INCLUDE_PATHS false
 set_fileset_property QUARTUS_SYNTH ENABLE_FILE_OVERWRITE_MODE true
-add_fileset_file fc_8g_xcvr.sv SYSTEM_VERILOG PATH fc_8g_xcvr.sv TOP_LEVEL_FILE
+add_fileset_file fc.sv SYSTEM_VERILOG PATH fc.sv
+add_fileset_file fc_state_rx.sv SYSTEM_VERILOG PATH fc_state_rx.sv
+add_fileset_file fc_state_tx.sv SYSTEM_VERILOG PATH fc_state_tx.sv
 add_fileset_file fc_8g_xcvr.sdc SDC PATH fc_8g_xcvr.sdc
 add_fileset_file fc_phy.v VERILOG PATH ../altera_fc_phy/fc_phy_sim/fc_phy.v
 add_fileset_file altera_xcvr_functions.sv SYSTEM_VERILOG PATH ../altera_fc_phy/fc_phy/altera_xcvr_functions.sv
@@ -87,12 +89,15 @@ add_fileset_file altera_xcvr_reset_control.sv SYSTEM_VERILOG PATH ../altera_fc_p
 add_fileset_file alt_xcvr_reset_counter.sv SYSTEM_VERILOG PATH ../altera_fc_phy/fc_phy/alt_xcvr_reset_counter.sv
 add_fileset_file alt_xcvr_arbiter.sv SYSTEM_VERILOG PATH ../altera_fc_phy/fc_phy/alt_xcvr_arbiter.sv
 add_fileset_file alt_xcvr_m2s.sv SYSTEM_VERILOG PATH ../altera_fc_phy/fc_phy/alt_xcvr_m2s.sv
+add_fileset_file fc_8g_xcvr.sv SYSTEM_VERILOG PATH fc_8g_xcvr.sv TOP_LEVEL_FILE
 
 add_fileset SIM_VERILOG SIM_VERILOG "" ""
 set_fileset_property SIM_VERILOG TOP_LEVEL fc_8g_xcvr
 set_fileset_property SIM_VERILOG ENABLE_RELATIVE_INCLUDE_PATHS false
 set_fileset_property SIM_VERILOG ENABLE_FILE_OVERWRITE_MODE true
-add_fileset_file fc_8g_xcvr.sv SYSTEM_VERILOG PATH fc_8g_xcvr.sv
+add_fileset_file fc.sv SYSTEM_VERILOG PATH fc.sv
+add_fileset_file fc_state_rx.sv SYSTEM_VERILOG PATH fc_state_rx.sv
+add_fileset_file fc_state_tx.sv SYSTEM_VERILOG PATH fc_state_tx.sv
 add_fileset_file fc_phy.v VERILOG PATH ../altera_fc_phy/fc_phy_sim/fc_phy.v
 add_fileset_file altera_xcvr_functions.sv SYSTEM_VERILOG PATH ../altera_fc_phy/fc_phy_sim/altera_xcvr_custom_phy/mentor/altera_xcvr_functions.sv MENTOR_SPECIFIC
 add_fileset_file altera_xcvr_custom.sv SYSTEM_VERILOG PATH ../altera_fc_phy/fc_phy_sim/altera_xcvr_custom_phy/altera_xcvr_custom.sv
@@ -139,6 +144,7 @@ add_fileset_file altera_xcvr_reset_control.sv SYSTEM_VERILOG PATH ../altera_fc_p
 add_fileset_file alt_xcvr_reset_counter.sv SYSTEM_VERILOG PATH ../altera_fc_phy/fc_phy_sim/altera_xcvr_custom_phy/mentor/alt_xcvr_reset_counter.sv MENTOR_SPECIFIC
 add_fileset_file alt_xcvr_arbiter.sv SYSTEM_VERILOG PATH ../altera_fc_phy/fc_phy_sim/altera_xcvr_custom_phy/mentor/alt_xcvr_arbiter.sv MENTOR_SPECIFIC
 add_fileset_file alt_xcvr_m2s.sv SYSTEM_VERILOG PATH ../altera_fc_phy/fc_phy_sim/altera_xcvr_custom_phy/mentor/alt_xcvr_m2s.sv MENTOR_SPECIFIC
+add_fileset_file fc_8g_xcvr.sv SYSTEM_VERILOG PATH fc_8g_xcvr.sv
 
 
 # 
@@ -154,47 +160,47 @@ add_fileset_file alt_xcvr_m2s.sv SYSTEM_VERILOG PATH ../altera_fc_phy/fc_phy_sim
 # 
 # connection point tx
 # 
-add_interface tx avalon_streaming end
-set_interface_property tx associatedClock tx_clk
-set_interface_property tx associatedReset reset
-set_interface_property tx dataBitsPerSymbol 8
-set_interface_property tx errorDescriptor ""
-set_interface_property tx firstSymbolInHighOrderBits true
-set_interface_property tx maxChannel 0
-set_interface_property tx readyLatency 0
-set_interface_property tx ENABLED true
-set_interface_property tx EXPORT_OF ""
-set_interface_property tx PORT_NAME_MAP ""
-set_interface_property tx CMSIS_SVD_VARIABLES ""
-set_interface_property tx SVD_ADDRESS_GROUP ""
+add_interface avtx avalon_streaming end
+set_interface_property avtx associatedClock tx_clk
+set_interface_property avtx associatedReset reset
+set_interface_property avtx dataBitsPerSymbol 8
+set_interface_property avtx errorDescriptor ""
+set_interface_property avtx firstSymbolInHighOrderBits true
+set_interface_property avtx maxChannel 0
+set_interface_property avtx readyLatency 0
+set_interface_property avtx ENABLED true
+set_interface_property avtx EXPORT_OF ""
+set_interface_property avtx PORT_NAME_MAP ""
+set_interface_property avtx CMSIS_SVD_VARIABLES ""
+set_interface_property avtx SVD_ADDRESS_GROUP ""
 
-add_interface_port tx tx_data data Input 32
-add_interface_port tx tx_ready ready Output 1
-add_interface_port tx tx_endofpacket endofpacket Input 1
-add_interface_port tx tx_startofpacket startofpacket Input 1
+add_interface_port avtx avtx_data data Input 32
+add_interface_port avtx avtx_ready ready Output 1
+add_interface_port avtx avtx_endofpacket endofpacket Input 1
+add_interface_port avtx avtx_startofpacket startofpacket Input 1
 
 
 # 
 # connection point rx
 # 
-add_interface rx avalon_streaming start
-set_interface_property rx associatedClock rx_clk
-set_interface_property rx associatedReset reset
-set_interface_property rx dataBitsPerSymbol 8
-set_interface_property rx errorDescriptor ""
-set_interface_property rx firstSymbolInHighOrderBits true
-set_interface_property rx maxChannel 0
-set_interface_property rx readyLatency 0
-set_interface_property rx ENABLED true
-set_interface_property rx EXPORT_OF ""
-set_interface_property rx PORT_NAME_MAP ""
-set_interface_property rx CMSIS_SVD_VARIABLES ""
-set_interface_property rx SVD_ADDRESS_GROUP ""
+add_interface avrx avalon_streaming start
+set_interface_property avrx associatedClock rx_clk
+set_interface_property avrx associatedReset reset
+set_interface_property avrx dataBitsPerSymbol 8
+set_interface_property avrx errorDescriptor ""
+set_interface_property avrx firstSymbolInHighOrderBits true
+set_interface_property avrx maxChannel 0
+set_interface_property avrx readyLatency 0
+set_interface_property avrx ENABLED true
+set_interface_property avrx EXPORT_OF ""
+set_interface_property avrx PORT_NAME_MAP ""
+set_interface_property avrx CMSIS_SVD_VARIABLES ""
+set_interface_property avrx SVD_ADDRESS_GROUP ""
 
-add_interface_port rx rx_data data Output 32
-add_interface_port rx rx_valid valid Output 1
-add_interface_port rx rx_endofpacket endofpacket Output 1
-add_interface_port rx rx_startofpacket startofpacket Output 1
+add_interface_port avrx avrx_data data Output 32
+add_interface_port avrx avrx_valid valid Output 1
+add_interface_port avrx avrx_endofpacket endofpacket Output 1
+add_interface_port avrx avrx_startofpacket startofpacket Output 1
 
 
 # 

@@ -21,7 +21,7 @@ if $compile_all {
   com
 }
 
-vlog -sv fc_8g_xcvr.sv
+vlog -sv fc.sv fc_state_rx.sv fc_state_tx.sv fc_8g_xcvr.sv
 vlog -sv top_tb.sv -L altera_common_sv_packages
 
 elab

@@ -48,11 +48,11 @@ set_interface_property reset EXPORT_OF mgmt_clk.clk_in_reset
 add_interface xcvr_mgmt_mm avalon slave
 set_interface_property xcvr_mgmt_mm EXPORT_OF fc_8g_xcvr_0.mgmt_mm
 add_interface xcvr_rx avalon_streaming source
-set_interface_property xcvr_rx EXPORT_OF fc_8g_xcvr_0.rx
+set_interface_property xcvr_rx EXPORT_OF fc_8g_xcvr_0.avrx
 add_interface xcvr_rx_clk clock source
 set_interface_property xcvr_rx_clk EXPORT_OF fc_8g_xcvr_0.rx_clk
 add_interface xcvr_tx avalon_streaming sink
-set_interface_property xcvr_tx EXPORT_OF fc_8g_xcvr_0.tx
+set_interface_property xcvr_tx EXPORT_OF fc_8g_xcvr_0.avtx
 add_interface xcvr_tx_clk clock source
 set_interface_property xcvr_tx_clk EXPORT_OF fc_8g_xcvr_0.tx_clk
 

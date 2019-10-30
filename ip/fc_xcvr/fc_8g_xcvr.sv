@@ -27,8 +27,6 @@ module fc_8g_xcvr (
     output wire  [91:0] reconfig_from_xcvr        //     reconfig_from_xcvr.
   );
 
-  import fc_util::*;
-
   wire        pll_locked;
 
   wire        rx_xcvr_ready;
@@ -104,25 +102,23 @@ module fc_8g_xcvr (
     return {Y[2:0], X[4:0]};
   endfunction
 
-  int tx_primitive_cntrs [PRIM_MAX];
-  int rx_primitive_cntrs [PRIM_MAX];
+  int tx_primitive_cntrs [fc::PRIM_MAX];
+  int rx_primitive_cntrs [fc::PRIM_MAX];
 
-  task automatic incr_primitve_cntrs(ref int cntrs [PRIM_MAX], input logic [31:0] data);
-    case(data)
-      SOFI3: cntrs[PRIM_SOFI3]++;
-      EOFT: cntrs[PRIM_EOFT]++;
-      default: ;
-    endcase
-  endtask
+  fc::primitives_t tx_prim = fc::PRIM_UNKNOWN, rx_prim = fc::PRIM_UNKNOWN;
 
   always @(posedge rx_clk) begin
-    if (rx_be_datak == 4'b1000)
-      incr_primitve_cntrs(rx_primitive_cntrs, rx_be_data);
+    if (rx_be_datak == 4'b1000) begin
+      rx_prim = fc::map_primitive(rx_be_data);
+      rx_primitive_cntrs[rx_prim]++;
+    end
   end
 
   always @(posedge tx_clk) begin
-    if (tx_be_datak == 4'b1000)
-      incr_primitve_cntrs(tx_primitive_cntrs, tx_be_data);
+    if (tx_be_datak == 4'b1000) begin
+      tx_prim = fc::map_primitive(tx_be_data);
+      tx_primitive_cntrs[tx_prim]++;
+    end
   end
 
   assign mm_waitrequest = mm_address[9] ? mgmt_waitrequest : 1'b0;
@@ -155,27 +151,36 @@ module fc_8g_xcvr (
   assign rx_be_data[31:24] = rx_le_data[7:0];
   assign rx_be_datak = {rx_le_datak[0], rx_le_datak[1], rx_le_datak[2], rx_le_datak[3]};
 
-  assign tx_be_data = avtx_valid ? avtx_data : IDLE;
-  assign tx_be_datak = avtx_valid ? 4'b0000 : 4'b0001;
+  logic [31:0] user_tx_data;
+  logic [3:0]  user_tx_datak;
 
-  wire state_t state;
+  assign user_tx_data = avtx_valid ? avtx_data : fc::IDLE;
+  // The start and end primitive of a frame is a K28.5, that's the only time
+  // the avtx stream has a control character
+  assign user_tx_datak = (avtx_valid | avtx_startofpacket | avtx_endofpacket) ? 4'b0000 : 4'b0001;
+
+  // Driven by fc_state_rx
+  wire fc::state_t state;
 
   fc_state_rx state_rx (
     .clk(rx_clk),
-    .data(rx_parallel_data),
-    .datak(rx_datak),
-    .state_out(state)
+    .reset(reset),
+    .data(rx_be_data),
+    .datak(rx_be_datak),
+    .state(state)
   );
-
 
   fc_state_tx state_tx (
     .clk(tx_clk),
-    .data(tx_parallel_data),
-    .datak(tx_datak),
-    .state_in(state)
+    .data(tx_be_data),
+    .datak(tx_be_datak),
+    .state(state)
   );
 
-  assign avrx_valid = state == STATE_ACTIVE;
+  // TODO(bluecmd): Note: On entry to the Active State, an FC_Port shall
+  // transmit a minimum of 6 IDLES before transmitting other Transmission Words
+
+  assign avrx_valid = state == fc::STATE_AC;
   assign avrx_data = rx_be_data;
 
   assign avtx_ready = tx_xcvr_ready;

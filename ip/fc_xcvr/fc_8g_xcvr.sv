@@ -34,6 +34,7 @@ module fc_8g_xcvr (
   logic [31:0] rx_le_data;
   logic [3:0]  rx_be_datak_r;
   logic [31:0] rx_be_data;
+  logic [31:0] rx_be_data_r;
   logic [3:0]  rx_be_datak;
   wire  [3:0]  rx_disperr;
   wire  [3:0]  rx_errdetect;
@@ -133,17 +134,45 @@ module fc_8g_xcvr (
     end
   end
 
+  logic is_aligned_r0;
+  logic is_aligned_r1;
+  logic is_aligned_r2;
+  logic is_aligned;
+  assign is_aligned_r0 =
+    (rx_syncstatus == 4'b1111) &&
+    (rx_patterndetect == 4'b0100 || rx_patterndetect == 4'b0001);
+
+  always @(posedge rx_clk) begin
+    // Match latency of rx_be_data*
+    is_aligned_r1 <= is_aligned_r0; // Latency from alignment     (aligned with rx_le_data_raw_r)
+    is_aligned_r2 <= is_aligned_r1; // Latency from alignment     (aligned with rx_le_data)
+    is_aligned <= is_aligned_r2;    // Latency from endian switch (aligned with rx_be_data)
+  end
+
   // This is best-effort to mgmt clock domain, do not depend on accuracy
   int tx_primitive_cntrs [fc::PRIM_MAX];
   int rx_primitive_cntrs [fc::PRIM_MAX];
 
   fc::primitives_t tx_prim = fc::PRIM_UNKNOWN, rx_prim = fc::PRIM_UNKNOWN;
 
+  // Signal used for trigging debug traces
+  (* noprune *) logic rx_unknown_prim;
+  logic [31:0] rx_last_unknown;
+  always @(posedge rx_clk) begin
+    // Sample unknown primitives for debugging
+    if (tx_be_datak_r == 4'b1000 && is_aligned) begin
+      rx_unknown_prim <= rx_prim == fc::PRIM_UNKNOWN;
+      if (rx_prim == fc::PRIM_UNKNOWN)
+        rx_last_unknown <= rx_be_data_r;
+    end
+  end
+
   always @(posedge rx_clk) begin
     rx_be_datak_r <= rx_be_datak;
+    rx_be_data_r <= rx_be_data;
     if (rx_be_datak == 4'b1000)
       rx_prim <= fc::map_primitive(rx_be_data);
-    if (rx_be_datak_r == 4'b1000)
+    if (rx_be_datak_r == 4'b1000 && is_aligned)
       rx_primitive_cntrs[rx_prim]++;
   end
 
@@ -175,6 +204,8 @@ module fc_8g_xcvr (
         case (mm_address[4:0])
           5'h0: reg_readdata = status_word_mgmt_xfered;
           5'h1: reg_readdata = state_mgmt_xfered;
+          5'h2: reg_readdata = rx_last_unknown;
+          // TODO: Add counter for STATE_AC transitions
           default: reg_readdata = 32'hffffffff;
         endcase
       end
@@ -237,7 +268,7 @@ module fc_8g_xcvr (
 
   fc_state_rx state_rx (
     .clk(rx_clk),
-    .reset(reset | (rx_syncstatus != 4'b1111)),
+    .reset(reset | ~is_aligned),
     .data(rx_be_data),
     .datak(rx_be_datak),
     .state(state)

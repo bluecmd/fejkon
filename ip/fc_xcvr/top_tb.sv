@@ -33,7 +33,7 @@ module top_tb;
     `TX.set_transaction_data(32'b0);
     repeat (10) `TX.push_transaction();
     `TX.set_transaction_eop(1);
-    `TX.set_transaction_data(fc::EOFT);
+    `TX.set_transaction_data(fc::EOFT_N);
     `TX.push_transaction();
   end
 

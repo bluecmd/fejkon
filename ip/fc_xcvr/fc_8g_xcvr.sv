@@ -1,15 +1,10 @@
 `timescale 1 ps / 1 ps
 module fc_8g_xcvr (
-    input  wire [31:0]  avtx_data,                //                   avtx.data
-    output wire         avtx_ready,               //                       .ready
+    input  wire [35:0]  avtx_data,                //                   avtx.data
     input  wire         avtx_valid,               //                       .valid
-    input  wire         avtx_startofpacket,       //                       .startofpacket
-    input  wire         avtx_endofpacket,         //                       .endofpacket
-    output wire [31:0]  avrx_data,                //                   avrx.data
+    output wire         avtx_ready,               //                       .ready
+    output wire [35:0]  avrx_data,                //                   avrx.data
     output wire         avrx_valid,               //                       .valid
-    input  wire         avrx_ready,               //                       .ready
-    output wire         avrx_startofpacket,       //                       .startofpacket
-    output wire         avrx_endofpacket,         //                       .endofpacket
     input  wire         reset,                    //                  reset.reset
     input  wire         mgmt_clk,                 //               mgmt_clk.clk
     input  wire [9:0]   mm_address,               //                mgmt_mm.address
@@ -27,9 +22,8 @@ module fc_8g_xcvr (
     output wire  [91:0] reconfig_from_xcvr        //     reconfig_from_xcvr.
   );
 
-  wire        pll_locked;
+  wire         pll_locked;
 
-  wire         rx_xcvr_ready;  // TODO: Unused
   logic [3:0]  rx_le_datak;
   logic [31:0] rx_le_data;
   logic [3:0]  rx_be_datak_r;
@@ -73,7 +67,7 @@ module fc_8g_xcvr (
     .phy_mgmt_write(mgmt_write),               //                            .write
     .phy_mgmt_writedata(mgmt_writedata),       //                            .writedata
     .tx_ready(tx_xcvr_ready),                  //                    tx_ready.export
-    .rx_ready(rx_xcvr_ready),                  //                    rx_ready.export
+    .rx_ready(),                               //                    rx_ready.export
     .pll_ref_clk(phy_clk) ,                    //                 pll_ref_clk.clk
     .tx_serial_data(td_p),                     //              tx_serial_data.export
     .pll_locked(pll_locked),                   //                  pll_locked.export
@@ -95,16 +89,6 @@ module fc_8g_xcvr (
     .reconfig_from_xcvr(reconfig_from_xcvr),   //          reconfig_from_xcvr.reconfig_from_xcvr
     .reconfig_to_xcvr(reconfig_to_xcvr)        //            reconfig_to_xcvr.reconfig_to_xcvr
   );
-
-  // Driven by fc_state_rx
-  fc::state_t state;
-  fc::state_t state_mgmt_cdc1;
-  fc::state_t state_mgmt_cdc2;
-  fc::state_t state_mgmt_xfered;
-
-  fc::state_t state_tx_cdc1;
-  fc::state_t state_tx_cdc2;
-  fc::state_t state_tx_xfered;
 
   assign status_word = {15'b0, pll_locked, rx_disperr, rx_errdetect, rx_patterndetect, rx_syncstatus};
 
@@ -203,9 +187,7 @@ module fc_8g_xcvr (
       4'h0: begin
         case (mm_address[4:0])
           5'h0: reg_readdata = status_word_mgmt_xfered;
-          5'h1: reg_readdata = state_mgmt_xfered;
-          5'h2: reg_readdata = rx_last_unknown;
-          // TODO: Add counter for STATE_AC transitions
+          5'h1: reg_readdata = rx_last_unknown;
           default: reg_readdata = 32'hffffffff;
         endcase
       end
@@ -246,47 +228,14 @@ module fc_8g_xcvr (
     rx_be_datak <= {rx_le_datak[0], rx_le_datak[1], rx_le_datak[2], rx_le_datak[3]};
   end
 
-  logic [31:0] user_tx_data;
-  logic [3:0]  user_tx_datak;
-
-  assign user_tx_data = avtx_valid ? avtx_data : fc::IDLE;
-  // The start and end primitive of a frame is a K28.5, that's the only time
-  // the avtx stream has a control character
-  assign user_tx_datak = (avtx_valid | avtx_startofpacket | avtx_endofpacket) ? 4'b0000 : 4'b0001;
-
-  always @(posedge mgmt_clk) begin
-    state_mgmt_cdc1 <= state;
-    state_mgmt_cdc2 <= state_mgmt_cdc1;
-    state_mgmt_xfered <= state_mgmt_cdc2;
-  end
-
-  always @(posedge tx_clk) begin
-    state_tx_cdc1 <= state;
-    state_tx_cdc2 <= state_tx_cdc1;
-    state_tx_xfered <= state_tx_cdc2;
-  end
-
-  fc_state_rx state_rx (
-    .clk(rx_clk),
-    .reset(reset | ~is_aligned),
-    .data(rx_be_data),
-    .datak(rx_be_datak),
-    .state(state)
-  );
-
-  fc_state_tx state_tx (
-    .clk(tx_clk),
-    .data(tx_be_data),
-    .datak(tx_be_datak),
-    .state(state_tx_xfered)
-  );
-
-  // TODO(bluecmd): Note: On entry to the Active State, an FC_Port shall
-  // transmit a minimum of 6 IDLES before transmitting other Transmission Words
-
-  assign avrx_valid = state == fc::STATE_AC;
-  assign avrx_data = rx_be_data;
+  // The TX stream is required to always have a valid frame, if it does not
+  // treat it as a catastrophic failure and kill the link
+  assign tx_be_data  = avtx_valid ? avtx_data[31:0] : fc::NOS;
+  assign tx_be_datak = avtx_valid ? avtx_data[35:32] : 4'b1000;
 
   assign avtx_ready = tx_xcvr_ready;
+  assign avrx_valid = is_aligned;
+
+  assign avrx_data = {rx_be_datak, rx_be_data};
 
 endmodule

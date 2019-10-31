@@ -1,4 +1,4 @@
-.PHONY: sim lint
+.PHONY: sim lint test
 
 lint:
 	verilator --lint-only freq_gauge.sv

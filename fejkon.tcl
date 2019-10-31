@@ -14,6 +14,8 @@ set_instance_parameter_value ext0 {clockFrequency} {50000000.0}
 set_instance_parameter_value ext0 {clockFrequencyKnown} {1}
 set_instance_parameter_value ext0 {resetSynchronousEdges} {NONE}
 
+add_instance fc0 fc_framer 1.0
+
 add_instance fcport0 fejkon_fcport 1.0
 
 add_instance ident fejkon_identity 1.0
@@ -123,6 +125,8 @@ add_interface si570_i2c conduit end
 set_interface_property si570_i2c EXPORT_OF si570_ctrl.si570_i2c
 
 # connections and connection parameters
+add_connection ext0.clk fc0.mgmt_clk
+
 add_connection ext0.clk fcport0.mgmt_clk
 
 add_connection ext0.clk ident.clk
@@ -156,6 +160,19 @@ add_connection ext0.clk_reset jtagm.clk_reset
 add_connection ext0.clk_reset reset_ctrl.reset_in0
 
 add_connection ext0.clk_reset si570_ctrl.reset
+
+add_connection fc0.avtx fcport0.tx_st
+
+add_connection fcport0.rx_clk fc0.rx_clk
+
+add_connection fcport0.rx_st fc0.avrx
+
+add_connection fcport0.tx_clk fc0.tx_clk
+
+add_connection jtagm.master fc0.mgmt_mm
+set_connection_parameter_value jtagm.master/fc0.mgmt_mm arbitrationPriority {1}
+set_connection_parameter_value jtagm.master/fc0.mgmt_mm baseAddress {0x00012000}
+set_connection_parameter_value jtagm.master/fc0.mgmt_mm defaultConnection {0}
 
 add_connection jtagm.master fcport0.mgmt_mm
 set_connection_parameter_value jtagm.master/fcport0.mgmt_mm arbitrationPriority {1}
@@ -199,6 +216,11 @@ set_connection_parameter_value jtagm.master/temp.temp_mm defaultConnection {0}
 
 add_connection jtagm.master_reset reset_ctrl.reset_in1
 
+add_connection pcie.bar2_mm fc0.mgmt_mm
+set_connection_parameter_value pcie.bar2_mm/fc0.mgmt_mm arbitrationPriority {1}
+set_connection_parameter_value pcie.bar2_mm/fc0.mgmt_mm baseAddress {0x00012000}
+set_connection_parameter_value pcie.bar2_mm/fc0.mgmt_mm defaultConnection {0}
+
 add_connection pcie.bar2_mm fcport0.mgmt_mm
 set_connection_parameter_value pcie.bar2_mm/fcport0.mgmt_mm arbitrationPriority {1}
 set_connection_parameter_value pcie.bar2_mm/fcport0.mgmt_mm baseAddress {0x00010000}
@@ -229,6 +251,8 @@ add_connection phy_clk.out_clk fcport0.phy_clk
 add_connection phy_clk.out_clk phy_clk_gauge.probe_clk
 
 add_connection phy_clk.out_clk phy_clk_out.in_clk
+
+add_connection reset_ctrl.reset_out fc0.reset
 
 add_connection reset_ctrl.reset_out fcport0.reset
 

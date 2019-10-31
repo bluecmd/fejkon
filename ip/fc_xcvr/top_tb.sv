@@ -2,8 +2,9 @@
 `define MGMT_RESET_N tb.tb_inst_reset_bfm
 `define XCVR tb.tb_inst.fc_8g_xcvr_0
 `define PHY tb.tb_inst.fc_8g_xcvr_0.phy
-`define TX tb.tb_inst_xcvr_tx_bfm
+`define TX tb.tb_inst_usertx_bfm
 `define PMA_CLK tb.tb_inst.fc_8g_xcvr_0.phy.fc_phy_inst.genblk1.S5.transceiver_core.pll_out_clk
+`define FRAMER tb.tb_inst.fc_framer_0
 
 `timescale 1ps / 1fs
 
@@ -15,11 +16,13 @@ module top_tb;
 
   initial begin
     set_verbosity(VERBOSITY_INFO);
-    wait(`XCVR.state == fc::STATE_AC);
+    wait(`FRAMER.state == fc::STATE_AC);
     $sformat(message, "%m: Test passed");
     print(VERBOSITY_INFO, message);
     // Run one 1 us more for more wave data
     #1000000
+    // Keep at least one assert in here for the simulation script
+    assert(1==1);
     $stop();
   end
 

@@ -59,6 +59,7 @@ package fc;
   function primitives_t map_primitive(input logic [31:0] data);
     case(data)
       fc::SOFI3: return fc::PRIM_SOFI3;
+      // TODO
       fc::EOFT:  return fc::PRIM_EOFT;
       fc::OLS:   return fc::PRIM_OLS;
       fc::LRR:   return fc::PRIM_LRR;

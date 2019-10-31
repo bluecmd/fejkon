@@ -30,15 +30,9 @@ module fc_8g_xcvr (
   wire        pll_locked;
 
   wire         rx_xcvr_ready;  // TODO: Unused
-  wire         tx_xcvr_ready;
-  logic [3:0]  tx_le_datak;
-  logic [31:0] tx_le_data;
+  logic [3:0]  rx_le_datak;
   logic [31:0] rx_le_data;
-  wire  [3:0]  rx_le_datak;
-  wire  [3:0]  tx_be_datak;
   logic [3:0]  rx_be_datak_r;
-  logic [3:0]  tx_be_datak_r;
-  wire  [31:0] tx_be_data;
   logic [31:0] rx_be_data;
   logic [3:0]  rx_be_datak;
   wire  [3:0]  rx_disperr;
@@ -46,9 +40,18 @@ module fc_8g_xcvr (
   wire  [3:0]  rx_patterndetect;
   wire  [3:0]  rx_syncstatus;
 
+  wire         tx_xcvr_ready;
+  logic [3:0]  tx_le_datak;
+  logic [31:0] tx_le_data;
+  wire  [31:0] tx_be_data;
+  wire  [3:0]  tx_be_datak;
+  logic [3:0]  tx_be_datak_r;
+
   // Alignment registers
   logic [31:0] rx_le_data_raw;
   logic [31:0] rx_le_data_raw_r;
+  logic [3:0]  rx_le_datak_raw;
+  logic [3:0]  rx_le_datak_raw_r;
 
   wire [31:0] status_word;
 
@@ -87,7 +90,7 @@ module fc_8g_xcvr (
     .tx_dispval(4'b0),                         //                  tx_dispval.data
     .tx_forcedisp(4'b0),                       //                tx_forcedisp.data
     .rx_parallel_data(rx_le_data_raw),         //            rx_parallel_data.data
-    .rx_datak(rx_le_datak),                    //                    rx_datak.data
+    .rx_datak(rx_le_datak_raw),                //                    rx_datak.data
     .reconfig_from_xcvr(reconfig_from_xcvr),   //          reconfig_from_xcvr.reconfig_from_xcvr
     .reconfig_to_xcvr(reconfig_to_xcvr)        //            reconfig_to_xcvr.reconfig_to_xcvr
   );
@@ -118,11 +121,15 @@ module fc_8g_xcvr (
   // TODO: Test this in testbench
   always @(posedge rx_clk) begin
     rx_le_data_raw_r <= rx_le_data_raw;
+    rx_le_datak_raw_r <= rx_le_datak_raw;
     if (rx_patterndetect == 4'b0100) begin
       rx_le_data[15:0] <= rx_le_data_raw_r[31:16];
       rx_le_data[31:16] <= rx_le_data_raw[15:0];
+      rx_le_datak[1:0] <= rx_le_datak_raw_r[3:2];
+      rx_le_datak[3:2] <= rx_le_datak_raw[1:0];
     end else if (rx_patterndetect == 4'b0001) begin
       rx_le_data <= rx_le_data_raw_r;
+      rx_le_datak <= rx_le_datak_raw;
     end
   end
 
@@ -131,22 +138,21 @@ module fc_8g_xcvr (
   int rx_primitive_cntrs [fc::PRIM_MAX];
 
   fc::primitives_t tx_prim = fc::PRIM_UNKNOWN, rx_prim = fc::PRIM_UNKNOWN;
-  fc::primitives_t tx_prim_r = fc::PRIM_UNKNOWN, rx_prim_r = fc::PRIM_UNKNOWN;
 
   always @(posedge rx_clk) begin
     rx_be_datak_r <= rx_be_datak;
     if (rx_be_datak == 4'b1000)
-      rx_prim_r <= fc::map_primitive(rx_be_data);
+      rx_prim <= fc::map_primitive(rx_be_data);
     if (rx_be_datak_r == 4'b1000)
-      rx_primitive_cntrs[rx_prim_r]++;
+      rx_primitive_cntrs[rx_prim]++;
   end
 
   always @(posedge tx_clk) begin
     tx_be_datak_r <= tx_be_datak;
     if (tx_be_datak == 4'b1000)
-      tx_prim_r <= fc::map_primitive(tx_be_data);
+      tx_prim <= fc::map_primitive(tx_be_data);
     if (tx_be_datak_r == 4'b1000)
-      tx_primitive_cntrs[tx_prim_r]++;
+      tx_primitive_cntrs[tx_prim]++;
   end
 
   logic [31:0] reg_readdata;

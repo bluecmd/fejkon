@@ -7,7 +7,7 @@ module fc_state_rx (
     output fc::state_t state
   );
 
-  fc::state_t state_r = fc::STATE_OL1, state_next;
+  fc::state_t state_r = fc::STATE_LF2, state_next;
 
   assign state = state_r;
 
@@ -16,6 +16,7 @@ module fc_state_rx (
     state_next = state_r;
     case (fc::map_primitive(data))
       fc::PRIM_OLS: state_next = fc::STATE_OL2;
+      fc::PRIM_NOS: state_next = fc::STATE_LF1;
       fc::PRIM_LR: begin
         if (state == fc::STATE_OL3 || state == fc::STATE_LF2)
           state_next = fc::STATE_LF2;
@@ -57,7 +58,7 @@ module fc_state_rx (
 
   always @(posedge clk) begin
     if (reset_r) begin
-      state_r <= fc::STATE_OL1;
+      state_r <= fc::STATE_LF2;
     end else begin
       state_r <= state_next;
     end

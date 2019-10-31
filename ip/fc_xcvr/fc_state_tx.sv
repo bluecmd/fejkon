@@ -8,7 +8,7 @@ module fc_state_tx (
 
   always @* begin
     case (state)
-      fc::STATE_AC:  data = fc::IDLE;
+      fc::STATE_AC:  data = fc::ARBFF;
       fc::STATE_LR1: data = fc::LR;
       fc::STATE_LR2: data = fc::LRR;
       fc::STATE_LR3: data = fc::IDLE;

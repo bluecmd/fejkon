@@ -4,13 +4,14 @@ package fc;
     return {Y[2:0], X[4:0]};
   endfunction
 
-  const logic [31:0] IDLE =  {D(28,5), D(21,4), D(21,5), D(21,5)};
+  const logic [31:0] IDLE  = {D(28,5), D(21,4), D(21,5), D(21,5)};
+  const logic [31:0] ARBFF = {D(28,5), D(20,4), D(31,7), D(31,7)};
   const logic [31:0] SOFI3 = {D(28,5), D(21,5), D(21,2), D(21,2)};
   const logic [31:0] EOFT  = {D(28,5), D(21,4), D(21,3), D(21,3)};
-  const logic [31:0] NOS =   {D(28,5), D(21,2), D(31,5), D(5,2)};
-  const logic [31:0] OLS =   {D(28,5), D(21,1), D(10,4), D(21,2)};
-  const logic [31:0] LR  =   {D(28,5), D(9,2),  D(31,5), D(9,2)};
-  const logic [31:0] LRR =   {D(28,5), D(21,1), D(31,5), D(9,2)};
+  const logic [31:0] NOS   = {D(28,5), D(21,2), D(31,5), D(5,2)};
+  const logic [31:0] OLS   = {D(28,5), D(21,1), D(10,4), D(21,2)};
+  const logic [31:0] LR    = {D(28,5), D(9,2),  D(31,5), D(9,2)};
+  const logic [31:0] LRR   = {D(28,5), D(21,1), D(31,5), D(9,2)};
 
   typedef enum integer {
     PRIM_IDLE = 0,
@@ -40,6 +41,7 @@ package fc;
     PRIM_OLS,
     PRIM_LR,
     PRIM_LRR,
+    PRIM_ARBFF,
     PRIM_UNKNOWN,
     PRIM_MAX
   } primitives_t;
@@ -66,6 +68,7 @@ package fc;
       fc::LR:    return fc::PRIM_LR;
       fc::NOS:   return fc::PRIM_NOS;
       fc::IDLE:  return fc::PRIM_IDLE;
+      fc::ARBFF: return fc::PRIM_ARBFF;
       default:   return fc::PRIM_UNKNOWN;
     endcase
     return fc::PRIM_UNKNOWN;

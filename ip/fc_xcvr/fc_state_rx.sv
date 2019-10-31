@@ -32,7 +32,7 @@ module fc_state_rx (
           default: state_next = fc::STATE_LR3;
         endcase
       end
-      fc::PRIM_IDLE: begin
+      fc::PRIM_IDLE, fc::PRIM_ARBFF: begin
         case (state)
           fc::STATE_AC: state_next = fc::STATE_AC;
           fc::STATE_LR1: state_next = fc::STATE_LR1;

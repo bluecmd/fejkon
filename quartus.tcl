@@ -35,7 +35,14 @@ set_instance_assignment -name PARTITION_HIERARCHY fejkon_pcie -to "fejkon_pcie:p
 
 source ../de5net.tcl
 
+# This is to enable SignalTap if you need that: (step 1/2)
+# set_global_assignment -name ENABLE_SIGNALTAP ON
+# set_global_assignment -name USE_SIGNALTAP_FILE ../stps/fcrx.stp
+# set_global_assignment -name SIGNALTAP_FILE ../stps/fcrx.stp
+
 # Commit assignments
 export_assignments
 
+# This is to enable SignalTap if you need that: (step 2/2)
+# quartus_stp fejkon --stp_file ../stps/fcrx.stp --enable
 execute_flow -compile

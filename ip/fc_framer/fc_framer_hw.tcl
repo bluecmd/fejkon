@@ -43,6 +43,7 @@ add_fileset_file fc.sv SYSTEM_VERILOG PATH ../fc.sv
 add_fileset_file fc_state_rx.sv SYSTEM_VERILOG PATH fc_state_rx.sv
 add_fileset_file fc_state_tx.sv SYSTEM_VERILOG PATH fc_state_tx.sv
 add_fileset_file fc_framer.sv SYSTEM_VERILOG PATH fc_framer.sv
+add_fileset_file fc_framer.sdc SDC PATH fc_framer.sdc
 
 add_fileset SIM_VERILOG SIM_VERILOG "" ""
 set_fileset_property SIM_VERILOG TOP_LEVEL fc_framer

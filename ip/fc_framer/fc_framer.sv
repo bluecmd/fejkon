@@ -33,9 +33,9 @@ module fc_framer (
   fc::state_t state_mgmt_cdc2;
   fc::state_t state_mgmt_xfered;
 
-  fc::state_t state_tx_cdc1;
-  fc::state_t state_tx_cdc2;
-  fc::state_t state_tx_xfered;
+  fc::state_t state_tx_cdc1 = fc::STATE_LF2;
+  fc::state_t state_tx_cdc2 = fc::STATE_LF2;
+  fc::state_t state_tx_xfered = fc::STATE_LF2;
 
   logic [31:0] reg_readdata;
   assign mm_readdata = reg_readdata;

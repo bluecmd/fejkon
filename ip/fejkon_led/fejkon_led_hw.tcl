@@ -42,6 +42,7 @@ set_fileset_property QUARTUS_SYNTH ENABLE_FILE_OVERWRITE_MODE true
 add_fileset_file fejkon_led.sv VERILOG PATH fejkon_led.sv TOP_LEVEL_FILE
 
 add_fileset SIM_VERILOG SIM_VERILOG "" ""
+set_fileset_property SIM_VERILOG TOP_LEVEL fejkon_led
 set_fileset_property SIM_VERILOG ENABLE_RELATIVE_INCLUDE_PATHS false
 set_fileset_property SIM_VERILOG ENABLE_FILE_OVERWRITE_MODE true
 add_fileset_file fejkon_led.sv VERILOG PATH fejkon_led.sv

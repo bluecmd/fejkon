@@ -7,13 +7,15 @@ if {$CONFIG_PCIE != "y"} {
 }
 
 if {$CONFIG_FCPORT0 != "y"} {
+  set_instance_property sfp0 ENABLED false
   set_instance_property fc0 ENABLED false
-  set_instance_property fcport0 ENABLED false
+  set_instance_property xcvr0 ENABLED false
 }
 
 if {$CONFIG_FCPORT1 != "y"} {
+  set_instance_property sfp1 ENABLED false
   set_instance_property fc1 ENABLED false
-  set_instance_property fcport1 ENABLED false
+  set_instance_property xcvr1 ENABLED false
 }
 
 if {$CONFIG_LOOPBACK_01 != "y"} {

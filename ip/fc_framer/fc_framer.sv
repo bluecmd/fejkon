@@ -24,7 +24,8 @@ module fc_framer (
     output wire [31:0]  mm_readdata,              //                       .readdata
     input  wire [31:0]  mm_writedata,             //                       .writedata
     input  wire         tx_clk,                   //                 tx_clk.clk
-    input  wire         rx_clk                    //                 rx_clk.clk
+    input  wire         rx_clk,                   //                 rx_clk.clk
+    output wire         active                    //                 active.active_led
   );
 
   // Driven by fc_state_rx
@@ -89,5 +90,7 @@ module fc_framer (
 
   assign userrx_valid = state == fc::STATE_AC;
   assign userrx_data = avtx_data[31:0];
+
+  assign active = userrx_valid;
 
 endmodule

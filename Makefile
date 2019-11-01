@@ -44,7 +44,7 @@ ip/altera_fc_phy/fc_phy.qip: ip/altera_fc_phy/fc_phy.v
 config.tcl: .config config.py
 	python3 config.py > config.tcl
 
-fejkon.qsys: fejkon.tcl fejkon_apply_config.tcl fejkon_fcport.qsys fejkon_sfp.qsys fejkon_pcie.qsys config.tcl
+fejkon.qsys: fejkon.tcl fejkon_apply_config.tcl fejkon_sfp.qsys fejkon_pcie.qsys config.tcl
 	$(QPATH)/sopc_builder/bin/qsys-script --script=fejkon_apply_config.tcl
 
 %.qsys: %.tcl

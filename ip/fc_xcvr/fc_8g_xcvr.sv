@@ -19,7 +19,8 @@ module fc_8g_xcvr (
     output wire         rx_clk,                   //                 rx_clk.clk
     input  wire         phy_clk,                  //                phy_clk.clk
     input  wire [139:0] reconfig_to_xcvr,         //       reconfig_to_xcvr.
-    output wire  [91:0] reconfig_from_xcvr        //     reconfig_from_xcvr.
+    output wire  [91:0] reconfig_from_xcvr,       //     reconfig_from_xcvr.
+    output wire         aligned                   //                aligned.aligned
   );
 
   wire         pll_locked;
@@ -237,5 +238,7 @@ module fc_8g_xcvr (
   assign avrx_valid = is_aligned;
 
   assign avrx_data = {rx_be_datak, rx_be_data};
+
+  assign aligned = is_aligned;
 
 endmodule

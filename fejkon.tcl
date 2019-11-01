@@ -54,6 +54,8 @@ set_instance_parameter_value jtagm {FIFO_DEPTHS} {2}
 set_instance_parameter_value jtagm {PLI_PORT} {50000}
 set_instance_parameter_value jtagm {USE_PLI} {0}
 
+add_instance led fejkon_led 1.0
+
 add_instance pcie fejkon_pcie 1.0
 
 add_instance phy_clk altera_clock_bridge 19.1
@@ -137,22 +139,16 @@ set_instance_parameter_value xcvr_reconfig {number_of_reconfig_interfaces} {4}
 # exported interfaces
 add_interface clk clock sink
 set_interface_property clk EXPORT_OF ext0.clk_in
-add_interface fc0_active conduit end
-set_interface_property fc0_active EXPORT_OF fc0.active
-add_interface fc1_active conduit end
-set_interface_property fc1_active EXPORT_OF fc1.active
-add_interface fcport0_aligned conduit end
-set_interface_property fcport0_aligned EXPORT_OF xcvr0.aligned
 add_interface fcport0_line_rd conduit end
 set_interface_property fcport0_line_rd EXPORT_OF xcvr0.line_rd
 add_interface fcport0_line_td conduit end
 set_interface_property fcport0_line_td EXPORT_OF xcvr0.line_td
-add_interface fcport1_aligned conduit end
-set_interface_property fcport1_aligned EXPORT_OF xcvr1.aligned
 add_interface fcport1_line_rd conduit end
 set_interface_property fcport1_line_rd EXPORT_OF xcvr1.line_rd
 add_interface fcport1_line_td conduit end
 set_interface_property fcport1_line_td EXPORT_OF xcvr1.line_td
+add_interface led conduit end
+set_interface_property led EXPORT_OF led.led
 add_interface pcie_refclk clock sink
 set_interface_property pcie_refclk EXPORT_OF pcie.pcie_refclk
 add_interface pcie_reset_pin conduit end
@@ -163,8 +159,6 @@ add_interface phy_clk clock sink
 set_interface_property phy_clk EXPORT_OF phy_clk.in_clk
 add_interface phy_clk_out clock source
 set_interface_property phy_clk_out EXPORT_OF phy_clk_out.out_clk
-add_interface reconfig_busy conduit end
-set_interface_property reconfig_busy EXPORT_OF xcvr_reconfig.reconfig_busy
 add_interface reset reset sink
 set_interface_property reset EXPORT_OF ext0.clk_in_reset
 add_interface sfp0_sfp conduit end
@@ -182,6 +176,8 @@ add_connection ext0.clk fc1.mgmt_clk
 add_connection ext0.clk ident.clk
 
 add_connection ext0.clk jtagm.clk
+
+add_connection ext0.clk led.clk
 
 add_connection ext0.clk pcie.bar2_clk
 
@@ -217,9 +213,23 @@ add_connection ext0.clk_reset reset_ctrl.reset_in0
 
 add_connection ext0.clk_reset si570_ctrl.reset
 
+add_connection fc0.active led.fcport0_active
+set_connection_parameter_value fc0.active/led.fcport0_active endPort {}
+set_connection_parameter_value fc0.active/led.fcport0_active endPortLSB {0}
+set_connection_parameter_value fc0.active/led.fcport0_active startPort {}
+set_connection_parameter_value fc0.active/led.fcport0_active startPortLSB {0}
+set_connection_parameter_value fc0.active/led.fcport0_active width {0}
+
 add_connection fc0.avtx xcvr0.avtx
 
 add_connection fc0.userrx fifo_0to1.in
+
+add_connection fc1.active led.fcport1_active
+set_connection_parameter_value fc1.active/led.fcport1_active endPort {}
+set_connection_parameter_value fc1.active/led.fcport1_active endPortLSB {0}
+set_connection_parameter_value fc1.active/led.fcport1_active startPort {}
+set_connection_parameter_value fc1.active/led.fcport1_active startPortLSB {0}
+set_connection_parameter_value fc1.active/led.fcport1_active width {0}
 
 add_connection fc1.avtx xcvr1.avtx
 
@@ -394,6 +404,13 @@ set_connection_parameter_value temp_sense.tsdcalo/temp.tsdcalo startPort {}
 set_connection_parameter_value temp_sense.tsdcalo/temp.tsdcalo startPortLSB {0}
 set_connection_parameter_value temp_sense.tsdcalo/temp.tsdcalo width {0}
 
+add_connection xcvr0.aligned led.fcport0_aligned
+set_connection_parameter_value xcvr0.aligned/led.fcport0_aligned endPort {}
+set_connection_parameter_value xcvr0.aligned/led.fcport0_aligned endPortLSB {0}
+set_connection_parameter_value xcvr0.aligned/led.fcport0_aligned startPort {}
+set_connection_parameter_value xcvr0.aligned/led.fcport0_aligned startPortLSB {0}
+set_connection_parameter_value xcvr0.aligned/led.fcport0_aligned width {0}
+
 add_connection xcvr0.avrx fc0.avrx
 
 add_connection xcvr0.reconfig_from_xcvr xcvr_reconfig.ch0_1_from_xcvr
@@ -418,6 +435,13 @@ add_connection xcvr0.tx_clk fc0.tx_clk
 
 add_connection xcvr0.tx_clk fifo_1to0.out_clk
 
+add_connection xcvr1.aligned led.fcport1_aligned
+set_connection_parameter_value xcvr1.aligned/led.fcport1_aligned endPort {}
+set_connection_parameter_value xcvr1.aligned/led.fcport1_aligned endPortLSB {0}
+set_connection_parameter_value xcvr1.aligned/led.fcport1_aligned startPort {}
+set_connection_parameter_value xcvr1.aligned/led.fcport1_aligned startPortLSB {0}
+set_connection_parameter_value xcvr1.aligned/led.fcport1_aligned width {0}
+
 add_connection xcvr1.avrx fc1.avrx
 
 add_connection xcvr1.rx_clk fc1.rx_clk
@@ -441,6 +465,13 @@ set_connection_parameter_value xcvr_reconfig.ch2_3_to_xcvr/xcvr1.reconfig_to_xcv
 set_connection_parameter_value xcvr_reconfig.ch2_3_to_xcvr/xcvr1.reconfig_to_xcvr startPort {}
 set_connection_parameter_value xcvr_reconfig.ch2_3_to_xcvr/xcvr1.reconfig_to_xcvr startPortLSB {0}
 set_connection_parameter_value xcvr_reconfig.ch2_3_to_xcvr/xcvr1.reconfig_to_xcvr width {0}
+
+add_connection xcvr_reconfig.reconfig_busy led.xcvr_reconfig
+set_connection_parameter_value xcvr_reconfig.reconfig_busy/led.xcvr_reconfig endPort {}
+set_connection_parameter_value xcvr_reconfig.reconfig_busy/led.xcvr_reconfig endPortLSB {0}
+set_connection_parameter_value xcvr_reconfig.reconfig_busy/led.xcvr_reconfig startPort {}
+set_connection_parameter_value xcvr_reconfig.reconfig_busy/led.xcvr_reconfig startPortLSB {0}
+set_connection_parameter_value xcvr_reconfig.reconfig_busy/led.xcvr_reconfig width {0}
 
 # interconnect requirements
 set_interconnect_requirement {$system} {qsys_mm.clockCrossingAdapter} {HANDSHAKE}

@@ -39,30 +39,26 @@ set_location_assignment PIN_AV34 -to phy_clk_out_clk ; # SMA_CLKOUT
 #============================================================
 # LED x 10
 #============================================================
-# set_instance_assignment -name IO_STANDARD "2.5 V" -to LED[2]
-# set_instance_assignment -name IO_STANDARD "2.5 V" -to LED[3]
-if {$CONFIG_FCPORT0 == "y"} {
-set_instance_assignment -name IO_STANDARD "2.5 V" -to fcport0_aligned_aligned_led ; # LED[0]
-set_location_assignment PIN_AW37 -to fcport0_aligned_aligned_led                  ; # LED[0]
-set_instance_assignment -name IO_STANDARD "2.5 V" -to fc0_active_active_led       ; # LED_BRACKET[0]
-set_location_assignment PIN_AH15 -to fc0_active_active_led                        ; # LED_BRACKET[0]
-}
-if {$CONFIG_FCPORT1 == "y"} {
-set_instance_assignment -name IO_STANDARD "2.5 V" -to fcport1_aligned_aligned_led ; # LED[1]
-set_location_assignment PIN_AV37 -to fcport1_aligned_aligned_led                  ; # LED[1]
-set_instance_assignment -name IO_STANDARD "2.5 V" -to fc1_active_active_led       ; # LED_BRACKET[1]
-set_location_assignment PIN_AH13 -to fc1_active_active_led                        ; # LED_BRACKET[1]
-}
-# set_instance_assignment -name IO_STANDARD "2.5 V" -to LED_BRACKET[2]
-# set_instance_assignment -name IO_STANDARD "2.5 V" -to LED_BRACKET[3]
-set_instance_assignment -name IO_STANDARD "2.5 V" -to reconfig_busy_reconfig_busy ; # LED_RJ45_L
-# set_instance_assignment -name IO_STANDARD "2.5 V" -to LED_RJ45_R
-# set_location_assignment PIN_BB36 -to LED[2]
-# set_location_assignment PIN_BB39 -to LED[3]
-# set_location_assignment PIN_AJ13 -to LED_BRACKET[2]
-# set_location_assignment PIN_AJ14 -to LED_BRACKET[3]
-set_location_assignment PIN_AG15 -to reconfig_busy_reconfig_busy ; # LED_RJ45_L
-# set_location_assignment PIN_AG16 -to LED_RJ45_R
+set_instance_assignment -name IO_STANDARD "2.5 V" -to led_board[0]   ; # LED[0]
+set_instance_assignment -name IO_STANDARD "2.5 V" -to led_board[1]   ; # LED[1]
+set_instance_assignment -name IO_STANDARD "2.5 V" -to led_board[2]   ; # LED[2]
+set_instance_assignment -name IO_STANDARD "2.5 V" -to led_board[3]   ; # LED[3]
+set_instance_assignment -name IO_STANDARD "2.5 V" -to led_bracket[0] ; # LED_BRACKET[0]
+set_instance_assignment -name IO_STANDARD "2.5 V" -to led_bracket[1] ; # LED_BRACKET[1]
+set_instance_assignment -name IO_STANDARD "2.5 V" -to led_bracket[2] ; # LED_BRACKET[2]
+set_instance_assignment -name IO_STANDARD "2.5 V" -to led_bracket[3] ; # LED_BRACKET[3]
+set_instance_assignment -name IO_STANDARD "2.5 V" -to led_rj45[0]    ; # LED_RJ45_L
+set_instance_assignment -name IO_STANDARD "2.5 V" -to led_rj45[1]    ; # LED_RJ45_R
+set_location_assignment PIN_AW37 -to led_board[0]     ; # LED[0]
+set_location_assignment PIN_AV37 -to led_board[1]     ; # LED[1]
+set_location_assignment PIN_BB36 -to led_board[2]     ; # LED[2]
+set_location_assignment PIN_BB39 -to led_board[3]     ; # LED[3]
+set_location_assignment PIN_AH15 -to led_bracket[0]   ; # LED_BRACKET[0]
+set_location_assignment PIN_AH13 -to led_bracket[1]   ; # LED_BRACKET[1]
+set_location_assignment PIN_AJ13 -to led_bracket[2]   ; # LED_BRACKET[2]
+set_location_assignment PIN_AJ14 -to led_bracket[3]   ; # LED_BRACKET[3]
+set_location_assignment PIN_AG15 -to led_rj45[0]      ; # LED_RJ45_L
+set_location_assignment PIN_AG16 -to led_rj45[1]      ; # LED_RJ45_R
 
 #============================================================
 # BUTTON x 4 and CPU_RESET_n

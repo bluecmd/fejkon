@@ -4,7 +4,12 @@
 **/.*.swp
 .qsys_edit
 
+# User configuration
+.config
+.config.old
+
 # Compilation output
+config.tcl
 gen/
 fejkon.sof
 ip/fejkon_identity/version.sv

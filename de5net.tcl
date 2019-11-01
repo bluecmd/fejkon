@@ -1471,26 +1471,26 @@ set_location_assignment PIN_AG4 -to fcport0_line_td_lvds                        
 #============================================================
 # SFP+ B
 #============================================================
-# set_instance_assignment -name IO_STANDARD "2.5 V" -to SFPB_LOS
-# set_instance_assignment -name IO_STANDARD "2.5 V" -to SFPB_MOD0_PRSNT_n
-# set_instance_assignment -name IO_STANDARD "2.5 V" -to SFPB_MOD1_SCL
-# set_instance_assignment -name IO_STANDARD "2.5 V" -to SFPB_MOD2_SDA
-# set_instance_assignment -name IO_STANDARD "2.5 V" -to SFPB_RATESEL[0]
-# set_instance_assignment -name IO_STANDARD "2.5 V" -to SFPB_RATESEL[1]
-# set_instance_assignment -name IO_STANDARD "1.5-V PCML" -to SFPB_RX_p
-# set_instance_assignment -name IO_STANDARD "2.5 V" -to SFPB_TXDISABLE
-# set_instance_assignment -name IO_STANDARD "2.5 V" -to SFPB_TXFAULT
-# set_instance_assignment -name IO_STANDARD "1.5-V PCML" -to SFPB_TX_p
-# set_location_assignment PIN_R22 -to SFPB_LOS
-# set_location_assignment PIN_K22 -to SFPB_MOD0_PRSNT_n
-# set_location_assignment PIN_K21 -to SFPB_MOD1_SCL
-# set_location_assignment PIN_K20 -to SFPB_MOD2_SDA
-# set_location_assignment PIN_R21 -to SFPB_RATESEL[0]
-# set_location_assignment PIN_T22 -to SFPB_RATESEL[1]
-# set_location_assignment PIN_AP2 -to SFPB_RX_p
-# set_location_assignment PIN_H22 -to SFPB_TXDISABLE
-# set_location_assignment PIN_H20 -to SFPB_TXFAULT
-# set_location_assignment PIN_AL4 -to SFPB_TX_p
+set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp1_sfp_los                   ; # SFPB_LOS
+set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp1_sfp_prsnt_n               ; # SFPB_MOD0_PRSNT_n
+set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp1_sfp_scl                   ; # SFPB_MOD1_SCL
+set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp1_sfp_sda                   ; # SFPB_MOD2_SDA
+set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp1_sfp_ratesel[0]            ; # SFPB_RATESEL[0]
+set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp1_sfp_ratesel[1]            ; # SFPB_RATESEL[1]
+set_instance_assignment -name IO_STANDARD "1.5-V PCML" -to fcport1_line_rd_lvds      ; # SFPB_RX_p
+set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp1_sfp_txdis                 ; # SFPB_TXDISABLE
+set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp1_sfp_txfail                ; # SFPB_TXFAULT
+set_instance_assignment -name IO_STANDARD "1.5-V PCML" -to fcport1_line_td_lvds      ; # SFPB_TX_p
+set_location_assignment PIN_R22 -to sfp1_sfp_los                                     ; # SFPB_LOS
+set_location_assignment PIN_K22 -to sfp1_sfp_prsnt_n                                 ; # SFPB_MOD0_PRSNT_n
+set_location_assignment PIN_K21 -to sfp1_sfp_scl                                     ; # SFPB_MOD1_SCL
+set_location_assignment PIN_K20 -to sfp1_sfp_sda                                     ; # SFPB_MOD2_SDA
+set_location_assignment PIN_R21 -to sfp1_sfp_ratesel[0]                              ; # SFPB_RATESEL[0]
+set_location_assignment PIN_T22 -to sfp1_sfp_ratesel[1]                              ; # SFPB_RATESEL[1]
+set_location_assignment PIN_AP2 -to fcport1_line_rd_lvds                             ; # SFPB_RX_p
+set_location_assignment PIN_H22 -to sfp1_sfp_txdis                                   ; # SFPB_TXDISABLE
+set_location_assignment PIN_H20 -to sfp1_sfp_txfail                                  ; # SFPB_TXFAULT
+set_location_assignment PIN_AL4 -to fcport1_line_td_lvds                             ; # SFPB_TX_p
 
 #============================================================
 # SFP+ C

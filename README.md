@@ -25,6 +25,20 @@ There are a few modifications to the board that are recommended.
 
 ![DE5-Net Voltage Regulators](images/de5-net-vrs.jpg)
 
+## Configuring and Building
+
+FPGA tooling can be a bit stuborn to work with, and if you do not have an FPGA
+background you might not want to use them.
+
+Fejkon uses Kconfig menu configuration for configuring the board features, and
+can be configured and built like this:
+
+```
+$ pip3 install menuconfig  # Unless you have menuconfig installed already
+$ make menuconfig
+$ make
+```
+
 ## Developing
 
 The recommended flow is using Quartus Platform Designer to make changes.

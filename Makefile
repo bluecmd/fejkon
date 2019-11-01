@@ -2,7 +2,7 @@ QPATH ?= "$(HOME)/intelFPGA/19.1/quartus"
 
 .DELETE_ON_ERROR:
 
-.PHONY: all syscon program flash editor sim ports defconfig
+.PHONY: all syscon program flash editor sim ports defconfig menuconfig
 
 all: fejkon.sof
 

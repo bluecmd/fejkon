@@ -39,25 +39,29 @@ set_location_assignment PIN_AV34 -to phy_clk_out_clk ; # SMA_CLKOUT
 #============================================================
 # LED x 10
 #============================================================
-# set_instance_assignment -name IO_STANDARD "2.5 V" -to LED[0]
-# set_instance_assignment -name IO_STANDARD "2.5 V" -to LED[1]
 # set_instance_assignment -name IO_STANDARD "2.5 V" -to LED[2]
 # set_instance_assignment -name IO_STANDARD "2.5 V" -to LED[3]
-set_instance_assignment -name IO_STANDARD "2.5 V" -to led_export[0] ; # LED_BRACKET[0]
-set_instance_assignment -name IO_STANDARD "2.5 V" -to led_export[1] ; # LED_BRACKET[1]
-set_instance_assignment -name IO_STANDARD "2.5 V" -to led_export[2] ; # LED_BRACKET[2]
-set_instance_assignment -name IO_STANDARD "2.5 V" -to led_export[3] ; # LED_BRACKET[3]
-# set_instance_assignment -name IO_STANDARD "2.5 V" -to LED_RJ45_L
+if {$CONFIG_FCPORT0 == "y"} {
+set_instance_assignment -name IO_STANDARD "2.5 V" -to fcport0_aligned_aligned_led ; # LED[0]
+set_location_assignment PIN_AW37 -to fcport0_aligned_aligned_led                  ; # LED[0]
+set_instance_assignment -name IO_STANDARD "2.5 V" -to fc0_active_active_led       ; # LED_BRACKET[0]
+set_location_assignment PIN_AH15 -to fc0_active_active_led                        ; # LED_BRACKET[0]
+}
+if {$CONFIG_FCPORT1 == "y"} {
+set_instance_assignment -name IO_STANDARD "2.5 V" -to fcport1_aligned_aligned_led ; # LED[1]
+set_location_assignment PIN_AV37 -to fcport1_aligned_aligned_led                  ; # LED[1]
+set_instance_assignment -name IO_STANDARD "2.5 V" -to fc1_active_active_led       ; # LED_BRACKET[1]
+set_location_assignment PIN_AH13 -to fc1_active_active_led                        ; # LED_BRACKET[1]
+}
+# set_instance_assignment -name IO_STANDARD "2.5 V" -to LED_BRACKET[2]
+# set_instance_assignment -name IO_STANDARD "2.5 V" -to LED_BRACKET[3]
+set_instance_assignment -name IO_STANDARD "2.5 V" -to reconfig_busy_reconfig_busy ; # LED_RJ45_L
 # set_instance_assignment -name IO_STANDARD "2.5 V" -to LED_RJ45_R
-# set_location_assignment PIN_AW37 -to LED[0]
-# set_location_assignment PIN_AV37 -to LED[1]
 # set_location_assignment PIN_BB36 -to LED[2]
 # set_location_assignment PIN_BB39 -to LED[3]
-set_location_assignment PIN_AH15 -to led_export[0] ; # LED_BRACKET[0]
-set_location_assignment PIN_AH13 -to led_export[1] ; # LED_BRACKET[1]
-set_location_assignment PIN_AJ13 -to led_export[2] ; # LED_BRACKET[2]
-set_location_assignment PIN_AJ14 -to led_export[3] ; # LED_BRACKET[3]
-# set_location_assignment PIN_AG15 -to LED_RJ45_L
+# set_location_assignment PIN_AJ13 -to LED_BRACKET[2]
+# set_location_assignment PIN_AJ14 -to LED_BRACKET[3]
+set_location_assignment PIN_AG15 -to reconfig_busy_reconfig_busy ; # LED_RJ45_L
 # set_location_assignment PIN_AG16 -to LED_RJ45_R
 
 #============================================================
@@ -157,6 +161,7 @@ set_location_assignment PIN_BC37 -to reset_reset_n ; # CPU_RESET_n
 #============================================================
 # PCIe x 8
 #============================================================
+if {$CONFIG_PCIE == "y"} {
 set_instance_assignment -name IO_STANDARD "2.5 V" -to pcie_reset_pin_perst_n ; # PCIE_PERST_n
 set_instance_assignment -name IO_STANDARD "HCSL" -to pcie_refclk_clk ; # PCIE_REFCLK_p
 set_instance_assignment -name IO_STANDARD "1.5-V PCML" -to pcie_serial_rx_in0 ; # PCIE_RX_p[0]
@@ -199,6 +204,7 @@ set_location_assignment PIN_AL41 -to pcie_serial_tx_out5 ; # PCIE_TX_p[5]
 set_location_assignment PIN_AJ41 -to pcie_serial_tx_out6 ; # PCIE_TX_p[6]
 set_location_assignment PIN_AG41 -to pcie_serial_tx_out7 ; # PCIE_TX_p[7]
 # set_location_assignment PIN_BD35 -to PCIE_WAKE_n
+}  ; # if CONFIG_PCIE == y
 
 #============================================================
 # Flash/MAX Address/Data Share Bus
@@ -1447,6 +1453,7 @@ set_location_assignment PIN_AG41 -to pcie_serial_tx_out7 ; # PCIE_TX_p[7]
 #============================================================
 # SFP+ A
 #============================================================
+if {$CONFIG_FCPORT0 == "y"} {
 set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp0_sfp_los                   ; # SFPA_LOS
 set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp0_sfp_prsnt_n               ; # SFPA_MOD0_PRSNT_n
 set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp0_sfp_scl                   ; # SFPA_MOD1_SCL
@@ -1467,30 +1474,33 @@ set_location_assignment PIN_AK2 -to fcport0_line_rd_lvds                        
 set_location_assignment PIN_B22 -to sfp0_sfp_txdis                                   ; # SFPA_TXDISABLE
 set_location_assignment PIN_A22 -to sfp0_sfp_txfail                                  ; # SFPA_TXFAULT
 set_location_assignment PIN_AG4 -to fcport0_line_td_lvds                             ; # SFPA_TX_p
+}  ; # if CONFIG_FCPORT0 == y
 
 #============================================================
 # SFP+ B
 #============================================================
-# set_instance_assignment -name IO_STANDARD "2.5 V" -to SFPB_LOS
-# set_instance_assignment -name IO_STANDARD "2.5 V" -to SFPB_MOD0_PRSNT_n
-# set_instance_assignment -name IO_STANDARD "2.5 V" -to SFPB_MOD1_SCL
-# set_instance_assignment -name IO_STANDARD "2.5 V" -to SFPB_MOD2_SDA
-# set_instance_assignment -name IO_STANDARD "2.5 V" -to SFPB_RATESEL[0]
-# set_instance_assignment -name IO_STANDARD "2.5 V" -to SFPB_RATESEL[1]
-# set_instance_assignment -name IO_STANDARD "1.5-V PCML" -to SFPB_RX_p
-# set_instance_assignment -name IO_STANDARD "2.5 V" -to SFPB_TXDISABLE
-# set_instance_assignment -name IO_STANDARD "2.5 V" -to SFPB_TXFAULT
-# set_instance_assignment -name IO_STANDARD "1.5-V PCML" -to SFPB_TX_p
-# set_location_assignment PIN_R22 -to SFPB_LOS
-# set_location_assignment PIN_K22 -to SFPB_MOD0_PRSNT_n
-# set_location_assignment PIN_K21 -to SFPB_MOD1_SCL
-# set_location_assignment PIN_K20 -to SFPB_MOD2_SDA
-# set_location_assignment PIN_R21 -to SFPB_RATESEL[0]
-# set_location_assignment PIN_T22 -to SFPB_RATESEL[1]
-# set_location_assignment PIN_AP2 -to SFPB_RX_p
-# set_location_assignment PIN_H22 -to SFPB_TXDISABLE
-# set_location_assignment PIN_H20 -to SFPB_TXFAULT
-# set_location_assignment PIN_AL4 -to SFPB_TX_p
+if {$CONFIG_FCPORT1 == "y"} {
+set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp1_sfp_los                   ; # SFPB_LOS
+set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp1_sfp_prsnt_n               ; # SFPB_MOD0_PRSNT_n
+set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp1_sfp_scl                   ; # SFPB_MOD1_SCL
+set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp1_sfp_sda                   ; # SFPB_MOD2_SDA
+set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp1_sfp_ratesel[0]            ; # SFPB_RATESEL[0]
+set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp1_sfp_ratesel[1]            ; # SFPB_RATESEL[1]
+set_instance_assignment -name IO_STANDARD "1.5-V PCML" -to fcport1_line_rd_lvds      ; # SFPB_RX_p
+set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp1_sfp_txdis                 ; # SFPB_TXDISABLE
+set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp1_sfp_txfail                ; # SFPB_TXFAULT
+set_instance_assignment -name IO_STANDARD "1.5-V PCML" -to fcport1_line_td_lvds      ; # SFPB_TX_p
+set_location_assignment PIN_R22 -to sfp1_sfp_los                                     ; # SFPB_LOS
+set_location_assignment PIN_K22 -to sfp1_sfp_prsnt_n                                 ; # SFPB_MOD0_PRSNT_n
+set_location_assignment PIN_K21 -to sfp1_sfp_scl                                     ; # SFPB_MOD1_SCL
+set_location_assignment PIN_K20 -to sfp1_sfp_sda                                     ; # SFPB_MOD2_SDA
+set_location_assignment PIN_R21 -to sfp1_sfp_ratesel[0]                              ; # SFPB_RATESEL[0]
+set_location_assignment PIN_T22 -to sfp1_sfp_ratesel[1]                              ; # SFPB_RATESEL[1]
+set_location_assignment PIN_AP2 -to fcport1_line_rd_lvds                             ; # SFPB_RX_p
+set_location_assignment PIN_H22 -to sfp1_sfp_txdis                                   ; # SFPB_TXDISABLE
+set_location_assignment PIN_H20 -to sfp1_sfp_txfail                                  ; # SFPB_TXFAULT
+set_location_assignment PIN_AL4 -to fcport1_line_td_lvds                             ; # SFPB_TX_p
+}  ; # if CONFIG_FCPORT1 == y
 
 #============================================================
 # SFP+ C

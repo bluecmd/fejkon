@@ -27,8 +27,45 @@ puts " E.g:"
 puts " - master_write_32 \$m 0x000e0000 5"
 puts " - jtag_debug_reset_system \$m"
 puts " - sfp 1"
+puts " - enable 1"
+puts " - fcstat 1"
 
 puts ""
+
+proc enable {id} {
+  global m
+  set off [expr 0x1000 * $id]
+  master_write_32 $m [expr $off] 0
+}
+
+proc fcstat {id} {
+  global m
+  set off [expr 0x10000 * $id]
+  puts [format " XCVR      : %s" [master_read_32 $m [expr $off + 0x00 * 4] 1]]
+  puts [format " Last Unk. : %s" [master_read_32 $m [expr $off + 0x02 * 4] 1]]
+  puts [format " State     : %s" [master_read_32 $m [expr $off + 0x2000] 1]]
+  puts         " -- Prims         RX         TX"
+  # TODO: Calculate rate?
+  puts [format " IDLE      : %s %s" [master_read_32 $m [expr $off + 0x80 + 0x00 * 4] 1] [master_read_32 $m [expr $off + 0x100 + 0x00 * 4] 1]]
+  puts [format " R_RDY     : %s %s" [master_read_32 $m [expr $off + 0x80 + 0x01 * 4] 1] [master_read_32 $m [expr $off + 0x100 + 0x01 * 4] 1]]
+  puts [format " BB_SCS    : %s %s" [master_read_32 $m [expr $off + 0x80 + 0x02 * 4] 1] [master_read_32 $m [expr $off + 0x100 + 0x02 * 4] 1]]
+  puts [format " BB_SCR    : %s %s" [master_read_32 $m [expr $off + 0x80 + 0x03 * 4] 1] [master_read_32 $m [expr $off + 0x100 + 0x03 * 4] 1]]
+  puts [format " SOFi2     : %s %s" [master_read_32 $m [expr $off + 0x80 + 0x04 * 4] 1] [master_read_32 $m [expr $off + 0x100 + 0x04 * 4] 1]]
+  puts [format " SOFn2     : %s %s" [master_read_32 $m [expr $off + 0x80 + 0x05 * 4] 1] [master_read_32 $m [expr $off + 0x100 + 0x05 * 4] 1]]
+  puts [format " SOFi3     : %s %s" [master_read_32 $m [expr $off + 0x80 + 0x06 * 4] 1] [master_read_32 $m [expr $off + 0x100 + 0x06 * 4] 1]]
+  puts [format " SOFn3     : %s %s" [master_read_32 $m [expr $off + 0x80 + 0x07 * 4] 1] [master_read_32 $m [expr $off + 0x100 + 0x07 * 4] 1]]
+  puts [format " SOFf      : %s %s" [master_read_32 $m [expr $off + 0x80 + 0x08 * 4] 1] [master_read_32 $m [expr $off + 0x100 + 0x08 * 4] 1]]
+  puts [format " EOFt      : %s %s" [master_read_32 $m [expr $off + 0x80 + 0x09 * 4] 1] [master_read_32 $m [expr $off + 0x100 + 0x09 * 4] 1]]
+  puts [format " EOFa      : %s %s" [master_read_32 $m [expr $off + 0x80 + 0x0a * 4] 1] [master_read_32 $m [expr $off + 0x100 + 0x0a * 4] 1]]
+  puts [format " EOFn      : %s %s" [master_read_32 $m [expr $off + 0x80 + 0x0b * 4] 1] [master_read_32 $m [expr $off + 0x100 + 0x0b * 4] 1]]
+  puts [format " EOFni     : %s %s" [master_read_32 $m [expr $off + 0x80 + 0x0c * 4] 1] [master_read_32 $m [expr $off + 0x100 + 0x0c * 4] 1]]
+  puts [format " NOS       : %s %s" [master_read_32 $m [expr $off + 0x80 + 0x0d * 4] 1] [master_read_32 $m [expr $off + 0x100 + 0x0d * 4] 1]]
+  puts [format " OLS       : %s %s" [master_read_32 $m [expr $off + 0x80 + 0x0e * 4] 1] [master_read_32 $m [expr $off + 0x100 + 0x0e * 4] 1]]
+  puts [format " LR        : %s %s" [master_read_32 $m [expr $off + 0x80 + 0x0f * 4] 1] [master_read_32 $m [expr $off + 0x100 + 0x0f * 4] 1]]
+  puts [format " LRR       : %s %s" [master_read_32 $m [expr $off + 0x80 + 0x10 * 4] 1] [master_read_32 $m [expr $off + 0x100 + 0x10 * 4] 1]]
+  puts [format " ARBff     : %s %s" [master_read_32 $m [expr $off + 0x80 + 0x11 * 4] 1] [master_read_32 $m [expr $off + 0x100 + 0x11 * 4] 1]]
+  puts [format " Unknown   : %s %s" [master_read_32 $m [expr $off + 0x80 + 0x12 * 4] 1] [master_read_32 $m [expr $off + 0x100 + 0x12 * 4] 1]]
+}
 
 proc sfp {id} {
   global m

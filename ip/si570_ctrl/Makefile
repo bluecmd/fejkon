@@ -1,6 +1,6 @@
 QPATH ?= "$(HOME)/intelFPGA/19.1/quartus"
 
-.PHONY: sim lint
+.PHONY: sim lint test
 
 lint:
 	vlog -lint -sv *.sv *.v

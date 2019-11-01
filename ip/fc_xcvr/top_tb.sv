@@ -2,12 +2,13 @@
 `define MGMT_RESET_N tb.tb_inst_reset_bfm
 `define XCVR tb.tb_inst.fc_8g_xcvr_0
 `define PHY tb.tb_inst.fc_8g_xcvr_0.phy
-`define TX tb.tb_inst_xcvr_tx_bfm
+`define TX tb.tb_inst_usertx_bfm
 `define PMA_CLK tb.tb_inst.fc_8g_xcvr_0.phy.fc_phy_inst.genblk1.S5.transceiver_core.pll_out_clk
+`define FRAMER tb.tb_inst.fc_framer_0
 
 `timescale 1ps / 1fs
 
-module top_tb();
+module top_tb;
 
   tb_tb tb();
 
@@ -15,21 +16,28 @@ module top_tb();
 
   initial begin
     set_verbosity(VERBOSITY_INFO);
-    wait(`PHY.rx_syncstatus != 0);
+    wait(`FRAMER.state == fc::STATE_AC);
     $sformat(message, "%m: Test passed");
     print(VERBOSITY_INFO, message);
     // Run one 1 us more for more wave data
     #1000000
+    // Keep at least one assert in here for the simulation script
+    assert(1==1);
     $stop();
   end
 
   initial begin
     wait(`TX.reset == 0);
-    // Send IDLE (K28.5 D21.4 D21.5 D21.5)
     `TX.init();
     `TX.set_response_timeout(0);
-    `TX.set_transaction_data({1'b0, 8'hB5, 1'b0, 8'hB5, 1'b0, 8'h95, 1'b1, 8'hBC});
-    repeat (1000) `TX.push_transaction();
+    `TX.set_transaction_sop(1);
+    `TX.set_transaction_data(fc::SOFI3);
+    `TX.push_transaction();
+    `TX.set_transaction_data(32'b0);
+    repeat (10) `TX.push_transaction();
+    `TX.set_transaction_eop(1);
+    `TX.set_transaction_data(fc::EOFT_N);
+    `TX.push_transaction();
   end
 
   initial begin
@@ -71,7 +79,7 @@ module top_tb();
       bit_cntr <= 0;
       symbol_rr <= symbol_r;
       case (symbol_r)
-`include "tb_8b10b.sv"
+`include "tb_8b10b.sv.inc"
       default : begin
         symbol <= "<Unknown>";
         $error("8B/10B decode error");

@@ -2,7 +2,7 @@ QPATH ?= "$(HOME)/intelFPGA/19.1/quartus"
 
 .DELETE_ON_ERROR:
 
-.PHONY: all syscon program flash editor sim ports
+.PHONY: all syscon program flash editor sim ports defconfig menuconfig
 
 all: fejkon.sof
 
@@ -21,12 +21,12 @@ fejkon.sof: ip/altera_fc_phy/fc_phy.qip fejkon.qsys de5net.sdc de5net.tcl $(wild
 	@echo
 	@echo '  ==> Generation report <=='
 	@echo
+	@cat gen/violated_paths.txt
+	@echo
 	@grep -B1 '; I/O Assignment Warnings' gen/output_files/fejkon.fit.rpt \
 		| grep -- '---'
 	@awk '/; I\/O Assignment Warnings/,/^$$/' gen/output_files/fejkon.fit.rpt
 	@cat gen/fmax.txt | grep -v Thi
-	@echo
-	@cat gen/violated_paths.txt
 	@echo
 
 # Temporarily program over JTAG
@@ -41,7 +41,11 @@ ip/altera_fc_phy/fc_phy.qip: ip/altera_fc_phy/fc_phy.v
 	(cd ip/altera_fc_phy; $(QPATH)/bin/qmegawiz  -silent $(PWD)/$<)
 	touch $@
 
-fejkon.qsys: fejkon.tcl fejkon_fcport.qsys fejkon_sfp.qsys fejkon_pcie.qsys
+config.tcl: .config config.py
+	python3 config.py > config.tcl
+
+fejkon.qsys: fejkon.tcl fejkon_apply_config.tcl fejkon_sfp.qsys fejkon_pcie.qsys config.tcl
+	$(QPATH)/sopc_builder/bin/qsys-script --script=fejkon_apply_config.tcl
 
 %.qsys: %.tcl
 	$(QPATH)/sopc_builder/bin/qsys-script --script=$< --search-path='$(wildcard ip/**/*_hw.tcl),$$'
@@ -61,3 +65,12 @@ testbench: fejkon.qsys
 
 sim: testbench
 	vsim -do msim.do
+
+menuconfig: .config
+	menuconfig
+
+defconfig:
+	cp defconfig .config
+
+.config:
+	cp defconfig .config

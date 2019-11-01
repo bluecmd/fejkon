@@ -26,6 +26,8 @@ set_instance_parameter_value alt_xcvr_reconfig_0 {number_of_reconfig_interfaces}
 
 add_instance fc_8g_xcvr_0 fc_8g_xcvr 1.0
 
+add_instance fc_framer_0 fc_framer 1.0
+
 add_instance mgmt_clk clock_source 19.1
 set_instance_parameter_value mgmt_clk {clockFrequency} {50000000.0}
 set_instance_parameter_value mgmt_clk {clockFrequencyKnown} {1}
@@ -36,25 +38,35 @@ set_instance_parameter_value phy_clk {clockFrequency} {106250000.0}
 set_instance_parameter_value phy_clk {clockFrequencyKnown} {1}
 set_instance_parameter_value phy_clk {resetSynchronousEdges} {NONE}
 
+add_instance rx_clk_bridge altera_clock_bridge 19.1
+set_instance_parameter_value rx_clk_bridge {EXPLICIT_CLOCK_RATE} {0.0}
+set_instance_parameter_value rx_clk_bridge {NUM_CLOCK_OUTPUTS} {1}
+
+add_instance tx_clk_bridge altera_clock_bridge 19.1
+set_instance_parameter_value tx_clk_bridge {EXPLICIT_CLOCK_RATE} {0.0}
+set_instance_parameter_value tx_clk_bridge {NUM_CLOCK_OUTPUTS} {1}
+
 # exported interfaces
 add_interface clk clock sink
 set_interface_property clk EXPORT_OF mgmt_clk.clk_in
+add_interface framer_mgmt_mm avalon slave
+set_interface_property framer_mgmt_mm EXPORT_OF fc_framer_0.mgmt_mm
 add_interface phy_clk clock sink
 set_interface_property phy_clk EXPORT_OF phy_clk.clk_in
 add_interface phy_reset reset sink
 set_interface_property phy_reset EXPORT_OF phy_clk.clk_in_reset
 add_interface reset reset sink
 set_interface_property reset EXPORT_OF mgmt_clk.clk_in_reset
+add_interface rx_clk clock source
+set_interface_property rx_clk EXPORT_OF rx_clk_bridge.out_clk
+add_interface tx_clk clock source
+set_interface_property tx_clk EXPORT_OF tx_clk_bridge.out_clk
+add_interface userrx avalon_streaming source
+set_interface_property userrx EXPORT_OF fc_framer_0.userrx
+add_interface usertx avalon_streaming sink
+set_interface_property usertx EXPORT_OF fc_framer_0.usertx
 add_interface xcvr_mgmt_mm avalon slave
 set_interface_property xcvr_mgmt_mm EXPORT_OF fc_8g_xcvr_0.mgmt_mm
-add_interface xcvr_rx avalon_streaming source
-set_interface_property xcvr_rx EXPORT_OF fc_8g_xcvr_0.rx
-add_interface xcvr_rx_clk clock source
-set_interface_property xcvr_rx_clk EXPORT_OF fc_8g_xcvr_0.rx_clk
-add_interface xcvr_tx avalon_streaming sink
-set_interface_property xcvr_tx EXPORT_OF fc_8g_xcvr_0.tx
-add_interface xcvr_tx_clk clock source
-set_interface_property xcvr_tx_clk EXPORT_OF fc_8g_xcvr_0.tx_clk
 
 # connections and connection parameters
 add_connection alt_xcvr_reconfig_0.reconfig_to_xcvr fc_8g_xcvr_0.reconfig_to_xcvr
@@ -63,6 +75,8 @@ set_connection_parameter_value alt_xcvr_reconfig_0.reconfig_to_xcvr/fc_8g_xcvr_0
 set_connection_parameter_value alt_xcvr_reconfig_0.reconfig_to_xcvr/fc_8g_xcvr_0.reconfig_to_xcvr startPort {}
 set_connection_parameter_value alt_xcvr_reconfig_0.reconfig_to_xcvr/fc_8g_xcvr_0.reconfig_to_xcvr startPortLSB {0}
 set_connection_parameter_value alt_xcvr_reconfig_0.reconfig_to_xcvr/fc_8g_xcvr_0.reconfig_to_xcvr width {0}
+
+add_connection fc_8g_xcvr_0.avrx fc_framer_0.avrx
 
 add_connection fc_8g_xcvr_0.line_td fc_8g_xcvr_0.line_rd
 set_connection_parameter_value fc_8g_xcvr_0.line_td/fc_8g_xcvr_0.line_rd endPort {}
@@ -78,13 +92,27 @@ set_connection_parameter_value fc_8g_xcvr_0.reconfig_from_xcvr/alt_xcvr_reconfig
 set_connection_parameter_value fc_8g_xcvr_0.reconfig_from_xcvr/alt_xcvr_reconfig_0.reconfig_from_xcvr startPortLSB {0}
 set_connection_parameter_value fc_8g_xcvr_0.reconfig_from_xcvr/alt_xcvr_reconfig_0.reconfig_from_xcvr width {0}
 
+add_connection fc_8g_xcvr_0.rx_clk fc_framer_0.rx_clk
+
+add_connection fc_8g_xcvr_0.rx_clk rx_clk_bridge.in_clk
+
+add_connection fc_8g_xcvr_0.tx_clk fc_framer_0.tx_clk
+
+add_connection fc_8g_xcvr_0.tx_clk tx_clk_bridge.in_clk
+
+add_connection fc_framer_0.avtx fc_8g_xcvr_0.avtx
+
 add_connection mgmt_clk.clk alt_xcvr_reconfig_0.mgmt_clk_clk
 
 add_connection mgmt_clk.clk fc_8g_xcvr_0.mgmt_clk
 
+add_connection mgmt_clk.clk fc_framer_0.mgmt_clk
+
 add_connection mgmt_clk.clk_reset alt_xcvr_reconfig_0.mgmt_rst_reset
 
 add_connection mgmt_clk.clk_reset fc_8g_xcvr_0.reset
+
+add_connection mgmt_clk.clk_reset fc_framer_0.reset
 
 add_connection phy_clk.clk fc_8g_xcvr_0.phy_clk
 

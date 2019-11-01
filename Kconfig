@@ -1,0 +1,22 @@
+config PCIE
+  bool "Enable PCIe functionality"
+  help
+    Needed if you intend to use the card for something useful.
+
+menu "SFP+ Ports"
+
+config FCPORT0
+  bool "Enable Port 0 (next to LEDs)"
+
+config FCPORT1
+  bool "Enable Port 1"
+
+endmenu
+
+config LOOPBACK_01
+  bool "Loopback port 0 and port 1"
+  depends on FCPORT0 && FCPORT1
+
+config STP_FILE
+  string "SignalTap file to enable"
+

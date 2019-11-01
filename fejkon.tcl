@@ -14,7 +14,37 @@ set_instance_parameter_value ext0 {clockFrequency} {50000000.0}
 set_instance_parameter_value ext0 {clockFrequencyKnown} {1}
 set_instance_parameter_value ext0 {resetSynchronousEdges} {NONE}
 
-add_instance fcport0 fejkon_fcport 1.0
+add_instance fc0 fc_framer 1.0
+
+add_instance fc1 fc_framer 1.0
+
+add_instance fifo_0to1 altera_avalon_dc_fifo 19.1
+set_instance_parameter_value fifo_0to1 {BITS_PER_SYMBOL} {8}
+set_instance_parameter_value fifo_0to1 {CHANNEL_WIDTH} {0}
+set_instance_parameter_value fifo_0to1 {ENABLE_EXPLICIT_MAXCHANNEL} {0}
+set_instance_parameter_value fifo_0to1 {ERROR_WIDTH} {0}
+set_instance_parameter_value fifo_0to1 {EXPLICIT_MAXCHANNEL} {0}
+set_instance_parameter_value fifo_0to1 {FIFO_DEPTH} {16}
+set_instance_parameter_value fifo_0to1 {RD_SYNC_DEPTH} {3}
+set_instance_parameter_value fifo_0to1 {SYMBOLS_PER_BEAT} {4}
+set_instance_parameter_value fifo_0to1 {USE_IN_FILL_LEVEL} {0}
+set_instance_parameter_value fifo_0to1 {USE_OUT_FILL_LEVEL} {0}
+set_instance_parameter_value fifo_0to1 {USE_PACKETS} {1}
+set_instance_parameter_value fifo_0to1 {WR_SYNC_DEPTH} {3}
+
+add_instance fifo_1to0 altera_avalon_dc_fifo 19.1
+set_instance_parameter_value fifo_1to0 {BITS_PER_SYMBOL} {8}
+set_instance_parameter_value fifo_1to0 {CHANNEL_WIDTH} {0}
+set_instance_parameter_value fifo_1to0 {ENABLE_EXPLICIT_MAXCHANNEL} {0}
+set_instance_parameter_value fifo_1to0 {ERROR_WIDTH} {0}
+set_instance_parameter_value fifo_1to0 {EXPLICIT_MAXCHANNEL} {0}
+set_instance_parameter_value fifo_1to0 {FIFO_DEPTH} {16}
+set_instance_parameter_value fifo_1to0 {RD_SYNC_DEPTH} {3}
+set_instance_parameter_value fifo_1to0 {SYMBOLS_PER_BEAT} {4}
+set_instance_parameter_value fifo_1to0 {USE_IN_FILL_LEVEL} {0}
+set_instance_parameter_value fifo_1to0 {USE_OUT_FILL_LEVEL} {0}
+set_instance_parameter_value fifo_1to0 {USE_PACKETS} {1}
+set_instance_parameter_value fifo_1to0 {WR_SYNC_DEPTH} {3}
 
 add_instance ident fejkon_identity 1.0
 
@@ -23,19 +53,6 @@ set_instance_parameter_value jtagm {FAST_VER} {0}
 set_instance_parameter_value jtagm {FIFO_DEPTHS} {2}
 set_instance_parameter_value jtagm {PLI_PORT} {50000}
 set_instance_parameter_value jtagm {USE_PLI} {0}
-
-add_instance led altera_avalon_pio 19.1
-set_instance_parameter_value led {bitClearingEdgeCapReg} {0}
-set_instance_parameter_value led {bitModifyingOutReg} {0}
-set_instance_parameter_value led {captureEdge} {0}
-set_instance_parameter_value led {direction} {Output}
-set_instance_parameter_value led {edgeType} {RISING}
-set_instance_parameter_value led {generateIRQ} {0}
-set_instance_parameter_value led {irqType} {LEVEL}
-set_instance_parameter_value led {resetValue} {10.0}
-set_instance_parameter_value led {simDoTestBenchWiring} {0}
-set_instance_parameter_value led {simDrivenValue} {0.0}
-set_instance_parameter_value led {width} {4}
 
 add_instance pcie fejkon_pcie 1.0
 
@@ -77,6 +94,8 @@ set_instance_parameter_value reset_ctrl {USE_RESET_REQUEST_INPUT} {0}
 
 add_instance sfp0 fejkon_sfp 1.0
 
+add_instance sfp1 fejkon_sfp 1.0
+
 add_instance si570_ctrl si570_ctrl 1.0
 set_instance_parameter_value si570_ctrl {I2CAddress} {0}
 set_instance_parameter_value si570_ctrl {RecallFrequency} {100000000}
@@ -96,15 +115,44 @@ set_instance_parameter_value temp_sense {SIM_TSDCALO} {0}
 set_instance_parameter_value temp_sense {USER_OFFSET_ENABLE} {off}
 set_instance_parameter_value temp_sense {USE_WYS} {on}
 
+add_instance xcvr0 fc_8g_xcvr 1.0
+
+add_instance xcvr1 fc_8g_xcvr 1.0
+
+add_instance xcvr_reconfig alt_xcvr_reconfig 19.1
+set_instance_parameter_value xcvr_reconfig {ber_en} {0}
+set_instance_parameter_value xcvr_reconfig {enable_adce} {0}
+set_instance_parameter_value xcvr_reconfig {enable_analog} {1}
+set_instance_parameter_value xcvr_reconfig {enable_dcd} {0}
+set_instance_parameter_value xcvr_reconfig {enable_dcd_power_up} {1}
+set_instance_parameter_value xcvr_reconfig {enable_dfe} {0}
+set_instance_parameter_value xcvr_reconfig {enable_eyemon} {0}
+set_instance_parameter_value xcvr_reconfig {enable_mif} {0}
+set_instance_parameter_value xcvr_reconfig {enable_offset} {1}
+set_instance_parameter_value xcvr_reconfig {gui_cal_status_port} {0}
+set_instance_parameter_value xcvr_reconfig {gui_enable_pll} {0}
+set_instance_parameter_value xcvr_reconfig {gui_split_sizes} {2,2}
+set_instance_parameter_value xcvr_reconfig {number_of_reconfig_interfaces} {4}
+
 # exported interfaces
 add_interface clk clock sink
 set_interface_property clk EXPORT_OF ext0.clk_in
+add_interface fc0_active conduit end
+set_interface_property fc0_active EXPORT_OF fc0.active
+add_interface fc1_active conduit end
+set_interface_property fc1_active EXPORT_OF fc1.active
+add_interface fcport0_aligned conduit end
+set_interface_property fcport0_aligned EXPORT_OF xcvr0.aligned
 add_interface fcport0_line_rd conduit end
-set_interface_property fcport0_line_rd EXPORT_OF fcport0.line_rd
+set_interface_property fcport0_line_rd EXPORT_OF xcvr0.line_rd
 add_interface fcport0_line_td conduit end
-set_interface_property fcport0_line_td EXPORT_OF fcport0.line_td
-add_interface led conduit end
-set_interface_property led EXPORT_OF led.external_connection
+set_interface_property fcport0_line_td EXPORT_OF xcvr0.line_td
+add_interface fcport1_aligned conduit end
+set_interface_property fcport1_aligned EXPORT_OF xcvr1.aligned
+add_interface fcport1_line_rd conduit end
+set_interface_property fcport1_line_rd EXPORT_OF xcvr1.line_rd
+add_interface fcport1_line_td conduit end
+set_interface_property fcport1_line_td EXPORT_OF xcvr1.line_td
 add_interface pcie_refclk clock sink
 set_interface_property pcie_refclk EXPORT_OF pcie.pcie_refclk
 add_interface pcie_reset_pin conduit end
@@ -115,21 +163,25 @@ add_interface phy_clk clock sink
 set_interface_property phy_clk EXPORT_OF phy_clk.in_clk
 add_interface phy_clk_out clock source
 set_interface_property phy_clk_out EXPORT_OF phy_clk_out.out_clk
+add_interface reconfig_busy conduit end
+set_interface_property reconfig_busy EXPORT_OF xcvr_reconfig.reconfig_busy
 add_interface reset reset sink
 set_interface_property reset EXPORT_OF ext0.clk_in_reset
 add_interface sfp0_sfp conduit end
 set_interface_property sfp0_sfp EXPORT_OF sfp0.sfp
+add_interface sfp1_sfp conduit end
+set_interface_property sfp1_sfp EXPORT_OF sfp1.sfp
 add_interface si570_i2c conduit end
 set_interface_property si570_i2c EXPORT_OF si570_ctrl.si570_i2c
 
 # connections and connection parameters
-add_connection ext0.clk fcport0.mgmt_clk
+add_connection ext0.clk fc0.mgmt_clk
+
+add_connection ext0.clk fc1.mgmt_clk
 
 add_connection ext0.clk ident.clk
 
 add_connection ext0.clk jtagm.clk
-
-add_connection ext0.clk led.clk
 
 add_connection ext0.clk pcie.bar2_clk
 
@@ -145,11 +197,19 @@ add_connection ext0.clk reset_ctrl.clk
 
 add_connection ext0.clk sfp0.clk
 
+add_connection ext0.clk sfp1.clk
+
 add_connection ext0.clk si570_ctrl.clk
 
 add_connection ext0.clk temp.clk
 
 add_connection ext0.clk temp_sense.clk
+
+add_connection ext0.clk xcvr0.mgmt_clk
+
+add_connection ext0.clk xcvr1.mgmt_clk
+
+add_connection ext0.clk xcvr_reconfig.mgmt_clk_clk
 
 add_connection ext0.clk_reset jtagm.clk_reset
 
@@ -157,20 +217,32 @@ add_connection ext0.clk_reset reset_ctrl.reset_in0
 
 add_connection ext0.clk_reset si570_ctrl.reset
 
-add_connection jtagm.master fcport0.mgmt_mm
-set_connection_parameter_value jtagm.master/fcport0.mgmt_mm arbitrationPriority {1}
-set_connection_parameter_value jtagm.master/fcport0.mgmt_mm baseAddress {0x00010000}
-set_connection_parameter_value jtagm.master/fcport0.mgmt_mm defaultConnection {0}
+add_connection fc0.avtx xcvr0.avtx
+
+add_connection fc0.userrx fifo_0to1.in
+
+add_connection fc1.avtx xcvr1.avtx
+
+add_connection fc1.userrx fifo_1to0.in
+
+add_connection fifo_0to1.out fc1.usertx
+
+add_connection fifo_1to0.out fc0.usertx
+
+add_connection jtagm.master fc0.mgmt_mm
+set_connection_parameter_value jtagm.master/fc0.mgmt_mm arbitrationPriority {1}
+set_connection_parameter_value jtagm.master/fc0.mgmt_mm baseAddress {0x00012000}
+set_connection_parameter_value jtagm.master/fc0.mgmt_mm defaultConnection {0}
+
+add_connection jtagm.master fc1.mgmt_mm
+set_connection_parameter_value jtagm.master/fc1.mgmt_mm arbitrationPriority {1}
+set_connection_parameter_value jtagm.master/fc1.mgmt_mm baseAddress {0x00022000}
+set_connection_parameter_value jtagm.master/fc1.mgmt_mm defaultConnection {0}
 
 add_connection jtagm.master ident.mm
 set_connection_parameter_value jtagm.master/ident.mm arbitrationPriority {1}
 set_connection_parameter_value jtagm.master/ident.mm baseAddress {0x0000}
 set_connection_parameter_value jtagm.master/ident.mm defaultConnection {0}
-
-add_connection jtagm.master led.s1
-set_connection_parameter_value jtagm.master/led.s1 arbitrationPriority {1}
-set_connection_parameter_value jtagm.master/led.s1 baseAddress {0x000e0000}
-set_connection_parameter_value jtagm.master/led.s1 defaultConnection {0}
 
 add_connection jtagm.master pcie.read_mem_mm
 set_connection_parameter_value jtagm.master/pcie.read_mem_mm arbitrationPriority {1}
@@ -192,17 +264,42 @@ set_connection_parameter_value jtagm.master/sfp0.mm arbitrationPriority {1}
 set_connection_parameter_value jtagm.master/sfp0.mm baseAddress {0x1000}
 set_connection_parameter_value jtagm.master/sfp0.mm defaultConnection {0}
 
+add_connection jtagm.master sfp1.mm
+set_connection_parameter_value jtagm.master/sfp1.mm arbitrationPriority {1}
+set_connection_parameter_value jtagm.master/sfp1.mm baseAddress {0x2000}
+set_connection_parameter_value jtagm.master/sfp1.mm defaultConnection {0}
+
 add_connection jtagm.master temp.temp_mm
 set_connection_parameter_value jtagm.master/temp.temp_mm arbitrationPriority {1}
 set_connection_parameter_value jtagm.master/temp.temp_mm baseAddress {0x0010}
 set_connection_parameter_value jtagm.master/temp.temp_mm defaultConnection {0}
 
+add_connection jtagm.master xcvr0.mgmt_mm
+set_connection_parameter_value jtagm.master/xcvr0.mgmt_mm arbitrationPriority {1}
+set_connection_parameter_value jtagm.master/xcvr0.mgmt_mm baseAddress {0x00010000}
+set_connection_parameter_value jtagm.master/xcvr0.mgmt_mm defaultConnection {0}
+
+add_connection jtagm.master xcvr1.mgmt_mm
+set_connection_parameter_value jtagm.master/xcvr1.mgmt_mm arbitrationPriority {1}
+set_connection_parameter_value jtagm.master/xcvr1.mgmt_mm baseAddress {0x00020000}
+set_connection_parameter_value jtagm.master/xcvr1.mgmt_mm defaultConnection {0}
+
+add_connection jtagm.master xcvr_reconfig.reconfig_mgmt
+set_connection_parameter_value jtagm.master/xcvr_reconfig.reconfig_mgmt arbitrationPriority {1}
+set_connection_parameter_value jtagm.master/xcvr_reconfig.reconfig_mgmt baseAddress {0xffff0000}
+set_connection_parameter_value jtagm.master/xcvr_reconfig.reconfig_mgmt defaultConnection {0}
+
 add_connection jtagm.master_reset reset_ctrl.reset_in1
 
-add_connection pcie.bar2_mm fcport0.mgmt_mm
-set_connection_parameter_value pcie.bar2_mm/fcport0.mgmt_mm arbitrationPriority {1}
-set_connection_parameter_value pcie.bar2_mm/fcport0.mgmt_mm baseAddress {0x00010000}
-set_connection_parameter_value pcie.bar2_mm/fcport0.mgmt_mm defaultConnection {0}
+add_connection pcie.bar2_mm fc0.mgmt_mm
+set_connection_parameter_value pcie.bar2_mm/fc0.mgmt_mm arbitrationPriority {1}
+set_connection_parameter_value pcie.bar2_mm/fc0.mgmt_mm baseAddress {0x00012000}
+set_connection_parameter_value pcie.bar2_mm/fc0.mgmt_mm defaultConnection {0}
+
+add_connection pcie.bar2_mm fc1.mgmt_mm
+set_connection_parameter_value pcie.bar2_mm/fc1.mgmt_mm arbitrationPriority {1}
+set_connection_parameter_value pcie.bar2_mm/fc1.mgmt_mm baseAddress {0x00022000}
+set_connection_parameter_value pcie.bar2_mm/fc1.mgmt_mm defaultConnection {0}
 
 add_connection pcie.bar2_mm ident.mm
 set_connection_parameter_value pcie.bar2_mm/ident.mm arbitrationPriority {1}
@@ -219,22 +316,47 @@ set_connection_parameter_value pcie.bar2_mm/sfp0.mm arbitrationPriority {1}
 set_connection_parameter_value pcie.bar2_mm/sfp0.mm baseAddress {0x1000}
 set_connection_parameter_value pcie.bar2_mm/sfp0.mm defaultConnection {0}
 
+add_connection pcie.bar2_mm sfp1.mm
+set_connection_parameter_value pcie.bar2_mm/sfp1.mm arbitrationPriority {1}
+set_connection_parameter_value pcie.bar2_mm/sfp1.mm baseAddress {0x2000}
+set_connection_parameter_value pcie.bar2_mm/sfp1.mm defaultConnection {0}
+
 add_connection pcie.bar2_mm temp.temp_mm
 set_connection_parameter_value pcie.bar2_mm/temp.temp_mm arbitrationPriority {1}
 set_connection_parameter_value pcie.bar2_mm/temp.temp_mm baseAddress {0x0010}
 set_connection_parameter_value pcie.bar2_mm/temp.temp_mm defaultConnection {0}
 
-add_connection phy_clk.out_clk fcport0.phy_clk
+add_connection pcie.bar2_mm xcvr0.mgmt_mm
+set_connection_parameter_value pcie.bar2_mm/xcvr0.mgmt_mm arbitrationPriority {1}
+set_connection_parameter_value pcie.bar2_mm/xcvr0.mgmt_mm baseAddress {0x00010000}
+set_connection_parameter_value pcie.bar2_mm/xcvr0.mgmt_mm defaultConnection {0}
+
+add_connection pcie.bar2_mm xcvr1.mgmt_mm
+set_connection_parameter_value pcie.bar2_mm/xcvr1.mgmt_mm arbitrationPriority {1}
+set_connection_parameter_value pcie.bar2_mm/xcvr1.mgmt_mm baseAddress {0x00020000}
+set_connection_parameter_value pcie.bar2_mm/xcvr1.mgmt_mm defaultConnection {0}
 
 add_connection phy_clk.out_clk phy_clk_gauge.probe_clk
 
 add_connection phy_clk.out_clk phy_clk_out.in_clk
 
-add_connection reset_ctrl.reset_out fcport0.reset
+add_connection phy_clk.out_clk xcvr0.phy_clk
+
+add_connection phy_clk.out_clk xcvr1.phy_clk
+
+add_connection reset_ctrl.reset_out fc0.reset
+
+add_connection reset_ctrl.reset_out fc1.reset
+
+add_connection reset_ctrl.reset_out fifo_0to1.in_clk_reset
+
+add_connection reset_ctrl.reset_out fifo_0to1.out_clk_reset
+
+add_connection reset_ctrl.reset_out fifo_1to0.in_clk_reset
+
+add_connection reset_ctrl.reset_out fifo_1to0.out_clk_reset
 
 add_connection reset_ctrl.reset_out ident.reset
-
-add_connection reset_ctrl.reset_out led.reset
 
 add_connection reset_ctrl.reset_out pcie.bar2_reset
 
@@ -244,7 +366,15 @@ add_connection reset_ctrl.reset_out phy_clk_gauge.reset
 
 add_connection reset_ctrl.reset_out sfp0.reset
 
+add_connection reset_ctrl.reset_out sfp1.reset
+
 add_connection reset_ctrl.reset_out temp.reset
+
+add_connection reset_ctrl.reset_out xcvr0.reset
+
+add_connection reset_ctrl.reset_out xcvr1.reset
+
+add_connection reset_ctrl.reset_out xcvr_reconfig.mgmt_rst_reset
 
 add_connection si570_ctrl.reset_out reset_ctrl.reset_in2
 
@@ -264,12 +394,62 @@ set_connection_parameter_value temp_sense.tsdcalo/temp.tsdcalo startPort {}
 set_connection_parameter_value temp_sense.tsdcalo/temp.tsdcalo startPortLSB {0}
 set_connection_parameter_value temp_sense.tsdcalo/temp.tsdcalo width {0}
 
+add_connection xcvr0.avrx fc0.avrx
+
+add_connection xcvr0.reconfig_from_xcvr xcvr_reconfig.ch0_1_from_xcvr
+set_connection_parameter_value xcvr0.reconfig_from_xcvr/xcvr_reconfig.ch0_1_from_xcvr endPort {}
+set_connection_parameter_value xcvr0.reconfig_from_xcvr/xcvr_reconfig.ch0_1_from_xcvr endPortLSB {0}
+set_connection_parameter_value xcvr0.reconfig_from_xcvr/xcvr_reconfig.ch0_1_from_xcvr startPort {}
+set_connection_parameter_value xcvr0.reconfig_from_xcvr/xcvr_reconfig.ch0_1_from_xcvr startPortLSB {0}
+set_connection_parameter_value xcvr0.reconfig_from_xcvr/xcvr_reconfig.ch0_1_from_xcvr width {0}
+
+add_connection xcvr0.reconfig_to_xcvr xcvr_reconfig.ch0_1_to_xcvr
+set_connection_parameter_value xcvr0.reconfig_to_xcvr/xcvr_reconfig.ch0_1_to_xcvr endPort {}
+set_connection_parameter_value xcvr0.reconfig_to_xcvr/xcvr_reconfig.ch0_1_to_xcvr endPortLSB {0}
+set_connection_parameter_value xcvr0.reconfig_to_xcvr/xcvr_reconfig.ch0_1_to_xcvr startPort {}
+set_connection_parameter_value xcvr0.reconfig_to_xcvr/xcvr_reconfig.ch0_1_to_xcvr startPortLSB {0}
+set_connection_parameter_value xcvr0.reconfig_to_xcvr/xcvr_reconfig.ch0_1_to_xcvr width {0}
+
+add_connection xcvr0.rx_clk fc0.rx_clk
+
+add_connection xcvr0.rx_clk fifo_0to1.in_clk
+
+add_connection xcvr0.tx_clk fc0.tx_clk
+
+add_connection xcvr0.tx_clk fifo_1to0.out_clk
+
+add_connection xcvr1.avrx fc1.avrx
+
+add_connection xcvr1.rx_clk fc1.rx_clk
+
+add_connection xcvr1.rx_clk fifo_1to0.in_clk
+
+add_connection xcvr1.tx_clk fc1.tx_clk
+
+add_connection xcvr1.tx_clk fifo_0to1.out_clk
+
+add_connection xcvr_reconfig.ch2_3_from_xcvr xcvr1.reconfig_from_xcvr
+set_connection_parameter_value xcvr_reconfig.ch2_3_from_xcvr/xcvr1.reconfig_from_xcvr endPort {}
+set_connection_parameter_value xcvr_reconfig.ch2_3_from_xcvr/xcvr1.reconfig_from_xcvr endPortLSB {0}
+set_connection_parameter_value xcvr_reconfig.ch2_3_from_xcvr/xcvr1.reconfig_from_xcvr startPort {}
+set_connection_parameter_value xcvr_reconfig.ch2_3_from_xcvr/xcvr1.reconfig_from_xcvr startPortLSB {0}
+set_connection_parameter_value xcvr_reconfig.ch2_3_from_xcvr/xcvr1.reconfig_from_xcvr width {0}
+
+add_connection xcvr_reconfig.ch2_3_to_xcvr xcvr1.reconfig_to_xcvr
+set_connection_parameter_value xcvr_reconfig.ch2_3_to_xcvr/xcvr1.reconfig_to_xcvr endPort {}
+set_connection_parameter_value xcvr_reconfig.ch2_3_to_xcvr/xcvr1.reconfig_to_xcvr endPortLSB {0}
+set_connection_parameter_value xcvr_reconfig.ch2_3_to_xcvr/xcvr1.reconfig_to_xcvr startPort {}
+set_connection_parameter_value xcvr_reconfig.ch2_3_to_xcvr/xcvr1.reconfig_to_xcvr startPortLSB {0}
+set_connection_parameter_value xcvr_reconfig.ch2_3_to_xcvr/xcvr1.reconfig_to_xcvr width {0}
+
 # interconnect requirements
 set_interconnect_requirement {$system} {qsys_mm.clockCrossingAdapter} {HANDSHAKE}
 set_interconnect_requirement {$system} {qsys_mm.enableEccProtection} {FALSE}
 set_interconnect_requirement {$system} {qsys_mm.enableInstrumentation} {TRUE}
 set_interconnect_requirement {$system} {qsys_mm.insertDefaultSlave} {FALSE}
 set_interconnect_requirement {$system} {qsys_mm.maxAdditionalLatency} {1}
+set_interconnect_requirement {fc0.mgmt_mm} {qsys_mm.insertPerformanceMonitor} {TRUE}
+set_interconnect_requirement {fc1.mgmt_mm} {qsys_mm.insertPerformanceMonitor} {TRUE}
 set_interconnect_requirement {fcport0.mgmt_mm} {qsys_mm.insertPerformanceMonitor} {TRUE}
 set_interconnect_requirement {fcport0.rx_dma_m} {qsys_mm.insertPerformanceMonitor} {TRUE}
 set_interconnect_requirement {fcport0.setup} {qsys_mm.insertPerformanceMonitor} {TRUE}
@@ -279,5 +459,8 @@ set_interconnect_requirement {pcie.bar2_mm} {qsys_mm.insertPerformanceMonitor} {
 set_interconnect_requirement {pcie.read_mem_mm} {qsys_mm.insertPerformanceMonitor} {TRUE}
 set_interconnect_requirement {pcie.write_mem_mm} {qsys_mm.insertPerformanceMonitor} {TRUE}
 set_interconnect_requirement {sfp0.mm} {qsys_mm.insertPerformanceMonitor} {TRUE}
+set_interconnect_requirement {sfp1.mm} {qsys_mm.insertPerformanceMonitor} {TRUE}
+set_interconnect_requirement {xcvr0.mgmt_mm} {qsys_mm.insertPerformanceMonitor} {TRUE}
+set_interconnect_requirement {xcvr1.mgmt_mm} {qsys_mm.insertPerformanceMonitor} {TRUE}
 
 save_system {fejkon.qsys}

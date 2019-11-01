@@ -3,3 +3,5 @@ tb.sopcinfo
 tb/
 tb_generation*
 tb_tb.*
+.linttmp
+ip

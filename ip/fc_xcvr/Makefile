@@ -2,16 +2,22 @@ QPATH ?= "$(HOME)/intelFPGA/19.1/quartus"
 
 .DELETE_ON_ERROR:
 
-.PHONY: editor sim lint
+.PHONY: editor sim lint test
 
-lint:
-	verilator --lint-only fc_8g_xcvr.sv fc_phy_bbox.sv
+lint: testbench/tb_tb.qsys
+	verilator --lint-only ../fc.sv fc_8g_xcvr.sv fc_phy_bbox.sv
+	vlog -work .linttmp -lint -sv testbench/tb_tb/simulation/submodules/verbosity_pkg.sv \
+		../fc.sv fc_8g_xcvr.sv fc_phy_bbox.sv top_tb.sv
+	rm -fr .linttmp
 
-%.qsys: %.tcl
+%.qsys: %.tcl ip
 	$(QPATH)/sopc_builder/bin/qsys-script --script=$<
 
 editor: tb.qsys
 	$(QPATH)/sopc_builder/bin/qsys-edit $<
+
+ip:
+	ln -sf ../ ip
 
 testbench/tb_tb.qsys: tb.qsys fc_8g_xcvr_hw.tcl
 	# Force re-compilation in the simulator
@@ -25,6 +31,18 @@ testbench/tb_tb.qsys: tb.qsys fc_8g_xcvr_hw.tcl
 	# These will be re-compiled specifically by msim.do
 	ln -sf $(PWD)/fc_8g_xcvr.sv \
 		testbench/tb_tb/simulation/submodules/fc_8g_xcvr.sv
+	ln -sf $(PWD)/../fc.sv \
+		testbench/tb_tb/simulation/submodules/fc.sv
+	ln -sf $(PWD)/../fc_framer/fc_framer.sv \
+		testbench/tb_tb/simulation/submodules/fc_framer.sv
+	ln -sf $(PWD)/../fc_framer/fc_state_tx.sv \
+		testbench/tb_tb/simulation/submodules/fc_state_tx.sv
+	ln -sf $(PWD)/../fc_framer/fc_state_rx.sv \
+		testbench/tb_tb/simulation/submodules/fc_state_rx.sv
 
 sim: testbench/tb_tb.qsys
 	vsim -msgmode both -displaymsgmode both -do msim.do
+
+test: testbench/tb_tb.qsys
+	vsim -c -do msim.do
+	@echo "NOTE: A few 8B/10B errors are to be expected"

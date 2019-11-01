@@ -36,7 +36,8 @@ module fc_8g_xcvr (
   wire  [3:0]  rx_patterndetect;
   wire  [3:0]  rx_syncstatus;
 
-  wire         tx_xcvr_ready;
+  wire         tx_xcvr_ready_raw;
+  logic        tx_xcvr_ready;
   logic [3:0]  tx_le_datak;
   logic [31:0] tx_le_data;
   wire  [31:0] tx_be_data;
@@ -67,7 +68,7 @@ module fc_8g_xcvr (
     .phy_mgmt_waitrequest(mgmt_waitrequest),   //                            .waitrequest
     .phy_mgmt_write(mgmt_write),               //                            .write
     .phy_mgmt_writedata(mgmt_writedata),       //                            .writedata
-    .tx_ready(tx_xcvr_ready),                  //                    tx_ready.export
+    .tx_ready(tx_xcvr_ready_raw),              //                    tx_ready.export
     .rx_ready(),                               //                    rx_ready.export
     .pll_ref_clk(phy_clk) ,                    //                 pll_ref_clk.clk
     .tx_serial_data(td_p),                     //              tx_serial_data.export
@@ -234,7 +235,21 @@ module fc_8g_xcvr (
   assign tx_be_data  = avtx_valid ? avtx_data[31:0] : fc::NOS;
   assign tx_be_datak = avtx_valid ? avtx_data[35:32] : 4'b1000;
 
-  assign avtx_ready = tx_xcvr_ready;
+  always @(posedge mgmt_clk) begin
+    tx_xcvr_ready <= tx_xcvr_ready_raw;
+  end
+
+  logic tx_xcvr_ready_cdc1 = 1'b0;
+  logic tx_xcvr_ready_cdc2 = 1'b0;
+  logic tx_xcvr_ready_xfered = 1'b0;
+
+  always @(posedge tx_clk) begin
+    tx_xcvr_ready_cdc1 <= tx_xcvr_ready;
+    tx_xcvr_ready_cdc2 <= tx_xcvr_ready_cdc1;
+    tx_xcvr_ready_xfered <= tx_xcvr_ready_cdc2;
+  end
+
+  assign avtx_ready = tx_xcvr_ready_xfered;
   assign avrx_valid = is_aligned;
 
   assign avrx_data = {rx_be_datak, rx_be_data};

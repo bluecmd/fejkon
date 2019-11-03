@@ -77,20 +77,39 @@ module fc_framer (
     .state(state)
   );
 
+  logic [31:0] tx_data;
+  logic [3:0]  tx_datak;
+
+  logic [31:0] statetx_data;
+  logic [3:0]  statetx_datak;
+
   fc_state_tx state_tx (
     .clk(tx_clk),
-    .data(avtx_data[31:0]),
-    .datak(avtx_data[35:32]),
+    .data(statetx_data),
+    .datak(statetx_datak),
     .state(state_tx_xfered)
   );
-  assign avtx_valid = 1'b1;
 
   // TODO(bluecmd): Note: On entry to the Active State, an FC_Port shall
   // transmit a minimum of 6 IDLES before transmitting other Transmission Words
 
-  assign userrx_valid = state == fc::STATE_AC;
-  assign userrx_data = avtx_data[31:0];
+  logic is_active;
+  assign is_active = state == fc::STATE_AC;
+  assign active = is_active;
 
-  assign active = userrx_valid;
+  assign userrx_valid = is_active;
+  assign userrx_data = avtx_data[31:0];
+  assign usertx_ready = is_active;
+
+  logic [3:0] usertx_datak;
+  assign usertx_datak = (usertx_startofpacket | usertx_endofpacket) ? 4'b1000 : 4'b0000;
+
+  always @(posedge tx_clk) begin
+    tx_data <= (is_active & usertx_valid) ? usertx_data : statetx_data;
+    tx_datak <= (is_active & usertx_valid) ? usertx_datak : statetx_datak;
+  end
+
+  assign avtx_data = {tx_datak, tx_data};
+  assign avtx_valid = 1'b1;
 
 endmodule

@@ -27,10 +27,12 @@ module fc_8g_xcvr (
 
   logic [3:0]  rx_le_datak;
   logic [31:0] rx_le_data;
+  logic [3:0]  rx_le_runningdisp;
   logic [3:0]  rx_be_datak_r;
   logic [31:0] rx_be_data;
   logic [31:0] rx_be_data_r;
   logic [3:0]  rx_be_datak;
+  logic [3:0]  rx_be_runningdisp;
   wire  [3:0]  rx_disperr;
   wire  [3:0]  rx_errdetect;
   wire  [3:0]  rx_patterndetect;
@@ -49,6 +51,8 @@ module fc_8g_xcvr (
   logic [31:0] rx_le_data_raw_r;
   logic [3:0]  rx_le_datak_raw;
   logic [3:0]  rx_le_datak_raw_r;
+  logic [3:0]  rx_le_runningdisp_raw;
+  logic [3:0]  rx_le_runningdisp_raw_r;
 
   wire [31:0] status_word;
 
@@ -74,7 +78,7 @@ module fc_8g_xcvr (
     .tx_serial_data(td_p),                     //              tx_serial_data.export
     .pll_locked(pll_locked),                   //                  pll_locked.export
     .rx_serial_data(rd_p),                     //              rx_serial_data.export
-    .rx_runningdisp(),                         //              rx_runningdisp.export
+    .rx_runningdisp(rx_le_runningdisp_raw),    //              rx_runningdisp.export
     .rx_disperr(rx_disperr),                   //                  rx_disperr.export
     .rx_errdetect(rx_errdetect),               //                rx_errdetect.export
     .rx_patterndetect(rx_patterndetect),       //            rx_patterndetect.export
@@ -92,7 +96,8 @@ module fc_8g_xcvr (
     .reconfig_to_xcvr(reconfig_to_xcvr)        //            reconfig_to_xcvr.reconfig_to_xcvr
   );
 
-  assign status_word = {15'b0, pll_locked, rx_disperr, rx_errdetect, rx_patterndetect, rx_syncstatus};
+  logic [3:0] saved_patterndetect = 0;
+  assign status_word = {15'b0, pll_locked, rx_disperr, rx_errdetect, saved_patterndetect, rx_syncstatus};
 
   logic [31:0] status_word_mgmt_cdc1 = 0;
   logic [31:0] status_word_mgmt_cdc2 = 0;
@@ -109,14 +114,18 @@ module fc_8g_xcvr (
   always @(posedge rx_clk) begin
     rx_le_data_raw_r <= rx_le_data_raw;
     rx_le_datak_raw_r <= rx_le_datak_raw;
-    if (rx_patterndetect == 4'b0100) begin
+    rx_le_runningdisp_raw_r <= rx_le_runningdisp_raw;
+    if (saved_patterndetect == 4'b0100) begin
       rx_le_data[15:0] <= rx_le_data_raw_r[31:16];
       rx_le_data[31:16] <= rx_le_data_raw[15:0];
       rx_le_datak[1:0] <= rx_le_datak_raw_r[3:2];
       rx_le_datak[3:2] <= rx_le_datak_raw[1:0];
-    end else if (rx_patterndetect == 4'b0001) begin
+      rx_le_runningdisp[1:0] <= rx_le_runningdisp_raw_r[3:2];
+      rx_le_runningdisp[3:2] <= rx_le_runningdisp_raw[1:0];
+    end else if (saved_patterndetect == 4'b0001) begin
       rx_le_data <= rx_le_data_raw_r;
       rx_le_datak <= rx_le_datak_raw;
+      rx_le_runningdisp <= rx_le_runningdisp_raw;
     end
   end
 
@@ -126,7 +135,16 @@ module fc_8g_xcvr (
   logic is_aligned;
   assign is_aligned_r0 =
     (rx_syncstatus == 4'b1111) &&
-    (rx_patterndetect == 4'b0100 || rx_patterndetect == 4'b0001);
+    (saved_patterndetect == 4'b0100 || saved_patterndetect == 4'b0001);
+
+  always @(posedge rx_clk) begin
+    // rx_patterndetect is only valid for K28.5 comma. We need
+    // to store the pattern detect outcome when we see an aligned K28.5
+    if (rx_syncstatus == 4'b1111 &&
+      (rx_patterndetect == 4'b0100 || rx_patterndetect == 4'b0001)) begin
+      saved_patterndetect <= rx_patterndetect;
+    end
+  end
 
   always @(posedge rx_clk) begin
     // Match latency of rx_be_data*
@@ -228,6 +246,12 @@ module fc_8g_xcvr (
     rx_be_data[23:16] <= rx_le_data[15:8];
     rx_be_data[31:24] <= rx_le_data[7:0];
     rx_be_datak <= {rx_le_datak[0], rx_le_datak[1], rx_le_datak[2], rx_le_datak[3]};
+    rx_be_runningdisp <= {
+      rx_le_runningdisp[0],
+      rx_le_runningdisp[1],
+      rx_le_runningdisp[2],
+      rx_le_runningdisp[3]
+    };
   end
 
   // The TX stream is required to always have a valid frame, if it does not

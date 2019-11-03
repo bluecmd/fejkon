@@ -179,6 +179,7 @@ set_interface_property userrx SVD_ADDRESS_GROUP ""
 
 add_interface_port userrx userrx_data data Output 32
 add_interface_port userrx userrx_valid valid Output 1
+add_interface_port userrx userrx_ready ready Input 1
 add_interface_port userrx userrx_endofpacket endofpacket Output 1
 add_interface_port userrx userrx_startofpacket startofpacket Output 1
 
@@ -201,6 +202,7 @@ set_interface_property usertx CMSIS_SVD_VARIABLES ""
 set_interface_property usertx SVD_ADDRESS_GROUP ""
 
 add_interface_port usertx usertx_data data Input 32
+add_interface_port usertx usertx_valid valid Input 1
 add_interface_port usertx usertx_ready ready Output 1
 add_interface_port usertx usertx_endofpacket endofpacket Input 1
 add_interface_port usertx usertx_startofpacket startofpacket Input 1

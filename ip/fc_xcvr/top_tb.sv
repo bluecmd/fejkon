@@ -102,4 +102,12 @@ module top_tb;
       endcase
     end
   end
+
+  initial begin
+    wait(`PHY0.rx_ready == 1);
+    // K28.5 should only ever occur with positive running disparity in an EOF
+    wait(symbol == "K28.5 +");
+    $error("Found K28.5 +, investigate");
+  end
+
 endmodule

@@ -59,7 +59,7 @@ module fc_state_rx (
   always @(posedge clk) begin
     if (reset_r) begin
       state_r <= fc::STATE_LF2;
-    end else begin
+    end else if (datak == 4'b1000) begin
       state_r <= state_next;
     end
   end

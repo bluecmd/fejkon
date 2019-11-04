@@ -42,7 +42,7 @@ proc fcstat {id} {
   global m
   set off [expr 0x10000 * $id]
   puts [format " XCVR      : %s" [master_read_32 $m [expr $off + 0x00 * 4] 1]]
-  puts [format " Last Unk. : %s" [master_read_32 $m [expr $off + 0x02 * 4] 1]]
+  puts [format " Last Unk. : %s" [master_read_32 $m [expr $off + 0x01 * 4] 1]]
   puts [format " State     : %s" [master_read_32 $m [expr $off + 0x2000] 1]]
   puts         " -- Prims         RX         TX"
   # TODO: Calculate rate?

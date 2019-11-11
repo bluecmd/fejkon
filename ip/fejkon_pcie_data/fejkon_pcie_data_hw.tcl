@@ -39,13 +39,13 @@ add_fileset QUARTUS_SYNTH QUARTUS_SYNTH "" ""
 set_fileset_property QUARTUS_SYNTH TOP_LEVEL fejkon_pcie_data
 set_fileset_property QUARTUS_SYNTH ENABLE_RELATIVE_INCLUDE_PATHS false
 set_fileset_property QUARTUS_SYNTH ENABLE_FILE_OVERWRITE_MODE true
-add_fileset_file fejkon_pcie_data.sv VERILOG PATH fejkon_pcie_data.sv TOP_LEVEL_FILE
+add_fileset_file fejkon_pcie_data.sv SYSTEM_VERILOG PATH fejkon_pcie_data.sv TOP_LEVEL_FILE
 
 add_fileset SIM_VERILOG SIM_VERILOG "" ""
 set_fileset_property SIM_VERILOG TOP_LEVEL fejkon_pcie_data
 set_fileset_property SIM_VERILOG ENABLE_RELATIVE_INCLUDE_PATHS false
 set_fileset_property SIM_VERILOG ENABLE_FILE_OVERWRITE_MODE true
-add_fileset_file fejkon_pcie_data.sv VERILOG PATH fejkon_pcie_data.sv
+add_fileset_file fejkon_pcie_data.sv SYSTEM_VERILOG PATH fejkon_pcie_data.sv
 
 
 # 

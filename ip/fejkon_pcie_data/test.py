@@ -29,10 +29,18 @@ class FakeEP(pcie.MemoryEndpoint, pcie.MSICapability):
         self.add_io_region(32)
 
 def testcase(*blocks):
+    """Runs a decorated function as a block in MyHDL.
+
+    Arguments:
+      *blocks: Any argument given is a function to create other blocks
+    """
     def inner(f):
         def w(self):
+            def rf():
+                yield from f(self)
+                raise myhdl.StopSimulation
             insts = [x(self, f) for x in blocks] + [f(self)]
-            sim = myhdl.Simulation([x(self, f) for x in blocks] + [f(self)])
+            sim = myhdl.Simulation([x(self, f) for x in blocks] + [rf()])
             sim.run(quiet=1)
         return w
     return inner
@@ -86,7 +94,6 @@ class TestFejkonDataFacility(unittest.TestCase):
         log.debug("0x%08x" % self.sw.upstream_bridge.mem_limit)
         log.debug("0x%016x" % self.sw.upstream_bridge.prefetchable_mem_base)
         log.debug("0x%016x" % self.sw.upstream_bridge.prefetchable_mem_limit)
-        raise myhdl.StopSimulation
 
     @testcase(clkgen)
     def testIO(self):
@@ -110,7 +117,6 @@ class TestFejkonDataFacility(unittest.TestCase):
 
         val = yield from self.rc.mem_read(0x8000000000000000, 16, 1000)
         assert val == bytearray(range(16))
-        raise myhdl.StopSimulation
 
     @testcase(clkgen)
     def testLargeIO(self):
@@ -121,7 +127,6 @@ class TestFejkonDataFacility(unittest.TestCase):
 
         val = yield from self.rc.mem_read(0x8000000000000000, 256*32, 100)
         assert val == bytearray(range(256))*32
-        raise myhdl.StopSimulation
 
     @testcase(clkgen)
     def testRootMemory(self):
@@ -140,7 +145,6 @@ class TestFejkonDataFacility(unittest.TestCase):
 
         val = yield from self.rc.mem_read(mem_base, 16)
         assert val == bytearray(range(16))
-        raise myhdl.StopSimulation
 
     @testcase(clkgen)
     def testDeviceToDeviceDMA(self):
@@ -168,7 +172,6 @@ class TestFejkonDataFacility(unittest.TestCase):
 
         val = yield from self.ep.mem_read(0x8000000000100000, 16, 10000)
         assert val == bytearray(range(16))
-        raise myhdl.StopSimulation
 
     @testcase(clkgen)
     def testDeviceToRootDMA(self):
@@ -187,7 +190,6 @@ class TestFejkonDataFacility(unittest.TestCase):
 
         val = yield from self.ep.mem_read(mem_base, 16, 1000)
         assert val == bytearray(range(16))
-        raise myhdl.StopSimulation
 
     @testcase(clkgen)
     def testMSI(self):
@@ -195,7 +197,6 @@ class TestFejkonDataFacility(unittest.TestCase):
         yield from self.ep.issue_msi_interrupt(4)
         yield self.rc.msi_get_signal(self.ep.get_id(), 4)
         yield myhdl.delay(100)
-        raise myhdl.StopSimulation
 
 if __name__ == '__main__':
     os.chdir(os.path.dirname(os.path.abspath(__file__)))

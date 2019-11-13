@@ -1,32 +1,84 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 from pcietb import pcie
+
+import binascii
 import logging
 import myhdl
-import unittest
-
 import os
 import sys
+import unittest
 
 
 log = logging.getLogger(__name__)
 
-# TODO(bluecmd): Remove the code below, I kept it to test the layout
-# Until I actually remove it, credit goes to https://github.com/alexforencich/verilog-pcie
 
-class FakeEP(pcie.MemoryEndpoint, pcie.MSICapability):
-    def __init__(self, *args, **kwargs):
-        super(FakeEP, self).__init__(*args, **kwargs)
+class Error(Exception):
+    pass
 
-        self.vendor_id = 0x1234
-        self.device_id = 0x5678
+class NoSuchBarError(Error):
+    pass
 
-        self.msi_multiple_message_capable = 5
+class FejkonEP(pcie.Endpoint, pcie.MSICapability):
+    def __init__(self, dut):
+        super(FejkonEP, self).__init__()
+        self.dut = dut
+        self.vendor_id = 0xf1c0
+        self.device_id = 0x0de5
+        self.msi_multiple_message_capable = 32
         self.msi_64bit_address_capable = 1
         self.msi_per_vector_mask_capable = 1
+        # No I/O bars for now
+        # self.register_rx_tlp_handler(pcie.TLP_IO_READ, self.handle_io_read_tlp)
+        # self.register_rx_tlp_handler(pcie.TLP_IO_WRITE, self.handle_io_write_tlp)
+        self.register_rx_tlp_handler(pcie.TLP_MEM_READ, self.handle_mem_read_tlp)
+        self.register_rx_tlp_handler(pcie.TLP_MEM_READ_64, self.handle_mem_read_tlp)
+        self.register_rx_tlp_handler(pcie.TLP_MEM_WRITE, self.handle_mem_write_tlp)
+        self.register_rx_tlp_handler(pcie.TLP_MEM_WRITE_64, self.handle_mem_write_tlp)
+        self.configure_bar(0, 0x80000, ext=False, prefetch=False, io=False)
 
-        self.add_mem_region(1024)
-        self.add_prefetchable_mem_region(1024*1024)
-        self.add_io_region(32)
+    def handle_mem_read_tlp(self, tlp):
+        log.info("Got read TLP: %s", tlp)
+        log.info("Match BAR: %s", self.match_bar(tlp.address))
+        bars = self.match_bar(tlp.address)
+        if len(bars) != 1:
+            raise NoSuchBarError(tlp.address)
+        bar, = bars
+
+        # TODO(bluecmd): This is supposed to be in the dut
+        region = bar[0]
+        addr = bar[1]
+        data = bytearray(tlp.length*4)
+        m = 0
+        n = 0
+        addr = tlp.address+tlp.get_first_be_offset()
+        dw_length = tlp.length
+        byte_length = tlp.get_be_byte_count()
+
+        while m < dw_length:
+            cpl = pcie.TLP()
+            cpl.set_completion_data(tlp, self.get_id())
+
+            cpl_dw_length = dw_length - m
+            cpl_byte_length = byte_length - n
+            cpl.byte_count = cpl_byte_length
+            if cpl_dw_length > 32 << self.max_payload_size:
+                cpl_dw_length = 32 << self.max_payload_size # max payload size
+                cpl_dw_length -= (addr & 0x7c) >> 2 # RCB align
+
+            cpl.lower_address = addr & 0x7f
+
+            cpl.set_data(data[m*4:(m+cpl_dw_length)*4])
+            # logging
+            yield from self.send(cpl)
+            m += cpl_dw_length;
+            n += cpl_dw_length*4 - (addr&3)
+            addr += cpl_dw_length*4 - (addr&3)
+
+
+    def handle_mem_write_tlp(self, tlp):
+        log.info("Got write TLP: %s", tlp)
+        log.info("Match BAR: %s", self.match_bar(tlp.address))
+        # TODO: Not implemented
 
 def testcase(*blocks):
     """Runs a decorated function as a block in MyHDL.
@@ -45,14 +97,23 @@ def testcase(*blocks):
         return w
     return inner
 
-class TestFejkonDataFacility(unittest.TestCase):
+class Test(unittest.TestCase):
 
     def setUp(self):
         self.clk = myhdl.Signal(bool(0))
         self.rst = myhdl.Signal(bool(0))
+
+        self.bar2_mm_address = myhdl.Signal(myhdl.intbv(0)[31:])
+
+        self.dut = myhdl.Cosimulation(
+                "vvp -m myhdl test.vvp -fst",
+                clk=self.clk,
+                reset=self.rst,
+                bar2_mm_address=self.bar2_mm_address)
+
         # PCIe devices
         rc = pcie.RootComplex()
-        ep = FakeEP()
+        ep = FejkonEP(self.dut)
         dev = pcie.Device(ep)
         rc.make_port().connect(dev)
         sw = pcie.Switch()
@@ -61,142 +122,39 @@ class TestFejkonDataFacility(unittest.TestCase):
         self.ep = ep
         self.sw = sw
 
+    # === MyHDL instances ===
+    # MyHDL instances that can be enable to co-execute alongside the test case
+    # These are processes that may or may not be included depending on if that
+    # signal is required for a particular test case.
+    # dutgen and clkgen is probably always required.
+
     def clkgen(self, test):
         @myhdl.always(myhdl.delay(2))
         def block():
             self.clk.next = not self.clk
         return block
 
+    def dutgen(self, test):
+        return self.dut
+
+    # === End of MyHDL instances ===
+
     def reset(self):
-        yield myhdl.delay(100)
-        yield self.clk.posedge
+        yield myhdl.delay(10)
         self.rst.next = 1
-        yield self.clk.posedge
+        yield myhdl.delay(10)
         self.rst.next = 0
-        yield self.clk.posedge
-        yield myhdl.delay(100)
-        yield self.clk.posedge
-        yield self.clk.posedge
+        yield myhdl.delay(10)
         yield from self.rc.enumerate(enable_bus_mastering=True, configure_msi=True)
 
-    @testcase(clkgen)
-    def testEnumeration(self):
+    @testcase(clkgen, dutgen)
+    def testCosim(self):
         yield from self.reset()
-        for k in range(6):
-            log.debug("0x%08x / 0x%08x" %(self.ep.bar[k], self.ep.bar_mask[k]))
+        bar0 = self.ep.bar[0]
+        ident = yield from self.rc.mem_read(bar0, 4)
+        assert self.bar2_mm_address > 0
+        log.info("Identity: %s", binascii.hexlify(ident))
 
-        log.debug(self.sw.upstream_bridge.pri_bus_num)
-        log.debug(self.sw.upstream_bridge.sec_bus_num)
-        log.debug(self.sw.upstream_bridge.sub_bus_num)
-        log.debug("0x%08x" % self.sw.upstream_bridge.io_base)
-        log.debug("0x%08x" % self.sw.upstream_bridge.io_limit)
-        log.debug("0x%08x" % self.sw.upstream_bridge.mem_base)
-        log.debug("0x%08x" % self.sw.upstream_bridge.mem_limit)
-        log.debug("0x%016x" % self.sw.upstream_bridge.prefetchable_mem_base)
-        log.debug("0x%016x" % self.sw.upstream_bridge.prefetchable_mem_limit)
-
-    @testcase(clkgen)
-    def testIO(self):
-        yield from self.reset()
-        yield from self.rc.io_write(0x80000000, bytearray(range(16)), 1000)
-        assert self.ep.read_region(3, 0, 16) == bytearray(range(16))
-
-        val = yield from self.rc.io_read(0x80000000, 16, 1000)
-        assert val == bytearray(range(16))
-
-        yield from self.rc.mem_write(0x80000000, bytearray(range(16)), 1000)
-        yield myhdl.delay(100)
-        assert self.ep.read_region(0, 0, 16) == bytearray(range(16))
-
-        val = yield from self.rc.mem_read(0x80000000, 16, 1000)
-        assert val == bytearray(range(16))
-
-        yield from self.rc.mem_write(0x8000000000000000, bytearray(range(16)), 1000)
-        yield myhdl.delay(1000)
-        assert self.ep.read_region(1, 0, 16) == bytearray(range(16))
-
-        val = yield from self.rc.mem_read(0x8000000000000000, 16, 1000)
-        assert val == bytearray(range(16))
-
-    @testcase(clkgen)
-    def testLargeIO(self):
-        yield from self.reset()
-        yield from self.rc.mem_write(0x8000000000000000, bytearray(range(256))*32, 100)
-        yield myhdl.delay(1000)
-        assert self.ep.read_region(1, 0, 256*32) == bytearray(range(256))*32
-
-        val = yield from self.rc.mem_read(0x8000000000000000, 256*32, 100)
-        assert val == bytearray(range(256))*32
-
-    @testcase(clkgen)
-    def testRootMemory(self):
-        yield from self.reset()
-        mem_base, mem_data = self.rc.alloc_region(1024*1024)
-        io_base, io_data = self.rc.alloc_io_region(1024)
-
-        yield from self.rc.io_write(io_base, bytearray(range(16)))
-        assert io_data[0:16] == bytearray(range(16))
-
-        val = yield from self.rc.io_read(io_base, 16)
-        assert val == bytearray(range(16))
-
-        yield from self.rc.mem_write(mem_base, bytearray(range(16)))
-        assert mem_data[0:16] == bytearray(range(16))
-
-        val = yield from self.rc.mem_read(mem_base, 16)
-        assert val == bytearray(range(16))
-
-    @testcase(clkgen)
-    def testDeviceToDeviceDMA(self):
-        ep2 = FakeEP()
-        dev2 = pcie.Device(ep2)
-        self.sw.make_port().connect(dev2)
-
-        yield from self.reset()
-        yield from self.ep.io_write(0x80001000, bytearray(range(16)), 10000)
-        assert ep2.read_region(3, 0, 16) == bytearray(range(16))
-
-        val = yield from self.ep.io_read(0x80001000, 16, 10000)
-        assert val == bytearray(range(16))
-
-        yield from self.ep.mem_write(0x80100000, bytearray(range(16)), 10000)
-        yield myhdl.delay(1000)
-        assert ep2.read_region(0, 0, 16) == bytearray(range(16))
-
-        val = yield from self.ep.mem_read(0x80100000, 16, 10000)
-        assert val == bytearray(range(16))
-
-        yield from self.ep.mem_write(0x8000000000100000, bytearray(range(16)), 10000)
-        yield myhdl.delay(1000)
-        assert ep2.read_region(1, 0, 16) == bytearray(range(16))
-
-        val = yield from self.ep.mem_read(0x8000000000100000, 16, 10000)
-        assert val == bytearray(range(16))
-
-    @testcase(clkgen)
-    def testDeviceToRootDMA(self):
-        yield from self.reset()
-        mem_base, mem_data = self.rc.alloc_region(1024*1024)
-        io_base, io_data = self.rc.alloc_io_region(1024)
-        yield from self.ep.io_write(io_base, bytearray(range(16)), 1000)
-        assert io_data[0:16] == bytearray(range(16))
-
-        val = yield from self.ep.io_read(io_base, 16, 1000)
-        assert val == bytearray(range(16))
-
-        yield from self.ep.mem_write(mem_base, bytearray(range(16)), 1000)
-        yield myhdl.delay(1000)
-        assert mem_data[0:16] == bytearray(range(16))
-
-        val = yield from self.ep.mem_read(mem_base, 16, 1000)
-        assert val == bytearray(range(16))
-
-    @testcase(clkgen)
-    def testMSI(self):
-        yield from self.reset()
-        yield from self.ep.issue_msi_interrupt(4)
-        yield self.rc.msi_get_signal(self.ep.get_id(), 4)
-        yield myhdl.delay(100)
 
 if __name__ == '__main__':
     os.chdir(os.path.dirname(os.path.abspath(__file__)))

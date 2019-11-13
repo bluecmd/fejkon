@@ -1,13 +1,15 @@
-.DELETE_ON_ERROR:
-
 .PHONY: lint test
 
-lint:
-	verilator --lint-only fejkon_pcie_data.sv
-	vlog -work .linttmp -lint -sv testbench/tb_tb/simulation/submodules/verbosity_pkg.sv \
-		fejkon_pcie_data.sv top_tb.sv
-	rm -fr .linttmp
+.DELETE_ON_ERROR:
 
-test:
-	echo TODO
-	exit 1
+SRCS := ../pcie_msi_intr/pcie_msi_intr.sv fejkon_pcie_data.sv test.sv
+
+lint: $(SRCS)
+	iverilog -g2012 -t null $^
+	verilator --lint-only --bbox-sys $^
+
+test.vvp: $(SRCS)
+	iverilog -g2012 -o $@ $^
+
+test: test.vvp
+	python3 test.py

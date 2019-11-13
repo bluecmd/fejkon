@@ -470,8 +470,6 @@ add_interface bar2_mm avalon master
 set_interface_property bar2_mm EXPORT_OF bar2_cdc.m0
 add_interface data_clk clock source
 set_interface_property data_clk EXPORT_OF pcie_clk.out_clk
-add_interface data_tx avalon_streaming sink
-set_interface_property data_tx EXPORT_OF pcie_data.pcie_data_tx
 add_interface irq interrupt receiver
 set_interface_property irq EXPORT_OF msi_intr.irq
 add_interface mgmt_clk clock sink
@@ -517,7 +515,7 @@ set_connection_parameter_value pcie_data.bar2_mm/bar2_cdc.s0 arbitrationPriority
 set_connection_parameter_value pcie_data.bar2_mm/bar2_cdc.s0 baseAddress {0x0000}
 set_connection_parameter_value pcie_data.bar2_mm/bar2_cdc.s0 defaultConnection {0}
 
-add_connection pcie_data.pcie_tx phy.tx_st
+add_connection pcie_data.tx_st phy.tx_st
 
 add_connection pcie_reconfig.hip_status_drv phy.hip_status
 set_connection_parameter_value pcie_reconfig.hip_status_drv/phy.hip_status endPort {}
@@ -576,7 +574,7 @@ set_connection_parameter_value phy.rx_bar_be/pcie_data.rx_bar_be startPort {}
 set_connection_parameter_value phy.rx_bar_be/pcie_data.rx_bar_be startPortLSB {0}
 set_connection_parameter_value phy.rx_bar_be/pcie_data.rx_bar_be width {0}
 
-add_connection phy.rx_st pcie_data.pcie_rx
+add_connection phy.rx_st pcie_data.rx_st
 
 add_connection xcvr_reconfig.reconfig_from_xcvr phy.reconfig_from_xcvr
 set_connection_parameter_value xcvr_reconfig.reconfig_from_xcvr/phy.reconfig_from_xcvr endPort {}

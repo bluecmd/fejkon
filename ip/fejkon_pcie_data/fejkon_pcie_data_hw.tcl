@@ -124,54 +124,54 @@ add_interface_port reset reset reset Input 1
 
 
 # 
-# connection point pcie_rx
+# connection point rx_st
 # 
-add_interface pcie_rx avalon_streaming end
-set_interface_property pcie_rx associatedClock clk
-set_interface_property pcie_rx associatedReset reset
-set_interface_property pcie_rx dataBitsPerSymbol 256
-set_interface_property pcie_rx errorDescriptor ""
-set_interface_property pcie_rx firstSymbolInHighOrderBits true
-set_interface_property pcie_rx maxChannel 0
-set_interface_property pcie_rx readyLatency 0
-set_interface_property pcie_rx ENABLED true
-set_interface_property pcie_rx EXPORT_OF ""
-set_interface_property pcie_rx PORT_NAME_MAP ""
-set_interface_property pcie_rx CMSIS_SVD_VARIABLES ""
-set_interface_property pcie_rx SVD_ADDRESS_GROUP ""
+add_interface rx_st avalon_streaming end
+set_interface_property rx_st associatedClock clk
+set_interface_property rx_st associatedReset reset
+set_interface_property rx_st dataBitsPerSymbol 256
+set_interface_property rx_st errorDescriptor ""
+set_interface_property rx_st firstSymbolInHighOrderBits true
+set_interface_property rx_st maxChannel 0
+set_interface_property rx_st readyLatency 0
+set_interface_property rx_st ENABLED true
+set_interface_property rx_st EXPORT_OF ""
+set_interface_property rx_st PORT_NAME_MAP ""
+set_interface_property rx_st CMSIS_SVD_VARIABLES ""
+set_interface_property rx_st SVD_ADDRESS_GROUP ""
 
-add_interface_port pcie_rx pcie_rx_data data Input 256
-add_interface_port pcie_rx pcie_rx_empty empty Input 1
-add_interface_port pcie_rx pcie_rx_error error Input 1
-add_interface_port pcie_rx pcie_rx_startofpacket startofpacket Input 1
-add_interface_port pcie_rx pcie_rx_endofpacket endofpacket Input 1
-add_interface_port pcie_rx pcie_rx_ready ready Output 1
-add_interface_port pcie_rx pcie_rx_valid valid Input 1
+add_interface_port rx_st rx_st_data data Input 256
+add_interface_port rx_st rx_st_empty empty Input 1
+add_interface_port rx_st rx_st_error error Input 1
+add_interface_port rx_st rx_st_startofpacket startofpacket Input 1
+add_interface_port rx_st rx_st_endofpacket endofpacket Input 1
+add_interface_port rx_st rx_st_ready ready Output 1
+add_interface_port rx_st rx_st_valid valid Input 1
 
 
 # 
-# connection point pcie_tx
+# connection point tx_st
 # 
-add_interface pcie_tx avalon_streaming start
-set_interface_property pcie_tx associatedClock clk
-set_interface_property pcie_tx associatedReset reset
-set_interface_property pcie_tx dataBitsPerSymbol 256
-set_interface_property pcie_tx errorDescriptor ""
-set_interface_property pcie_tx firstSymbolInHighOrderBits true
-set_interface_property pcie_tx maxChannel 0
-set_interface_property pcie_tx readyLatency 0
-set_interface_property pcie_tx ENABLED true
-set_interface_property pcie_tx EXPORT_OF ""
-set_interface_property pcie_tx PORT_NAME_MAP ""
-set_interface_property pcie_tx CMSIS_SVD_VARIABLES ""
-set_interface_property pcie_tx SVD_ADDRESS_GROUP ""
+add_interface tx_st avalon_streaming start
+set_interface_property tx_st associatedClock clk
+set_interface_property tx_st associatedReset reset
+set_interface_property tx_st dataBitsPerSymbol 256
+set_interface_property tx_st errorDescriptor ""
+set_interface_property tx_st firstSymbolInHighOrderBits true
+set_interface_property tx_st maxChannel 0
+set_interface_property tx_st readyLatency 0
+set_interface_property tx_st ENABLED true
+set_interface_property tx_st EXPORT_OF ""
+set_interface_property tx_st PORT_NAME_MAP ""
+set_interface_property tx_st CMSIS_SVD_VARIABLES ""
+set_interface_property tx_st SVD_ADDRESS_GROUP ""
 
-add_interface_port pcie_tx pcie_tx_data data Output 256
-add_interface_port pcie_tx pcie_tx_startofpacket startofpacket Output 1
-add_interface_port pcie_tx pcie_tx_endofpacket endofpacket Output 1
-add_interface_port pcie_tx pcie_tx_error error Output 1
-add_interface_port pcie_tx pcie_tx_empty empty Output 1
-add_interface_port pcie_tx pcie_tx_valid valid Output 1
+add_interface_port tx_st tx_st_data data Output 256
+add_interface_port tx_st tx_st_startofpacket startofpacket Output 1
+add_interface_port tx_st tx_st_endofpacket endofpacket Output 1
+add_interface_port tx_st tx_st_error error Output 1
+add_interface_port tx_st tx_st_empty empty Output 1
+add_interface_port tx_st tx_st_valid valid Output 1
 
 
 # 
@@ -191,27 +191,27 @@ add_interface_port rx_bar_be rx_st_mask rx_st_mask Output 1
 
 
 # 
-# connection point pcie_data_tx
+# connection point data_tx
 # 
-add_interface pcie_data_tx avalon_streaming end
-set_interface_property pcie_data_tx associatedClock clk
-set_interface_property pcie_data_tx associatedReset reset
-set_interface_property pcie_data_tx dataBitsPerSymbol 8
-set_interface_property pcie_data_tx errorDescriptor ""
-set_interface_property pcie_data_tx firstSymbolInHighOrderBits true
-set_interface_property pcie_data_tx maxChannel 0
-set_interface_property pcie_data_tx readyLatency 0
-set_interface_property pcie_data_tx ENABLED true
-set_interface_property pcie_data_tx EXPORT_OF ""
-set_interface_property pcie_data_tx PORT_NAME_MAP ""
-set_interface_property pcie_data_tx CMSIS_SVD_VARIABLES ""
-set_interface_property pcie_data_tx SVD_ADDRESS_GROUP ""
+add_interface data_tx avalon_streaming end
+set_interface_property data_tx associatedClock clk
+set_interface_property data_tx associatedReset reset
+set_interface_property data_tx dataBitsPerSymbol 8
+set_interface_property data_tx errorDescriptor ""
+set_interface_property data_tx firstSymbolInHighOrderBits true
+set_interface_property data_tx maxChannel 0
+set_interface_property data_tx readyLatency 0
+set_interface_property data_tx ENABLED true
+set_interface_property data_tx EXPORT_OF ""
+set_interface_property data_tx PORT_NAME_MAP ""
+set_interface_property data_tx CMSIS_SVD_VARIABLES ""
+set_interface_property data_tx SVD_ADDRESS_GROUP ""
 
-add_interface_port pcie_data_tx pcie_data_tx_data data Input 256
-add_interface_port pcie_data_tx pcie_data_tx_valid valid Input 1
-add_interface_port pcie_data_tx pcie_data_tx_ready ready Output 1
-add_interface_port pcie_data_tx pcie_data_tx_channel channel Input 2
-add_interface_port pcie_data_tx pcie_data_tx_endofpacket endofpacket Input 1
-add_interface_port pcie_data_tx pcie_data_tx_startofpacket startofpacket Input 1
-add_interface_port pcie_data_tx pcie_data_tx_empty empty Input 5
+add_interface_port data_tx data_tx_data data Input 256
+add_interface_port data_tx data_tx_valid valid Input 1
+add_interface_port data_tx data_tx_ready ready Output 1
+add_interface_port data_tx data_tx_channel channel Input 2
+add_interface_port data_tx data_tx_endofpacket endofpacket Input 1
+add_interface_port data_tx data_tx_startofpacket startofpacket Input 1
+add_interface_port data_tx data_tx_empty empty Input 5
 

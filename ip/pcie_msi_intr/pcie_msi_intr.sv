@@ -1,9 +1,5 @@
 `timescale 1 ps / 1 ps
-module pcie_msi_intr #(
-		parameter AUTO_INT_CARD_INTERRUPTS_USED             = "-1",
-		parameter AUTO_INT_PORT0_SFP_I2C_INTERRUPTS_USED    = "-1",
-		parameter AUTO_INT_PORT0_SFP_STATUS_INTERRUPTS_USED = "-1"
-	) (
+module pcie_msi_intr (
 		output wire        app_int_sts,    // int_msi.app_int_sts
 		output wire [4:0]  app_msi_num,    //        .app_msi_num
 		output wire        app_msi_req,    //        .app_msi_req

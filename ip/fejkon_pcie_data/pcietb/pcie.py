@@ -140,6 +140,12 @@ PCIE_GEN_RATE = {
 trace_routing = False
 
 
+def pciePrint(*args, **kwargs):
+    # Silence by default
+    # print(*args, **kwargs)
+    pass
+
+
 def align(val, mask):
     if val & mask:
         return val + mask + 1 - (val & mask)
@@ -411,27 +417,27 @@ class TLP(object):
         ret = True
         if self.fmt == FMT_3DW_DATA or self.fmt == FMT_4DW_DATA:
             if self.length != len(self.data):
-                print("TLP validation failed, length field does not match data: %s" % repr(self))
+                pciePrint("TLP validation failed, length field does not match data: %s" % repr(self))
                 ret = False
             if 0 > self.length > 1024:
-                print("TLP validation failed, length out of range: %s" % repr(self))
+                pciePrint("TLP validation failed, length out of range: %s" % repr(self))
                 ret = False
         if (self.fmt_type == TLP_MEM_READ or self.fmt_type == TLP_MEM_READ_64 or
                 self.fmt_type == TLP_MEM_READ_LOCKED or self.fmt_type == TLP_MEM_READ_LOCKED_64 or
                 self.fmt_type == TLP_MEM_WRITE or self.fmt_type == TLP_MEM_WRITE_64):
             if self.length*4 > 0x1000 - (self.address & 0xfff):
-                print("TLP validation failed, request crosses 4K boundary: %s" % repr(self))
+                pciePrint("TLP validation failed, request crosses 4K boundary: %s" % repr(self))
                 ret = False
         if (self.fmt_type == TLP_IO_READ or self.fmt_type == TLP_IO_WRITE):
             if self.length != 1:
-                print("TLP validation failed, invalid length for IO request: %s" % repr(self))
+                pciePrint("TLP validation failed, invalid length for IO request: %s" % repr(self))
                 ret = False
             if self.last_be != 0:
-                print("TLP validation failed, invalid last BE for IO request: %s" % repr(self))
+                pciePrint("TLP validation failed, invalid last BE for IO request: %s" % repr(self))
                 ret = False
         if (self.fmt_type == TLP_CPL_DATA):
             if (self.byte_count + (self.lower_address&3) + 3) < self.length*4:
-                print("TLP validation failed, completion byte count too small: %s" % repr(self))
+                pciePrint("TLP validation failed, completion byte count too small: %s" % repr(self))
                 ret = False
         return ret
 
@@ -1459,10 +1465,10 @@ class MSICapability(object):
 
     def issue_msi_interrupt(self, number=0, attr=0, tc=0):
         if not self.msi_enable:
-            print("MSI disabled")
+            pciePrint("MSI disabled")
             return
         if number < 0 or number >= 2**self.msi_multiple_message_enable or number >= 2**self.msi_multiple_message_capable:
-            print("MSI message number out of range")
+            pciePrint("MSI message number out of range")
             return
 
         data = self.msi_message_data & ~(2**self.msi_multiple_message_enable-1) | number
@@ -1522,7 +1528,7 @@ class MSIXCapability(object):
 
     def issue_msix_interrupt(self, addr, data, attr=0, tc=0):
         if not self.msix_enable:
-            print("MSI-X disabled")
+            pciePrint("MSI-X disabled")
             return
 
         yield from self.mem_write(addr, struct.pack('<L', data), attr=attr, tc=tc)
@@ -1767,7 +1773,7 @@ class Function(PMCapability, PCIECapability):
 
     def upstream_send(self, tlp):
         # logging
-        print("[%s] Sending upstream TLP: %s" % (highlight(self.get_desc()), repr(tlp)))
+        pciePrint("[%s] Sending upstream TLP: %s" % (highlight(self.get_desc()), repr(tlp)))
         assert tlp.check()
         if self.upstream_tx_handler is None:
             raise Exception("Transmit handler not set")
@@ -1778,7 +1784,7 @@ class Function(PMCapability, PCIECapability):
 
     def upstream_recv(self, tlp):
         # logging
-        print("[%s] Got downstream TLP: %s" % (highlight(self.get_desc()), repr(tlp)))
+        pciePrint("[%s] Got downstream TLP: %s" % (highlight(self.get_desc()), repr(tlp)))
         assert tlp.check()
         yield from self.handle_tlp(tlp)
 
@@ -1795,7 +1801,7 @@ class Function(PMCapability, PCIECapability):
     def register_rx_tlp_handler(self, fmt_type, func):
         self.rx_tlp_handler[fmt_type] = func
 
-    def recv_cpl(self, tag, timeout=0):
+    def recv_cpl(self, tag, timeout=10000):
         queue = self.rx_cpl_queues[tag]
         sync = self.rx_cpl_sync[tag]
 
@@ -1822,7 +1828,7 @@ class Function(PMCapability, PCIECapability):
     def handle_config_0_tlp(self, tlp):
         if tlp.dest_id.device == self.device_num and tlp.dest_id.function == self.function_num:
             # logging
-            print("[%s] Config type 0 for me" % (highlight(self.get_desc())))
+            pciePrint("[%s] Config type 0 for me" % (highlight(self.get_desc())))
 
             # capture address information
             self.bus_num = tlp.dest_id.bus
@@ -1841,18 +1847,18 @@ class Function(PMCapability, PCIECapability):
                 self.write_config_register(tlp.register_number, tlp.data[0], tlp.first_be)
 
             # logging
-            print("[%s] Completion: %s" % (highlight(self.get_desc()), repr(cpl)))
+            pciePrint("[%s] Completion: %s" % (highlight(self.get_desc()), repr(cpl)))
             yield from self.upstream_send(cpl)
         else:
             # error
             pass
 
-    def io_read(self, addr, length, timeout=0):
+    def io_read(self, addr, length, timeout=10000):
         n = 0
         data = b''
 
         if not self.bus_master_enable:
-            print("Bus mastering not enabled")
+            pciePrint("Bus mastering not enabled")
             return None
 
         while n < length:
@@ -1883,7 +1889,7 @@ class Function(PMCapability, PCIECapability):
 
         return data[:length]
 
-    def io_read_words(self, addr, count, ws=2, timeout=0, attr=0, tc=0):
+    def io_read_words(self, addr, count, ws=2, timeout=10000, attr=0, tc=0):
         assert ws in (1, 2, 4, 8)
         data = yield from self.io_read(addr, count*ws, timeout, attr, tc)
         words = []
@@ -1891,35 +1897,35 @@ class Function(PMCapability, PCIECapability):
             words.append(int.from_bytes(data[ws*k:ws*(k+1)], 'little'))
         return words
 
-    def io_read_dwords(self, addr, count, timeout=0, attr=0, tc=0):
+    def io_read_dwords(self, addr, count, timeout=10000, attr=0, tc=0):
         data = yield from self.io_read_words(addr, count, 4, timeout, attr, tc)
         return data
 
-    def io_read_qwords(self, addr, count, timeout=0, attr=0, tc=0):
+    def io_read_qwords(self, addr, count, timeout=10000, attr=0, tc=0):
         data = yield from self.io_read_words(addr, count, 8, timeout, attr, tc)
         return data
 
-    def io_read_byte(self, addr, timeout=0, attr=0, tc=0):
+    def io_read_byte(self, addr, timeout=10000, attr=0, tc=0):
         data = yield from self.io_read(addr, 1, timeout, attr, tc)
         return data[0]
 
-    def io_read_word(self, addr, timeout=0, attr=0, tc=0):
+    def io_read_word(self, addr, timeout=10000, attr=0, tc=0):
         data = yield from self.io_read_words(addr, 1, timeout=timeout, attr=attr, tc=tc)
         return data[0]
 
-    def io_read_dword(self, addr, timeout=0, attr=0, tc=0):
+    def io_read_dword(self, addr, timeout=10000, attr=0, tc=0):
         data = yield from self.io_read_dwords(addr, 1, timeout=timeout, attr=attr, tc=tc)
         return data[0]
 
-    def io_read_qword(self, addr, timeout=0, attr=0, tc=0):
+    def io_read_qword(self, addr, timeout=10000, attr=0, tc=0):
         data = yield from self.io_read_qwords(addr, 1, timeout=timeout, attr=attr, tc=tc)
         return data[0]
 
-    def io_write(self, addr, data, timeout=0):
+    def io_write(self, addr, data, timeout=10000):
         n = 0
 
         if not self.bus_master_enable:
-            print("Bus mastering not enabled")
+            pciePrint("Bus mastering not enabled")
             return
 
         while n < len(data):
@@ -1943,7 +1949,7 @@ class Function(PMCapability, PCIECapability):
             n += byte_length
             addr += byte_length
 
-    def io_write_words(self, addr, data, ws=2, timeout=0, attr=0, tc=0):
+    def io_write_words(self, addr, data, ws=2, timeout=10000, attr=0, tc=0):
         assert ws in (1, 2, 4, 8)
         words = data
         data = b''
@@ -1951,30 +1957,30 @@ class Function(PMCapability, PCIECapability):
             data += w.to_bytes(ws, 'little')
         yield from self.io_write(addr, data, timeout, attr, tc)
 
-    def io_write_dwords(self, addr, data, timeout=0, attr=0, tc=0):
+    def io_write_dwords(self, addr, data, timeout=10000, attr=0, tc=0):
         yield from self.io_write_words(addr, data, 4, timeout, attr, tc)
 
-    def io_write_qwords(self, addr, data, timeout=0, attr=0, tc=0):
+    def io_write_qwords(self, addr, data, timeout=10000, attr=0, tc=0):
         yield from self.io_write_words(addr, data, 8, timeout, attr, tc)
 
-    def io_write_byte(self, addr, data, timeout=0, attr=0, tc=0):
+    def io_write_byte(self, addr, data, timeout=10000, attr=0, tc=0):
         yield from self.io_write(addr, [data], timeout, attr, tc)
 
-    def io_write_word(self, addr, data, timeout=0, attr=0, tc=0):
+    def io_write_word(self, addr, data, timeout=10000, attr=0, tc=0):
         yield from self.io_write_words(addr, [data], timeout=timeout, attr=attr, tc=tc)
 
-    def io_write_dword(self, addr, data, timeout=0, attr=0, tc=0):
+    def io_write_dword(self, addr, data, timeout=10000, attr=0, tc=0):
         yield from self.io_write_dwords(addr, [data], timeout=timeout, attr=attr, tc=tc)
 
-    def io_write_qword(self, addr, data, timeout=0, attr=0, tc=0):
+    def io_write_qword(self, addr, data, timeout=10000, attr=0, tc=0):
         yield from self.io_write_qwords(addr, [data], timeout=timeout, attr=attr, tc=tc)
 
-    def mem_read(self, addr, length, timeout=0, attr=0, tc=0):
+    def mem_read(self, addr, length, timeout=10000, attr=0, tc=0):
         n = 0
         data = b''
 
         if not self.bus_master_enable:
-            print("Bus mastering not enabled")
+            pciePrint("Bus mastering not enabled")
             return None
 
         while n < length:
@@ -2024,7 +2030,7 @@ class Function(PMCapability, PCIECapability):
 
         return data
 
-    def mem_read_words(self, addr, count, ws=2, timeout=0, attr=0, tc=0):
+    def mem_read_words(self, addr, count, ws=2, timeout=10000, attr=0, tc=0):
         assert ws in (1, 2, 4, 8)
         data = yield from self.mem_read(addr, count*ws, timeout, attr, tc)
         words = []
@@ -2032,35 +2038,35 @@ class Function(PMCapability, PCIECapability):
             words.append(int.from_bytes(data[ws*k:ws*(k+1)], 'little'))
         return words
 
-    def mem_read_dwords(self, addr, count, timeout=0, attr=0, tc=0):
+    def mem_read_dwords(self, addr, count, timeout=10000, attr=0, tc=0):
         data = yield from self.mem_read_words(addr, count, 4, timeout, attr, tc)
         return data
 
-    def mem_read_qwords(self, addr, count, timeout=0, attr=0, tc=0):
+    def mem_read_qwords(self, addr, count, timeout=10000, attr=0, tc=0):
         data = yield from self.mem_read_words(addr, count, 8, timeout, attr, tc)
         return data
 
-    def mem_read_byte(self, addr, timeout=0, attr=0, tc=0):
+    def mem_read_byte(self, addr, timeout=10000, attr=0, tc=0):
         data = yield from self.mem_read(addr, 1, timeout, attr, tc)
         return data[0]
 
-    def mem_read_word(self, addr, timeout=0, attr=0, tc=0):
+    def mem_read_word(self, addr, timeout=10000, attr=0, tc=0):
         data = yield from self.mem_read_words(addr, 1, timeout=timeout, attr=attr, tc=tc)
         return data[0]
 
-    def mem_read_dword(self, addr, timeout=0, attr=0, tc=0):
+    def mem_read_dword(self, addr, timeout=10000, attr=0, tc=0):
         data = yield from self.mem_read_dwords(addr, 1, timeout=timeout, attr=attr, tc=tc)
         return data[0]
 
-    def mem_read_qword(self, addr, timeout=0, attr=0, tc=0):
+    def mem_read_qword(self, addr, timeout=10000, attr=0, tc=0):
         data = yield from self.mem_read_qwords(addr, 1, timeout=timeout, attr=attr, tc=tc)
         return data[0]
 
-    def mem_write(self, addr, data, timeout=0, attr=0, tc=0):
+    def mem_write(self, addr, data, timeout=10000, attr=0, tc=0):
         n = 0
 
         if not self.bus_master_enable:
-            print("Bus mastering not enabled")
+            pciePrint("Bus mastering not enabled")
             return
 
         while n < len(data):
@@ -2084,7 +2090,7 @@ class Function(PMCapability, PCIECapability):
             n += byte_length
             addr += byte_length
 
-    def mem_write_words(self, addr, data, ws=2, timeout=0, attr=0, tc=0):
+    def mem_write_words(self, addr, data, ws=2, timeout=10000, attr=0, tc=0):
         assert ws in (1, 2, 4, 8)
         words = data
         data = b''
@@ -2092,22 +2098,22 @@ class Function(PMCapability, PCIECapability):
             data += w.to_bytes(ws, 'little')
         yield from self.mem_write(addr, data, timeout, attr, tc)
 
-    def mem_write_dwords(self, addr, data, timeout=0, attr=0, tc=0):
+    def mem_write_dwords(self, addr, data, timeout=10000, attr=0, tc=0):
         yield from self.mem_write_words(addr, data, 4, timeout, attr, tc)
 
-    def mem_write_qwords(self, addr, data, timeout=0, attr=0, tc=0):
+    def mem_write_qwords(self, addr, data, timeout=10000, attr=0, tc=0):
         yield from self.mem_write_words(addr, data, 8, timeout, attr, tc)
 
-    def mem_write_byte(self, addr, data, timeout=0, attr=0, tc=0):
+    def mem_write_byte(self, addr, data, timeout=10000, attr=0, tc=0):
         yield from self.mem_write(addr, [data], timeout, attr, tc)
 
-    def mem_write_word(self, addr, data, timeout=0, attr=0, tc=0):
+    def mem_write_word(self, addr, data, timeout=10000, attr=0, tc=0):
         yield from self.mem_write_words(addr, [data], timeout=timeout, attr=attr, tc=tc)
 
-    def mem_write_dword(self, addr, data, timeout=0, attr=0, tc=0):
+    def mem_write_dword(self, addr, data, timeout=10000, attr=0, tc=0):
         yield from self.mem_write_dwords(addr, [data], timeout=timeout, attr=attr, tc=tc)
 
-    def mem_write_qword(self, addr, data, timeout=0, attr=0, tc=0):
+    def mem_write_qword(self, addr, data, timeout=10000, attr=0, tc=0):
         yield from self.mem_write_qwords(addr, [data], timeout=timeout, attr=attr, tc=tc)
 
 
@@ -2255,7 +2261,7 @@ class MemoryEndpoint(Endpoint):
         m = self.match_bar(tlp.address, True)
         if len(m) == 1:
             # logging
-            print("[%s] IO read" % (highlight(self.get_desc())))
+            pciePrint("[%s] IO read" % (highlight(self.get_desc())))
 
             assert tlp.length == 1
 
@@ -2291,25 +2297,25 @@ class MemoryEndpoint(Endpoint):
             cpl.length = 1
 
             # logging
-            print("[%s] Completion: %s" % (highlight(self.get_desc()), repr(cpl)))
+            pciePrint("[%s] Completion: %s" % (highlight(self.get_desc()), repr(cpl)))
             yield from self.send(cpl)
 
         else:
             # logging
-            print("IO request did not match any BARs")
+            pciePrint("IO request did not match any BARs")
 
             # Unsupported request
             cpl = TLP()
             cpl.set_ur_completion(tlp, self.get_id())
             # logging
-            print("[%s] UR Completion: %s" % (highlight(self.get_desc()), repr(cpl)))
+            pciePrint("[%s] UR Completion: %s" % (highlight(self.get_desc()), repr(cpl)))
             yield from self.send(cpl)
 
     def handle_io_write_tlp(self, tlp):
         m = self.match_bar(tlp.address, True)
         if len(m) == 1:
             # logging
-            print("[%s] IO write" % (highlight(self.get_desc())))
+            pciePrint("[%s] IO write" % (highlight(self.get_desc())))
 
             assert tlp.length == 1
 
@@ -2343,24 +2349,24 @@ class MemoryEndpoint(Endpoint):
             cpl.byte_count = 4
 
             # logging
-            print("[%s] Completion: %s" % (highlight(self.get_desc()), repr(cpl)))
+            pciePrint("[%s] Completion: %s" % (highlight(self.get_desc()), repr(cpl)))
             yield from self.send(cpl)
 
         else:
             # logging
-            print("IO request did not match any BARs")
+            pciePrint("IO request did not match any BARs")
 
             # Unsupported request
             cpl = TLP()
             cpl.set_ur_completion(tlp, self.get_id())
             # logging
-            print("[%s] UR Completion: %s" % (highlight(self.get_desc()), repr(cpl)))
+            pciePrint("[%s] UR Completion: %s" % (highlight(self.get_desc()), repr(cpl)))
             yield from self.send(cpl)
 
     def handle_mem_read_tlp(self, tlp):
         m = self.match_bar(tlp.address)
         if len(m) == 1:
-            print("[%s] Memory read" % (highlight(self.get_desc())))
+            pciePrint("[%s] Memory read" % (highlight(self.get_desc())))
 
             # perform operation
             region = m[0][0]
@@ -2368,7 +2374,7 @@ class MemoryEndpoint(Endpoint):
 
             # check for 4k boundary crossing
             if tlp.length*4 > 0x1000 - (addr & 0xfff):
-                print("Request crossed 4k boundary, discarding request")
+                pciePrint("Request crossed 4k boundary, discarding request")
                 return
 
             # perform read
@@ -2397,7 +2403,7 @@ class MemoryEndpoint(Endpoint):
                 cpl.set_data(data[m*4:(m+cpl_dw_length)*4])
 
                 # logging
-                print("[%s] Completion: %s" % (highlight(self.get_desc()), repr(cpl)))
+                pciePrint("[%s] Completion: %s" % (highlight(self.get_desc()), repr(cpl)))
                 yield from self.send(cpl)
 
                 m += cpl_dw_length;
@@ -2406,20 +2412,20 @@ class MemoryEndpoint(Endpoint):
 
         else:
             # logging
-            print("Memory request did not match any BARs")
+            pciePrint("Memory request did not match any BARs")
 
             # Unsupported request
             cpl = TLP()
             cpl.set_ur_completion(tlp, self.get_id())
             # logging
-            print("[%s] UR Completion: %s" % (highlight(self.get_desc()), repr(cpl)))
+            pciePrint("[%s] UR Completion: %s" % (highlight(self.get_desc()), repr(cpl)))
             yield from self.send(cpl)
 
     def handle_mem_write_tlp(self, tlp):
         m = self.match_bar(tlp.address)
         if len(m) == 1:
             # logging
-            print("[%s] Memory write" % (highlight(self.get_desc())))
+            pciePrint("[%s] Memory write" % (highlight(self.get_desc())))
 
             # perform operation
             region = m[0][0]
@@ -2430,7 +2436,7 @@ class MemoryEndpoint(Endpoint):
 
             # check for 4k boundary crossing
             if tlp.length*4 > 0x1000 - (addr & 0xfff):
-                print("Request crossed 4k boundary, discarding request")
+                pciePrint("Request crossed 4k boundary, discarding request")
                 return
 
             # perform write
@@ -2476,7 +2482,7 @@ class MemoryEndpoint(Endpoint):
 
         else:
             # logging
-            print("Memory request did not match any BARs")
+            pciePrint("Memory request did not match any BARs")
 
 
 class Bridge(Function):
@@ -2612,7 +2618,7 @@ class Bridge(Function):
     def upstream_recv(self, tlp):
         # logging
         if trace_routing:
-            print("[%s] Routing downstream TLP: %s" % (highlight(self.get_desc()), repr(tlp)))
+            pciePrint("[%s] Routing downstream TLP: %s" % (highlight(self.get_desc()), repr(tlp)))
         assert tlp.check()
         if tlp.fmt_type == TLP_CFG_READ_0 or tlp.fmt_type == TLP_CFG_WRITE_0:
             yield from self.handle_tlp(tlp)
@@ -2702,7 +2708,7 @@ class Bridge(Function):
     def downstream_recv(self, tlp):
         # logging
         if trace_routing:
-            print("[%s] Routing upstream TLP: %s" % (highlight(self.get_desc()), repr(tlp)))
+            pciePrint("[%s] Routing upstream TLP: %s" % (highlight(self.get_desc()), repr(tlp)))
         assert tlp.check()
         if (tlp.fmt_type == TLP_CFG_READ_0 or tlp.fmt_type == TLP_CFG_WRITE_0 or
                 tlp.fmt_type == TLP_CFG_READ_1 or tlp.fmt_type == TLP_CFG_WRITE_1):
@@ -2864,7 +2870,7 @@ class SwitchUpstreamPort(Bridge):
             cpl = TLP()
             cpl.set_ur_completion(tlp, (self.bus_num, self.device_num, 0))
             # logging
-            print("[%s] UR Completion: %s" % (highlight(self.get_desc()), repr(cpl)))
+            pciePrint("[%s] UR Completion: %s" % (highlight(self.get_desc()), repr(cpl)))
             if from_downstream:
                 yield from self.route_downstream_tlp(cpl, False)
             else:
@@ -2973,7 +2979,7 @@ class Device(object):
 
     def upstream_recv(self, tlp):
         # logging
-        print("[%s] Got downstream TLP: %s" % (highlight(self.get_desc()), repr(tlp)))
+        pciePrint("[%s] Got downstream TLP: %s" % (highlight(self.get_desc()), repr(tlp)))
         assert tlp.check()
         if tlp.fmt_type == TLP_CFG_READ_0 or tlp.fmt_type == TLP_CFG_WRITE_0:
             # config type 0
@@ -2992,15 +2998,15 @@ class Device(object):
                         return
 
                 #raise Exception("Function not found")
-                print("Function not found")
+                pciePrint("Function not found")
             else:
-                print("Device number mismatch")
+                pciePrint("Device number mismatch")
             
             # Unsupported request
             cpl = TLP()
             cpl.set_ur_completion(tlp, (self.bus_num, self.device_num, 0))
             # logging
-            print("[%s] UR Completion: %s" % (highlight(self.get_desc()), repr(cpl)))
+            pciePrint("[%s] UR Completion: %s" % (highlight(self.get_desc()), repr(cpl)))
             yield from self.upstream_send(cpl)
         elif (tlp.fmt_type == TLP_CPL or tlp.fmt_type == TLP_CPL_DATA or
                 tlp.fmt_type == TLP_CPL_LOCKED or tlp.fmt_type == TLP_CPL_LOCKED_DATA):
@@ -3012,9 +3018,9 @@ class Device(object):
                         yield from f.upstream_recv(tlp)
                         return
 
-                print("Function not found")
+                pciePrint("Function not found")
             else:
-                print("Bus/device number mismatch")
+                pciePrint("Bus/device number mismatch")
         elif (tlp.fmt_type == TLP_IO_READ or tlp.fmt_type == TLP_IO_WRITE):
             # IO read/write
 
@@ -3023,13 +3029,13 @@ class Device(object):
                     yield from f.upstream_recv(tlp)
                     return
 
-            print("IO request did not match any BARs")
+            pciePrint("IO request did not match any BARs")
 
             # Unsupported request
             cpl = TLP()
             cpl.set_ur_completion(tlp, (self.bus_num, self.device_num, 0))
             # logging
-            print("[%s] UR Completion: %s" % (highlight(self.get_desc()), repr(cpl)))
+            pciePrint("[%s] UR Completion: %s" % (highlight(self.get_desc()), repr(cpl)))
             yield from self.upstream_send(cpl)
         elif (tlp.fmt_type == TLP_MEM_READ or tlp.fmt_type == TLP_MEM_READ_64 or
                 tlp.fmt_type == TLP_MEM_WRITE or tlp.fmt_type == TLP_MEM_WRITE_64):
@@ -3040,21 +3046,21 @@ class Device(object):
                     yield from f.upstream_recv(tlp)
                     return
 
-            print("Memory request did not match any BARs")
+            pciePrint("Memory request did not match any BARs")
 
             if tlp.fmt_type == TLP_MEM_READ or tlp.fmt_type == TLP_MEM_READ_64:
                 # Unsupported request
                 cpl = TLP()
                 cpl.set_ur_completion(tlp, (self.bus_num, self.device_num, 0))
                 # logging
-                print("[%s] UR Completion: %s" % (highlight(self.get_desc()), repr(cpl)))
+                pciePrint("[%s] UR Completion: %s" % (highlight(self.get_desc()), repr(cpl)))
                 yield from self.upstream_send(cpl)
         else:
             raise Exception("TODO")
 
     def upstream_send(self, tlp):
         # logging
-        print("[%s] Sending upstream TLP: %s" % (highlight(self.get_desc()), repr(tlp)))
+        pciePrint("[%s] Sending upstream TLP: %s" % (highlight(self.get_desc()), repr(tlp)))
         assert tlp.check()
         yield from self.upstream_port.send(tlp)
 
@@ -3369,7 +3375,7 @@ class RootComplex(Switch):
 
     def downstream_send(self, tlp):
         # logging
-        print("[%s] Sending TLP: %s" % (highlight(self.get_desc()), repr(tlp)))
+        pciePrint("[%s] Sending TLP: %s" % (highlight(self.get_desc()), repr(tlp)))
         assert tlp.check()
         yield from self.upstream_bridge.upstream_recv(tlp)
 
@@ -3378,7 +3384,7 @@ class RootComplex(Switch):
 
     def downstream_recv(self, tlp):
         # logging
-        print("[%s] Got TLP: %s" % (highlight(self.get_desc()), repr(tlp)))
+        pciePrint("[%s] Got TLP: %s" % (highlight(self.get_desc()), repr(tlp)))
         assert tlp.check()
         yield from self.handle_tlp(tlp)
 
@@ -3395,7 +3401,7 @@ class RootComplex(Switch):
     def register_rx_tlp_handler(self, fmt_type, func):
         self.rx_tlp_handler[fmt_type] = func
 
-    def recv_cpl(self, tag, timeout=0):
+    def recv_cpl(self, tag, timeout=10000):
         queue = self.rx_cpl_queues[tag]
         sync = self.rx_cpl_sync[tag]
 
@@ -3422,7 +3428,7 @@ class RootComplex(Switch):
     def handle_io_read_tlp(self, tlp):
         if self.find_io_region(tlp.address):
             # logging
-            print("[%s] IO read" % (highlight(self.get_desc())))
+            pciePrint("[%s] IO read" % (highlight(self.get_desc())))
 
             assert tlp.length == 1
 
@@ -3457,24 +3463,24 @@ class RootComplex(Switch):
             cpl.length = 1
 
             # logging
-            print("[%s] Completion: %s" % (highlight(self.get_desc()), repr(cpl)))
+            pciePrint("[%s] Completion: %s" % (highlight(self.get_desc()), repr(cpl)))
             yield from self.send(cpl)
 
         else:
             # logging
-            print("IO request did not match any regions")
+            pciePrint("IO request did not match any regions")
 
             # Unsupported request
             cpl = TLP()
             cpl.set_ur_completion(tlp, PcieId(0, 0, 0))
             # logging
-            print("[%s] UR Completion: %s" % (highlight(self.get_desc()), repr(cpl)))
+            pciePrint("[%s] UR Completion: %s" % (highlight(self.get_desc()), repr(cpl)))
             yield from self.send(cpl)
 
     def handle_io_write_tlp(self, tlp):
         if self.find_io_region(tlp.address):
             # logging
-            print("[%s] IO write" % (highlight(self.get_desc())))
+            pciePrint("[%s] IO write" % (highlight(self.get_desc())))
 
             assert tlp.length == 1
 
@@ -3507,24 +3513,24 @@ class RootComplex(Switch):
             cpl.byte_count = 4
 
             # logging
-            print("[%s] Completion: %s" % (highlight(self.get_desc()), repr(cpl)))
+            pciePrint("[%s] Completion: %s" % (highlight(self.get_desc()), repr(cpl)))
             yield from self.send(cpl)
 
         else:
             # logging
-            print("IO request did not match any regions")
+            pciePrint("IO request did not match any regions")
 
             # Unsupported request
             cpl = TLP()
             cpl.set_ur_completion(tlp, PcieId(0, 0, 0))
             # logging
-            print("[%s] UR Completion: %s" % (highlight(self.get_desc()), repr(cpl)))
+            pciePrint("[%s] UR Completion: %s" % (highlight(self.get_desc()), repr(cpl)))
             yield from self.send(cpl)
 
     def handle_mem_read_tlp(self, tlp):
         if self.find_region(tlp.address):
             # logging
-            print("[%s] Memory read" % (highlight(self.get_desc())))
+            pciePrint("[%s] Memory read" % (highlight(self.get_desc())))
 
             # perform operation
             addr = tlp.address
@@ -3532,7 +3538,7 @@ class RootComplex(Switch):
 
             # check for 4k boundary crossing
             if tlp.length*4 > 0x1000 - (addr & 0xfff):
-                print("Request crossed 4k boundary, discarding request")
+                pciePrint("Request crossed 4k boundary, discarding request")
                 return
 
             # perform read
@@ -3561,7 +3567,7 @@ class RootComplex(Switch):
                 cpl.set_data(data[m*4:(m+cpl_dw_length)*4])
 
                 # logging
-                print("[%s] Completion: %s" % (highlight(self.get_desc()), repr(cpl)))
+                pciePrint("[%s] Completion: %s" % (highlight(self.get_desc()), repr(cpl)))
                 yield from self.send(cpl)
 
                 m += cpl_dw_length;
@@ -3570,19 +3576,19 @@ class RootComplex(Switch):
 
         else:
             # logging
-            print("Memory request did not match any regions")
+            pciePrint("Memory request did not match any regions")
 
             # Unsupported request
             cpl = TLP()
             cpl.set_ur_completion(tlp, PcieId(0, 0, 0))
             # logging
-            print("[%s] UR Completion: %s" % (highlight(self.get_desc()), repr(cpl)))
+            pciePrint("[%s] UR Completion: %s" % (highlight(self.get_desc()), repr(cpl)))
             yield from self.send(cpl)
 
     def handle_mem_write_tlp(self, tlp):
         if self.find_region(tlp.address):
             # logging
-            print("[%s] Memory write" % (highlight(self.get_desc())))
+            pciePrint("[%s] Memory write" % (highlight(self.get_desc())))
 
             # perform operation
             addr = tlp.address
@@ -3592,7 +3598,7 @@ class RootComplex(Switch):
 
             # check for 4k boundary crossing
             if tlp.length*4 > 0x1000 - (addr & 0xfff):
-                print("Request crossed 4k boundary, discarding request")
+                pciePrint("Request crossed 4k boundary, discarding request")
                 return
 
             # perform write
@@ -3638,9 +3644,9 @@ class RootComplex(Switch):
 
         else:
             # logging
-            print("Memory request did not match any regions")
+            pciePrint("Memory request did not match any regions")
 
-    def config_read(self, dev, addr, length, timeout=0):
+    def config_read(self, dev, addr, length, timeout=10000):
         n = 0
         data = b''
 
@@ -3673,7 +3679,7 @@ class RootComplex(Switch):
 
         return data[:length]
 
-    def config_read_words(self, dev, addr, count, ws=2, timeout=0):
+    def config_read_words(self, dev, addr, count, ws=2, timeout=10000):
         assert ws in (1, 2, 4, 8)
         data = yield from self.config_read(dev, addr, count*ws, timeout)
         words = []
@@ -3681,31 +3687,31 @@ class RootComplex(Switch):
             words.append(int.from_bytes(data[ws*k:ws*(k+1)], 'little'))
         return words
 
-    def config_read_dwords(self, dev, addr, count, timeout=0):
+    def config_read_dwords(self, dev, addr, count, timeout=10000):
         data = yield from self.config_read_words(dev, addr, count, 4, timeout)
         return data
 
-    def config_read_qwords(self, dev, addr, count, timeout=0):
+    def config_read_qwords(self, dev, addr, count, timeout=10000):
         data = yield from self.config_read_words(dev, addr, count, 8, timeout)
         return data
 
-    def config_read_byte(self, dev, addr, timeout=0):
+    def config_read_byte(self, dev, addr, timeout=10000):
         data = yield from self.config_read(dev, addr, 1, timeout)
         return data[0]
 
-    def config_read_word(self, dev, addr, timeout=0):
+    def config_read_word(self, dev, addr, timeout=10000):
         data = yield from self.config_read_words(dev, addr, 1, timeout=timeout)
         return data[0]
 
-    def config_read_dword(self, dev, addr, timeout=0):
+    def config_read_dword(self, dev, addr, timeout=10000):
         data = yield from self.config_read_dwords(dev, addr, 1, timeout=timeout)
         return data[0]
 
-    def config_read_qword(self, dev, addr, timeout=0):
+    def config_read_qword(self, dev, addr, timeout=10000):
         data = yield from self.config_read_qwords(dev, addr, 1, timeout=timeout)
         return data[0]
 
-    def config_write(self, dev, addr, data, timeout=0):
+    def config_write(self, dev, addr, data, timeout=10000):
         n = 0
 
         while n < len(data):
@@ -3727,7 +3733,7 @@ class RootComplex(Switch):
             n += byte_length
             addr += byte_length
 
-    def config_write_words(self, dev, addr, data, ws=2, timeout=0):
+    def config_write_words(self, dev, addr, data, ws=2, timeout=10000):
         assert ws in (1, 2, 4, 8)
         words = data
         data = b''
@@ -3735,25 +3741,25 @@ class RootComplex(Switch):
             data += w.to_bytes(ws, 'little')
         yield from self.config_write(dev, addr, data, timeout)
 
-    def config_write_dwords(self, dev, addr, data, timeout=0):
+    def config_write_dwords(self, dev, addr, data, timeout=10000):
         yield from self.config_write_words(dev, addr, data, 4, timeout)
 
-    def config_write_qwords(self, dev, addr, data, timeout=0):
+    def config_write_qwords(self, dev, addr, data, timeout=10000):
         yield from self.config_write_words(dev, addr, data, 8, timeout)
 
-    def config_write_byte(self, dev, addr, data, timeout=0):
+    def config_write_byte(self, dev, addr, data, timeout=10000):
         yield from self.config_write(dev, addr, [data], timeout)
 
-    def config_write_word(self, dev, addr, data, timeout=0):
+    def config_write_word(self, dev, addr, data, timeout=10000):
         yield from self.config_write_words(dev, addr, [data], timeout=timeout)
 
-    def config_write_dword(self, dev, addr, data, timeout=0):
+    def config_write_dword(self, dev, addr, data, timeout=10000):
         yield from self.config_write_dwords(dev, addr, [data], timeout=timeout)
 
-    def config_write_qword(self, dev, addr, data, timeout=0):
+    def config_write_qword(self, dev, addr, data, timeout=10000):
         yield from self.config_write_qwords(dev, addr, [data], timeout=timeout)
 
-    def capability_read(self, dev, cap_id, addr, length, timeout=0):
+    def capability_read(self, dev, cap_id, addr, length, timeout=10000):
         ti = self.tree.find_dev(dev)
 
         if not ti:
@@ -3767,7 +3773,7 @@ class RootComplex(Switch):
         val = yield from self.config_read(dev, addr+offset, length, timeout)
         return val
 
-    def capability_read_words(self, dev, cap_id, addr, count, ws=2, timeout=0):
+    def capability_read_words(self, dev, cap_id, addr, count, ws=2, timeout=10000):
         assert ws in (1, 2, 4, 8)
         data = yield from self.capability_read(dev, cap_id, addr, count*ws, timeout)
         words = []
@@ -3775,31 +3781,31 @@ class RootComplex(Switch):
             words.append(int.from_bytes(data[ws*k:ws*(k+1)], 'little'))
         return words
 
-    def capability_read_dwords(self, dev, cap_id, addr, count, timeout=0):
+    def capability_read_dwords(self, dev, cap_id, addr, count, timeout=10000):
         data = yield from self.capability_read_words(dev, cap_id, addr, count, 4, timeout)
         return data
 
-    def capability_read_qwords(self, dev, cap_id, addr, count, timeout=0):
+    def capability_read_qwords(self, dev, cap_id, addr, count, timeout=10000):
         data = yield from self.capability_read_words(dev, cap_id, addr, count, 8, timeout)
         return data
 
-    def capability_read_byte(self, dev, cap_id, addr, timeout=0):
+    def capability_read_byte(self, dev, cap_id, addr, timeout=10000):
         data = yield from self.capability_read(dev, cap_id, addr, 1, timeout)
         return data[0]
 
-    def capability_read_word(self, dev, cap_id, addr, timeout=0):
+    def capability_read_word(self, dev, cap_id, addr, timeout=10000):
         data = yield from self.capability_read_words(dev, cap_id, addr, 1, timeout=timeout)
         return data[0]
 
-    def capability_read_dword(self, dev, cap_id, addr, timeout=0):
+    def capability_read_dword(self, dev, cap_id, addr, timeout=10000):
         data = yield from self.capability_read_dwords(dev, cap_id, addr, 1, timeout=timeout)
         return data[0]
 
-    def capability_read_qword(self, dev, cap_id, addr, timeout=0):
+    def capability_read_qword(self, dev, cap_id, addr, timeout=10000):
         data = yield from self.capability_read_qwords(dev, cap_id, addr, 1, timeout=timeout)
         return data[0]
 
-    def capability_write(self, dev, cap_id, addr, data, timeout=0):
+    def capability_write(self, dev, cap_id, addr, data, timeout=10000):
         ti = self.tree.find_dev(dev)
 
         if not ti:
@@ -3812,7 +3818,7 @@ class RootComplex(Switch):
 
         yield from self.config_write(dev, addr+offset, data, timeout)
 
-    def capability_write_words(self, dev, cap_id, addr, data, ws=2, timeout=0):
+    def capability_write_words(self, dev, cap_id, addr, data, ws=2, timeout=10000):
         assert ws in (1, 2, 4, 8)
         words = data
         data = b''
@@ -3820,25 +3826,25 @@ class RootComplex(Switch):
             data += w.to_bytes(ws, 'little')
         yield from self.capability_write(dev, cap_id, addr, data, timeout)
 
-    def capability_write_dwords(self, dev, cap_id, addr, data, timeout=0):
+    def capability_write_dwords(self, dev, cap_id, addr, data, timeout=10000):
         yield from self.capability_write_words(dev, cap_id, addr, data, 4, timeout)
 
-    def capability_write_qwords(self, dev, cap_id, addr, data, timeout=0):
+    def capability_write_qwords(self, dev, cap_id, addr, data, timeout=10000):
         yield from self.capability_write_words(dev, cap_id, addr, data, 8, timeout)
 
-    def capability_write_byte(self, dev, cap_id, addr, data, timeout=0):
+    def capability_write_byte(self, dev, cap_id, addr, data, timeout=10000):
         yield from self.capability_write(dev, cap_id, addr, [data], timeout)
 
-    def capability_write_word(self, dev, cap_id, addr, data, timeout=0):
+    def capability_write_word(self, dev, cap_id, addr, data, timeout=10000):
         yield from self.capability_write_words(dev, cap_id, addr, [data], timeout=timeout)
 
-    def capability_write_dword(self, dev, cap_id, addr, data, timeout=0):
+    def capability_write_dword(self, dev, cap_id, addr, data, timeout=10000):
         yield from self.capability_write_dwords(dev, cap_id, addr, [data], timeout=timeout)
 
-    def capability_write_qword(self, dev, cap_id, addr, data, timeout=0):
+    def capability_write_qword(self, dev, cap_id, addr, data, timeout=10000):
         yield from self.capability_write_qwords(dev, cap_id, addr, [data], timeout=timeout)
 
-    def io_read(self, addr, length, timeout=0):
+    def io_read(self, addr, length, timeout=10000):
         n = 0
         data = b''
 
@@ -3874,7 +3880,7 @@ class RootComplex(Switch):
 
         return data[:length]
 
-    def io_read_words(self, addr, count, ws=2, timeout=0, attr=0, tc=0):
+    def io_read_words(self, addr, count, ws=2, timeout=10000, attr=0, tc=0):
         assert ws in (1, 2, 4, 8)
         data = yield from self.io_read(addr, count*ws, timeout, attr, tc)
         words = []
@@ -3882,31 +3888,31 @@ class RootComplex(Switch):
             words.append(int.from_bytes(data[ws*k:ws*(k+1)], 'little'))
         return words
 
-    def io_read_dwords(self, addr, count, timeout=0, attr=0, tc=0):
+    def io_read_dwords(self, addr, count, timeout=10000, attr=0, tc=0):
         data = yield from self.io_read_words(addr, count, 4, timeout, attr, tc)
         return data
 
-    def io_read_qwords(self, addr, count, timeout=0, attr=0, tc=0):
+    def io_read_qwords(self, addr, count, timeout=10000, attr=0, tc=0):
         data = yield from self.io_read_words(addr, count, 8, timeout, attr, tc)
         return data
 
-    def io_read_byte(self, addr, timeout=0, attr=0, tc=0):
+    def io_read_byte(self, addr, timeout=10000, attr=0, tc=0):
         data = yield from self.io_read(addr, 1, timeout, attr, tc)
         return data[0]
 
-    def io_read_word(self, addr, timeout=0, attr=0, tc=0):
+    def io_read_word(self, addr, timeout=10000, attr=0, tc=0):
         data = yield from self.io_read_words(addr, 1, timeout=timeout, attr=attr, tc=tc)
         return data[0]
 
-    def io_read_dword(self, addr, timeout=0, attr=0, tc=0):
+    def io_read_dword(self, addr, timeout=10000, attr=0, tc=0):
         data = yield from self.io_read_dwords(addr, 1, timeout=timeout, attr=attr, tc=tc)
         return data[0]
 
-    def io_read_qword(self, addr, timeout=0, attr=0, tc=0):
+    def io_read_qword(self, addr, timeout=10000, attr=0, tc=0):
         data = yield from self.io_read_qwords(addr, 1, timeout=timeout, attr=attr, tc=tc)
         return data[0]
 
-    def io_write(self, addr, data, timeout=0):
+    def io_write(self, addr, data, timeout=10000):
         n = 0
 
         if self.find_region(addr):
@@ -3934,7 +3940,7 @@ class RootComplex(Switch):
             n += byte_length
             addr += byte_length
 
-    def io_write_words(self, addr, data, ws=2, timeout=0, attr=0, tc=0):
+    def io_write_words(self, addr, data, ws=2, timeout=10000, attr=0, tc=0):
         assert ws in (1, 2, 4, 8)
         words = data
         data = b''
@@ -3942,25 +3948,25 @@ class RootComplex(Switch):
             data += w.to_bytes(ws, 'little')
         yield from self.io_write(addr, data, timeout, attr, tc)
 
-    def io_write_dwords(self, addr, data, timeout=0, attr=0, tc=0):
+    def io_write_dwords(self, addr, data, timeout=10000, attr=0, tc=0):
         yield from self.io_write_words(addr, data, 4, timeout, attr, tc)
 
-    def io_write_qwords(self, addr, data, timeout=0, attr=0, tc=0):
+    def io_write_qwords(self, addr, data, timeout=10000, attr=0, tc=0):
         yield from self.io_write_words(addr, data, 8, timeout, attr, tc)
 
-    def io_write_byte(self, addr, data, timeout=0, attr=0, tc=0):
+    def io_write_byte(self, addr, data, timeout=10000, attr=0, tc=0):
         yield from self.io_write(addr, [data], timeout, attr, tc)
 
-    def io_write_word(self, addr, data, timeout=0, attr=0, tc=0):
+    def io_write_word(self, addr, data, timeout=10000, attr=0, tc=0):
         yield from self.io_write_words(addr, [data], timeout=timeout, attr=attr, tc=tc)
 
-    def io_write_dword(self, addr, data, timeout=0, attr=0, tc=0):
+    def io_write_dword(self, addr, data, timeout=10000, attr=0, tc=0):
         yield from self.io_write_dwords(addr, [data], timeout=timeout, attr=attr, tc=tc)
 
-    def io_write_qword(self, addr, data, timeout=0, attr=0, tc=0):
+    def io_write_qword(self, addr, data, timeout=10000, attr=0, tc=0):
         yield from self.io_write_qwords(addr, [data], timeout=timeout, attr=attr, tc=tc)
 
-    def mem_read(self, addr, length, timeout=0, attr=0, tc=0):
+    def mem_read(self, addr, length, timeout=10000, attr=0, tc=0):
         n = 0
         data = b''
 
@@ -4015,7 +4021,7 @@ class RootComplex(Switch):
 
         return data
 
-    def mem_read_words(self, addr, count, ws=2, timeout=0, attr=0, tc=0):
+    def mem_read_words(self, addr, count, ws=2, timeout=10000, attr=0, tc=0):
         assert ws in (1, 2, 4, 8)
         data = yield from self.mem_read(addr, count*ws, timeout, attr, tc)
         words = []
@@ -4023,31 +4029,31 @@ class RootComplex(Switch):
             words.append(int.from_bytes(data[ws*k:ws*(k+1)], 'little'))
         return words
 
-    def mem_read_dwords(self, addr, count, timeout=0, attr=0, tc=0):
+    def mem_read_dwords(self, addr, count, timeout=10000, attr=0, tc=0):
         data = yield from self.mem_read_words(addr, count, 4, timeout, attr, tc)
         return data
 
-    def mem_read_qwords(self, addr, count, timeout=0, attr=0, tc=0):
+    def mem_read_qwords(self, addr, count, timeout=10000, attr=0, tc=0):
         data = yield from self.mem_read_words(addr, count, 8, timeout, attr, tc)
         return data
 
-    def mem_read_byte(self, addr, timeout=0, attr=0, tc=0):
+    def mem_read_byte(self, addr, timeout=10000, attr=0, tc=0):
         data = yield from self.mem_read(addr, 1, timeout, attr, tc)
         return data[0]
 
-    def mem_read_word(self, addr, timeout=0, attr=0, tc=0):
+    def mem_read_word(self, addr, timeout=10000, attr=0, tc=0):
         data = yield from self.mem_read_words(addr, 1, timeout=timeout, attr=attr, tc=tc)
         return data[0]
 
-    def mem_read_dword(self, addr, timeout=0, attr=0, tc=0):
+    def mem_read_dword(self, addr, timeout=10000, attr=0, tc=0):
         data = yield from self.mem_read_dwords(addr, 1, timeout=timeout, attr=attr, tc=tc)
         return data[0]
 
-    def mem_read_qword(self, addr, timeout=0, attr=0, tc=0):
+    def mem_read_qword(self, addr, timeout=10000, attr=0, tc=0):
         data = yield from self.mem_read_qwords(addr, 1, timeout=timeout, attr=attr, tc=tc)
         return data[0]
 
-    def mem_write(self, addr, data, timeout=0, attr=0, tc=0):
+    def mem_write(self, addr, data, timeout=10000, attr=0, tc=0):
         n = 0
 
         if self.find_region(addr):
@@ -4075,7 +4081,7 @@ class RootComplex(Switch):
             n += byte_length
             addr += byte_length
 
-    def mem_write_words(self, addr, data, ws=2, timeout=0, attr=0, tc=0):
+    def mem_write_words(self, addr, data, ws=2, timeout=10000, attr=0, tc=0):
         assert ws in (1, 2, 4, 8)
         words = data
         data = b''
@@ -4083,22 +4089,22 @@ class RootComplex(Switch):
             data += w.to_bytes(ws, 'little')
         yield from self.mem_write(addr, data, timeout, attr, tc)
 
-    def mem_write_dwords(self, addr, data, timeout=0, attr=0, tc=0):
+    def mem_write_dwords(self, addr, data, timeout=10000, attr=0, tc=0):
         yield from self.mem_write_words(addr, data, 4, timeout, attr, tc)
 
-    def mem_write_qwords(self, addr, data, timeout=0, attr=0, tc=0):
+    def mem_write_qwords(self, addr, data, timeout=10000, attr=0, tc=0):
         yield from self.mem_write_words(addr, data, 8, timeout, attr, tc)
 
-    def mem_write_byte(self, addr, data, timeout=0, attr=0, tc=0):
+    def mem_write_byte(self, addr, data, timeout=10000, attr=0, tc=0):
         yield from self.mem_write(addr, [data], timeout, attr, tc)
 
-    def mem_write_word(self, addr, data, timeout=0, attr=0, tc=0):
+    def mem_write_word(self, addr, data, timeout=10000, attr=0, tc=0):
         yield from self.mem_write_words(addr, [data], timeout=timeout, attr=attr, tc=tc)
 
-    def mem_write_dword(self, addr, data, timeout=0, attr=0, tc=0):
+    def mem_write_dword(self, addr, data, timeout=10000, attr=0, tc=0):
         yield from self.mem_write_dwords(addr, [data], timeout=timeout, attr=attr, tc=tc)
 
-    def mem_write_qword(self, addr, data, timeout=0, attr=0, tc=0):
+    def mem_write_qword(self, addr, data, timeout=10000, attr=0, tc=0):
         yield from self.mem_write_qwords(addr, [data], timeout=timeout, attr=attr, tc=tc)
 
     def msi_region_read(self, addr, length):
@@ -4108,7 +4114,7 @@ class RootComplex(Switch):
         assert addr == 0
         assert len(data) == 4
         number = struct.unpack('<L', data)[0]
-        print("MSI interrupt: 0x%08x, 0x%04x" % (addr, number))
+        pciePrint("MSI interrupt: 0x%08x, 0x%04x" % (addr, number))
         assert number in self.msi_signals
         for sig in self.msi_signals[number]:
             sig.next = not sig
@@ -4217,7 +4223,7 @@ class RootComplex(Switch):
         tree.prefetchable_mem_limit = self.prefetchable_mem_limit
 
         # logging
-        print("[%s] Enumerating bus %d" % (highlight(self.get_desc()), bus))
+        pciePrint("[%s] Enumerating bus %d" % (highlight(self.get_desc()), bus))
 
         for d in range(32):
             if bus == 0 and d == 0:
@@ -4231,7 +4237,7 @@ class RootComplex(Switch):
 
             # valid vendor ID
             # logging
-            print("[%s] Found device at %02x:%02x.%x" % (highlight(self.get_desc()), bus, d, 0))
+            pciePrint("[%s] Found device at %02x:%02x.%x" % (highlight(self.get_desc()), bus, d, 0))
 
             fc = 1
 
@@ -4257,7 +4263,7 @@ class RootComplex(Switch):
                 ti.vendor_id, ti.device_id = struct.unpack('<HH', val)
 
                 # logging
-                print("[%s] Found function at %02x:%02x.%x" % (highlight(self.get_desc()), bus, d, f))
+                pciePrint("[%s] Found function at %02x:%02x.%x" % (highlight(self.get_desc()), bus, d, f))
 
                 # read type
                 val = yield from self.config_read_byte(PcieId(bus, d, f), 0x00e, timeout)
@@ -4269,7 +4275,7 @@ class RootComplex(Switch):
                 if bridge:
                     # found a bridge
                     # logging
-                    print("[%s] Found bridge at %02x:%02x.%x" % (highlight(self.get_desc()), bus, d, f))
+                    pciePrint("[%s] Found bridge at %02x:%02x.%x" % (highlight(self.get_desc()), bus, d, f))
 
                     bar_cnt = 2
 
@@ -4286,14 +4292,14 @@ class RootComplex(Switch):
                         continue
                     
                     # logging
-                    print("[%s] Configure %02x:%02x.%x BAR%d" % (highlight(self.get_desc()), bus, d, f, bar))
+                    pciePrint("[%s] Configure %02x:%02x.%x BAR%d" % (highlight(self.get_desc()), bus, d, f, bar))
 
                     if val & 1:
                         # IO BAR
                         mask = (~val & 0xffffffff) | 3
                         size = mask + 1
                         # logging
-                        print("[%s] %02x:%02x.%x IO BAR%d raw: %08x, mask: %08x, size: %d" % (highlight(self.get_desc()), bus, d, f, bar, val, mask, size))
+                        pciePrint("[%s] %02x:%02x.%x IO BAR%d raw: %08x, mask: %08x, size: %d" % (highlight(self.get_desc()), bus, d, f, bar, val, mask, size))
 
                         # align
                         self.io_limit = align(self.io_limit, mask)
@@ -4304,7 +4310,7 @@ class RootComplex(Switch):
                         ti.bar_size[bar] = size
 
                         # logging
-                        print("[%s] %02x:%02x.%x IO BAR%d Allocation: %08x, size: %d" % (highlight(self.get_desc()), bus, d, f, bar, val, size))
+                        pciePrint("[%s] %02x:%02x.%x IO BAR%d Allocation: %08x, size: %d" % (highlight(self.get_desc()), bus, d, f, bar, val, size))
 
                         self.io_limit += size
 
@@ -4323,7 +4329,7 @@ class RootComplex(Switch):
                             mask = (~val & 0xffffffffffffffff) | 15
                             size = mask + 1
                             # logging
-                            print("[%s] %02x:%02x.%x (64-bit) Mem BAR%d raw: %016x, mask: %016x, size: %d" % (highlight(self.get_desc()), bus, d, f, bar, val, mask, size))
+                            pciePrint("[%s] %02x:%02x.%x (64-bit) Mem BAR%d raw: %016x, mask: %016x, size: %d" % (highlight(self.get_desc()), bus, d, f, bar, val, mask, size))
 
                             if not val & 8:
                                 # not-prefetchable
@@ -4338,7 +4344,7 @@ class RootComplex(Switch):
                             ti.bar_size[bar] = size
 
                             # logging
-                            print("[%s] %02x:%02x.%x (64-bit) Mem BAR%d Allocation: %016x, size: %d" % (highlight(self.get_desc()), bus, d, f, bar, val, size))
+                            pciePrint("[%s] %02x:%02x.%x (64-bit) Mem BAR%d Allocation: %016x, size: %d" % (highlight(self.get_desc()), bus, d, f, bar, val, size))
 
                             self.prefetchable_mem_limit += size
 
@@ -4352,12 +4358,12 @@ class RootComplex(Switch):
                             mask = (~val & 0xffffffff) | 15
                             size = mask + 1
                             # logging
-                            print("[%s] %02x:%02x.%x (32-bit) Mem BAR%d raw: %08x, mask: %08x, size: %d" % (highlight(self.get_desc()), bus, d, f, bar, val, mask, size))
+                            pciePrint("[%s] %02x:%02x.%x (32-bit) Mem BAR%d raw: %08x, mask: %08x, size: %d" % (highlight(self.get_desc()), bus, d, f, bar, val, mask, size))
 
                             if val & 8:
                                 # prefetchable
                                 # logging
-                                print("[%s] %02x:%02x.%x (32-bit) Mem BAR%d marked prefetchable, but allocating as non-prefetchable" % (highlight(self.get_desc()), bus, d, f, bar))
+                                pciePrint("[%s] %02x:%02x.%x (32-bit) Mem BAR%d marked prefetchable, but allocating as non-prefetchable" % (highlight(self.get_desc()), bus, d, f, bar))
 
                             # align
                             self.mem_limit = align(self.mem_limit, mask)
@@ -4368,7 +4374,7 @@ class RootComplex(Switch):
                             ti.bar_size[bar] = size
 
                             # logging
-                            print("[%s] %02x:%02x.%x (32-bit) Mem BAR%d Allocation: %08x, size: %d" % (highlight(self.get_desc()), bus, d, f, bar, val, size))
+                            pciePrint("[%s] %02x:%02x.%x (32-bit) Mem BAR%d Allocation: %08x, size: %d" % (highlight(self.get_desc()), bus, d, f, bar, val, size))
 
                             self.mem_limit += size
 
@@ -4378,7 +4384,7 @@ class RootComplex(Switch):
                             bar += 1
 
                 # logging
-                print("[%s] Walk capabilities of %02x:%02x.%x" % (highlight(self.get_desc()), bus, d, f))
+                pciePrint("[%s] Walk capabilities of %02x:%02x.%x" % (highlight(self.get_desc()), bus, d, f))
 
                 # walk capabilities
                 ptr = yield from self.config_read_byte(PcieId(bus, d, f), 0x34)
@@ -4387,7 +4393,7 @@ class RootComplex(Switch):
                 while ptr > 0:
                     val = yield from self.config_read(PcieId(bus, d, f), ptr, 2)
                     # logging
-                    print("[%s] Found capability 0x%02x at offset 0x%02x, next ptr 0x%02x" % (highlight(self.get_desc()), val[0], ptr, val[1] & 0xfc))
+                    pciePrint("[%s] Found capability 0x%02x at offset 0x%02x, next ptr 0x%02x" % (highlight(self.get_desc()), val[0], ptr, val[1] & 0xfc))
                     ti.capabilities.append((val[0], ptr))
                     ptr = val[1] & 0xfc
 
@@ -4418,7 +4424,7 @@ class RootComplex(Switch):
                 if bridge:
                     # set bridge registers for enumeration
                     # logging
-                    print("[%s] Set pri %d, sec %d, sub %d" % (highlight(self.get_desc()), bus, sec_bus, 255))
+                    pciePrint("[%s] Set pri %d, sec %d, sub %d" % (highlight(self.get_desc()), bus, sec_bus, 255))
 
                     yield from self.config_write(PcieId(bus, d, f), 0x018, bytearray([bus, sec_bus, 255]))
 
@@ -4427,24 +4433,24 @@ class RootComplex(Switch):
 
                     # finalize bridge configuration
                     # logging
-                    print("[%s] Set pri %d, sec %d, sub %d" % (highlight(self.get_desc()), bus, sec_bus, sub_bus))
+                    pciePrint("[%s] Set pri %d, sec %d, sub %d" % (highlight(self.get_desc()), bus, sec_bus, sub_bus))
 
                     yield from self.config_write(PcieId(bus, d, f), 0x018, bytearray([bus, sec_bus, sub_bus]))
 
                     # set base/limit registers
                     # logging
-                    print("[%s] Set IO base: %08x, limit: %08x" % (highlight(self.get_desc()), ti.io_base, ti.io_limit))
+                    pciePrint("[%s] Set IO base: %08x, limit: %08x" % (highlight(self.get_desc()), ti.io_base, ti.io_limit))
 
                     yield from self.config_write(PcieId(bus, d, f), 0x01C, struct.pack('BB', (ti.io_base >> 8) & 0xf0, (ti.io_limit >> 8) & 0xf0))
                     yield from self.config_write(PcieId(bus, d, f), 0x030, struct.pack('<HH', ti.io_base >> 16, ti.io_limit >> 16))
 
                     # logging
-                    print("[%s] Set mem base: %08x, limit: %08x" % (highlight(self.get_desc()), ti.mem_base, ti.mem_limit))
+                    pciePrint("[%s] Set mem base: %08x, limit: %08x" % (highlight(self.get_desc()), ti.mem_base, ti.mem_limit))
 
                     yield from self.config_write(PcieId(bus, d, f), 0x020, struct.pack('<HH', (ti.mem_base >> 16) & 0xfff0, (ti.mem_limit >> 16) & 0xfff0))
 
                     # logging
-                    print("[%s] Set prefetchable mem base: %016x, limit: %016x" % (highlight(self.get_desc()), ti.prefetchable_mem_base, ti.prefetchable_mem_limit))
+                    pciePrint("[%s] Set prefetchable mem base: %016x, limit: %016x" % (highlight(self.get_desc()), ti.prefetchable_mem_base, ti.prefetchable_mem_limit))
 
                     yield from self.config_write(PcieId(bus, d, f), 0x024, struct.pack('<HH', (ti.prefetchable_mem_base >> 16) & 0xfff0, (ti.prefetchable_mem_limit >> 16) & 0xfff0))
                     yield from self.config_write(PcieId(bus, d, f), 0x028, struct.pack('<L', ti.prefetchable_mem_base >> 32))
@@ -4464,13 +4470,13 @@ class RootComplex(Switch):
         tree.prefetchable_mem_limit = self.prefetchable_mem_limit-1
 
         # logging
-        print("[%s] Enumeration of bus %d complete" % (highlight(self.get_desc()), bus))
+        pciePrint("[%s] Enumeration of bus %d complete" % (highlight(self.get_desc()), bus))
 
         return sub_bus
 
     def enumerate(self, timeout=1000, enable_bus_mastering=False, configure_msi=False):
         # logging
-        print("[%s] Enumerating bus" % (highlight(self.get_desc())))
+        pciePrint("[%s] Enumerating bus" % (highlight(self.get_desc())))
 
         self.io_limit = self.io_base
         self.mem_limit = self.mem_base
@@ -4487,9 +4493,9 @@ class RootComplex(Switch):
         self.upstream_bridge.prefetchable_mem_limit = self.prefetchable_mem_limit
 
         # logging
-        print("[%s] Enumeration complete" % (highlight(self.get_desc())))
+        pciePrint("[%s] Enumeration complete" % (highlight(self.get_desc())))
 
         # logging
-        print("Device tree:")
-        print(self.tree.to_str().strip())
+        pciePrint("Device tree:")
+        pciePrint(self.tree.to_str().strip())
 

@@ -5,6 +5,7 @@
 SRCS := ../pcie_msi_intr/pcie_msi_intr.sv fejkon_pcie_data.sv test.sv
 
 lint: $(SRCS)
+	pylint3 --rcfile=pylintrc test.py --exit-zero
 	iverilog -g2012 -t null $^
 	verilator --lint-only --bbox-sys $^
 

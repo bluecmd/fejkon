@@ -1,24 +1,25 @@
 #!/usr/bin/env python3
-from pcietb import pcie
+"""TODO(bluecmd): String here
 
+Documentation
+"""
 import binascii
-import logging
-import myhdl
+import logging as log
 import os
-import sys
 import unittest
 
-
-log = logging.getLogger(__name__)
+import myhdl
+from pcietb import pcie
 
 
 class Error(Exception):
-    pass
+    """Catch-all local error class"""
 
 class NoSuchBarError(Error):
-    pass
+    """An invalid BAR was addressed"""
 
 class FejkonEP(pcie.Endpoint, pcie.MSICapability):
+    """Fejkon card function model"""
     def __init__(self, dut):
         super(FejkonEP, self).__init__()
         self.dut = dut
@@ -42,11 +43,10 @@ class FejkonEP(pcie.Endpoint, pcie.MSICapability):
         bars = self.match_bar(tlp.address)
         if len(bars) != 1:
             raise NoSuchBarError(tlp.address)
-        bar, = bars
+        bar = bars[0]
 
         # TODO(bluecmd): This is supposed to be in the dut
-        region = bar[0]
-        addr = bar[1]
+        _, addr = bar
         data = bytearray(tlp.length*4)
         m = 0
         n = 0
@@ -70,7 +70,7 @@ class FejkonEP(pcie.Endpoint, pcie.MSICapability):
             cpl.set_data(data[m*4:(m+cpl_dw_length)*4])
             # logging
             yield from self.send(cpl)
-            m += cpl_dw_length;
+            m += cpl_dw_length
             n += cpl_dw_length*4 - (addr&3)
             addr += cpl_dw_length*4 - (addr&3)
 
@@ -87,17 +87,18 @@ def testcase(*blocks):
       *blocks: Any argument given is a function to create other blocks
     """
     def inner(f):
-        def w(self):
-            def rf():
+        def block(self):
+            def run_and_stop():
                 yield from f(self)
                 raise myhdl.StopSimulation
-            insts = [x(self, f) for x in blocks] + [f(self)]
-            sim = myhdl.Simulation([x(self, f) for x in blocks] + [rf()])
+            insts = [x(self, f) for x in blocks] + [run_and_stop()]
+            sim = myhdl.Simulation(insts)
             sim.run(quiet=1)
-        return w
+        return block
     return inner
 
 class Test(unittest.TestCase):
+    """Collection of PCIe test cases"""
 
     def setUp(self):
         self.clk = myhdl.Signal(bool(0))
@@ -106,10 +107,10 @@ class Test(unittest.TestCase):
         self.bar2_mm_address = myhdl.Signal(myhdl.intbv(0)[31:])
 
         self.dut = myhdl.Cosimulation(
-                "vvp -m myhdl test.vvp -fst",
-                clk=self.clk,
-                reset=self.rst,
-                bar2_mm_address=self.bar2_mm_address)
+            "vvp -m myhdl test.vvp -fst",
+            clk=self.clk,
+            reset=self.rst,
+            bar2_mm_address=self.bar2_mm_address)
 
         # PCIe devices
         rc = pcie.RootComplex()
@@ -128,13 +129,13 @@ class Test(unittest.TestCase):
     # signal is required for a particular test case.
     # dutgen and clkgen is probably always required.
 
-    def clkgen(self, test):
+    def clkgen(self, unused_test):
         @myhdl.always(myhdl.delay(2))
         def block():
             self.clk.next = not self.clk
         return block
 
-    def dutgen(self, test):
+    def dutgen(self, unused_test):
         return self.dut
 
     # === End of MyHDL instances ===
@@ -148,7 +149,7 @@ class Test(unittest.TestCase):
         yield from self.rc.enumerate(enable_bus_mastering=True, configure_msi=True)
 
     @testcase(clkgen, dutgen)
-    def testCosim(self):
+    def test_cosim(self):
         yield from self.reset()
         bar0 = self.ep.bar[0]
         ident = yield from self.rc.mem_read(bar0, 4)
@@ -158,8 +159,7 @@ class Test(unittest.TestCase):
 
 if __name__ == '__main__':
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
-    logging.basicConfig(
-            level=logging.DEBUG,
-            format='[%(asctime)-15s] %(funcName)-15s %(levelname)-8s %(message)s')
+    log.basicConfig(
+        level=log.DEBUG,
+        format='[%(asctime)-15s] %(funcName)-15s %(levelname)-8s %(message)s')
     unittest.main()
-

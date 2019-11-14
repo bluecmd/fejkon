@@ -34,7 +34,7 @@ Fejkon uses Kconfig menu configuration for configuring the board features, and
 can be configured and built like this:
 
 ```
-$ pip3 install menuconfig  # Unless you have menuconfig installed already
+$ pip3 install kconfiglib
 $ make menuconfig
 $ make
 ```
@@ -49,6 +49,16 @@ using "Export System as Platform Designer script (.tcl)" under the "File" menu. 
 have updated any subsystems you need to this for those systems as well.
 
 Finally review any changes to the \*.tcl files and commit them if they look reasonable.
+
+To run the tests, install these:
+
+```
+$ pip3 install myhdl
+$ sudo apt install iverilog gtkwave verilator
+$ cd .local/share/myhdl/cosimulation/icarus
+$ make
+$ sudo cp myhdl.vpi /usr/lib/x86_64-linux-gnu/ivl/
+```
 
 ## PCIe specification
 

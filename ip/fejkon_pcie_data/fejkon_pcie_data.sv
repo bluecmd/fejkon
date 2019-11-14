@@ -10,7 +10,7 @@ module fejkon_pcie_data (
     input  wire         clk,                   //          clk.clk
     input  wire         reset,                 //        reset.reset
     input  wire [255:0] rx_st_data,            //        rx_st.data
-    input  wire         rx_st_empty,           //             .empty
+    input  wire [1:0]   rx_st_empty,           //             .empty
     input  wire         rx_st_error,           //             .error
     input  wire         rx_st_startofpacket,   //             .startofpacket
     input  wire         rx_st_endofpacket,     //             .endofpacket
@@ -20,7 +20,7 @@ module fejkon_pcie_data (
     output wire         tx_st_startofpacket,   //             .startofpacket
     output wire         tx_st_endofpacket,     //             .endofpacket
     output wire         tx_st_error,           //             .error
-    output wire         tx_st_empty,           //             .empty
+    output wire [1:0]   tx_st_empty,           //             .empty
     input  wire         tx_st_ready,           //             .ready
     output wire         tx_st_valid,           //             .valid
     input  wire [7:0]   rx_st_bar,             //    rx_bar_be.rx_st_bar
@@ -77,7 +77,7 @@ module fejkon_pcie_data (
 
   assign tx_st_error = 1'b0;
 
-  assign tx_st_empty = 1'b0;
+  assign tx_st_empty = 2'b00;
 
   assign rx_st_mask = 1'b0;
 
@@ -85,7 +85,9 @@ module fejkon_pcie_data (
 
 
   always @(posedge clk) begin
-    bar0_addr <= bar0_addr + 1;
+    if (rx_st_valid) begin
+      bar0_addr <= rx_st_data[31:0];
+    end
   end
 
 endmodule

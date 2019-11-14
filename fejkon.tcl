@@ -429,50 +429,50 @@ set_connection_parameter_value jtagm.master/xcvr_reconfig.reconfig_mgmt defaultC
 
 add_connection jtagm.master_reset reset_ctrl.reset_in1
 
-add_connection pcie.bar2_mm fc0.mgmt_mm
-set_connection_parameter_value pcie.bar2_mm/fc0.mgmt_mm arbitrationPriority {1}
-set_connection_parameter_value pcie.bar2_mm/fc0.mgmt_mm baseAddress {0x00012000}
-set_connection_parameter_value pcie.bar2_mm/fc0.mgmt_mm defaultConnection {0}
+add_connection pcie.bar0_mm fc0.mgmt_mm
+set_connection_parameter_value pcie.bar0_mm/fc0.mgmt_mm arbitrationPriority {1}
+set_connection_parameter_value pcie.bar0_mm/fc0.mgmt_mm baseAddress {0x00012000}
+set_connection_parameter_value pcie.bar0_mm/fc0.mgmt_mm defaultConnection {0}
 
-add_connection pcie.bar2_mm fc1.mgmt_mm
-set_connection_parameter_value pcie.bar2_mm/fc1.mgmt_mm arbitrationPriority {1}
-set_connection_parameter_value pcie.bar2_mm/fc1.mgmt_mm baseAddress {0x00022000}
-set_connection_parameter_value pcie.bar2_mm/fc1.mgmt_mm defaultConnection {0}
+add_connection pcie.bar0_mm fc1.mgmt_mm
+set_connection_parameter_value pcie.bar0_mm/fc1.mgmt_mm arbitrationPriority {1}
+set_connection_parameter_value pcie.bar0_mm/fc1.mgmt_mm baseAddress {0x00022000}
+set_connection_parameter_value pcie.bar0_mm/fc1.mgmt_mm defaultConnection {0}
 
-add_connection pcie.bar2_mm ident.mm
-set_connection_parameter_value pcie.bar2_mm/ident.mm arbitrationPriority {1}
-set_connection_parameter_value pcie.bar2_mm/ident.mm baseAddress {0x0000}
-set_connection_parameter_value pcie.bar2_mm/ident.mm defaultConnection {0}
+add_connection pcie.bar0_mm ident.mm
+set_connection_parameter_value pcie.bar0_mm/ident.mm arbitrationPriority {1}
+set_connection_parameter_value pcie.bar0_mm/ident.mm baseAddress {0x0000}
+set_connection_parameter_value pcie.bar0_mm/ident.mm defaultConnection {0}
 
-add_connection pcie.bar2_mm phy_clk_gauge.mm
-set_connection_parameter_value pcie.bar2_mm/phy_clk_gauge.mm arbitrationPriority {1}
-set_connection_parameter_value pcie.bar2_mm/phy_clk_gauge.mm baseAddress {0x0020}
-set_connection_parameter_value pcie.bar2_mm/phy_clk_gauge.mm defaultConnection {0}
+add_connection pcie.bar0_mm phy_clk_gauge.mm
+set_connection_parameter_value pcie.bar0_mm/phy_clk_gauge.mm arbitrationPriority {1}
+set_connection_parameter_value pcie.bar0_mm/phy_clk_gauge.mm baseAddress {0x0020}
+set_connection_parameter_value pcie.bar0_mm/phy_clk_gauge.mm defaultConnection {0}
 
-add_connection pcie.bar2_mm sfp0.mm
-set_connection_parameter_value pcie.bar2_mm/sfp0.mm arbitrationPriority {1}
-set_connection_parameter_value pcie.bar2_mm/sfp0.mm baseAddress {0x1000}
-set_connection_parameter_value pcie.bar2_mm/sfp0.mm defaultConnection {0}
+add_connection pcie.bar0_mm sfp0.mm
+set_connection_parameter_value pcie.bar0_mm/sfp0.mm arbitrationPriority {1}
+set_connection_parameter_value pcie.bar0_mm/sfp0.mm baseAddress {0x1000}
+set_connection_parameter_value pcie.bar0_mm/sfp0.mm defaultConnection {0}
 
-add_connection pcie.bar2_mm sfp1.mm
-set_connection_parameter_value pcie.bar2_mm/sfp1.mm arbitrationPriority {1}
-set_connection_parameter_value pcie.bar2_mm/sfp1.mm baseAddress {0x2000}
-set_connection_parameter_value pcie.bar2_mm/sfp1.mm defaultConnection {0}
+add_connection pcie.bar0_mm sfp1.mm
+set_connection_parameter_value pcie.bar0_mm/sfp1.mm arbitrationPriority {1}
+set_connection_parameter_value pcie.bar0_mm/sfp1.mm baseAddress {0x2000}
+set_connection_parameter_value pcie.bar0_mm/sfp1.mm defaultConnection {0}
 
-add_connection pcie.bar2_mm temp.temp_mm
-set_connection_parameter_value pcie.bar2_mm/temp.temp_mm arbitrationPriority {1}
-set_connection_parameter_value pcie.bar2_mm/temp.temp_mm baseAddress {0x0010}
-set_connection_parameter_value pcie.bar2_mm/temp.temp_mm defaultConnection {0}
+add_connection pcie.bar0_mm temp.temp_mm
+set_connection_parameter_value pcie.bar0_mm/temp.temp_mm arbitrationPriority {1}
+set_connection_parameter_value pcie.bar0_mm/temp.temp_mm baseAddress {0x0010}
+set_connection_parameter_value pcie.bar0_mm/temp.temp_mm defaultConnection {0}
 
-add_connection pcie.bar2_mm xcvr0.mgmt_mm
-set_connection_parameter_value pcie.bar2_mm/xcvr0.mgmt_mm arbitrationPriority {1}
-set_connection_parameter_value pcie.bar2_mm/xcvr0.mgmt_mm baseAddress {0x00010000}
-set_connection_parameter_value pcie.bar2_mm/xcvr0.mgmt_mm defaultConnection {0}
+add_connection pcie.bar0_mm xcvr0.mgmt_mm
+set_connection_parameter_value pcie.bar0_mm/xcvr0.mgmt_mm arbitrationPriority {1}
+set_connection_parameter_value pcie.bar0_mm/xcvr0.mgmt_mm baseAddress {0x00010000}
+set_connection_parameter_value pcie.bar0_mm/xcvr0.mgmt_mm defaultConnection {0}
 
-add_connection pcie.bar2_mm xcvr1.mgmt_mm
-set_connection_parameter_value pcie.bar2_mm/xcvr1.mgmt_mm arbitrationPriority {1}
-set_connection_parameter_value pcie.bar2_mm/xcvr1.mgmt_mm baseAddress {0x00020000}
-set_connection_parameter_value pcie.bar2_mm/xcvr1.mgmt_mm defaultConnection {0}
+add_connection pcie.bar0_mm xcvr1.mgmt_mm
+set_connection_parameter_value pcie.bar0_mm/xcvr1.mgmt_mm arbitrationPriority {1}
+set_connection_parameter_value pcie.bar0_mm/xcvr1.mgmt_mm baseAddress {0x00020000}
+set_connection_parameter_value pcie.bar0_mm/xcvr1.mgmt_mm defaultConnection {0}
 
 add_connection pcie.data_clk fc0_pcie_tx.out_clk
 
@@ -662,7 +662,7 @@ set_interconnect_requirement {fcport0.rx_dma_m} {qsys_mm.insertPerformanceMonito
 set_interconnect_requirement {fcport0.setup} {qsys_mm.insertPerformanceMonitor} {TRUE}
 set_interconnect_requirement {fcport0.tx_dma_m} {qsys_mm.insertPerformanceMonitor} {TRUE}
 set_interconnect_requirement {jtagm.master} {qsys_mm.insertPerformanceMonitor} {FALSE}
-set_interconnect_requirement {pcie.bar2_mm} {qsys_mm.insertPerformanceMonitor} {TRUE}
+set_interconnect_requirement {pcie.bar0_mm} {qsys_mm.insertPerformanceMonitor} {TRUE}
 set_interconnect_requirement {pcie.read_mem_mm} {qsys_mm.insertPerformanceMonitor} {TRUE}
 set_interconnect_requirement {pcie.write_mem_mm} {qsys_mm.insertPerformanceMonitor} {TRUE}
 set_interconnect_requirement {sfp0.mm} {qsys_mm.insertPerformanceMonitor} {TRUE}

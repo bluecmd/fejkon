@@ -20,6 +20,8 @@ class NoSuchBarError(Error):
 
 class FejkonEP(pcie.Endpoint, pcie.MSICapability):
     """Fejkon card function model"""
+
+    # pylint: disable=too-many-instance-attributes
     def __init__(self, clk):
         super(FejkonEP, self).__init__()
         self.clk = clk
@@ -36,38 +38,39 @@ class FejkonEP(pcie.Endpoint, pcie.MSICapability):
         self.register_rx_tlp_handler(pcie.TLP_MEM_WRITE, self.handle_mem_write_tlp)
         self.register_rx_tlp_handler(pcie.TLP_MEM_WRITE_64, self.handle_mem_write_tlp)
         self.configure_bar(0, 0x80000, ext=False, prefetch=False, io=False)
-        self.bar0_mm_address = myhdl.Signal(myhdl.intbv()[31:])
+        self.bar0_mm_address = myhdl.Signal(myhdl.intbv()[32:])
         self.bar0_mm_readdatavalid = myhdl.Signal(myhdl.intbv())
-        self.bar0_mm_readdata = myhdl.Signal(myhdl.intbv()[31:])
+        self.bar0_mm_readdata = myhdl.Signal(myhdl.intbv()[32:])
         self.bar0_mm_read = myhdl.Signal(myhdl.intbv())
         self.bar0_mm_write = myhdl.Signal(myhdl.intbv())
-        self.bar0_mm_writedata = myhdl.Signal(myhdl.intbv()[31:])
+        self.bar0_mm_writedata = myhdl.Signal(myhdl.intbv()[32:])
         self.bar0_mm_waitrequest = myhdl.Signal(myhdl.intbv())
-        self.rx_st_data = myhdl.Signal(myhdl.intbv()[255:])
-        self.rx_st_empty = myhdl.Signal(myhdl.intbv())
+        self.rx_st_data = myhdl.Signal(myhdl.intbv()[256:])
+        self.rx_st_empty = myhdl.Signal(myhdl.intbv()[2:])
         self.rx_st_error = myhdl.Signal(myhdl.intbv())
         self.rx_st_startofpacket = myhdl.Signal(myhdl.intbv())
         self.rx_st_endofpacket = myhdl.Signal(myhdl.intbv())
         self.rx_st_ready = myhdl.Signal(myhdl.intbv())
         self.rx_st_valid = myhdl.Signal(myhdl.intbv())
-        self.tx_st_data = myhdl.Signal(myhdl.intbv()[255:])
+        self.tx_st_data = myhdl.Signal(myhdl.intbv()[256:])
         self.tx_st_startofpacket = myhdl.Signal(myhdl.intbv())
         self.tx_st_endofpacket = myhdl.Signal(myhdl.intbv())
         self.tx_st_error = myhdl.Signal(myhdl.intbv())
-        self.tx_st_empty = myhdl.Signal(myhdl.intbv())
+        self.tx_st_empty = myhdl.Signal(myhdl.intbv()[2:])
         self.tx_st_ready = myhdl.Signal(myhdl.intbv())
         self.tx_st_valid = myhdl.Signal(myhdl.intbv())
-        self.rx_st_bar = myhdl.Signal(myhdl.intbv()[7:])
+        self.rx_st_bar = myhdl.Signal(myhdl.intbv()[8:])
         self.rx_st_mask = myhdl.Signal(myhdl.intbv())
-        self.data_tx_data = myhdl.Signal(myhdl.intbv()[255:])
+        self.data_tx_data = myhdl.Signal(myhdl.intbv()[256:])
         self.data_tx_valid = myhdl.Signal(myhdl.intbv())
         self.data_tx_ready = myhdl.Signal(myhdl.intbv())
-        self.data_tx_channel = myhdl.Signal(myhdl.intbv()[1:])
+        self.data_tx_channel = myhdl.Signal(myhdl.intbv()[2:])
         self.data_tx_endofpacket = myhdl.Signal(myhdl.intbv())
         self.data_tx_startofpacket = myhdl.Signal(myhdl.intbv())
-        self.data_tx_empty = myhdl.Signal(myhdl.intbv()[4:])
+        self.data_tx_empty = myhdl.Signal(myhdl.intbv()[5:])
 
     def handle_mem_read_tlp(self, tlp):
+        """Handle ordinary 32 and 64 bit memory read TLPs"""
         log.info("Got read TLP: %s", tlp)
         log.info("Match BAR: %s", self.match_bar(tlp.address))
         bars = self.match_bar(tlp.address)
@@ -76,17 +79,36 @@ class FejkonEP(pcie.Endpoint, pcie.MSICapability):
         bar = bars[0]
 
         dws = tlp.pack()
-        # TODO: This needs to be x4 (256 bit)
-        for i, dw in enumerate(dws):
-            self.rx_st_data.next = dw
-            self.rx_st_empty.next = 0
+        frames = int(len(dws)/4.0 + 0.5)
+        # Pad to 16 word alignment
+        empty_dws = len(dws) % 4
+        dws.extend([0]*(empty_dws))
+        yield self.clk.posedge
+        self.rx_st_bar = bar
+        for i in range(frames):
+            # This is only >0 on the last frame
+            last = (i == frames-1)
+            first = (i == 0)
+            self.rx_st_data.next = (
+                dws[i+3] << 96 | dws[i+2] << 64 | dws[i+1] << 32 | dws[i])
+            self.rx_st_empty.next = empty_dws if last else 0
             self.rx_st_error.next = 0
-            self.rx_st_startofpacket.next = (i == 0)
-            self.rx_st_endofpacket.next = (i == len(dws)-1)
+            self.rx_st_startofpacket.next = first
+            self.rx_st_endofpacket.next = last
             self.rx_st_valid.next = 1
             yield self.clk.posedge
 
         self.rx_st_valid.next = 0
+        # Clean up some signals to make things look neat
+        self.rx_st_startofpacket.next = 0
+        self.rx_st_endofpacket.next = 0
+        self.rx_st_empty.next = 0
+        self.rx_st_bar = 0
+
+        val = yield self.tx_st_valid.posedge, myhdl.delay(1000)
+        if not val:
+            raise Exception("Timeout waiting for CplD")
+        yield self.clk.posedge
 
         # TODO(bluecmd): This is supposed to be in the dut
         #_, addr = bar
@@ -129,12 +151,12 @@ def testcase(*blocks):
     Arguments:
       *blocks: Any argument given is a function to create other blocks
     """
-    def inner(f):
+    def inner(func):
         def block(self):
             def run_and_stop():
-                yield from f(self)
+                yield from func(self)
                 raise myhdl.StopSimulation
-            insts = [x(self, f) for x in blocks] + [run_and_stop()]
+            insts = [x(self, func) for x in blocks] + [run_and_stop()]
             sim = myhdl.Simulation(insts)
             sim.run(quiet=1)
         return block

@@ -9,17 +9,17 @@ set_project_property HIDE_FROM_IP_CATALOG {false}
 
 # Instances and instance parameters
 # (disabled instances are intentionally culled)
-add_instance bar2_cdc altera_avalon_mm_clock_crossing_bridge 19.1
-set_instance_parameter_value bar2_cdc {ADDRESS_UNITS} {SYMBOLS}
-set_instance_parameter_value bar2_cdc {ADDRESS_WIDTH} {20}
-set_instance_parameter_value bar2_cdc {COMMAND_FIFO_DEPTH} {4}
-set_instance_parameter_value bar2_cdc {DATA_WIDTH} {32}
-set_instance_parameter_value bar2_cdc {MASTER_SYNC_DEPTH} {2}
-set_instance_parameter_value bar2_cdc {MAX_BURST_SIZE} {1}
-set_instance_parameter_value bar2_cdc {RESPONSE_FIFO_DEPTH} {4}
-set_instance_parameter_value bar2_cdc {SLAVE_SYNC_DEPTH} {2}
-set_instance_parameter_value bar2_cdc {SYMBOL_WIDTH} {8}
-set_instance_parameter_value bar2_cdc {USE_AUTO_ADDRESS_WIDTH} {0}
+add_instance bar0_cdc altera_avalon_mm_clock_crossing_bridge 19.1
+set_instance_parameter_value bar0_cdc {ADDRESS_UNITS} {SYMBOLS}
+set_instance_parameter_value bar0_cdc {ADDRESS_WIDTH} {20}
+set_instance_parameter_value bar0_cdc {COMMAND_FIFO_DEPTH} {4}
+set_instance_parameter_value bar0_cdc {DATA_WIDTH} {32}
+set_instance_parameter_value bar0_cdc {MASTER_SYNC_DEPTH} {2}
+set_instance_parameter_value bar0_cdc {MAX_BURST_SIZE} {1}
+set_instance_parameter_value bar0_cdc {RESPONSE_FIFO_DEPTH} {4}
+set_instance_parameter_value bar0_cdc {SLAVE_SYNC_DEPTH} {2}
+set_instance_parameter_value bar0_cdc {SYMBOL_WIDTH} {8}
+set_instance_parameter_value bar0_cdc {USE_AUTO_ADDRESS_WIDTH} {0}
 
 add_instance mgmt_clk altera_clock_bridge 19.1
 set_instance_parameter_value mgmt_clk {EXPLICIT_CLOCK_RATE} {0.0}
@@ -112,12 +112,12 @@ set_instance_parameter_value phy {advanced_default_hwtcl_vc0_clk_enable} {true}
 set_instance_parameter_value phy {advanced_default_hwtcl_wrong_device_id} {disable}
 set_instance_parameter_value phy {advanced_default_parameter_override} {0}
 set_instance_parameter_value phy {ast_width_hwtcl} {Avalon-ST 256-bit}
-set_instance_parameter_value phy {bar0_size_mask_hwtcl} {28}
+set_instance_parameter_value phy {bar0_size_mask_hwtcl} {19}
 set_instance_parameter_value phy {bar0_type_hwtcl} {1}
 set_instance_parameter_value phy {bar1_size_mask_hwtcl} {0}
 set_instance_parameter_value phy {bar1_type_hwtcl} {0}
-set_instance_parameter_value phy {bar2_size_mask_hwtcl} {19}
-set_instance_parameter_value phy {bar2_type_hwtcl} {1}
+set_instance_parameter_value phy {bar2_size_mask_hwtcl} {0}
+set_instance_parameter_value phy {bar2_type_hwtcl} {0}
 set_instance_parameter_value phy {bar3_size_mask_hwtcl} {0}
 set_instance_parameter_value phy {bar3_type_hwtcl} {0}
 set_instance_parameter_value phy {bar4_size_mask_hwtcl} {0}
@@ -466,10 +466,12 @@ set_instance_parameter_value xcvr_reconfig {gui_split_sizes} {}
 set_instance_parameter_value xcvr_reconfig {number_of_reconfig_interfaces} {11}
 
 # exported interfaces
-add_interface bar2_mm avalon master
-set_interface_property bar2_mm EXPORT_OF bar2_cdc.m0
+add_interface bar0_mm avalon master
+set_interface_property bar0_mm EXPORT_OF bar0_cdc.m0
 add_interface data_clk clock source
 set_interface_property data_clk EXPORT_OF pcie_clk.out_clk
+add_interface data_tx avalon_streaming sink
+set_interface_property data_tx EXPORT_OF pcie_data.data_tx
 add_interface irq interrupt receiver
 set_interface_property irq EXPORT_OF msi_intr.irq
 add_interface mgmt_clk clock sink
@@ -484,7 +486,7 @@ add_interface phy_serial conduit end
 set_interface_property phy_serial EXPORT_OF phy.hip_serial
 
 # connections and connection parameters
-add_connection mgmt_clk.out_clk bar2_cdc.m0_clk
+add_connection mgmt_clk.out_clk bar0_cdc.m0_clk
 
 add_connection mgmt_clk.out_clk mgmt_rst.clk
 
@@ -496,9 +498,9 @@ add_connection mgmt_clk.out_clk pcie_reset.clk
 
 add_connection mgmt_clk.out_clk xcvr_reconfig.mgmt_clk_clk
 
-add_connection mgmt_rst.out_reset bar2_cdc.m0_reset
+add_connection mgmt_rst.out_reset bar0_cdc.m0_reset
 
-add_connection mgmt_rst.out_reset bar2_cdc.s0_reset
+add_connection mgmt_rst.out_reset bar0_cdc.s0_reset
 
 add_connection mgmt_rst.out_reset msi_intr.reset
 
@@ -510,10 +512,10 @@ add_connection mgmt_rst.out_reset pcie_reset.reset
 
 add_connection mgmt_rst.out_reset xcvr_reconfig.mgmt_rst_reset
 
-add_connection pcie_data.bar2_mm bar2_cdc.s0
-set_connection_parameter_value pcie_data.bar2_mm/bar2_cdc.s0 arbitrationPriority {1}
-set_connection_parameter_value pcie_data.bar2_mm/bar2_cdc.s0 baseAddress {0x0000}
-set_connection_parameter_value pcie_data.bar2_mm/bar2_cdc.s0 defaultConnection {0}
+add_connection pcie_data.bar0_mm bar0_cdc.s0
+set_connection_parameter_value pcie_data.bar0_mm/bar0_cdc.s0 arbitrationPriority {1}
+set_connection_parameter_value pcie_data.bar0_mm/bar0_cdc.s0 baseAddress {0x0000}
+set_connection_parameter_value pcie_data.bar0_mm/bar0_cdc.s0 defaultConnection {0}
 
 add_connection pcie_data.tx_st phy.tx_st
 
@@ -543,7 +545,7 @@ set_connection_parameter_value pcie_reset.npor/phy.npor startPort {}
 set_connection_parameter_value pcie_reset.npor/phy.npor startPortLSB {0}
 set_connection_parameter_value pcie_reset.npor/phy.npor width {0}
 
-add_connection phy.coreclkout_hip bar2_cdc.s0_clk
+add_connection phy.coreclkout_hip bar0_cdc.s0_clk
 
 add_connection phy.coreclkout_hip msi_intr.clk
 

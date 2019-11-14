@@ -1,15 +1,15 @@
 [*]
-[*] GTKWave Analyzer v3.3.98 (w)1999-2019 BSI
-[*] Thu Nov 14 19:05:13 2019
+[*] GTKWave Analyzer v3.3.101 (w)1999-2019 BSI
+[*] Thu Nov 14 22:22:57 2019
 [*]
-[dumpfile] "/home/bluecmd/fejkon/ip/fejkon_pcie_data/test.fst"
-[dumpfile_mtime] "Thu Nov 14 18:58:59 2019"
-[dumpfile_size] 24192
-[savefile] "/home/bluecmd/fejkon/ip/fejkon_pcie_data/test.gtkw"
-[timestart] 0
-[size] 2352 1186
+[dumpfile] "test.fst"
+[dumpfile_mtime] "Thu Nov 14 22:21:50 2019"
+[dumpfile_size] 24168
+[savefile] "test.gtkw"
+[timestart] 33631650
+[size] 1920 1016
 [pos] 6 38
-*-22.611031 33600000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-11.158355 33638160 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] test.
 [sst_width] 588
 [signals_width] 350
@@ -47,15 +47,16 @@ test.dut.data_tx_data[255:0]
 @28
 test.dut.rx_st_startofpacket
 test.dut.rx_st_endofpacket
+test.dut.rx_st_mask
 @22
 test.dut.rx_st_bar[7:0]
 @28
 test.dut.rx_st_error
-test.dut.rx_st_mask
 test.dut.rx_st_ready
 test.dut.rx_st_valid
-test.dut.rx_st_empty
-@22
+@24
+test.dut.rx_st_empty[1:0]
+@23
 test.dut.rx_st_data[255:0]
 @200
 -
@@ -63,9 +64,11 @@ test.dut.rx_st_data[255:0]
 test.dut.tx_st_startofpacket
 test.dut.tx_st_endofpacket
 test.dut.tx_st_error
+test.dut.tx_st_ready
 test.dut.tx_st_valid
-test.dut.tx_st_empty
-@23
+@24
+test.dut.tx_st_empty[1:0]
+@22
 test.dut.tx_st_data[255:0]
 [pattern_trace] 1
 [pattern_trace] 0

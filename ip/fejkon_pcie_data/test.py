@@ -20,9 +20,9 @@ class NoSuchBarError(Error):
 
 class FejkonEP(pcie.Endpoint, pcie.MSICapability):
     """Fejkon card function model"""
-    def __init__(self, dut):
+    def __init__(self, clk):
         super(FejkonEP, self).__init__()
-        self.dut = dut
+        self.clk = clk
         self.vendor_id = 0xf1c0
         self.device_id = 0x0de5
         self.msi_multiple_message_capable = 32
@@ -36,6 +36,36 @@ class FejkonEP(pcie.Endpoint, pcie.MSICapability):
         self.register_rx_tlp_handler(pcie.TLP_MEM_WRITE, self.handle_mem_write_tlp)
         self.register_rx_tlp_handler(pcie.TLP_MEM_WRITE_64, self.handle_mem_write_tlp)
         self.configure_bar(0, 0x80000, ext=False, prefetch=False, io=False)
+        self.bar0_mm_address = myhdl.Signal(myhdl.intbv()[31:])
+        self.bar0_mm_readdatavalid = myhdl.Signal(myhdl.intbv())
+        self.bar0_mm_readdata = myhdl.Signal(myhdl.intbv()[31:])
+        self.bar0_mm_read = myhdl.Signal(myhdl.intbv())
+        self.bar0_mm_write = myhdl.Signal(myhdl.intbv())
+        self.bar0_mm_writedata = myhdl.Signal(myhdl.intbv()[31:])
+        self.bar0_mm_waitrequest = myhdl.Signal(myhdl.intbv())
+        self.rx_st_data = myhdl.Signal(myhdl.intbv()[255:])
+        self.rx_st_empty = myhdl.Signal(myhdl.intbv())
+        self.rx_st_error = myhdl.Signal(myhdl.intbv())
+        self.rx_st_startofpacket = myhdl.Signal(myhdl.intbv())
+        self.rx_st_endofpacket = myhdl.Signal(myhdl.intbv())
+        self.rx_st_ready = myhdl.Signal(myhdl.intbv())
+        self.rx_st_valid = myhdl.Signal(myhdl.intbv())
+        self.tx_st_data = myhdl.Signal(myhdl.intbv()[255:])
+        self.tx_st_startofpacket = myhdl.Signal(myhdl.intbv())
+        self.tx_st_endofpacket = myhdl.Signal(myhdl.intbv())
+        self.tx_st_error = myhdl.Signal(myhdl.intbv())
+        self.tx_st_empty = myhdl.Signal(myhdl.intbv())
+        self.tx_st_ready = myhdl.Signal(myhdl.intbv())
+        self.tx_st_valid = myhdl.Signal(myhdl.intbv())
+        self.rx_st_bar = myhdl.Signal(myhdl.intbv()[7:])
+        self.rx_st_mask = myhdl.Signal(myhdl.intbv())
+        self.data_tx_data = myhdl.Signal(myhdl.intbv()[255:])
+        self.data_tx_valid = myhdl.Signal(myhdl.intbv())
+        self.data_tx_ready = myhdl.Signal(myhdl.intbv())
+        self.data_tx_channel = myhdl.Signal(myhdl.intbv()[1:])
+        self.data_tx_endofpacket = myhdl.Signal(myhdl.intbv())
+        self.data_tx_startofpacket = myhdl.Signal(myhdl.intbv())
+        self.data_tx_empty = myhdl.Signal(myhdl.intbv()[4:])
 
     def handle_mem_read_tlp(self, tlp):
         log.info("Got read TLP: %s", tlp)
@@ -45,34 +75,47 @@ class FejkonEP(pcie.Endpoint, pcie.MSICapability):
             raise NoSuchBarError(tlp.address)
         bar = bars[0]
 
+        dws = tlp.pack()
+        # TODO: This needs to be x4 (256 bit)
+        for i, dw in enumerate(dws):
+            self.rx_st_data.next = dw
+            self.rx_st_empty.next = 0
+            self.rx_st_error.next = 0
+            self.rx_st_startofpacket.next = (i == 0)
+            self.rx_st_endofpacket.next = (i == len(dws)-1)
+            self.rx_st_valid.next = 1
+            yield self.clk.posedge
+
+        self.rx_st_valid.next = 0
+
         # TODO(bluecmd): This is supposed to be in the dut
-        _, addr = bar
-        data = bytearray(tlp.length*4)
-        m = 0
-        n = 0
-        addr = tlp.address+tlp.get_first_be_offset()
-        dw_length = tlp.length
-        byte_length = tlp.get_be_byte_count()
+        #_, addr = bar
+        #data = bytearray(tlp.length*4)
+        #m = 0
+        #n = 0
+        #addr = tlp.address+tlp.get_first_be_offset()
+        #dw_length = tlp.length
+        #byte_length = tlp.get_be_byte_count()
 
-        while m < dw_length:
-            cpl = pcie.TLP()
-            cpl.set_completion_data(tlp, self.get_id())
+        #while m < dw_length:
+        #    cpl = pcie.TLP()
+        #    cpl.set_completion_data(tlp, self.get_id())
 
-            cpl_dw_length = dw_length - m
-            cpl_byte_length = byte_length - n
-            cpl.byte_count = cpl_byte_length
-            if cpl_dw_length > 32 << self.max_payload_size:
-                cpl_dw_length = 32 << self.max_payload_size # max payload size
-                cpl_dw_length -= (addr & 0x7c) >> 2 # RCB align
+        #    cpl_dw_length = dw_length - m
+        #    cpl_byte_length = byte_length - n
+        #    cpl.byte_count = cpl_byte_length
+        #    if cpl_dw_length > 32 << self.max_payload_size:
+        #        cpl_dw_length = 32 << self.max_payload_size # max payload size
+        #        cpl_dw_length -= (addr & 0x7c) >> 2 # RCB align
 
-            cpl.lower_address = addr & 0x7f
+        #    cpl.lower_address = addr & 0x7f
 
-            cpl.set_data(data[m*4:(m+cpl_dw_length)*4])
-            # logging
-            yield from self.send(cpl)
-            m += cpl_dw_length
-            n += cpl_dw_length*4 - (addr&3)
-            addr += cpl_dw_length*4 - (addr&3)
+        #    cpl.set_data(data[m*4:(m+cpl_dw_length)*4])
+        #    # logging
+        #    yield from self.send(cpl)
+        #    m += cpl_dw_length
+        #    n += cpl_dw_length*4 - (addr&3)
+        #    addr += cpl_dw_length*4 - (addr&3)
 
 
     def handle_mem_write_tlp(self, tlp):
@@ -103,18 +146,9 @@ class Test(unittest.TestCase):
     def setUp(self):
         self.clk = myhdl.Signal(bool(0))
         self.rst = myhdl.Signal(bool(0))
-
-        self.bar2_mm_address = myhdl.Signal(myhdl.intbv(0)[31:])
-
-        self.dut = myhdl.Cosimulation(
-            "vvp -m myhdl test.vvp -fst",
-            clk=self.clk,
-            reset=self.rst,
-            bar2_mm_address=self.bar2_mm_address)
-
         # PCIe devices
         rc = pcie.RootComplex()
-        ep = FejkonEP(self.dut)
+        ep = FejkonEP(self.clk)
         dev = pcie.Device(ep)
         rc.make_port().connect(dev)
         sw = pcie.Switch()
@@ -136,7 +170,40 @@ class Test(unittest.TestCase):
         return block
 
     def dutgen(self, unused_test):
-        return self.dut
+        return myhdl.Cosimulation(
+            "vvp -m myhdl test.vvp -fst",
+            clk=self.clk,
+            reset=self.rst,
+            bar0_mm_address=self.ep.bar0_mm_address,
+            bar0_mm_readdatavalid=self.ep.bar0_mm_readdatavalid,
+            bar0_mm_readdata=self.ep.bar0_mm_readdata,
+            bar0_mm_read=self.ep.bar0_mm_read,
+            bar0_mm_write=self.ep.bar0_mm_write,
+            bar0_mm_writedata=self.ep.bar0_mm_writedata,
+            bar0_mm_waitrequest=self.ep.bar0_mm_waitrequest,
+            rx_st_data=self.ep.rx_st_data,
+            rx_st_empty=self.ep.rx_st_empty,
+            rx_st_error=self.ep.rx_st_error,
+            rx_st_startofpacket=self.ep.rx_st_startofpacket,
+            rx_st_endofpacket=self.ep.rx_st_endofpacket,
+            rx_st_ready=self.ep.rx_st_ready,
+            rx_st_valid=self.ep.rx_st_valid,
+            rx_st_bar=self.ep.rx_st_bar,
+            rx_st_mask=self.ep.rx_st_mask,
+            tx_st_data=self.ep.tx_st_data,
+            tx_st_startofpacket=self.ep.tx_st_startofpacket,
+            tx_st_endofpacket=self.ep.tx_st_endofpacket,
+            tx_st_error=self.ep.tx_st_error,
+            tx_st_empty=self.ep.tx_st_empty,
+            tx_st_ready=self.ep.tx_st_ready,
+            tx_st_valid=self.ep.tx_st_valid,
+            data_tx_data=self.ep.data_tx_data,
+            data_tx_valid=self.ep.data_tx_valid,
+            data_tx_ready=self.ep.data_tx_ready,
+            data_tx_channel=self.ep.data_tx_channel,
+            data_tx_endofpacket=self.ep.data_tx_endofpacket,
+            data_tx_startofpacket=self.ep.data_tx_startofpacket,
+            data_tx_empty=self.ep.data_tx_empty)
 
     # === End of MyHDL instances ===
 
@@ -153,7 +220,7 @@ class Test(unittest.TestCase):
         yield from self.reset()
         bar0 = self.ep.bar[0]
         ident = yield from self.rc.mem_read(bar0, 4)
-        assert self.bar2_mm_address > 0
+        assert self.ep.bar0_mm_address > 0
         log.info("Identity: %s", binascii.hexlify(ident))
 
 

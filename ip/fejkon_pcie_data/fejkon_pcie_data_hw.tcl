@@ -59,39 +59,39 @@ add_fileset_file fejkon_pcie_data.sv SYSTEM_VERILOG PATH fejkon_pcie_data.sv
 
 
 # 
-# connection point bar2_mm
+# connection point bar0_mm
 # 
-add_interface bar2_mm avalon start
-set_interface_property bar2_mm addressUnits SYMBOLS
-set_interface_property bar2_mm associatedClock clk
-set_interface_property bar2_mm associatedReset reset
-set_interface_property bar2_mm bitsPerSymbol 8
-set_interface_property bar2_mm burstOnBurstBoundariesOnly false
-set_interface_property bar2_mm burstcountUnits WORDS
-set_interface_property bar2_mm doStreamReads false
-set_interface_property bar2_mm doStreamWrites false
-set_interface_property bar2_mm holdTime 0
-set_interface_property bar2_mm linewrapBursts false
-set_interface_property bar2_mm maximumPendingReadTransactions 0
-set_interface_property bar2_mm maximumPendingWriteTransactions 0
-set_interface_property bar2_mm readLatency 0
-set_interface_property bar2_mm readWaitTime 1
-set_interface_property bar2_mm setupTime 0
-set_interface_property bar2_mm timingUnits Cycles
-set_interface_property bar2_mm writeWaitTime 0
-set_interface_property bar2_mm ENABLED true
-set_interface_property bar2_mm EXPORT_OF ""
-set_interface_property bar2_mm PORT_NAME_MAP ""
-set_interface_property bar2_mm CMSIS_SVD_VARIABLES ""
-set_interface_property bar2_mm SVD_ADDRESS_GROUP ""
+add_interface bar0_mm avalon start
+set_interface_property bar0_mm addressUnits SYMBOLS
+set_interface_property bar0_mm associatedClock clk
+set_interface_property bar0_mm associatedReset reset
+set_interface_property bar0_mm bitsPerSymbol 8
+set_interface_property bar0_mm burstOnBurstBoundariesOnly false
+set_interface_property bar0_mm burstcountUnits WORDS
+set_interface_property bar0_mm doStreamReads false
+set_interface_property bar0_mm doStreamWrites false
+set_interface_property bar0_mm holdTime 0
+set_interface_property bar0_mm linewrapBursts false
+set_interface_property bar0_mm maximumPendingReadTransactions 0
+set_interface_property bar0_mm maximumPendingWriteTransactions 0
+set_interface_property bar0_mm readLatency 0
+set_interface_property bar0_mm readWaitTime 1
+set_interface_property bar0_mm setupTime 0
+set_interface_property bar0_mm timingUnits Cycles
+set_interface_property bar0_mm writeWaitTime 0
+set_interface_property bar0_mm ENABLED true
+set_interface_property bar0_mm EXPORT_OF ""
+set_interface_property bar0_mm PORT_NAME_MAP ""
+set_interface_property bar0_mm CMSIS_SVD_VARIABLES ""
+set_interface_property bar0_mm SVD_ADDRESS_GROUP ""
 
-add_interface_port bar2_mm bar2_mm_address address Output 32
-add_interface_port bar2_mm bar2_mm_readdatavalid readdatavalid Input 1
-add_interface_port bar2_mm bar2_mm_readdata readdata Input 32
-add_interface_port bar2_mm bar2_mm_read read Output 1
-add_interface_port bar2_mm bar2_mm_write write Output 1
-add_interface_port bar2_mm bar2_mm_writedata writedata Output 32
-add_interface_port bar2_mm bar2_mm_waitrequest waitrequest Input 1
+add_interface_port bar0_mm bar2_mm_address address Output 32
+add_interface_port bar0_mm bar2_mm_readdatavalid readdatavalid Input 1
+add_interface_port bar0_mm bar2_mm_readdata readdata Input 32
+add_interface_port bar0_mm bar2_mm_read read Output 1
+add_interface_port bar0_mm bar2_mm_write write Output 1
+add_interface_port bar0_mm bar2_mm_writedata writedata Output 32
+add_interface_port bar0_mm bar2_mm_waitrequest waitrequest Input 1
 
 
 # 

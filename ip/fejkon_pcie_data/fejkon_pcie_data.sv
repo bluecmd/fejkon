@@ -1,12 +1,12 @@
 `timescale 1 ps / 1 ps
 module fejkon_pcie_data (
-    output wire [31:0]  bar2_mm_address,       //      bar2_mm.address
-    input  wire         bar2_mm_readdatavalid, //             .readdatavalid
-    input  wire [31:0]  bar2_mm_readdata,      //             .readdata
-    output wire         bar2_mm_read,          //             .read
-    output wire         bar2_mm_write,         //             .write
-    output wire [31:0]  bar2_mm_writedata,     //             .writedata
-    input  wire         bar2_mm_waitrequest,   //             .waitrequest
+    output wire [31:0]  bar0_mm_address,       //      bar0_mm.address
+    input  wire         bar0_mm_readdatavalid, //             .readdatavalid
+    input  wire [31:0]  bar0_mm_readdata,      //             .readdata
+    output wire         bar0_mm_read,          //             .read
+    output wire         bar0_mm_write,         //             .write
+    output wire [31:0]  bar0_mm_writedata,     //             .writedata
+    input  wire         bar0_mm_waitrequest,   //             .waitrequest
     input  wire         clk,                   //          clk.clk
     input  wire         reset,                 //        reset.reset
     input  wire [255:0] rx_st_data,            //        rx_st.data
@@ -21,6 +21,7 @@ module fejkon_pcie_data (
     output wire         tx_st_endofpacket,     //             .endofpacket
     output wire         tx_st_error,           //             .error
     output wire         tx_st_empty,           //             .empty
+    input  wire         tx_st_ready,           //             .ready
     output wire         tx_st_valid,           //             .valid
     input  wire [7:0]   rx_st_bar,             //    rx_bar_be.rx_st_bar
     output wire         rx_st_mask,            //             .rx_st_mask
@@ -52,17 +53,17 @@ module fejkon_pcie_data (
   // rx_h2 ||     Requester ID               |     Tag           |LastBE  |FirstBE||
   //
 
-  logic [31:0] bar2_addr = 0;
+  logic [31:0] bar0_addr = 0;
 
   // TODO: Auto-generated HDL template
 
-  assign bar2_mm_address = bar2_addr;
+  assign bar0_mm_address = bar0_addr;
 
-  assign bar2_mm_read = 1'b0;
+  assign bar0_mm_read = 1'b0;
 
-  assign bar2_mm_write = 1'b0;
+  assign bar0_mm_write = 1'b0;
 
-  assign bar2_mm_writedata = 32'b00000000000000000000000000000000;
+  assign bar0_mm_writedata = 32'b00000000000000000000000000000000;
 
   assign rx_st_ready = 1'b0;
 
@@ -84,7 +85,7 @@ module fejkon_pcie_data (
 
 
   always @(posedge clk) begin
-    bar2_addr <= bar2_addr + 1;
+    bar0_addr <= bar0_addr + 1;
   end
 
 endmodule

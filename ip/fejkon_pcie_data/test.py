@@ -5,6 +5,7 @@ Documentation
 """
 import binascii
 import logging as log
+import math
 import os
 import unittest
 
@@ -78,10 +79,15 @@ class FejkonEP(pcie.Endpoint, pcie.MSICapability):
             raise NoSuchBarError(tlp.address)
         bar = bars[0]
 
+        if self.rx_st_ready != 1:
+            val = yield self.rx_st_ready.posedge, myhdl.delay(1000)
+            if not val:
+                raise Exception("Timeout waiting for rx_st_ready")
+
         dws = tlp.pack()
-        frames = int(len(dws)/4.0 + 0.5)
-        # Pad to 16 word alignment
-        empty_dws = len(dws) % 4
+        frames = int(math.ceil(len(dws)/8.0))
+        # Pad to 32 word alignment
+        empty_dws = 8 - len(dws) % 8
         dws.extend([0]*(empty_dws))
         yield self.clk.posedge
         self.rx_st_bar = bar
@@ -90,8 +96,10 @@ class FejkonEP(pcie.Endpoint, pcie.MSICapability):
             last = (i == frames-1)
             first = (i == 0)
             self.rx_st_data.next = (
-                dws[i+3] << 96 | dws[i+2] << 64 | dws[i+1] << 32 | dws[i])
-            self.rx_st_empty.next = empty_dws if last else 0
+                dws[i+7] << 224 | dws[i+6] << 192 | dws[i+5] << 160 |
+                dws[i+4] << 128 | dws[i+3] << 96 | dws[i+2] << 64 |
+                dws[i+1] << 32 | dws[i])
+            self.rx_st_empty.next = empty_dws // 2 if last else 0
             self.rx_st_error.next = 0
             self.rx_st_startofpacket.next = first
             self.rx_st_endofpacket.next = last

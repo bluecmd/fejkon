@@ -55,38 +55,46 @@ module fejkon_pcie_data (
 
   logic [31:0] bar0_addr = 0;
 
-  // TODO: Auto-generated HDL template
+  logic [31:0] [7:0] rx_st_dword;
+  logic [31:0] [7:0] tx_st_dword;
+  logic [1:0] rx_st_fmt;
+  logic [4:0] rx_st_type;
+  logic [9:0] rx_st_len;
+
+  assign rx_st_fmt  = rx_st_dword[0][30:29];
+  assign rx_st_type = rx_st_dword[0][28:24];
+  assign rx_st_len  = rx_st_dword[0][9:0];
+
+  assign rx_st_dword = rx_st_data;
+  assign tx_st_data = tx_st_dword;
 
   assign bar0_mm_address = bar0_addr;
 
   assign bar0_mm_read = 1'b0;
-
   assign bar0_mm_write = 1'b0;
-
-  assign bar0_mm_writedata = 32'b00000000000000000000000000000000;
-
-  assign rx_st_ready = 1'b0;
+  assign bar0_mm_writedata = 32'hdeadbeef;
 
   assign tx_st_valid = 1'b0;
-
-  assign tx_st_data = 256'b0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000;
-
   assign tx_st_startofpacket = 1'b0;
-
   assign tx_st_endofpacket = 1'b0;
-
   assign tx_st_error = 1'b0;
-
   assign tx_st_empty = 2'b00;
 
+  // Used to stall the sending of non-posted TLPs from the PCIe IP.
+  // Since we have to deal with posted TLPs anyway it seems not so useful to
+  // implement it.
   assign rx_st_mask = 1'b0;
+
+  assign rx_st_ready = ~reset;
 
   assign data_tx_ready = 1'b1;
 
+  // TODO(bluecmd): Abort any TLP if we get !rx_st_valid - from example code
 
   always @(posedge clk) begin
     if (rx_st_valid) begin
-      bar0_addr <= rx_st_data[31:0];
+      bar0_addr <= rx_st_dword[0];
+      tx_st_dword <= rx_st_dword;
     end
   end
 

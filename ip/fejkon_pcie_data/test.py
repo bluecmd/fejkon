@@ -113,10 +113,21 @@ class FejkonEP(pcie.Endpoint, pcie.MSICapability):
         self.rx_st_empty.next = 0
         self.rx_st_bar = 0
 
-        val = yield self.tx_st_valid.posedge, myhdl.delay(1000)
-        if not val:
+        yield self.tx_st_valid.posedge, myhdl.delay(1000)
+        if not self.tx_st_valid:
             raise Exception("Timeout waiting for CplD")
+
         yield self.clk.posedge
+
+        dws = []
+        val = int(self.tx_st_data)
+        for i in range(3):
+            dws.append(val & 0xffffffff)
+            val = val >> 32
+        cpl = pcie.TLP()
+        cpl.unpack(dws)
+        log.info("TLP returned: %s", cpl)
+        yield from self.send(cpl)
 
         # TODO(bluecmd): This is supposed to be in the dut
         #_, addr = bar
@@ -258,6 +269,7 @@ class Test(unittest.TestCase):
         # TODO
         yield from self.reset()
         bar0 = self.ep.bar[0]
+        yield from self.rc.mem_write(bar0, bytearray([0]*4))
         ident = yield from self.rc.mem_read(bar0, 4)
         assert self.ep.bar0_mm_address > 0
         log.info("Identity: %s", binascii.hexlify(ident))

@@ -1,7 +1,7 @@
-[timestart] 33631650
+[timestart] 33635330
 [size] 1920 1016
 [pos] 6 38
-*-11.158355 33638160 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-11.158355 33645990 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] test.
 [sst_width] 588
 [signals_width] 350
@@ -48,8 +48,15 @@ test.dut.rx_st_ready
 test.dut.rx_st_valid
 @24
 test.dut.rx_st_empty[1:0]
-@23
+@22
 test.dut.rx_st_data[255:0]
+@201
+-
+@28
+test.dut.rx_tx_strobe
+@22
+test.dut.rx_tx_requester_id[15:0]
+test.dut.rx_tx_tag[7:0]
 @200
 -
 @28

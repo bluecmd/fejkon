@@ -545,6 +545,13 @@ set_connection_parameter_value pcie_reset.npor/phy.npor startPort {}
 set_connection_parameter_value pcie_reset.npor/phy.npor startPortLSB {0}
 set_connection_parameter_value pcie_reset.npor/phy.npor width {0}
 
+add_connection phy.config_tl pcie_data.config_tl
+set_connection_parameter_value phy.config_tl/pcie_data.config_tl endPort {}
+set_connection_parameter_value phy.config_tl/pcie_data.config_tl endPortLSB {0}
+set_connection_parameter_value phy.config_tl/pcie_data.config_tl startPort {}
+set_connection_parameter_value phy.config_tl/pcie_data.config_tl startPortLSB {0}
+set_connection_parameter_value phy.config_tl/pcie_data.config_tl width {0}
+
 add_connection phy.coreclkout_hip bar0_cdc.s0_clk
 
 add_connection phy.coreclkout_hip msi_intr.clk

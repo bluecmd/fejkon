@@ -417,27 +417,27 @@ class TLP(object):
         ret = True
         if self.fmt == FMT_3DW_DATA or self.fmt == FMT_4DW_DATA:
             if self.length != len(self.data):
-                pciePrint("TLP validation failed, length field does not match data: %s" % repr(self))
+                print("TLP validation failed, length field does not match data: %s" % repr(self))
                 ret = False
             if 0 > self.length > 1024:
-                pciePrint("TLP validation failed, length out of range: %s" % repr(self))
+                print("TLP validation failed, length out of range: %s" % repr(self))
                 ret = False
         if (self.fmt_type == TLP_MEM_READ or self.fmt_type == TLP_MEM_READ_64 or
                 self.fmt_type == TLP_MEM_READ_LOCKED or self.fmt_type == TLP_MEM_READ_LOCKED_64 or
                 self.fmt_type == TLP_MEM_WRITE or self.fmt_type == TLP_MEM_WRITE_64):
             if self.length*4 > 0x1000 - (self.address & 0xfff):
-                pciePrint("TLP validation failed, request crosses 4K boundary: %s" % repr(self))
+                print("TLP validation failed, request crosses 4K boundary: %s" % repr(self))
                 ret = False
         if (self.fmt_type == TLP_IO_READ or self.fmt_type == TLP_IO_WRITE):
             if self.length != 1:
-                pciePrint("TLP validation failed, invalid length for IO request: %s" % repr(self))
+                print("TLP validation failed, invalid length for IO request: %s" % repr(self))
                 ret = False
             if self.last_be != 0:
-                pciePrint("TLP validation failed, invalid last BE for IO request: %s" % repr(self))
+                print("TLP validation failed, invalid last BE for IO request: %s" % repr(self))
                 ret = False
         if (self.fmt_type == TLP_CPL_DATA):
             if (self.byte_count + (self.lower_address&3) + 3) < self.length*4:
-                pciePrint("TLP validation failed, completion byte count too small: %s" % repr(self))
+                print("TLP validation failed, completion byte count too small: %s" % repr(self))
                 ret = False
         return ret
 

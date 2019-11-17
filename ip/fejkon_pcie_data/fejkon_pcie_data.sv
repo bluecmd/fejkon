@@ -161,13 +161,14 @@ module fejkon_pcie_data (
       tx_tx_dword <= 256'b0;
       tx_tx_dword[0][30:29] <= 2'b10;   // CplD Fmt
       tx_tx_dword[0][28:24] <= 5'b1010; // CplD Type
-      tx_tx_dword[0][9:0] <= 2'h0;      // Length
+      tx_tx_dword[0][9:0] <= 2'h1;      // Length
       tx_tx_dword[1][31:16] <= my_id;   // Completer ID
-      tx_tx_dword[1][15:13] <= 1;       // Status (UR for now)
-      tx_tx_dword[1][11:0] <= 0;        // Byte Count
+      tx_tx_dword[1][15:13] <= 0;       // Status OK
+      tx_tx_dword[1][11:0] <= 4;        // Byte Count
       tx_tx_dword[2][31:16] <= rx_tx_requester_id;
       tx_tx_dword[2][15:8] <= rx_tx_tag;
       tx_tx_dword[2][6:0] <= 0;         // Lower address
+      tx_tx_dword[3] <= 32'hdeadbeef;
       tx_tx_valid <= 1'b1;
       tx_tx_empty <= 2'h3;
       tx_tx_startofpacket <= 1'b1;

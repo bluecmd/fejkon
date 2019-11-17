@@ -7,6 +7,7 @@ import binascii
 import logging as log
 import math
 import os
+import threading
 import unittest
 
 import myhdl
@@ -25,6 +26,8 @@ class FejkonEP(pcie.Endpoint, pcie.MSICapability):
     # pylint: disable=too-many-instance-attributes
     def __init__(self, clk):
         super(FejkonEP, self).__init__()
+        self.tx_sem = threading.Semaphore(0)
+        self.lock = threading.Lock()
         self.clk = clk
         self.vendor_id = 0xf1c0
         self.device_id = 0x0de5
@@ -70,10 +73,8 @@ class FejkonEP(pcie.Endpoint, pcie.MSICapability):
         self.data_tx_startofpacket = myhdl.Signal(myhdl.intbv())
         self.data_tx_empty = myhdl.Signal(myhdl.intbv()[5:])
 
-    def handle_mem_read_tlp(self, tlp):
-        """Handle ordinary 32 and 64 bit memory read TLPs"""
-        log.info("Got read TLP: %s", tlp)
-        log.info("Match BAR: %s", self.match_bar(tlp.address))
+    def _tlp_to_dut(self, tlp):
+        """Move a TLP to the DUT."""
         bars = self.match_bar(tlp.address)
         if len(bars) != 1:
             raise NoSuchBarError(tlp.address)
@@ -90,29 +91,35 @@ class FejkonEP(pcie.Endpoint, pcie.MSICapability):
         empty_dws = 8 - len(dws) % 8
         dws.extend([0]*(empty_dws))
         yield self.clk.posedge
-        self.rx_st_bar = bar
-        for i in range(frames):
-            # This is only >0 on the last frame
-            last = (i == frames-1)
-            first = (i == 0)
-            self.rx_st_data.next = (
-                dws[i+7] << 224 | dws[i+6] << 192 | dws[i+5] << 160 |
-                dws[i+4] << 128 | dws[i+3] << 96 | dws[i+2] << 64 |
-                dws[i+1] << 32 | dws[i])
-            self.rx_st_empty.next = empty_dws // 2 if last else 0
-            self.rx_st_error.next = 0
-            self.rx_st_startofpacket.next = first
-            self.rx_st_endofpacket.next = last
-            self.rx_st_valid.next = 1
-            yield self.clk.posedge
+        with self.lock:
+            self.rx_st_bar = bar
+            for i in range(frames):
+                # This is only >0 on the last frame
+                last = (i == frames-1)
+                first = (i == 0)
+                self.rx_st_data.next = (
+                    dws[8*i+7] << 224 | dws[8*i+6] << 192 | dws[8*i+5] << 160 |
+                    dws[8*i+4] << 128 | dws[8*i+3] << 96 | dws[8*i+2] << 64 |
+                    dws[8*i+1] << 32 | dws[8*i])
+                self.rx_st_empty.next = empty_dws // 2 if last else 0
+                self.rx_st_error.next = 0
+                self.rx_st_startofpacket.next = first
+                self.rx_st_endofpacket.next = last
+                self.rx_st_valid.next = 1
+                yield self.clk.posedge
 
-        self.rx_st_valid.next = 0
-        # Clean up some signals to make things look neat
-        self.rx_st_startofpacket.next = 0
-        self.rx_st_endofpacket.next = 0
-        self.rx_st_empty.next = 0
-        self.rx_st_bar = 0
+            self.rx_st_valid.next = 0
+            # Clean up some signals to make things look neat
+            self.rx_st_startofpacket.next = 0
+            self.rx_st_endofpacket.next = 0
+            self.rx_st_empty.next = 0
+            self.rx_st_bar = 0
 
+    def handle_mem_read_tlp(self, tlp):
+        """Handle ordinary 32 and 64 bit memory read TLPs"""
+        log.info("Got read TLP: %s", tlp)
+        yield from self._tlp_to_dut(tlp)
+        self.tx_sem.release()
         yield self.tx_st_valid.posedge, myhdl.delay(1000)
         if not self.tx_st_valid:
             raise Exception("Timeout waiting for CplD")
@@ -121,48 +128,28 @@ class FejkonEP(pcie.Endpoint, pcie.MSICapability):
 
         dws = []
         val = int(self.tx_st_data)
+        # Parse header
         for i in range(3):
             dws.append(val & 0xffffffff)
             val = val >> 32
         cpl = pcie.TLP()
         cpl.unpack(dws)
+        # Read data
+        for i in range(cpl.length):
+            if i > 4:
+                raise Exception("Unsupported, only 8 DW supported for now")
+            dws.append(val & 0xffffffff)
+            val = val >> 32
+        cpl = pcie.TLP()
+        cpl.unpack(dws)
         log.info("TLP returned: %s", cpl)
+        assert cpl.lower_address == tlp.get_lower_address()
         yield from self.send(cpl)
-
-        # TODO(bluecmd): This is supposed to be in the dut
-        #_, addr = bar
-        #data = bytearray(tlp.length*4)
-        #m = 0
-        #n = 0
-        #addr = tlp.address+tlp.get_first_be_offset()
-        #dw_length = tlp.length
-        #byte_length = tlp.get_be_byte_count()
-
-        #while m < dw_length:
-        #    cpl = pcie.TLP()
-        #    cpl.set_completion_data(tlp, self.get_id())
-
-        #    cpl_dw_length = dw_length - m
-        #    cpl_byte_length = byte_length - n
-        #    cpl.byte_count = cpl_byte_length
-        #    if cpl_dw_length > 32 << self.max_payload_size:
-        #        cpl_dw_length = 32 << self.max_payload_size # max payload size
-        #        cpl_dw_length -= (addr & 0x7c) >> 2 # RCB align
-
-        #    cpl.lower_address = addr & 0x7f
-
-        #    cpl.set_data(data[m*4:(m+cpl_dw_length)*4])
-        #    # logging
-        #    yield from self.send(cpl)
-        #    m += cpl_dw_length
-        #    n += cpl_dw_length*4 - (addr&3)
-        #    addr += cpl_dw_length*4 - (addr&3)
-
 
     def handle_mem_write_tlp(self, tlp):
         log.info("Got write TLP: %s", tlp)
-        log.info("Match BAR: %s", self.match_bar(tlp.address))
-        # TODO: Not implemented
+        yield from self._tlp_to_dut(tlp)
+        self.tx_sem.release()
 
 def testcase(*blocks):
     """Runs a decorated function as a block in MyHDL.
@@ -211,12 +198,13 @@ class Test(unittest.TestCase):
         return block
 
     def dutgen(self, test):
+        """Cosimulation of actual Verilog code"""
         # This is because icarus does not allow changing the dumpfile in
         # a nice way
-        op = os.getcwd()
-        np = os.path.join(op, test.__name__)
-        os.makedirs(np, exist_ok=True)
-        os.chdir(np)
+        oldpath = os.getcwd()
+        newpath = os.path.join(oldpath, test.__name__)
+        os.makedirs(newpath, exist_ok=True)
+        os.chdir(newpath)
         ret = myhdl.Cosimulation(
             "vvp -m myhdl ../test.vvp -fst",
             clk=self.clk,
@@ -251,7 +239,7 @@ class Test(unittest.TestCase):
             data_tx_endofpacket=self.ep.data_tx_endofpacket,
             data_tx_startofpacket=self.ep.data_tx_startofpacket,
             data_tx_empty=self.ep.data_tx_empty)
-        os.chdir(op)
+        os.chdir(oldpath)
         return ret
 
     # === End of MyHDL instances ===
@@ -264,23 +252,62 @@ class Test(unittest.TestCase):
         yield myhdl.delay(10)
         yield from self.rc.enumerate(enable_bus_mastering=True, configure_msi=True)
 
+    def await_tx(self):
+        """Called to prevent multiple TX to be called at the same time."""
+        # Bug workaround for MyHDL
+        while not self.ep.tx_sem.acquire(blocking=False):
+            yield myhdl.delay(100)
+
     @testcase(clkgen, dutgen)
-    def test_identity(self):
-        # TODO
+    def test_read(self):
+        """Test reading standard 4 byte reads."""
         yield from self.reset()
         bar0 = self.ep.bar[0]
-        yield from self.rc.mem_write(bar0, bytearray([0]*4))
         ident = yield from self.rc.mem_read(bar0, 4)
-        assert self.ep.bar0_mm_address > 0
         log.info("Identity: %s", binascii.hexlify(ident))
+        githash = yield from self.rc.mem_read(bar0 + 4, 4)
+        log.info("Git hash: %s", binascii.hexlify(githash))
+
+    @testcase(clkgen, dutgen)
+    def test_write_read(self):
+        """Test writing and then reading 4 bytes."""
+        yield from self.reset()
+        bar0 = self.ep.bar[0]
+        data = bytearray([1, 2, 3, 4])
+        yield from self.rc.mem_write(bar0 + 128, data)
+        yield from self.await_tx()
+        readback = yield from self.rc.mem_read(bar0 + 128, 4)
+        self.assertEqual(data, readback)
+
+    @testcase(clkgen, dutgen)
+    def test_large_read(self):
+        """Test reading 4096 bytes in one big read."""
+        yield from self.reset()
+        bar0 = self.ep.bar[0]
+        data = yield from self.rc.mem_read(bar0 + 4096, 4096)
+        log.debug("Large read: %s", data)
+        assert len(data) == 4096
+
+    @testcase(clkgen, dutgen)
+    def test_large_write(self):
+        """Test writing 4092 bytes in one big write."""
+        yield from self.reset()
+        bar0 = self.ep.bar[0]
+        data = bytearray(range(128))
+        log.debug("Doing write")
+        yield from self.rc.mem_write(bar0 + 1024, data)
+        yield from self.await_tx()
+        log.debug("Write completed")
+        # TODO: We'd do a zero-length read here but the PCIe test bench library
+        # does not support it
+        log.debug("Doing read")
+        _ = yield from self.rc.mem_read(bar0 + 128, 4)
+        log.debug("Read completed")
 
     @testcase(clkgen, dutgen)
     def test_dma(self):
         # TODO
         yield from self.reset()
-        bar0 = self.ep.bar[0]
-        ident = yield from self.rc.mem_read(bar0, 4)
-        assert self.ep.bar0_mm_address > 0
 
 
 if __name__ == '__main__':

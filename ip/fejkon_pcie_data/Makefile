@@ -12,5 +12,10 @@ test.vvp: $(SRCS)
 	iverilog -g2012 -o $@ $^
 
 test: test.vvp
-	python3 test.py
-	gtkwave test.gtkw
+	python3 test.py $(TESTARGS)
+
+wave: $(TEST)/wave.fst test.gtkw
+	gtkwave --save test.gtkw --dump=$<
+	sed -i '/^\[dumpfile/d' test.gtkw
+	sed -i '/^\[savefile/d' test.gtkw
+	sed -i '/^\[\*]/d' test.gtkw

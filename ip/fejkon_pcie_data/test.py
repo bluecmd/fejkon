@@ -199,9 +199,15 @@ class Test(unittest.TestCase):
             self.clk.next = not self.clk
         return block
 
-    def dutgen(self, unused_test):
-        return myhdl.Cosimulation(
-            "vvp -m myhdl test.vvp -fst",
+    def dutgen(self, test):
+        # This is because icarus does not allow changing the dumpfile in
+        # a nice way
+        op = os.getcwd()
+        np = os.path.join(op, test.__name__)
+        os.makedirs(np, exist_ok=True)
+        os.chdir(np)
+        ret = myhdl.Cosimulation(
+            "vvp -m myhdl ../test.vvp -fst",
             clk=self.clk,
             reset=self.rst,
             bar0_mm_address=self.ep.bar0_mm_address,
@@ -234,6 +240,8 @@ class Test(unittest.TestCase):
             data_tx_endofpacket=self.ep.data_tx_endofpacket,
             data_tx_startofpacket=self.ep.data_tx_startofpacket,
             data_tx_empty=self.ep.data_tx_empty)
+        os.chdir(op)
+        return ret
 
     # === End of MyHDL instances ===
 
@@ -246,12 +254,21 @@ class Test(unittest.TestCase):
         yield from self.rc.enumerate(enable_bus_mastering=True, configure_msi=True)
 
     @testcase(clkgen, dutgen)
-    def test_cosim(self):
+    def test_identity(self):
+        # TODO
         yield from self.reset()
         bar0 = self.ep.bar[0]
         ident = yield from self.rc.mem_read(bar0, 4)
         assert self.ep.bar0_mm_address > 0
         log.info("Identity: %s", binascii.hexlify(ident))
+
+    @testcase(clkgen, dutgen)
+    def test_dma(self):
+        # TODO
+        yield from self.reset()
+        bar0 = self.ep.bar[0]
+        ident = yield from self.rc.mem_read(bar0, 4)
+        assert self.ep.bar0_mm_address > 0
 
 
 if __name__ == '__main__':

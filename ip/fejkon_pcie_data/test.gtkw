@@ -1,11 +1,3 @@
-[*]
-[*] GTKWave Analyzer v3.3.101 (w)1999-2019 BSI
-[*] Thu Nov 14 22:22:57 2019
-[*]
-[dumpfile] "test.fst"
-[dumpfile_mtime] "Thu Nov 14 22:21:50 2019"
-[dumpfile_size] 24168
-[savefile] "test.gtkw"
 [timestart] 33631650
 [size] 1920 1016
 [pos] 6 38

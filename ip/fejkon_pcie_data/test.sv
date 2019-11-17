@@ -115,7 +115,7 @@ module test;
   );
 
   initial begin
-    $dumpfile("test.fst");
+    $dumpfile("wave.fst");
     $dumpvars(0, test);
   end
 endmodule

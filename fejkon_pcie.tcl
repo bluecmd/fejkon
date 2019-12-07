@@ -21,6 +21,38 @@ set_instance_parameter_value bar0_cdc {SLAVE_SYNC_DEPTH} {2}
 set_instance_parameter_value bar0_cdc {SYMBOL_WIDTH} {8}
 set_instance_parameter_value bar0_cdc {USE_AUTO_ADDRESS_WIDTH} {0}
 
+add_instance mem_req_fifo altera_avalon_sc_fifo 19.1
+set_instance_parameter_value mem_req_fifo {BITS_PER_SYMBOL} {128}
+set_instance_parameter_value mem_req_fifo {CHANNEL_WIDTH} {0}
+set_instance_parameter_value mem_req_fifo {EMPTY_LATENCY} {3}
+set_instance_parameter_value mem_req_fifo {ENABLE_EXPLICIT_MAXCHANNEL} {0}
+set_instance_parameter_value mem_req_fifo {ERROR_WIDTH} {0}
+set_instance_parameter_value mem_req_fifo {EXPLICIT_MAXCHANNEL} {0}
+set_instance_parameter_value mem_req_fifo {FIFO_DEPTH} {64}
+set_instance_parameter_value mem_req_fifo {SYMBOLS_PER_BEAT} {1}
+set_instance_parameter_value mem_req_fifo {USE_ALMOST_EMPTY_IF} {0}
+set_instance_parameter_value mem_req_fifo {USE_ALMOST_FULL_IF} {0}
+set_instance_parameter_value mem_req_fifo {USE_FILL_LEVEL} {0}
+set_instance_parameter_value mem_req_fifo {USE_MEMORY_BLOCKS} {1}
+set_instance_parameter_value mem_req_fifo {USE_PACKETS} {0}
+set_instance_parameter_value mem_req_fifo {USE_STORE_FORWARD} {0}
+
+add_instance mem_resp_fifo altera_avalon_sc_fifo 19.1
+set_instance_parameter_value mem_resp_fifo {BITS_PER_SYMBOL} {128}
+set_instance_parameter_value mem_resp_fifo {CHANNEL_WIDTH} {0}
+set_instance_parameter_value mem_resp_fifo {EMPTY_LATENCY} {3}
+set_instance_parameter_value mem_resp_fifo {ENABLE_EXPLICIT_MAXCHANNEL} {0}
+set_instance_parameter_value mem_resp_fifo {ERROR_WIDTH} {0}
+set_instance_parameter_value mem_resp_fifo {EXPLICIT_MAXCHANNEL} {0}
+set_instance_parameter_value mem_resp_fifo {FIFO_DEPTH} {64}
+set_instance_parameter_value mem_resp_fifo {SYMBOLS_PER_BEAT} {1}
+set_instance_parameter_value mem_resp_fifo {USE_ALMOST_EMPTY_IF} {0}
+set_instance_parameter_value mem_resp_fifo {USE_ALMOST_FULL_IF} {0}
+set_instance_parameter_value mem_resp_fifo {USE_FILL_LEVEL} {0}
+set_instance_parameter_value mem_resp_fifo {USE_MEMORY_BLOCKS} {1}
+set_instance_parameter_value mem_resp_fifo {USE_PACKETS} {0}
+set_instance_parameter_value mem_resp_fifo {USE_STORE_FORWARD} {0}
+
 add_instance mgmt_clk altera_clock_bridge 19.1
 set_instance_parameter_value mgmt_clk {EXPLICIT_CLOCK_RATE} {0.0}
 set_instance_parameter_value mgmt_clk {NUM_CLOCK_OUTPUTS} {1}
@@ -32,6 +64,8 @@ set_instance_parameter_value mgmt_rst {SYNCHRONOUS_EDGES} {deassert}
 set_instance_parameter_value mgmt_rst {USE_RESET_REQUEST} {0}
 
 add_instance msi_intr pcie_msi_intr 1.0
+
+add_instance pcie_avalon fejkon_pcie_avalon 1.0
 
 add_instance pcie_clk altera_clock_bridge 19.1
 set_instance_parameter_value pcie_clk {EXPLICIT_CLOCK_RATE} {0.0}
@@ -486,6 +520,10 @@ add_interface phy_serial conduit end
 set_interface_property phy_serial EXPORT_OF phy.hip_serial
 
 # connections and connection parameters
+add_connection mem_req_fifo.out pcie_avalon.mem_access_req
+
+add_connection mem_resp_fifo.out pcie_data.mem_access_resp
+
 add_connection mgmt_clk.out_clk bar0_cdc.m0_clk
 
 add_connection mgmt_clk.out_clk mgmt_rst.clk
@@ -502,7 +540,13 @@ add_connection mgmt_rst.out_reset bar0_cdc.m0_reset
 
 add_connection mgmt_rst.out_reset bar0_cdc.s0_reset
 
+add_connection mgmt_rst.out_reset mem_req_fifo.clk_reset
+
+add_connection mgmt_rst.out_reset mem_resp_fifo.clk_reset
+
 add_connection mgmt_rst.out_reset msi_intr.reset
+
+add_connection mgmt_rst.out_reset pcie_avalon.reset
 
 add_connection mgmt_rst.out_reset pcie_data.reset
 
@@ -512,10 +556,14 @@ add_connection mgmt_rst.out_reset pcie_reset.reset
 
 add_connection mgmt_rst.out_reset xcvr_reconfig.mgmt_rst_reset
 
-add_connection pcie_data.bar0_mm bar0_cdc.s0
-set_connection_parameter_value pcie_data.bar0_mm/bar0_cdc.s0 arbitrationPriority {1}
-set_connection_parameter_value pcie_data.bar0_mm/bar0_cdc.s0 baseAddress {0x0000}
-set_connection_parameter_value pcie_data.bar0_mm/bar0_cdc.s0 defaultConnection {0}
+add_connection pcie_avalon.mem_access_resp mem_resp_fifo.in
+
+add_connection pcie_avalon.mm bar0_cdc.s0
+set_connection_parameter_value pcie_avalon.mm/bar0_cdc.s0 arbitrationPriority {1}
+set_connection_parameter_value pcie_avalon.mm/bar0_cdc.s0 baseAddress {0x0000}
+set_connection_parameter_value pcie_avalon.mm/bar0_cdc.s0 defaultConnection {0}
+
+add_connection pcie_data.mem_access_req mem_req_fifo.in
 
 add_connection pcie_data.tx_st phy.tx_st
 
@@ -545,16 +593,15 @@ set_connection_parameter_value pcie_reset.npor/phy.npor startPort {}
 set_connection_parameter_value pcie_reset.npor/phy.npor startPortLSB {0}
 set_connection_parameter_value pcie_reset.npor/phy.npor width {0}
 
-add_connection phy.config_tl pcie_data.config_tl
-set_connection_parameter_value phy.config_tl/pcie_data.config_tl endPort {}
-set_connection_parameter_value phy.config_tl/pcie_data.config_tl endPortLSB {0}
-set_connection_parameter_value phy.config_tl/pcie_data.config_tl startPort {}
-set_connection_parameter_value phy.config_tl/pcie_data.config_tl startPortLSB {0}
-set_connection_parameter_value phy.config_tl/pcie_data.config_tl width {0}
-
 add_connection phy.coreclkout_hip bar0_cdc.s0_clk
 
+add_connection phy.coreclkout_hip mem_req_fifo.clk
+
+add_connection phy.coreclkout_hip mem_resp_fifo.clk
+
 add_connection phy.coreclkout_hip msi_intr.clk
+
+add_connection phy.coreclkout_hip pcie_avalon.clk
 
 add_connection phy.coreclkout_hip pcie_clk.in_clk
 

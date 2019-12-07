@@ -4,13 +4,6 @@ module test;
   logic clk;
   logic reset;
 
-  logic [31:0]  bar0_mm_address;
-  logic         bar0_mm_readdatavalid;
-  logic [31:0]  bar0_mm_readdata;
-  logic         bar0_mm_read;
-  logic         bar0_mm_write;
-  logic [31:0]  bar0_mm_writedata;
-  logic         bar0_mm_waitrequest;
   logic [255:0] rx_st_data;
   logic [1:0]   rx_st_empty;
   logic         rx_st_error;
@@ -34,14 +27,17 @@ module test;
   logic         data_tx_endofpacket;
   logic         data_tx_startofpacket;
   logic [4:0]   data_tx_empty;
+  logic [127:0] mem_access_req_data;
+  logic         mem_access_req_ready;
+  logic         mem_access_req_valid;
+  logic [127:0] mem_access_resp_data;
+  logic         mem_access_resp_ready;
+  logic         mem_access_resp_valid;
 
   initial begin
     $from_myhdl(
       clk,
       reset,
-      bar0_mm_readdatavalid,
-      bar0_mm_readdata,
-      bar0_mm_waitrequest,
       rx_st_data,
       rx_st_empty,
       rx_st_error,
@@ -52,10 +48,6 @@ module test;
       rx_st_bar
     );
     $to_myhdl(
-      bar0_mm_address,
-      bar0_mm_read,
-      bar0_mm_write,
-      bar0_mm_writedata,
       rx_st_ready,
       tx_st_data,
       tx_st_startofpacket,
@@ -70,13 +62,6 @@ module test;
   fejkon_pcie_data dut(
     .clk(clk),
     .reset(reset),
-    .bar0_mm_address(bar0_mm_address),
-    .bar0_mm_readdatavalid(bar0_mm_readdatavalid),
-    .bar0_mm_readdata(bar0_mm_readdata),
-    .bar0_mm_read(bar0_mm_read),
-    .bar0_mm_write(bar0_mm_write),
-    .bar0_mm_writedata(bar0_mm_writedata),
-    .bar0_mm_waitrequest(bar0_mm_waitrequest),
     .rx_st_data(rx_st_data),
     .rx_st_empty(rx_st_empty),
     .rx_st_error(rx_st_error),
@@ -99,7 +84,13 @@ module test;
     .data_tx_channel(data_tx_channel),
     .data_tx_endofpacket(data_tx_endofpacket),
     .data_tx_startofpacket(data_tx_startofpacket),
-    .data_tx_empty(data_tx_empty)
+    .data_tx_empty(data_tx_empty),
+    .mem_access_resp_data(mem_access_resp_data),
+    .mem_access_resp_ready(mem_access_resp_ready),
+    .mem_access_resp_valid(mem_access_resp_valid),
+    .mem_access_req_data(mem_access_req_data),
+    .mem_access_req_ready(mem_access_req_ready),
+    .mem_access_req_valid(mem_access_req_valid)
   );
 
   pcie_msi_intr msi (
@@ -113,6 +104,9 @@ module test;
     .reset(reset),
     .irq()
   );
+
+  // TODO(bluecmd): Have a simple mem_access module to emulate Avalon
+  // responses
 
   initial begin
     $dumpfile("wave.fst");

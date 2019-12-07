@@ -1,12 +1,5 @@
 `timescale 1 ps / 1 ps
 module fejkon_pcie_data (
-    output wire [31:0]  bar0_mm_address,       //      bar0_mm.address
-    input  wire         bar0_mm_readdatavalid, //             .readdatavalid
-    input  wire [31:0]  bar0_mm_readdata,      //             .readdata
-    output wire         bar0_mm_read,          //             .read
-    output wire         bar0_mm_write,         //             .write
-    output wire [31:0]  bar0_mm_writedata,     //             .writedata
-    input  wire         bar0_mm_waitrequest,   //             .waitrequest
     input  wire         clk,                   //          clk.clk
     input  wire         reset,                 //        reset.reset
     input  wire [255:0] rx_st_data,            //        rx_st.data
@@ -32,6 +25,12 @@ module fejkon_pcie_data (
     input  wire         data_tx_endofpacket,   //             .endofpacket
     input  wire         data_tx_startofpacket, //             .startofpacket
     input  wire [4:0]   data_tx_empty,         //             .empty
+    input  wire [127:0] mem_access_resp_data,  // mem_access_resp.data
+    output wire         mem_access_resp_ready, //                .ready
+    input  wire         mem_access_resp_valid, //                .valid
+    output wire [127:0] mem_access_req_data,   //  mem_access_req.data
+    input  wire         mem_access_req_ready,  //                .ready
+    output wire         mem_access_req_valid,  //                .valid
     input  wire [3:0]   tl_cfg_add,            //    config_tl.tl_cfg_add
     input  wire [31:0]  tl_cfg_ctl,            //             .tl_cfg_ctl
     input  wire [52:0]  tl_cfg_sts,            //             .tl_cfg_sts
@@ -90,10 +89,11 @@ module fejkon_pcie_data (
   tlp_t rx_st_type;
 
   // TLP being processed, valid for whole packet
-  tlp_t        rx_tx_type = TLP_UNKNOWN;
-  logic [7:0]  rx_tx_tag = 0;
-  logic [15:0] rx_tx_requester_id = 0;
-  logic        rx_tx_strobe = 0;
+  tlp_t        rx_frm_type = TLP_UNKNOWN;
+  logic [7:0]  rx_frm_tag = 0;
+  logic [15:0] rx_frm_requester_id = 0;
+  logic        rx_frm_is_start = 0;
+  logic [63:0] rx_frm_addr = 0;
 
   always @(*) begin
     case ({rx_st_fmt[1], rx_st_dword[0][28:24]})
@@ -106,16 +106,21 @@ module fejkon_pcie_data (
   end
 
   always @(posedge clk) begin
-    rx_tx_strobe <= 1'b0;
+    rx_frm_is_start <= 1'b0;
     if (rx_st_valid & rx_st_startofpacket) begin
-      rx_tx_strobe <= 1'b1;
-      rx_tx_type <= rx_st_type;
+      rx_frm_is_start <= 1'b1;
+      rx_frm_type <= rx_st_type;
       if (rx_st_type == TLP_CPL || rx_st_type == TLP_CPLD) begin
-        rx_tx_tag <= rx_st_dword[2][15:8];
-        rx_tx_requester_id <= rx_st_dword[2][31:16];
+        rx_frm_tag <= rx_st_dword[2][15:8];
+        rx_frm_requester_id <= rx_st_dword[2][31:16];
       end else begin
-        rx_tx_tag <= rx_st_dword[1][15:8];
-        rx_tx_requester_id <= rx_st_dword[1][31:16];
+        rx_frm_tag <= rx_st_dword[1][15:8];
+        rx_frm_requester_id <= rx_st_dword[1][31:16];
+        if (rx_st_is_4dw) begin
+          rx_frm_addr <= {rx_st_dword[2], rx_st_dword[3][31:2], 2'b0};
+        end else begin
+          rx_frm_addr <= {32'b0, rx_st_dword[2][31:2], 2'b0};
+        end
       end
     end
   end
@@ -138,43 +143,62 @@ module fejkon_pcie_data (
 
   assign data_tx_ready = 1'b1;
 
-  logic              tx_tx_valid;
-  logic              tx_tx_startofpacket;
-  logic              tx_tx_endofpacket;
-  logic        [1:0] tx_tx_empty;
-  logic [7:0] [31:0] tx_tx_dword;
+  logic              tx_frm_valid;
+  logic              tx_frm_startofpacket;
+  logic              tx_frm_endofpacket;
+  logic        [1:0] tx_frm_empty;
+  logic [7:0] [31:0] tx_frm_dword;
 
-  assign tx_st_valid = tx_tx_valid;
-  assign tx_st_startofpacket = tx_tx_startofpacket;
-  assign tx_st_endofpacket = tx_tx_endofpacket;
-  assign tx_st_empty = tx_tx_empty;
-  assign tx_st_dword = tx_tx_dword;
+  assign tx_st_valid = tx_frm_valid;
+  assign tx_st_startofpacket = tx_frm_startofpacket;
+  assign tx_st_endofpacket = tx_frm_endofpacket;
+  assign tx_st_empty = tx_frm_empty;
+  assign tx_st_dword = tx_frm_dword;
   assign tx_st_error = 1'b0;
 
   // TODO(bluecmd): Abort any TLP if we get !rx_st_valid - from example code
+  // TODO(bluecmd): Abort if we get 64 bit addresses? I don't think we should
+  // expect that, and the code is not tested.
+
+  // TODO(bluecmd): Put the values needed (requester_id, tag, addr, size, ..?)
+  // in a 64 element deep FIFO - it seems the hard IP core supports only 64
+  // incoming non-posted requests so we should be good.
+  // Then, create a sub-module that reads from the FIFO and produces Avalon-MM
+  // transactions and writes the response into another 64 FIFO with the same
+  // data and the read response. Using the same queues for MRD and MWR should
+  // be fine, and we should only support 4 byte read/writes so the FIFO
+  // size should be fine.
+  // HMM. Thinking about this, I feel we should just export a pair of
+  // Avalon-ST source/sinks with this information, and let the FIFO stuff
+  // happen in Qsys. Then we create a dedicated Avalon-MM core and use the
+  // Intel BFMs for that verification, keeping this core as clean as possible.
   always @(posedge clk) begin
-    tx_tx_valid <= 1'b0;
-    tx_tx_startofpacket <= 1'b0;
-    tx_tx_endofpacket <= 1'b0;
-    tx_tx_empty <= 2'h0;
-    if (rx_tx_strobe && rx_tx_type == TLP_MRD) begin
-      tx_tx_dword <= 256'b0;
-      tx_tx_dword[0][30:29] <= 2'b10;   // CplD Fmt
-      tx_tx_dword[0][28:24] <= 5'b1010; // CplD Type
-      tx_tx_dword[0][9:0] <= 2'h1;      // Length
-      tx_tx_dword[1][31:16] <= my_id;   // Completer ID
-      tx_tx_dword[1][15:13] <= 0;       // Status OK
-      tx_tx_dword[1][11:0] <= 4;        // Byte Count
-      tx_tx_dword[2][31:16] <= rx_tx_requester_id;
-      tx_tx_dword[2][15:8] <= rx_tx_tag;
-      tx_tx_dword[2][6:0] <= 0;         // Lower address
-      tx_tx_dword[3] <= 32'hdeadbeef;
-      tx_tx_valid <= 1'b1;
-      tx_tx_empty <= 2'h3;
-      tx_tx_startofpacket <= 1'b1;
-      tx_tx_endofpacket <= 1'b1;
+    tx_frm_valid <= 1'b0;
+    tx_frm_startofpacket <= 1'b0;
+    tx_frm_endofpacket <= 1'b0;
+    tx_frm_empty <= 2'h0;
+    if (rx_frm_is_start && rx_frm_type == TLP_MRD) begin
+      tx_frm_dword <= 256'b0;
+      tx_frm_dword[0][30:29] <= 2'b10;   // CplD Fmt
+      tx_frm_dword[0][28:24] <= 5'b1010; // CplD Type
+      tx_frm_dword[0][9:0] <= 2'h1;      // Length
+      tx_frm_dword[1][31:16] <= my_id;   // Completer ID
+      tx_frm_dword[1][15:13] <= 0;       // Status OK
+      tx_frm_dword[1][11:0] <= 4;        // Byte Count
+      tx_frm_dword[2][31:16] <= rx_frm_requester_id;
+      tx_frm_dword[2][15:8] <= rx_frm_tag;
+      tx_frm_dword[2][6:0] <= rx_frm_addr[6:0]; // Lower address
+      tx_frm_dword[3] <= 32'hdeadbeef;
+      tx_frm_valid <= 1'b1;
+      tx_frm_empty <= 2'h3;
+      tx_frm_startofpacket <= 1'b1;
+      tx_frm_endofpacket <= 1'b1;
     end
   end
+
+  assign mem_access_req_valid = 1'b0;
+  assign mem_access_req_data = 128'b0;
+  assign mem_access_resp_ready = 1'b0;
 
   // TODO: PCie completion errors
   assign cpl_pending = 1'b0;

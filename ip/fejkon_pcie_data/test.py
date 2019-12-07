@@ -258,6 +258,8 @@ class Test(unittest.TestCase):
         while not self.ep.tx_sem.acquire(blocking=False):
             yield myhdl.delay(100)
 
+    # TODO(bluecmd): we don't test 64 bit operations currently
+
     @testcase(clkgen, dutgen)
     def test_read(self):
         """Test reading standard 4 byte reads."""

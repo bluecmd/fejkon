@@ -12,7 +12,7 @@ struct fejkon_port;
 
 struct fejkon_card {
   struct pci_dev *pci;
-  void __iomem *bar2;
+  void __iomem *bar0;
   struct fejkon_port *port[MAX_PORTS];
 };
 
@@ -38,8 +38,8 @@ struct fejkon_port {
 
 #define CLK 50 * 1000 * 1000
 
-#define BAR2_SFP_I2C_OFFSET(x)    (0x1000 * (x + 1) + 0x40)
-#define BAR2_SFP_STATUS_OFFSET(x) (0x1000 * (x + 1) + 0x0)
+#define BAR0_SFP_I2C_OFFSET(x)    (0x1000 * (x + 1) + 0x40)
+#define BAR0_SFP_STATUS_OFFSET(x) (0x1000 * (x + 1) + 0x0)
 
 struct i2c_dev * fejkon_i2c_probe(struct device *dev, void __iomem *base, int irq);
 

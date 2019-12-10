@@ -64,17 +64,9 @@ $ sudo cp myhdl.vpi /usr/lib/x86_64-linux-gnu/ivl/
 
 The board uses vendor/device ID `f1c0:0de5`. Mnemonic is **FICO**n **DE5**-net.
 
-The PCIe bus has four Base Address Registers (BARs).
+The PCIe endpoint has one Base Address Register (BAR).
 
 ### BAR 0
-
-PCIe DMA engine. TODO.
-
-### BAR 1
-
-PCIe DMA engine. TODO
-
-### BAR 2
 
 Accesses need to be 4 byte wide.
 

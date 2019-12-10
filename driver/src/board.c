@@ -17,7 +17,7 @@
 #endif
 #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
 
-#define BAR2_AREA_SIZE 0x50000
+#define BAR0_AREA_SIZE 0x50000
 
 #define FEJKON_VENDOR_ID 0xf1c0
 #define FEJKON_DEVICE_ID 0x0de5
@@ -60,7 +60,7 @@ static const struct net_device_ops net_netdev_ops = {
 static void port_refresh_status(struct fejkon_port *port)
 {
   int status;
-  status = ioread32(port->card->bar2 + BAR2_SFP_STATUS_OFFSET(port->id));
+  status = ioread32(port->card->bar0 + BAR0_SFP_STATUS_OFFSET(port->id));
   if ((status & SFP_PRESENT) == 0 || status & SFP_LOS || status & SFP_TX_FAIL) {
     netif_carrier_off(port->net);
   } else {
@@ -131,12 +131,12 @@ static int fejkon_hwmon_read(struct device *dev, enum hwmon_sensor_types type,
     switch (attr) {
     case hwmon_temp_input:
       // Unit is millidegree C
-      reg = ioread16(card->bar2 + 0x10);
+      reg = ioread16(card->bar0 + 0x10);
       if ((reg & (1<<8)) == 0) {
         // No value available
         return -ERANGE;
       }
-      *val = ((ioread16(card->bar2 + 0x10) & 0xff) - 128) * 1000;
+      *val = ((ioread16(card->bar0 + 0x10) & 0xff) - 128) * 1000;
       break;
     default:
       return -EINVAL;
@@ -190,7 +190,7 @@ static ssize_t phy_freq_show(struct device *dev, struct device_attribute *attr,
     char *buf)
 {
   struct fejkon_card *card = pci_get_drvdata(to_pci_dev(dev));
-  return sprintf(buf, "%u\n", ioread32(card->bar2 + 0x20));
+  return sprintf(buf, "%u\n", ioread32(card->bar0 + 0x20));
 }
 
 static DEVICE_ATTR_RO(phy_freq);
@@ -232,9 +232,9 @@ static int probe(struct pci_dev *pcidev, const struct pci_device_id *id)
   if (!card)
     return -ENOMEM;
   card->pci = pcidev;
-  card->bar2 = pci_iomap(pcidev, 2 /* bar */, BAR2_AREA_SIZE);
+  card->bar0 = pci_iomap(pcidev, 0 /* bar */, BAR0_AREA_SIZE);
 
-  version = ioread32(card->bar2 + 0x0);
+  version = ioread32(card->bar0 + 0x0);
   if ((version & 0xffff) != 0x0de5) {
     dev_dbg(&pcidev->dev, "ignoring card with unknown magic: %04x", version & 0xffff);
     goto error;
@@ -246,11 +246,11 @@ static int probe(struct pci_dev *pcidev, const struct pci_device_id *id)
     goto error;
   }
   version = (version >> 16) & 0xff;
-  githash = ioread32(card->bar2 + 0x4);
+  githash = ioread32(card->bar0 + 0x4);
   dev_notice(&pcidev->dev, "found card with version %d (%08x), ports = %d\n",
       version, githash, ports);
 
-  phy_clock = ioread32(card->bar2 + 0x20);
+  phy_clock = ioread32(card->bar0 + 0x20);
   dev_notice(&pcidev->dev, "PHY clock running at %d.%03d MHz",
       phy_clock / 1000000, (phy_clock / 1000) % 1000);
 
@@ -324,7 +324,7 @@ static int probe(struct pci_dev *pcidev, const struct pci_device_id *id)
 
     irq = pci_irq_vector(pcidev, PORT_SFP_I2C_IRQ(port->id));
     port->i2c = fejkon_i2c_probe(
-        port->dev, card->bar2 + BAR2_SFP_I2C_OFFSET(port->id), irq);
+        port->dev, card->bar0 + BAR0_SFP_I2C_OFFSET(port->id), irq);
     if (port->i2c == NULL) {
       dev_err(port->dev, "fejkon_i2c_probe failed\n");
       goto error;

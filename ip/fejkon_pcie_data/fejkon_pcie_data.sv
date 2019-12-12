@@ -31,6 +31,9 @@ module fejkon_pcie_data (
     output wire [127:0] mem_access_req_data,   //  mem_access_req.data
     input  wire         mem_access_req_ready,  //                .ready
     output wire         mem_access_req_valid,  //                .valid
+    input  wire         csr_read,              //          csr.read
+    output wire [31:0]  csr_readdata,          //             .readdata
+    input  wire [3:0]   csr_address,           //             .address
     input  wire [3:0]   tl_cfg_add,            //    config_tl.tl_cfg_add
     input  wire [31:0]  tl_cfg_ctl,            //             .tl_cfg_ctl
     input  wire [52:0]  tl_cfg_sts,            //             .tl_cfg_sts
@@ -64,17 +67,19 @@ module fejkon_pcie_data (
   // it its own module based on altpcierd_tl_cfg_sample.v.
   // Bus Number[7:0] Device Number[4:0] Function Number[2:0]
   // We're using what is called "non-ARI" mode
-  logic [15:0] my_id = {8'h0, 5'h0, 3'h0};
+  // In linux ths format of a device is bus:device.function, in the dev system
+  // things are usually b3:00.0, so default to that for now.
+  logic [15:0] my_id = {8'hb3, 5'h0, 3'h0};
 
   logic [31:0] bar0_addr = 0;
 
   logic [7:0] [31:0] rx_st_dword;
   logic [7:0] [31:0] tx_st_dword;
-  logic [1:0]        rx_st_fmt;
+  logic [2:0]        rx_st_fmt;
   logic [9:0]        rx_st_len;
   logic              rx_st_is_4dw;
 
-  assign rx_st_fmt    = rx_st_dword[0][30:29];
+  assign rx_st_fmt    = rx_st_dword[0][31:29];
   assign rx_st_len    = rx_st_dword[0][9:0];
   assign rx_st_is_4dw = rx_st_fmt[0];
 
@@ -105,6 +110,51 @@ module fejkon_pcie_data (
     endcase
   end
 
+  int csr_rx_tlp_counter = 0;
+  int csr_tx_tlp_counter = 0;
+
+  logic [2:0] [31:0] csr_rx_tlp = {32'b0, 32'b0, 32'b0};
+  logic [2:0] [31:0] csr_tx_tlp = {32'b0, 32'b0, 32'b0};
+
+  always @(posedge clk) begin
+    if (reset) begin
+      csr_rx_tlp_counter <= 0;
+      csr_tx_tlp_counter <= 0;
+      csr_rx_tlp <= {32'b0, 32'b0, 32'b0};
+      csr_tx_tlp <= {32'b0, 32'b0, 32'b0};
+    end else begin
+      if (rx_st_valid & rx_st_startofpacket) begin
+        csr_rx_tlp_counter <= csr_rx_tlp_counter + 1;
+        csr_rx_tlp <= rx_st_dword[2:0];
+      end
+      if (tx_st_valid & tx_st_startofpacket) begin
+        csr_tx_tlp_counter <= csr_tx_tlp_counter + 1;
+        csr_tx_tlp <= tx_st_dword[2:0];
+      end
+    end
+  end
+
+  logic [31:0] csr_readdata_reg;
+
+  assign csr_readdata = csr_readdata_reg;
+
+  always @(posedge clk) begin
+    if (csr_read) begin
+      case (csr_address)
+        4'h0: csr_readdata_reg <= {16'b0, my_id};
+        4'h1: csr_readdata_reg <= csr_rx_tlp_counter;
+        4'h2: csr_readdata_reg <= csr_tx_tlp_counter;
+        4'h3: csr_readdata_reg <= csr_rx_tlp[0];
+        4'h4: csr_readdata_reg <= csr_rx_tlp[1];
+        4'h5: csr_readdata_reg <= csr_rx_tlp[2];
+        4'h6: csr_readdata_reg <= csr_tx_tlp[0];
+        4'h7: csr_readdata_reg <= csr_tx_tlp[1];
+        4'h8: csr_readdata_reg <= csr_tx_tlp[2];
+        default: csr_readdata_reg <= 32'hffffffff;
+      endcase
+    end
+  end
+
   always @(posedge clk) begin
     rx_frm_is_start <= 1'b0;
     if (rx_st_valid & rx_st_startofpacket) begin
@@ -127,12 +177,6 @@ module fejkon_pcie_data (
 
   assign rx_st_dword = rx_st_data;
   assign tx_st_data = tx_st_dword;
-
-  assign bar0_mm_address = bar0_addr;
-
-  assign bar0_mm_read = 1'b0;
-  assign bar0_mm_write = 1'b0;
-  assign bar0_mm_writedata = 32'hdeadbeef;
 
   // Used to stall the sending of non-posted TLPs from the PCIe IP.
   // Since we have to deal with posted TLPs anyway it seems not so useful to
@@ -179,16 +223,16 @@ module fejkon_pcie_data (
     tx_frm_empty <= 2'h0;
     if (rx_frm_is_start && rx_frm_type == TLP_MRD) begin
       tx_frm_dword <= 256'b0;
-      tx_frm_dword[0][30:29] <= 2'b10;   // CplD Fmt
-      tx_frm_dword[0][28:24] <= 5'b1010; // CplD Type
-      tx_frm_dword[0][9:0] <= 2'h1;      // Length
-      tx_frm_dword[1][31:16] <= my_id;   // Completer ID
-      tx_frm_dword[1][15:13] <= 0;       // Status OK
-      tx_frm_dword[1][11:0] <= 4;        // Byte Count
+      tx_frm_dword[0][31:29] <= 3'b010;   // CplD Fmt
+      tx_frm_dword[0][28:24] <= 5'b01010; // CplD Type
+      tx_frm_dword[0][9:0] <= 10'h1;      // Length
+      tx_frm_dword[1][31:16] <= my_id;    // Completer ID
+      tx_frm_dword[1][15:13] <= 0;        // Status OK
+      tx_frm_dword[1][11:0] <= 4;         // Byte Count
       tx_frm_dword[2][31:16] <= rx_frm_requester_id;
       tx_frm_dword[2][15:8] <= rx_frm_tag;
       tx_frm_dword[2][6:0] <= rx_frm_addr[6:0]; // Lower address
-      tx_frm_dword[3] <= 32'hdeadbeef;
+      tx_frm_dword[3] <= {rx_frm_tag, rx_frm_requester_id, rx_frm_addr[7:0]}; // Data, in big-endian
       tx_frm_valid <= 1'b1;
       tx_frm_empty <= 2'h3;
       tx_frm_startofpacket <= 1'b1;

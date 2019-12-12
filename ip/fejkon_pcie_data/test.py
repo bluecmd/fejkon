@@ -3,7 +3,6 @@
 
 Documentation
 """
-import binascii
 import logging as log
 import math
 import os
@@ -42,13 +41,6 @@ class FejkonEP(pcie.Endpoint, pcie.MSICapability):
         self.register_rx_tlp_handler(pcie.TLP_MEM_WRITE, self.handle_mem_write_tlp)
         self.register_rx_tlp_handler(pcie.TLP_MEM_WRITE_64, self.handle_mem_write_tlp)
         self.configure_bar(0, 0x80000, ext=False, prefetch=False, io=False)
-        self.bar0_mm_address = myhdl.Signal(myhdl.intbv()[32:])
-        self.bar0_mm_readdatavalid = myhdl.Signal(myhdl.intbv())
-        self.bar0_mm_readdata = myhdl.Signal(myhdl.intbv()[32:])
-        self.bar0_mm_read = myhdl.Signal(myhdl.intbv())
-        self.bar0_mm_write = myhdl.Signal(myhdl.intbv())
-        self.bar0_mm_writedata = myhdl.Signal(myhdl.intbv()[32:])
-        self.bar0_mm_waitrequest = myhdl.Signal(myhdl.intbv())
         self.rx_st_data = myhdl.Signal(myhdl.intbv()[256:])
         self.rx_st_empty = myhdl.Signal(myhdl.intbv()[2:])
         self.rx_st_error = myhdl.Signal(myhdl.intbv())
@@ -209,13 +201,6 @@ class Test(unittest.TestCase):
             "vvp -m myhdl ../test.vvp -fst",
             clk=self.clk,
             reset=self.rst,
-            bar0_mm_address=self.ep.bar0_mm_address,
-            bar0_mm_readdatavalid=self.ep.bar0_mm_readdatavalid,
-            bar0_mm_readdata=self.ep.bar0_mm_readdata,
-            bar0_mm_read=self.ep.bar0_mm_read,
-            bar0_mm_write=self.ep.bar0_mm_write,
-            bar0_mm_writedata=self.ep.bar0_mm_writedata,
-            bar0_mm_waitrequest=self.ep.bar0_mm_waitrequest,
             rx_st_data=self.ep.rx_st_data,
             rx_st_empty=self.ep.rx_st_empty,
             rx_st_error=self.ep.rx_st_error,
@@ -266,16 +251,17 @@ class Test(unittest.TestCase):
         yield from self.reset()
         bar0 = self.ep.bar[0]
         ident = yield from self.rc.mem_read(bar0, 4)
-        log.info("Identity: %s", binascii.hexlify(ident))
+        log.info("Identity: 0x%08x", int.from_bytes(ident, byteorder='little', signed=False))
         githash = yield from self.rc.mem_read(bar0 + 4, 4)
-        log.info("Git hash: %s", binascii.hexlify(githash))
+        log.info("Git hash: 0x%08x", int.from_bytes(githash, byteorder='little', signed=False))
 
     @testcase(clkgen, dutgen)
     def test_write_read(self):
         """Test writing and then reading 4 bytes."""
         yield from self.reset()
         bar0 = self.ep.bar[0]
-        data = bytearray([1, 2, 3, 4])
+        # TODO: PCIe test code requires LE byte arrays for some reason
+        data = bytearray(reversed([1, 2, 3, 4]))
         yield from self.rc.mem_write(bar0 + 128, data)
         yield from self.await_tx()
         readback = yield from self.rc.mem_read(bar0 + 128, 4)

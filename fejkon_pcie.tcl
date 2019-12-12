@@ -21,6 +21,18 @@ set_instance_parameter_value bar0_cdc {SLAVE_SYNC_DEPTH} {2}
 set_instance_parameter_value bar0_cdc {SYMBOL_WIDTH} {8}
 set_instance_parameter_value bar0_cdc {USE_AUTO_ADDRESS_WIDTH} {0}
 
+add_instance csr_bridge altera_avalon_mm_clock_crossing_bridge 19.1
+set_instance_parameter_value csr_bridge {ADDRESS_UNITS} {SYMBOLS}
+set_instance_parameter_value csr_bridge {ADDRESS_WIDTH} {10}
+set_instance_parameter_value csr_bridge {COMMAND_FIFO_DEPTH} {4}
+set_instance_parameter_value csr_bridge {DATA_WIDTH} {32}
+set_instance_parameter_value csr_bridge {MASTER_SYNC_DEPTH} {2}
+set_instance_parameter_value csr_bridge {MAX_BURST_SIZE} {1}
+set_instance_parameter_value csr_bridge {RESPONSE_FIFO_DEPTH} {4}
+set_instance_parameter_value csr_bridge {SLAVE_SYNC_DEPTH} {2}
+set_instance_parameter_value csr_bridge {SYMBOL_WIDTH} {8}
+set_instance_parameter_value csr_bridge {USE_AUTO_ADDRESS_WIDTH} {1}
+
 add_instance mem_req_fifo altera_avalon_sc_fifo 19.1
 set_instance_parameter_value mem_req_fifo {BITS_PER_SYMBOL} {128}
 set_instance_parameter_value mem_req_fifo {CHANNEL_WIDTH} {0}
@@ -147,7 +159,7 @@ set_instance_parameter_value phy {advanced_default_hwtcl_wrong_device_id} {disab
 set_instance_parameter_value phy {advanced_default_parameter_override} {0}
 set_instance_parameter_value phy {ast_width_hwtcl} {Avalon-ST 256-bit}
 set_instance_parameter_value phy {bar0_size_mask_hwtcl} {19}
-set_instance_parameter_value phy {bar0_type_hwtcl} {1}
+set_instance_parameter_value phy {bar0_type_hwtcl} {2}
 set_instance_parameter_value phy {bar1_size_mask_hwtcl} {0}
 set_instance_parameter_value phy {bar1_type_hwtcl} {0}
 set_instance_parameter_value phy {bar2_size_mask_hwtcl} {0}
@@ -502,6 +514,8 @@ set_instance_parameter_value xcvr_reconfig {number_of_reconfig_interfaces} {11}
 # exported interfaces
 add_interface bar0_mm avalon master
 set_interface_property bar0_mm EXPORT_OF bar0_cdc.m0
+add_interface csr_mm avalon slave
+set_interface_property csr_mm EXPORT_OF csr_bridge.s0
 add_interface data_clk clock source
 set_interface_property data_clk EXPORT_OF pcie_clk.out_clk
 add_interface data_tx avalon_streaming sink
@@ -520,11 +534,18 @@ add_interface phy_serial conduit end
 set_interface_property phy_serial EXPORT_OF phy.hip_serial
 
 # connections and connection parameters
+add_connection csr_bridge.m0 pcie_data.csr
+set_connection_parameter_value csr_bridge.m0/pcie_data.csr arbitrationPriority {1}
+set_connection_parameter_value csr_bridge.m0/pcie_data.csr baseAddress {0x0000}
+set_connection_parameter_value csr_bridge.m0/pcie_data.csr defaultConnection {0}
+
 add_connection mem_req_fifo.out pcie_avalon.mem_access_req
 
 add_connection mem_resp_fifo.out pcie_data.mem_access_resp
 
 add_connection mgmt_clk.out_clk bar0_cdc.m0_clk
+
+add_connection mgmt_clk.out_clk csr_bridge.s0_clk
 
 add_connection mgmt_clk.out_clk mgmt_rst.clk
 
@@ -539,6 +560,10 @@ add_connection mgmt_clk.out_clk xcvr_reconfig.mgmt_clk_clk
 add_connection mgmt_rst.out_reset bar0_cdc.m0_reset
 
 add_connection mgmt_rst.out_reset bar0_cdc.s0_reset
+
+add_connection mgmt_rst.out_reset csr_bridge.m0_reset
+
+add_connection mgmt_rst.out_reset csr_bridge.s0_reset
 
 add_connection mgmt_rst.out_reset mem_req_fifo.clk_reset
 
@@ -594,6 +619,8 @@ set_connection_parameter_value pcie_reset.npor/phy.npor startPortLSB {0}
 set_connection_parameter_value pcie_reset.npor/phy.npor width {0}
 
 add_connection phy.coreclkout_hip bar0_cdc.s0_clk
+
+add_connection phy.coreclkout_hip csr_bridge.m0_clk
 
 add_connection phy.coreclkout_hip mem_req_fifo.clk
 

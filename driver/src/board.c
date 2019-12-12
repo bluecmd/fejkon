@@ -214,7 +214,7 @@ static int probe(struct pci_dev *pcidev, const struct pci_device_id *id)
     goto error;
   }
 
-  ret = pci_request_region(pcidev, 2 /* bar */, KBUILD_MODNAME);
+  ret = pci_request_region(pcidev, 0 /* bar */, KBUILD_MODNAME);
   if (ret < 0) {
     dev_err(&pcidev->dev, "pci_request_region\n");
     goto error;
@@ -344,7 +344,7 @@ static int probe(struct pci_dev *pcidev, const struct pci_device_id *id)
   pci_set_drvdata(pcidev, card);
   return 0;
 error:
-  pci_release_region(pcidev, 2 /* bar */);
+  pci_release_region(pcidev, 0 /* bar */);
   return ret;
 }
 
@@ -372,7 +372,7 @@ static void remove(struct pci_dev *dev)
   device_remove_file(&dev->dev, &dev_attr_phy_freq);
   free_irq(pci_irq_vector(dev, 0), card);
   pci_free_irq_vectors(dev);
-  pci_release_region(dev, 2 /* bar */);
+  pci_release_region(dev, 0 /* bar */);
   pci_disable_device(dev);
 }
 

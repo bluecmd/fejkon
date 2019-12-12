@@ -78,22 +78,36 @@ Accesses need to be 4 byte wide.
 | 0x00004 | 4     | Card   | Git hash      | Git hash of HDL built        |
 | 0x00010 | 1     | Card   | Temprature    | FPGA Core Temperature (1)    |
 | 0x00020 | 4     | Card   | Freq. Gauge   | PHY effective clock gauge    |
-| 0x01000 | 1     | Port 0 | SFP Status    | SFP Status Word (2)          |
-| 0x01040 | 64    | Port 0 | SFP Port I2C  | SFP I2C core (3)             |
+| 0x00040 | 64    | Card   | PCIe Facility | PCIe counters and status (2) |
+| 0x01000 | 1     | Port 0 | SFP Status    | SFP Status Word (3)          |
+| 0x01040 | 64    | Port 0 | SFP Port I2C  | SFP I2C core (4)             |
 | 0x02x00 | ...   | Port 1 | SFP Port      |                              |
 | 0x03x00 | ...   | Port 2 | SFP Port      |                              |
 | 0x04x00 | ...   | Port 3 | SFP Port      |                              |
-| 0x10000 | 512   | Port 0 | FC XCVR IP    | Fejkon FC XCVR Core (4)      |
-| 0x10200 | 512   | Port 0 | TX XCVR Mgmt  | V-Series Transceiver PHY (5) |
+| 0x10000 | 2048  | Port 0 | FC XCVR IP    | Fejkon FC XCVR Core (5)      |
+| 0x10800 | 2048  | Port 0 | TX XCVR Mgmt  | V-Series Transceiver PHY (6) |
+| 0x12000 | 32    | Port 0 | FC Framer     | Fibre Channel Framer (7)     |
 | 0x2xxxx | ...   | Port 1 | ...           |                              |
 | 0x3xxxx | ...   | Port 2 | ...           |                              |
 | 0x4xxxx | ...   | Port 3 | ...           |                              |
 
 1) Details in section below
 2) Details in section below
-3) See "Intel FPGA Avalon I2C (Master) Core" in [Embedded Peripherals IP User Guide](https://www.intel.com/content/dam/www/programmable/us/en/pdfs/literature/ug/ug_embedded_ip.pdf)
-4) Details in section below
-5) See "Custom PHY" in [V-Series Transceiver PHY IP Core User Guide](https://www.intel.com/content/dam/www/programmable/us/en/pdfs/literature/ug/xcvr_user_guide.pdf)
+3) Details in section below
+4) See "Intel FPGA Avalon I2C (Master) Core" in [Embedded Peripherals IP User Guide](https://www.intel.com/content/dam/www/programmable/us/en/pdfs/literature/ug/ug_embedded_ip.pdf)
+5) Details in section below
+6) See "Custom PHY" in [V-Series Transceiver PHY IP Core User Guide](https://www.intel.com/content/dam/www/programmable/us/en/pdfs/literature/ug/xcvr_user_guide.pdf)
+7) Details in section below
+
+#### PCIe Facility
+
+| Addr | Width | Name                  |
+|------|-------|-----------------------|
+| 0x00 | 4     | Endpoint address      |
+| 0x04 | 4     | RX TLP counter        |
+| 0x08 | 4     | TX TLP counter        |
+| 0x0C | 12    | RX TLP header data    |
+| 0x18 | 12    | TX TLP header data    |
 
 #### Temperature
 
@@ -117,9 +131,36 @@ See Temperature decoding details in [FPGA Temperature Sensor IP Core User Guide]
 
 #### Fejkon FC XCVR Core
 
-| Addr    | Width | Name          |
-|---------|-------|---------------|
-| 0x00000 | 4     | Port Status   |
+| Addr    | Width | Name                   |
+|---------|-------|------------------------|
+| 0x00000 | 4     | Port Status            |
+| 0x00004 | 4     | Last Unknown Coded Set |
+| 0x00080 | 128   | RX Primitive Counters  |
+| 0x00100 | 128   | TX Primitive Counters  |
+
+The primitive counters logged are in order:
+
+ *  IDLE
+ *  R\_RDY
+ *  BB\_SCS
+ *  BB\_SCR
+ *  SOFi2
+ *  SOFn2
+ *  SOFi3
+ *  SOFn3
+ *  SOFf
+ *  EOFt
+ *  EOFa
+ *  EOFn
+ *  EOFni
+ *  NOS
+ *  OLS
+ *  LR
+ *  LRR
+ *  ARBff
+ *  Unknown
+
+The data type is unsigned 32 bit integer for the primitive counters.
 
 ##### Port Status
 
@@ -133,9 +174,27 @@ See Temperature decoding details in [FPGA Temperature Sensor IP Core User Guide]
 
 A fully operational port has status `0x1001f`.
 
-### BAR 3
+#### FC Framer
 
-PCIe DMA engine descriptors. TODO
+| Addr    | Width | Name                   |
+|---------|-------|------------------------|
+| 0x00000 | 4     | State                  |
+
+States:
+
+| Value | Code | Name                   |
+|-------|------|------------------------|
+| 0     | AC   | Active                 |
+| 1     | LR1  | LR Transmit            |
+| 2     | LR2  | LR Receive             |
+| 3     | LR3  | LRR Receive            |
+| 4     | LF1  | NOS Receive            |
+| 5     | LF2  | NOS Transmit           |
+| 6     | OL1  | OLS Transmit           |
+| 7     | OL2  | OLS Receive            |
+| 8     | OL3  | Wait for OLS           |
+
+Note: Only ACTIVE is guaranted to be stable at numeric 0 over time.
 
 ### MSI Interrupts
 

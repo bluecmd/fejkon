@@ -392,6 +392,11 @@ set_connection_parameter_value jtagm.master/ident.mm arbitrationPriority {1}
 set_connection_parameter_value jtagm.master/ident.mm baseAddress {0x0000}
 set_connection_parameter_value jtagm.master/ident.mm defaultConnection {0}
 
+add_connection jtagm.master pcie.csr_mm
+set_connection_parameter_value jtagm.master/pcie.csr_mm arbitrationPriority {1}
+set_connection_parameter_value jtagm.master/pcie.csr_mm baseAddress {0x0040}
+set_connection_parameter_value jtagm.master/pcie.csr_mm defaultConnection {0}
+
 add_connection jtagm.master phy_clk_gauge.mm
 set_connection_parameter_value jtagm.master/phy_clk_gauge.mm arbitrationPriority {1}
 set_connection_parameter_value jtagm.master/phy_clk_gauge.mm baseAddress {0x0020}
@@ -443,6 +448,11 @@ add_connection pcie.bar0_mm ident.mm
 set_connection_parameter_value pcie.bar0_mm/ident.mm arbitrationPriority {1}
 set_connection_parameter_value pcie.bar0_mm/ident.mm baseAddress {0x0000}
 set_connection_parameter_value pcie.bar0_mm/ident.mm defaultConnection {0}
+
+add_connection pcie.bar0_mm pcie.csr_mm
+set_connection_parameter_value pcie.bar0_mm/pcie.csr_mm arbitrationPriority {1}
+set_connection_parameter_value pcie.bar0_mm/pcie.csr_mm baseAddress {0x0040}
+set_connection_parameter_value pcie.bar0_mm/pcie.csr_mm defaultConnection {0}
 
 add_connection pcie.bar0_mm phy_clk_gauge.mm
 set_connection_parameter_value pcie.bar0_mm/phy_clk_gauge.mm arbitrationPriority {1}

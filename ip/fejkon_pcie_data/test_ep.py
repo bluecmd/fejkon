@@ -136,6 +136,11 @@ class FejkonEP(pcie.Endpoint, pcie.MSICapability):
             val = val >> 32
         cpl = pcie.TLP()
         cpl.unpack(dws)
+        # Poorly documented alignment on Intel PCIe cores for V-series
+        # See things like "256-bit Avalon-ST tx_st_data Cycle Definition"
+        # TODO: For 64-bit accesses skip this
+        if cpl.lower_address & 0x4 == 0:
+            val = val >> 32
         # Read data
         for i in range(cpl.length):
             if i > 4:

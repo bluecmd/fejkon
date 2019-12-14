@@ -41,13 +41,13 @@ proc enable {id} {
 
 proc pcie {} {
   global m
-  set off [expr 0x40]
+  set off [expr 0x100]
   puts [format " My ID       : %s" [master_read_16  $m [expr $off + 0x00] 1]]
   puts [format " TLP RX/TX   : %s %s" \
     [master_read_32 $m [expr $off + 0x04] 1] \
     [master_read_32 $m [expr $off + 0x08] 1]]
-  puts [format " Last TLP RX : %s" [master_read_32 $m [expr $off + 0x0C] 3]]
-  puts [format " Last TLP TX : %s" [master_read_32 $m [expr $off + 0x18] 3]]
+  puts [format " Last TLP RX : %s" [master_read_32 $m [expr $off + 0x20] 8]]
+  puts [format " Last TLP TX : %s" [master_read_32 $m [expr $off + 0x40] 8]]
 }
 
 proc fcstat {id} {

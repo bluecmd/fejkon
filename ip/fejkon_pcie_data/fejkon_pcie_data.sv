@@ -33,7 +33,7 @@ module fejkon_pcie_data (
     output wire         mem_access_req_valid,  //                .valid
     input  wire         csr_read,              //          csr.read
     output wire [31:0]  csr_readdata,          //             .readdata
-    input  wire [3:0]   csr_address,           //             .address
+    input  wire [5:0]   csr_address,           //             .address
     input  wire [3:0]   tl_cfg_add,            //    config_tl.tl_cfg_add
     input  wire [31:0]  tl_cfg_ctl,            //             .tl_cfg_ctl
     input  wire [52:0]  tl_cfg_sts,            //             .tl_cfg_sts
@@ -118,8 +118,8 @@ module fejkon_pcie_data (
   int csr_rx_tlp_counter = 0;
   int csr_tx_tlp_counter = 0;
 
-  logic [2:0] [31:0] csr_rx_tlp = {32'b0, 32'b0, 32'b0};
-  logic [2:0] [31:0] csr_tx_tlp = {32'b0, 32'b0, 32'b0};
+  logic [7:0] [31:0] csr_rx_tlp = 256'b0;
+  logic [7:0] [31:0] csr_tx_tlp = 256'b0;
 
   logic is_ready;
   assign is_ready =  ~reset & my_id_valid;
@@ -131,16 +131,34 @@ module fejkon_pcie_data (
     if (reset) begin
       csr_rx_tlp_counter <= 0;
       csr_tx_tlp_counter <= 0;
-      csr_rx_tlp <= {32'b0, 32'b0, 32'b0};
-      csr_tx_tlp <= {32'b0, 32'b0, 32'b0};
+      csr_rx_tlp <= 256'b0;
+      csr_tx_tlp <= 256'b0;
     end else begin
       if (rx_st_ok & rx_st_startofpacket) begin
         csr_rx_tlp_counter <= csr_rx_tlp_counter + 1;
-        csr_rx_tlp <= rx_st_dword[2:0];
+        csr_rx_tlp <= rx_st_dword;
+        // Mask out the parts we're supposed to only care about
+        if (rx_st_endofpacket) begin
+          case (rx_st_empty)
+            2'h1: csr_rx_tlp[7:6] <= ~0;
+            2'h2: csr_rx_tlp[7:4] <= ~0;
+            2'h3: csr_rx_tlp[7:2] <= ~0;
+            default: ;
+          endcase
+        end
       end
       if (tx_frm_valid & tx_frm_startofpacket) begin
         csr_tx_tlp_counter <= csr_tx_tlp_counter + 1;
-        csr_tx_tlp <= tx_st_dword[2:0];
+        csr_tx_tlp <= tx_st_dword;
+        // Mask out the parts we're supposed to only care about
+        if (tx_frm_endofpacket) begin
+          case (tx_frm_empty)
+            2'h1: csr_tx_tlp[7:6] <= ~0;
+            2'h2: csr_tx_tlp[7:4] <= ~0;
+            2'h3: csr_tx_tlp[7:2] <= ~0;
+            default: ;
+          endcase
+        end
       end
     end
   end
@@ -151,16 +169,12 @@ module fejkon_pcie_data (
 
   always @(posedge clk) begin
     if (csr_read) begin
-      case (csr_address)
-        4'h0: csr_readdata_reg <= {16'b0, my_id};
-        4'h1: csr_readdata_reg <= csr_rx_tlp_counter;
-        4'h2: csr_readdata_reg <= csr_tx_tlp_counter;
-        4'h3: csr_readdata_reg <= csr_rx_tlp[0];
-        4'h4: csr_readdata_reg <= csr_rx_tlp[1];
-        4'h5: csr_readdata_reg <= csr_rx_tlp[2];
-        4'h6: csr_readdata_reg <= csr_tx_tlp[0];
-        4'h7: csr_readdata_reg <= csr_tx_tlp[1];
-        4'h8: csr_readdata_reg <= csr_tx_tlp[2];
+      casez (csr_address)
+        6'h0: csr_readdata_reg <= {16'b0, my_id};
+        6'h1: csr_readdata_reg <= csr_rx_tlp_counter;
+        6'h2: csr_readdata_reg <= csr_tx_tlp_counter;
+        6'b001???: csr_readdata_reg <= csr_rx_tlp[csr_address[2:0]];
+        6'b010???: csr_readdata_reg <= csr_tx_tlp[csr_address[2:0]];
         default: csr_readdata_reg <= 32'hffffffff;
       endcase
     end
@@ -243,9 +257,18 @@ module fejkon_pcie_data (
       tx_frm_dword[2][31:16] <= rx_frm_requester_id;
       tx_frm_dword[2][15:8] <= rx_frm_tag;
       tx_frm_dword[2][6:0] <= rx_frm_addr[6:0]; // Lower address
-      tx_frm_dword[3] <= {rx_frm_tag, rx_frm_requester_id, rx_frm_addr[7:0]}; // Data, in big-endian
+      // Note: This is really poorly documented, but for some reason, if the
+      // offset of the lower address *is* 8-aligned, we have to pad the
+      // header with one dword - essentially shifting everything 4 bytes.
+      if (rx_frm_addr[2] == 0) begin
+        // Align header to 8-bytes, start data at 5th DW
+        tx_frm_empty <= 2'h1;
+        tx_frm_dword[4] <= {rx_frm_tag, rx_frm_requester_id, rx_frm_addr[7:0]};
+      end else begin
+        tx_frm_empty <= 2'h2;
+        tx_frm_dword[3] <= {rx_frm_tag, rx_frm_requester_id, rx_frm_addr[7:0]};
+      end
       tx_frm_valid <= 1'b1;
-      tx_frm_empty <= 2'h2;               // 4 DW of TLP
       tx_frm_startofpacket <= 1'b1;
       tx_frm_endofpacket <= 1'b1;
     end

@@ -78,7 +78,7 @@ Accesses need to be 4 byte wide.
 | 0x00004 | 4     | Card   | Git hash      | Git hash of HDL built        |
 | 0x00010 | 1     | Card   | Temprature    | FPGA Core Temperature (1)    |
 | 0x00020 | 4     | Card   | Freq. Gauge   | PHY effective clock gauge    |
-| 0x00040 | 64    | Card   | PCIe Facility | PCIe counters and status (2) |
+| 0x00100 | 256   | Card   | PCIe Facility | PCIe counters and status (2) |
 | 0x01000 | 1     | Port 0 | SFP Status    | SFP Status Word (3)          |
 | 0x01040 | 64    | Port 0 | SFP Port I2C  | SFP I2C core (4)             |
 | 0x02x00 | ...   | Port 1 | SFP Port      |                              |
@@ -106,8 +106,8 @@ Accesses need to be 4 byte wide.
 | 0x00 | 4     | Endpoint address      |
 | 0x04 | 4     | RX TLP counter        |
 | 0x08 | 4     | TX TLP counter        |
-| 0x0C | 12    | RX TLP header data    |
-| 0x18 | 12    | TX TLP header data    |
+| 0x20 | 32    | Last RX TLP (8 DWs)   |
+| 0x40 | 32    | Last TX TLP (8 DWs)   |
 
 #### Temperature
 

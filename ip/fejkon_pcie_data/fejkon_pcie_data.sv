@@ -62,14 +62,19 @@ module fejkon_pcie_data (
   // rx_h2 ||     Requester ID               |     Tag           |LastBE  |FirstBE||
   //
 
-  // TODO(bluecmd): This should be read from the bus/dev from config_tl.
-  // That interface requires some non-trivial decoding - probably just make
-  // it its own module based on altpcierd_tl_cfg_sample.v.
-  // Bus Number[7:0] Device Number[4:0] Function Number[2:0]
-  // We're using what is called "non-ARI" mode
-  // In linux ths format of a device is bus:device.function, in the dev system
-  // things are usually b3:00.0, so default to that for now.
-  logic [15:0] my_id = {8'hb3, 5'h0, 3'h0};
+  logic [15:0] my_id;
+
+  logic my_id_valid;
+
+  tl_cfg_module tl_cfg_mod (
+    .clk(clk),
+    .reset(reset),
+    .tl_cfg_add(tl_cfg_add),
+    .tl_cfg_ctl(tl_cfg_ctl),
+    .tl_cfg_sts(tl_cfg_sts),
+    .my_id(my_id),
+    .my_id_valid(my_id_valid)
+  );
 
   logic [31:0] bar0_addr = 0;
 
@@ -116,6 +121,12 @@ module fejkon_pcie_data (
   logic [2:0] [31:0] csr_rx_tlp = {32'b0, 32'b0, 32'b0};
   logic [2:0] [31:0] csr_tx_tlp = {32'b0, 32'b0, 32'b0};
 
+  logic is_ready;
+  assign is_ready =  ~reset & my_id_valid;
+
+  logic rx_st_ok;
+  assign rx_st_ok = is_ready & rx_st_valid;
+
   always @(posedge clk) begin
     if (reset) begin
       csr_rx_tlp_counter <= 0;
@@ -123,11 +134,11 @@ module fejkon_pcie_data (
       csr_rx_tlp <= {32'b0, 32'b0, 32'b0};
       csr_tx_tlp <= {32'b0, 32'b0, 32'b0};
     end else begin
-      if (rx_st_valid & rx_st_startofpacket) begin
+      if (rx_st_ok & rx_st_startofpacket) begin
         csr_rx_tlp_counter <= csr_rx_tlp_counter + 1;
         csr_rx_tlp <= rx_st_dword[2:0];
       end
-      if (tx_st_valid & tx_st_startofpacket) begin
+      if (tx_frm_valid & tx_frm_startofpacket) begin
         csr_tx_tlp_counter <= csr_tx_tlp_counter + 1;
         csr_tx_tlp <= tx_st_dword[2:0];
       end
@@ -183,7 +194,7 @@ module fejkon_pcie_data (
   // implement it.
   assign rx_st_mask = 1'b0;
 
-  assign rx_st_ready = ~reset;
+  assign rx_st_ready = is_ready;
 
   assign data_tx_ready = 1'b1;
 
@@ -221,7 +232,7 @@ module fejkon_pcie_data (
     tx_frm_startofpacket <= 1'b0;
     tx_frm_endofpacket <= 1'b0;
     tx_frm_empty <= 2'h0;
-    if (rx_frm_is_start && rx_frm_type == TLP_MRD) begin
+    if (rx_st_ready & rx_frm_is_start && rx_frm_type == TLP_MRD) begin
       tx_frm_dword <= 256'b0;
       tx_frm_dword[0][31:29] <= 3'b010;   // CplD Fmt
       tx_frm_dword[0][28:24] <= 5'b01010; // CplD Type

@@ -33,6 +33,9 @@ module test;
   logic [127:0] mem_access_resp_data;
   logic         mem_access_resp_ready;
   logic         mem_access_resp_valid;
+  logic [3:0]   tl_cfg_add;
+  logic [31:0]  tl_cfg_ctl;
+  logic [52:0]  tl_cfg_sts;
 
   initial begin
     $from_myhdl(
@@ -45,7 +48,10 @@ module test;
       rx_st_endofpacket,
       rx_st_valid,
       tx_st_ready,
-      rx_st_bar
+      rx_st_bar,
+      tl_cfg_add,
+      tl_cfg_ctl,
+      tl_cfg_sts
     );
     $to_myhdl(
       rx_st_ready,
@@ -90,7 +96,10 @@ module test;
     .mem_access_resp_valid(mem_access_resp_valid),
     .mem_access_req_data(mem_access_req_data),
     .mem_access_req_ready(mem_access_req_ready),
-    .mem_access_req_valid(mem_access_req_valid)
+    .mem_access_req_valid(mem_access_req_valid),
+    .tl_cfg_add(tl_cfg_add),
+    .tl_cfg_ctl(tl_cfg_ctl),
+    .tl_cfg_sts(tl_cfg_sts)
   );
 
   pcie_msi_intr msi (

@@ -1,7 +1,7 @@
-[timestart] 33635330
+[timestart] 33355400
 [size] 1920 1016
 [pos] 6 38
-*-11.158355 33645990 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-16.158356 33628200 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] test.
 [sst_width] 588
 [signals_width] 350
@@ -12,16 +12,6 @@ test.dut.clk
 test.dut.reset
 @200
 -
-@28
-test.dut.bar0_mm_read
-test.dut.bar0_mm_write
-test.dut.bar0_mm_readdatavalid
-test.dut.bar0_mm_waitrequest
-@22
-test.dut.bar0_mm_address[31:0]
-test.dut.bar0_mm_readdata[31:0]
-test.dut.bar0_mm_writedata[31:0]
-@200
 -
 @28
 test.dut.data_tx_startofpacket
@@ -50,17 +40,11 @@ test.dut.rx_st_valid
 test.dut.rx_st_empty[1:0]
 @22
 test.dut.rx_st_data[255:0]
-@201
--
-@28
-test.dut.rx_tx_strobe
-@22
-test.dut.rx_tx_requester_id[15:0]
-test.dut.rx_tx_tag[7:0]
 @200
 -
-@28
+@29
 test.dut.tx_st_startofpacket
+@28
 test.dut.tx_st_endofpacket
 test.dut.tx_st_error
 test.dut.tx_st_ready
@@ -69,5 +53,14 @@ test.dut.tx_st_valid
 test.dut.tx_st_empty[1:0]
 @22
 test.dut.tx_st_data[255:0]
+@200
+-
+@22
+test.dut.my_id[15:0]
+@28
+test.dut.my_id_valid
+@22
+test.dut.tl_cfg_add[3:0]
+test.dut.tl_cfg_ctl[31:0]
 [pattern_trace] 1
 [pattern_trace] 0

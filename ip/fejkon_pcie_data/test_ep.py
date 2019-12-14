@@ -58,6 +58,15 @@ class FejkonEP(pcie.Endpoint, pcie.MSICapability):
         self.data_tx_endofpacket = myhdl.Signal(myhdl.intbv())
         self.data_tx_startofpacket = myhdl.Signal(myhdl.intbv())
         self.data_tx_empty = myhdl.Signal(myhdl.intbv()[5:])
+        self.tl_cfg_add = myhdl.Signal(myhdl.intbv()[4:])
+        self.tl_cfg_ctl = myhdl.Signal(myhdl.intbv()[32:])
+        self.tl_cfg_sts = myhdl.Signal(myhdl.intbv()[53:])
+
+    def handle_config_0_tlp(self, tlp):
+        yield from super(FejkonEP, self).handle_config_0_tlp(tlp)
+        # Send the bus/dev number
+        self.tl_cfg_add.next = 0xF
+        self.tl_cfg_ctl.next = self.bus_num << 5 | self.device_num
 
     def _tlp_to_dut(self, tlp):
         """Move a TLP to the DUT."""

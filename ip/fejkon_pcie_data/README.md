@@ -8,10 +8,10 @@ $ make test
 
 Run a single test:
 ```
-$ make test TESTARGS=Test.test_identity
+$ make test TEST=test_read
 ```
 
 Open GTKwave for the waveform from a specific test:
 ```
-$ make wave TEST=test_identity
+$ make wave TEST=test_read
 ```

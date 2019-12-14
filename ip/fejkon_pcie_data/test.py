@@ -91,7 +91,10 @@ class Test(unittest.TestCase):
             data_tx_channel=self.ep.data_tx_channel,
             data_tx_endofpacket=self.ep.data_tx_endofpacket,
             data_tx_startofpacket=self.ep.data_tx_startofpacket,
-            data_tx_empty=self.ep.data_tx_empty)
+            data_tx_empty=self.ep.data_tx_empty,
+            tl_cfg_add=self.ep.tl_cfg_add,
+            tl_cfg_ctl=self.ep.tl_cfg_ctl,
+            tl_cfg_sts=self.ep.tl_cfg_sts)
         os.chdir(oldpath)
         return ret
 

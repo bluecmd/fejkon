@@ -588,6 +588,13 @@ set_connection_parameter_value pcie_avalon.mm/bar0_cdc.s0 arbitrationPriority {1
 set_connection_parameter_value pcie_avalon.mm/bar0_cdc.s0 baseAddress {0x0000}
 set_connection_parameter_value pcie_avalon.mm/bar0_cdc.s0 defaultConnection {0}
 
+add_connection pcie_data.config_tl phy.config_tl
+set_connection_parameter_value pcie_data.config_tl/phy.config_tl endPort {}
+set_connection_parameter_value pcie_data.config_tl/phy.config_tl endPortLSB {0}
+set_connection_parameter_value pcie_data.config_tl/phy.config_tl startPort {}
+set_connection_parameter_value pcie_data.config_tl/phy.config_tl startPortLSB {0}
+set_connection_parameter_value pcie_data.config_tl/phy.config_tl width {0}
+
 add_connection pcie_data.mem_access_req mem_req_fifo.in
 
 add_connection pcie_data.tx_st phy.tx_st

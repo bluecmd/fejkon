@@ -195,6 +195,88 @@ static ssize_t phy_freq_show(struct device *dev, struct device_attribute *attr,
 
 static DEVICE_ATTR_RO(phy_freq);
 
+
+static int probe_port(struct fejkon_card *card, int port_id)
+{
+  int ret;
+  int irq;
+  struct net_device *net;
+  struct fejkon_port *port;
+
+  net = alloc_netdev(sizeof(*port), "fc%d", NET_NAME_UNKNOWN, init_netdev);
+  if (net == NULL) {
+    ret = -ENOMEM;
+    goto error;
+  }
+
+  port = netdev_priv(net);
+  port->id = port_id;
+  port->card = card;
+  port->net = net;
+  port->dev = device_create(
+      fejkon_class, &card->pci->dev, MKDEV(0, 0), NULL,
+      "%s port%d", dev_name(&card->pci->dev), port->id);
+  SET_NETDEV_DEV(net, port->dev);
+
+  irq = pci_irq_vector(card->pci, PORT_RX_IRQ(port->id));
+  ret = request_irq(irq, port_rx_irq, IRQF_SHARED, KBUILD_MODNAME, port);
+  if (ret < 0) {
+    dev_err(port->dev, "request_irq for port_rx_irq\n");
+    goto error;
+  }
+
+  irq = pci_irq_vector(card->pci, PORT_TX_IRQ(port->id));
+  ret = request_irq(irq, port_tx_irq, IRQF_SHARED, KBUILD_MODNAME, port);
+  if (ret < 0) {
+    dev_err(port->dev, "request_irq for port_tx_irq\n");
+    goto error;
+  }
+
+  irq = pci_irq_vector(card->pci, PORT_SFP_IRQ(port->id));
+  ret = request_irq(irq, port_sfp_irq, IRQF_SHARED, KBUILD_MODNAME, port);
+  if (ret < 0) {
+    dev_err(port->dev, "request_irq for port_sfp_irq\n");
+    goto error;
+  }
+
+  irq = pci_irq_vector(card->pci, PORT_SFP_I2C_IRQ(port->id));
+  port->i2c = fejkon_i2c_probe(
+      port->dev, card->bar0 + BAR0_SFP_I2C_OFFSET(port->id), irq);
+  if (port->i2c == NULL) {
+    dev_err(port->dev, "fejkon_i2c_probe failed\n");
+    goto error;
+  }
+
+  ret = register_netdev(net);
+  if (ret) {
+    dev_err(port->dev, "unable to register netdev\n");
+    goto error;
+  }
+
+  card->port[port->id] = port;
+  port_refresh_status(port);
+  dev_notice(port->dev, "registered port %d netdev %s\n", port->id, net->name);
+
+error:
+  /* TODO: Error breakdown and cleanup */
+  return ret;
+}
+
+/* Note: Requires the caller to have the RTNL lock */
+static void remove_port(struct fejkon_card *card, int port_id)
+{
+  struct fejkon_port *port = card->port[port_id];
+  if (port == NULL) {
+    return;
+  }
+  unregister_netdevice(port->net);
+  fejkon_i2c_remove(port->i2c);
+  free_irq(pci_irq_vector(card->pci, PORT_RX_IRQ(port_id)), port);
+  free_irq(pci_irq_vector(card->pci, PORT_TX_IRQ(port_id)), port);
+  free_irq(pci_irq_vector(card->pci, PORT_SFP_IRQ(port_id)), port);
+  device_unregister(port->dev);
+}
+
 static int probe(struct pci_dev *pcidev, const struct pci_device_id *id)
 {
   unsigned int phy_clock;
@@ -203,47 +285,53 @@ static int probe(struct pci_dev *pcidev, const struct pci_device_id *id)
   int ret;
   int irqs;
   int irq;
-  int i;
+  int port_init;
   int ports;
   struct fejkon_card *card;
   struct device *hwm;
 
+  card = devm_kzalloc(&pcidev->dev, sizeof(*card), GFP_KERNEL);
+  if (!card) {
+    ret = -ENOMEM;
+    goto error_card_alloc;
+  }
+
   ret = pci_enable_device(pcidev);
   if (ret < 0) {
     dev_err(&pcidev->dev, "pci_enable_device\n");
-    goto error;
+    goto error_enable;
   }
 
   ret = pci_request_region(pcidev, 0 /* bar */, KBUILD_MODNAME);
   if (ret < 0) {
     dev_err(&pcidev->dev, "pci_request_region\n");
-    goto error;
+    goto error_request_region;
   }
 
   ret = pci_set_dma_mask(pcidev, DMA_BIT_MASK(64));
   if (ret < 0) {
     dev_err(&pcidev->dev, "pci_set_dma_mask\n");
-    goto error;
+    goto error_set_dma_mask;
   }
 
   pci_set_master(pcidev);
 
-  card = devm_kzalloc(&pcidev->dev, sizeof(*card), GFP_KERNEL);
-  if (!card)
-    return -ENOMEM;
   card->pci = pcidev;
   card->bar0 = pci_iomap(pcidev, 0 /* bar */, BAR0_AREA_SIZE);
 
   version = ioread32(card->bar0 + 0x0);
+  dev_dbg(&pcidev->dev, "DEBUG RESULT: %08x", version);
   if ((version & 0xffff) != 0x0de5) {
     dev_dbg(&pcidev->dev, "ignoring card with unknown magic: %04x", version & 0xffff);
-    goto error;
+    ret = -EINVAL;
+    goto error_sanity;
   }
 
   ports = (version >> 24) & 0xff;
   if (ports > MAX_PORTS) {
     dev_err(&pcidev->dev, "card has too many ports: %d\n", ports);
-    goto error;
+    ret = -EINVAL;
+    goto error_sanity;
   }
   version = (version >> 16) & 0xff;
   githash = ioread32(card->bar0 + 0x4);
@@ -260,120 +348,90 @@ static int probe(struct pci_dev *pcidev, const struct pci_device_id *id)
     /* See the README.md for fejkon for more details about this */
     dev_err(&pcidev->dev, "pci_alloc_irq_vectors failed, is multiple "
         "MSI interrupts support enabled for your platform?");
-    goto error;
+    goto error_irq_vectors;
   }
 
   irq = pci_irq_vector(pcidev, 0);
   ret = request_irq(irq, card_irq, IRQF_SHARED, KBUILD_MODNAME, card);
   if (ret < 0) {
     dev_err(&pcidev->dev, "request_irq\n");
-    goto error;
+    goto error_request_irq;
   }
 
   hwm = devm_hwmon_device_register_with_info(
       &pcidev->dev, "fejkon", card, &fejkon_hwmon_chip_info, NULL);
   if (IS_ERR(hwm)) {
     dev_err(&pcidev->dev, "devm_hwmon_device_register_with_info\n");
-    return PTR_ERR(hwm);
+    ret = PTR_ERR(hwm);
+    goto error_hwmon_register;
   }
 
   ret = device_create_file(&pcidev->dev, &dev_attr_phy_freq);
   if (ret) {
     dev_err(&pcidev->dev, "unable to create sysfs file\n");
-    goto error;
+    goto error_sysfs_register;
   }
 
   /* card initialized, register netdev for ports */
-  for (i = 0; i < ports; i++) {
-    struct net_device *net;
-    struct fejkon_port *port;
-    net = alloc_netdev(sizeof(*port), "fc%d", NET_NAME_UNKNOWN, init_netdev);
-    if (net == NULL) {
-      return -ENOMEM;
-    }
-
-    port = netdev_priv(net);
-    port->id = i;
-    port->card = card;
-    port->net = net;
-    port->dev = device_create(
-        fejkon_class, &pcidev->dev, MKDEV(0, 0), NULL,
-        "%s port%d", dev_name(&pcidev->dev), port->id);
-    SET_NETDEV_DEV(net, port->dev);
-
-    irq = pci_irq_vector(pcidev, PORT_RX_IRQ(i));
-    ret = request_irq(irq, port_rx_irq, IRQF_SHARED, KBUILD_MODNAME, port);
+  for (port_init = 0; port_init < ports; port_init++) {
+    ret = probe_port(card, port_init);
     if (ret < 0) {
-      dev_err(port->dev, "request_irq for port_rx_irq\n");
-      goto error;
+      goto error_port_init;
     }
-
-    irq = pci_irq_vector(pcidev, PORT_TX_IRQ(i));
-    ret = request_irq(irq, port_tx_irq, IRQF_SHARED, KBUILD_MODNAME, port);
-    if (ret < 0) {
-      dev_err(port->dev, "request_irq for port_tx_irq\n");
-      goto error;
-    }
-
-    irq = pci_irq_vector(pcidev, PORT_SFP_IRQ(i));
-    ret = request_irq(irq, port_sfp_irq, IRQF_SHARED, KBUILD_MODNAME, port);
-    if (ret < 0) {
-      dev_err(port->dev, "request_irq for port_sfp_irq\n");
-      goto error;
-    }
-
-    irq = pci_irq_vector(pcidev, PORT_SFP_I2C_IRQ(port->id));
-    port->i2c = fejkon_i2c_probe(
-        port->dev, card->bar0 + BAR0_SFP_I2C_OFFSET(port->id), irq);
-    if (port->i2c == NULL) {
-      dev_err(port->dev, "fejkon_i2c_probe failed\n");
-      goto error;
-    }
-
-    ret = register_netdev(net);
-    if (ret) {
-      dev_err(port->dev, "unable to register netdev\n");
-      goto error;
-    }
-
-    card->port[i] = port;
-    port_refresh_status(port);
-    dev_notice(port->dev, "registered port %d netdev %s\n", i, net->name);
   }
 
   pci_set_drvdata(pcidev, card);
   return 0;
-error:
+error_port_init:
+  rtnl_lock();
+  for (port_init--; port_init >= 0; port_init--) {
+    remove_port(card, port_init);
+  }
+  rtnl_unlock();
+  device_remove_file(&pcidev->dev, &dev_attr_phy_freq);
+error_sysfs_register:
+  /* hwmon is deregistered with device, nothing to clean up*/
+error_hwmon_register:
+  free_irq(pci_irq_vector(pcidev, 0), card);
+error_request_irq:
+  pci_free_irq_vectors(pcidev);
+error_irq_vectors:
+error_sanity:
+error_set_dma_mask:
   pci_release_region(pcidev, 0 /* bar */);
+error_request_region:
+  pci_disable_device(pcidev);
+error_enable:
+error_card_alloc:
   return ret;
 }
 
-static void remove(struct pci_dev *dev)
+static void remove(struct pci_dev *pcidev)
 {
-  struct fejkon_card *card = pci_get_drvdata(dev);
+  struct fejkon_card *card = pci_get_drvdata(pcidev);
   int i;
   if (!card) {
     return;
   }
   rtnl_lock();
   for (i = 0; i < MAX_PORTS; i++) {
-    struct fejkon_port *port = card->port[i];
-    if (port == NULL) {
-      continue;
-    }
-    unregister_netdevice(port->net);
-    fejkon_i2c_remove(port->i2c);
-    free_irq(pci_irq_vector(dev, PORT_RX_IRQ(i)), port);
-    free_irq(pci_irq_vector(dev, PORT_TX_IRQ(i)), port);
-    free_irq(pci_irq_vector(dev, PORT_SFP_IRQ(i)), port);
-    device_unregister(port->dev);
+    remove_port(card, i);
   }
   rtnl_unlock();
-  device_remove_file(&dev->dev, &dev_attr_phy_freq);
-  free_irq(pci_irq_vector(dev, 0), card);
-  pci_free_irq_vectors(dev);
-  pci_release_region(dev, 0 /* bar */);
-  pci_disable_device(dev);
+  device_remove_file(&pcidev->dev, &dev_attr_phy_freq);
+  free_irq(pci_irq_vector(pcidev, 0), card);
+  pci_free_irq_vectors(pcidev);
+  pci_release_region(pcidev, 0 /* bar */);
+  pci_disable_device(pcidev);
+}
+
+static pci_ers_result_t error_detected(struct pci_dev *pcidev,
+    enum pci_channel_state unused_state)
+{
+  dev_err(&pcidev->dev, "Error detected, disconnecting device");
+  /* assume the worst for now and just shut the device down */
+  remove(pcidev);
+  return PCI_ERS_RESULT_DISCONNECT;
 }
 
 static struct pci_device_id id_table[] = {
@@ -383,11 +441,16 @@ static struct pci_device_id id_table[] = {
 
 MODULE_DEVICE_TABLE(pci, id_table);
 
+static struct pci_error_handlers pci_error_handlers = {
+  .error_detected = error_detected,
+};
+
 static struct pci_driver pci_driver = {
-  .name     = KBUILD_MODNAME,
-  .id_table = id_table,
-  .probe    = probe,
-  .remove   = remove,
+  .name        = KBUILD_MODNAME,
+  .id_table    = id_table,
+  .probe       = probe,
+  .remove      = remove,
+  .err_handler = &pci_error_handlers,
 };
 
 static int minit(void)

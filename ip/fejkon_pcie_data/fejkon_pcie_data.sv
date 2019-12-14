@@ -234,7 +234,7 @@ module fejkon_pcie_data (
       tx_frm_dword[2][6:0] <= rx_frm_addr[6:0]; // Lower address
       tx_frm_dword[3] <= {rx_frm_tag, rx_frm_requester_id, rx_frm_addr[7:0]}; // Data, in big-endian
       tx_frm_valid <= 1'b1;
-      tx_frm_empty <= 2'h3;
+      tx_frm_empty <= 2'h2;               // 4 DW of TLP
       tx_frm_startofpacket <= 1'b1;
       tx_frm_endofpacket <= 1'b1;
     end

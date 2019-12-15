@@ -1,3 +1,14 @@
+// PCIe TLP handler for Fejkon
+//
+// Note about SystemVerilog:
+// We could use SystemVerilog structures for this module, and some things
+// would be easier to reason about - but Icarus Verilog which we use for MyHDL
+// does not support it.
+//
+// Personal note:
+// Oh well, most likely not going to use MyHDL and iverilog in the future, it
+// was been quite annoying to rely on its quirks.
+
 `timescale 1 ps / 1 ps
 module fejkon_pcie_data (
     input  wire         clk,                   //          clk.clk
@@ -42,6 +53,14 @@ module fejkon_pcie_data (
     output wire         cpl_pending            //             .cpl_pending
   );
 
+  typedef enum integer {
+    TLP_MRD,
+    TLP_MWR,
+    TLP_CPL,
+    TLP_CPLD,
+    TLP_UNKNOWN
+  } tlp_t;
+
   // From Intel example design, altpcied_ep_256bit_downstream.v
   //
   // RX Header
@@ -76,34 +95,27 @@ module fejkon_pcie_data (
     .my_id_valid(my_id_valid)
   );
 
-  logic [31:0] bar0_addr = 0;
+  logic is_ready;
+  // Signal indicating if we are happy to process work
+  assign is_ready =  ~reset & my_id_valid;
 
+  logic rx_st_ok;
+  // Signal indicating if we should process the current RX TLP stream
+  assign rx_st_ok = is_ready & rx_st_valid;
+
+  //
+  // Incoming TLP field accessors
+  //
   logic [7:0] [31:0] rx_st_dword;
-  logic [7:0] [31:0] tx_st_dword;
+  tlp_t              rx_st_type;
   logic [2:0]        rx_st_fmt;
   logic [9:0]        rx_st_len;
   logic              rx_st_is_4dw;
 
+  assign rx_st_dword  = rx_st_data;
   assign rx_st_fmt    = rx_st_dword[0][31:29];
   assign rx_st_len    = rx_st_dword[0][9:0];
   assign rx_st_is_4dw = rx_st_fmt[0];
-
-  typedef enum integer {
-    TLP_MRD,
-    TLP_MWR,
-    TLP_CPL,
-    TLP_CPLD,
-    TLP_UNKNOWN
-  } tlp_t;
-
-  tlp_t rx_st_type;
-
-  // TLP being processed, valid for whole packet
-  tlp_t        rx_frm_type = TLP_UNKNOWN;
-  logic [7:0]  rx_frm_tag = 0;
-  logic [15:0] rx_frm_requester_id = 0;
-  logic        rx_frm_is_start = 0;
-  logic [63:0] rx_frm_addr = 0;
 
   always @(*) begin
     case ({rx_st_fmt[1], rx_st_dword[0][28:24]})
@@ -115,71 +127,20 @@ module fejkon_pcie_data (
     endcase
   end
 
-  int csr_rx_tlp_counter = 0;
-  int csr_tx_tlp_counter = 0;
+  //
+  // Incoming TLP processing
+  //
 
-  logic [7:0] [31:0] csr_rx_tlp = 256'b0;
-  logic [7:0] [31:0] csr_tx_tlp = 256'b0;
+  // TLP being processed, valid for whole packet duration
+  tlp_t        rx_frm_type = TLP_UNKNOWN;
+  logic [7:0]  rx_frm_tag = 0;
+  logic [15:0] rx_frm_requester_id = 0;
+  logic        rx_frm_is_start = 0;
+  logic [63:0] rx_frm_addr = 0;
 
-  logic is_ready;
-  assign is_ready =  ~reset & my_id_valid;
-
-  logic rx_st_ok;
-  assign rx_st_ok = is_ready & rx_st_valid;
-
-  always @(posedge clk) begin
-    if (reset) begin
-      csr_rx_tlp_counter <= 0;
-      csr_tx_tlp_counter <= 0;
-      csr_rx_tlp <= 256'b0;
-      csr_tx_tlp <= 256'b0;
-    end else begin
-      if (rx_st_ok & rx_st_startofpacket) begin
-        csr_rx_tlp_counter <= csr_rx_tlp_counter + 1;
-        csr_rx_tlp <= rx_st_dword;
-        // Mask out the parts we're supposed to only care about
-        if (rx_st_endofpacket) begin
-          case (rx_st_empty)
-            2'h1: csr_rx_tlp[7:6] <= ~0;
-            2'h2: csr_rx_tlp[7:4] <= ~0;
-            2'h3: csr_rx_tlp[7:2] <= ~0;
-            default: ;
-          endcase
-        end
-      end
-      if (tx_frm_valid & tx_frm_startofpacket) begin
-        csr_tx_tlp_counter <= csr_tx_tlp_counter + 1;
-        csr_tx_tlp <= tx_st_dword;
-        // Mask out the parts we're supposed to only care about
-        if (tx_frm_endofpacket) begin
-          case (tx_frm_empty)
-            2'h1: csr_tx_tlp[7:6] <= ~0;
-            2'h2: csr_tx_tlp[7:4] <= ~0;
-            2'h3: csr_tx_tlp[7:2] <= ~0;
-            default: ;
-          endcase
-        end
-      end
-    end
-  end
-
-  logic [31:0] csr_readdata_reg;
-
-  assign csr_readdata = csr_readdata_reg;
-
-  always @(posedge clk) begin
-    if (csr_read) begin
-      casez (csr_address)
-        6'h0: csr_readdata_reg <= {16'b0, my_id};
-        6'h1: csr_readdata_reg <= csr_rx_tlp_counter;
-        6'h2: csr_readdata_reg <= csr_tx_tlp_counter;
-        6'b001???: csr_readdata_reg <= csr_rx_tlp[csr_address[2:0]];
-        6'b010???: csr_readdata_reg <= csr_tx_tlp[csr_address[2:0]];
-        default: csr_readdata_reg <= 32'hffffffff;
-      endcase
-    end
-  end
-
+  // Process incoming TLP
+  // This process converts from the Avalon-ST (rx_st_*) to the internal
+  // registers for the current frame (rx_frm_*)
   always @(posedge clk) begin
     rx_frm_is_start <= 1'b0;
     if (rx_st_valid & rx_st_startofpacket) begin
@@ -200,30 +161,14 @@ module fejkon_pcie_data (
     end
   end
 
-  assign rx_st_dword = rx_st_data;
-  assign tx_st_data = tx_st_dword;
-
-  // Used to stall the sending of non-posted TLPs from the PCIe IP.
-  // Since we have to deal with posted TLPs anyway it seems not so useful to
-  // implement it.
-  assign rx_st_mask = 1'b0;
-
-  assign rx_st_ready = is_ready;
-
-  assign data_tx_ready = 1'b1;
-
+  //
+  // Outgoing TLP construction
+  //
   logic              tx_frm_valid;
   logic              tx_frm_startofpacket;
   logic              tx_frm_endofpacket;
   logic        [1:0] tx_frm_empty;
   logic [7:0] [31:0] tx_frm_dword;
-
-  assign tx_st_valid = tx_frm_valid;
-  assign tx_st_startofpacket = tx_frm_startofpacket;
-  assign tx_st_endofpacket = tx_frm_endofpacket;
-  assign tx_st_empty = tx_frm_empty;
-  assign tx_st_dword = tx_frm_dword;
-  assign tx_st_error = 1'b0;
 
   // TODO(bluecmd): Abort any TLP if we get !rx_st_valid - from example code
   // TODO(bluecmd): Abort if we get 64 bit addresses? I don't think we should
@@ -274,11 +219,82 @@ module fejkon_pcie_data (
     end
   end
 
-  assign mem_access_req_valid = 1'b0;
-  assign mem_access_req_data = 128'b0;
-  assign mem_access_resp_ready = 1'b0;
+  int csr_rx_tlp_counter = 0;
+  int csr_tx_tlp_counter = 0;
 
-  // TODO: PCie completion errors
+  logic [7:0] [31:0] csr_rx_tlp = 256'b0;
+  logic [7:0] [31:0] csr_tx_tlp = 256'b0;
+
+  // Process internal statistics bookkeeping
+  always @(posedge clk) begin
+    if (reset) begin
+      csr_rx_tlp_counter <= 0;
+      csr_tx_tlp_counter <= 0;
+      csr_rx_tlp <= 256'b0;
+      csr_tx_tlp <= 256'b0;
+    end else begin
+      if (rx_st_ok & rx_st_startofpacket) begin
+        csr_rx_tlp_counter <= csr_rx_tlp_counter + 1;
+        csr_rx_tlp <= rx_st_dword;
+        // Mask out the parts we're supposed to only care about
+        if (rx_st_endofpacket) begin
+          case (rx_st_empty)
+            2'h1: csr_rx_tlp[7:6] <= ~0;
+            2'h2: csr_rx_tlp[7:4] <= ~0;
+            2'h3: csr_rx_tlp[7:2] <= ~0;
+            default: ;
+          endcase
+        end
+      end
+      if (tx_frm_valid & tx_frm_startofpacket) begin
+        csr_tx_tlp_counter <= csr_tx_tlp_counter + 1;
+        csr_tx_tlp <= tx_frm_dword;
+        // Mask out the parts we're supposed to only care about
+        if (tx_frm_endofpacket) begin
+          case (tx_frm_empty)
+            2'h1: csr_tx_tlp[7:6] <= ~0;
+            2'h2: csr_tx_tlp[7:4] <= ~0;
+            2'h3: csr_tx_tlp[7:2] <= ~0;
+            default: ;
+          endcase
+        end
+      end
+    end
+  end
+
+  logic [31:0] csr_readdata_reg;
+
+  // Process Control Status Register (CSR) accesses
+  // This handles reading statistics and control the DMA engine
+  always @(posedge clk) begin
+    if (csr_read) begin
+      casez (csr_address)
+        6'h0: csr_readdata_reg <= {16'b0, my_id};
+        6'h1: csr_readdata_reg <= csr_rx_tlp_counter;
+        6'h2: csr_readdata_reg <= csr_tx_tlp_counter;
+        6'b001???: csr_readdata_reg <= csr_rx_tlp[csr_address[2:0]];
+        6'b010???: csr_readdata_reg <= csr_tx_tlp[csr_address[2:0]];
+        default: csr_readdata_reg <= 32'hffffffff;
+      endcase
+    end
+  end
+
+  // Assignment of outputs
+  assign csr_readdata = csr_readdata_reg;
+  assign rx_st_ready = is_ready;
+  assign tx_st_data = tx_frm_dword;
+  assign tx_st_valid = tx_frm_valid;
+  assign tx_st_startofpacket = tx_frm_startofpacket;
+  assign tx_st_endofpacket = tx_frm_endofpacket;
+  assign tx_st_empty = tx_frm_empty;
+  assign tx_st_error = 1'b0;
+  // Used to stall the sending of non-posted TLPs from the PCIe IP.
+  // Since we have to deal with posted TLPs anyway it seems not so useful to
+  // implement it.
+  assign rx_st_mask = 1'b0;
+  assign data_tx_ready = is_ready;
+
+  // TODO: PCie completion errors for DMA
   assign cpl_pending = 1'b0;
   // cpl_err[0]: Completion timeout error with recovery.
   // cpl_err[1]: Completion timeout error without recovery.
@@ -288,5 +304,10 @@ module fejkon_pcie_data (
   // cpl_err[5]: Unsupported Request error for non-posted TLP.
   // cpl_err[6]: Log header.
   assign cpl_err = 7'b0;
+
+  // TODO
+  assign mem_access_req_valid = 1'b0;
+  assign mem_access_req_data = 128'b0;
+  assign mem_access_resp_ready = 1'b0;
 
 endmodule

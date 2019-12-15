@@ -115,7 +115,6 @@ class Test(unittest.TestCase):
             yield myhdl.delay(100)
 
     # TODO(bluecmd): we don't test 64 bit operations currently
-
     @testcase(clkgen, dutgen)
     def test_read(self):
         """Test reading standard 4 byte reads."""
@@ -125,6 +124,22 @@ class Test(unittest.TestCase):
         log.info("Identity: 0x%08x", int.from_bytes(ident, byteorder='little', signed=False))
         githash = yield from self.rc.mem_read(bar0 + 4, 4)
         log.info("Git hash: 0x%08x", int.from_bytes(githash, byteorder='little', signed=False))
+
+    @testcase(clkgen, dutgen)
+    def test_too_small_read(self):
+        """Test reading 3 bytes, should fail."""
+        yield from self.reset()
+        bar0 = self.ep.bar[0]
+        with self.assertRaises(pcie.UnsuccessfulCompletionError):
+            _ = yield from self.rc.mem_read(bar0, 3)
+
+    @testcase(clkgen, dutgen)
+    def test_too_large_read(self):
+        """Test reading 1024 bytes, should fail."""
+        yield from self.reset()
+        bar0 = self.ep.bar[0]
+        with self.assertRaises(pcie.UnsuccessfulCompletionError):
+            _ = yield from self.rc.mem_read(bar0, 1024)
 
     @testcase(clkgen, dutgen)
     def test_write_read(self):
@@ -137,31 +152,6 @@ class Test(unittest.TestCase):
         yield from self.await_tx()
         readback = yield from self.rc.mem_read(bar0 + 128, 4)
         self.assertEqual(data, readback)
-
-    @testcase(clkgen, dutgen)
-    def test_large_read(self):
-        """Test reading 4096 bytes in one big read."""
-        yield from self.reset()
-        bar0 = self.ep.bar[0]
-        data = yield from self.rc.mem_read(bar0 + 4096, 4096)
-        log.debug("Large read: %s", data)
-        assert len(data) == 4096
-
-    @testcase(clkgen, dutgen)
-    def test_large_write(self):
-        """Test writing 4092 bytes in one big write."""
-        yield from self.reset()
-        bar0 = self.ep.bar[0]
-        data = bytearray(range(128))
-        log.debug("Doing write")
-        yield from self.rc.mem_write(bar0 + 1024, data)
-        yield from self.await_tx()
-        log.debug("Write completed")
-        # TODO: We'd do a zero-length read here but the PCIe test bench library
-        # does not support it
-        log.debug("Doing read")
-        _ = yield from self.rc.mem_read(bar0 + 128, 4)
-        log.debug("Read completed")
 
     @testcase(clkgen, dutgen)
     def test_dma(self):

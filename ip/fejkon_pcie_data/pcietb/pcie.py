@@ -140,6 +140,18 @@ PCIE_GEN_RATE = {
 trace_routing = False
 
 
+class Error(Exception):
+    pass
+
+
+class TimeoutCompletionError(Error):
+    pass
+
+
+class UnsuccessfulCompletionError(Error):
+    pass
+
+
 def pciePrint(*args, **kwargs):
     # Silence by default
     # print(*args, **kwargs)
@@ -1875,9 +1887,9 @@ class Function(PMCapability, PCIECapability):
             cpl = yield from self.recv_cpl(tlp.tag, timeout)
 
             if not cpl:
-                raise Exception("Timeout")
+                raise TimeoutCompletionError()
             if cpl.status != CPL_STATUS_SC:
-                raise Exception("Unsuccessful completion")
+                raise UnsuccessfulCompletionError()
             else:
                 assert cpl.length == 1
                 d = struct.pack('<L', cpl.data[0])
@@ -1942,9 +1954,9 @@ class Function(PMCapability, PCIECapability):
             cpl = yield from self.recv_cpl(tlp.tag, timeout)
 
             if not cpl:
-                raise Exception("Timeout")
+                raise TimeoutCompletionError()
             if cpl.status != CPL_STATUS_SC:
-                raise Exception("Unsuccessful completion")
+                raise UnsuccessfulCompletionError()
 
             n += byte_length
             addr += byte_length
@@ -2008,9 +2020,9 @@ class Function(PMCapability, PCIECapability):
                 cpl = yield from self.recv_cpl(tlp.tag, timeout)
 
                 if not cpl:
-                    raise Exception("Timeout")
+                    raise TimeoutCompletionError()
                 if cpl.status != CPL_STATUS_SC:
-                    raise Exception("Unsuccessful completion")
+                    raise UnsuccessfulCompletionError()
                 else:
                     assert cpl.byte_count+3+(cpl.lower_address&3) >= cpl.length*4
                     assert cpl.byte_count == byte_length - m
@@ -3866,9 +3878,9 @@ class RootComplex(Switch):
             cpl = yield from self.recv_cpl(tlp.tag, timeout)
 
             if not cpl:
-                raise Exception("Timeout")
+                raise TimeoutCompletionError()
             if cpl.status != CPL_STATUS_SC:
-                raise Exception("Unsuccessful completion")
+                raise UnsuccessfulCompletionError()
             else:
                 assert cpl.length == 1
                 d = struct.pack('<L', cpl.data[0])
@@ -3933,9 +3945,9 @@ class RootComplex(Switch):
             cpl = yield from self.recv_cpl(tlp.tag, timeout)
 
             if not cpl:
-                raise Exception("Timeout")
+                raise TimeoutCompletionError()
             if cpl.status != CPL_STATUS_SC:
-                raise Exception("Unsuccessful completion")
+                raise UnsuccessfulCompletionError()
 
             n += byte_length
             addr += byte_length
@@ -3999,9 +4011,9 @@ class RootComplex(Switch):
                 cpl = yield from self.recv_cpl(tlp.tag, timeout)
 
                 if not cpl:
-                    raise Exception("Timeout")
+                    raise TimeoutCompletionError()
                 if cpl.status != CPL_STATUS_SC:
-                    raise Exception("Unsuccessful completion")
+                    raise UnsuccessfulCompletionError()
                 else:
                     assert cpl.byte_count+3+(cpl.lower_address&3) >= cpl.length*4
                     assert cpl.byte_count == byte_length - m

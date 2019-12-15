@@ -10,6 +10,7 @@
 #include <linux/module.h>
 #include <linux/netdevice.h>
 #include <linux/rtnetlink.h>
+#include <linux/aer.h>
 #include <asm/uaccess.h>
 
 #ifdef pr_fmt
@@ -302,6 +303,12 @@ static int probe(struct pci_dev *pcidev, const struct pci_device_id *id)
     goto error_enable;
   }
 
+  ret = pci_enable_pcie_error_reporting(pcidev);
+  if (ret < 0) {
+    dev_err(&pcidev->dev, "pci_enable_pcie_error_reporting\n");
+    goto error_enable_aer;
+  }
+
   ret = pci_request_region(pcidev, 0 /* bar */, KBUILD_MODNAME);
   if (ret < 0) {
     dev_err(&pcidev->dev, "pci_request_region\n");
@@ -400,6 +407,7 @@ error_sanity:
 error_set_dma_mask:
   pci_release_region(pcidev, 0 /* bar */);
 error_request_region:
+error_enable_aer:
   pci_disable_device(pcidev);
 error_enable:
 error_card_alloc:

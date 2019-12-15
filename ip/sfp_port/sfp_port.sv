@@ -32,6 +32,7 @@ module sfp_port (
     input  wire       mm_write,         //      .write
     input  wire [7:0] mm_writedata,     //      .writedata
     output wire [1:0] mm_response,      //      .response
+    output wire       intr,             //  intr.irq
 
     // Altera I2C master bus driver
     output wire sda_in,
@@ -104,5 +105,7 @@ module sfp_port (
   assign sda_in = mod2_sda;
   assign mod1_scl = scl_oe ? 1'b0 : 1'bz;
   assign mod2_sda = sda_oe ? 1'b0 : 1'bz;
+
+  assign intr = 1'b0;
 
 endmodule

@@ -181,3 +181,20 @@ set_interface_property i2c_reset SVD_ADDRESS_GROUP ""
 
 add_interface_port i2c_reset i2c_reset reset Output 1
 
+
+# 
+# connection point intr
+# 
+add_interface intr interrupt end
+set_interface_property intr associatedAddressablePoint ""
+set_interface_property intr associatedClock clk
+set_interface_property intr bridgedReceiverOffset ""
+set_interface_property intr bridgesToReceiver ""
+set_interface_property intr ENABLED true
+set_interface_property intr EXPORT_OF ""
+set_interface_property intr PORT_NAME_MAP ""
+set_interface_property intr CMSIS_SVD_VARIABLES ""
+set_interface_property intr SVD_ADDRESS_GROUP ""
+
+add_interface_port intr intr irq Output 1
+

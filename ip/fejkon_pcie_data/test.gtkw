@@ -1,0 +1,66 @@
+[timestart] 33355400
+[size] 1920 1016
+[pos] 6 38
+*-16.158356 33628200 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] test.
+[sst_width] 588
+[signals_width] 350
+[sst_expanded] 1
+[sst_vpaned_height] 358
+@28
+test.dut.clk
+test.dut.reset
+@200
+-
+-
+@28
+test.dut.data_tx_startofpacket
+test.dut.data_tx_endofpacket
+test.dut.data_tx_channel[1:0]
+@22
+test.dut.data_tx_empty[4:0]
+@28
+test.dut.data_tx_ready
+test.dut.data_tx_valid
+@22
+test.dut.data_tx_data[255:0]
+@200
+-
+@28
+test.dut.rx_st_startofpacket
+test.dut.rx_st_endofpacket
+test.dut.rx_st_mask
+@22
+test.dut.rx_st_bar[7:0]
+@28
+test.dut.rx_st_error
+test.dut.rx_st_ready
+test.dut.rx_st_valid
+@24
+test.dut.rx_st_empty[1:0]
+@22
+test.dut.rx_st_data[255:0]
+@200
+-
+@29
+test.dut.tx_st_startofpacket
+@28
+test.dut.tx_st_endofpacket
+test.dut.tx_st_error
+test.dut.tx_st_ready
+test.dut.tx_st_valid
+@24
+test.dut.tx_st_empty[1:0]
+@22
+test.dut.tx_st_data[255:0]
+@200
+-
+@22
+test.dut.my_id[15:0]
+@28
+test.dut.my_id_valid
+@22
+test.dut.tl_cfg_add[3:0]
+test.dut.tl_cfg_ctl[31:0]
+[pattern_trace] 1
+[pattern_trace] 0

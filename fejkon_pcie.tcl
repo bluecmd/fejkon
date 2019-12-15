@@ -9,83 +9,61 @@ set_project_property HIDE_FROM_IP_CATALOG {false}
 
 # Instances and instance parameters
 # (disabled instances are intentionally culled)
-add_instance alt_xcvr_reconfig_0 alt_xcvr_reconfig 19.1
-set_instance_parameter_value alt_xcvr_reconfig_0 {ber_en} {0}
-set_instance_parameter_value alt_xcvr_reconfig_0 {enable_adce} {0}
-set_instance_parameter_value alt_xcvr_reconfig_0 {enable_analog} {1}
-set_instance_parameter_value alt_xcvr_reconfig_0 {enable_dcd} {0}
-set_instance_parameter_value alt_xcvr_reconfig_0 {enable_dcd_power_up} {1}
-set_instance_parameter_value alt_xcvr_reconfig_0 {enable_dfe} {0}
-set_instance_parameter_value alt_xcvr_reconfig_0 {enable_eyemon} {0}
-set_instance_parameter_value alt_xcvr_reconfig_0 {enable_mif} {0}
-set_instance_parameter_value alt_xcvr_reconfig_0 {enable_offset} {1}
-set_instance_parameter_value alt_xcvr_reconfig_0 {gui_cal_status_port} {0}
-set_instance_parameter_value alt_xcvr_reconfig_0 {gui_enable_pll} {0}
-set_instance_parameter_value alt_xcvr_reconfig_0 {gui_split_sizes} {}
-set_instance_parameter_value alt_xcvr_reconfig_0 {number_of_reconfig_interfaces} {11}
+add_instance bar0_cdc altera_avalon_mm_clock_crossing_bridge 19.1
+set_instance_parameter_value bar0_cdc {ADDRESS_UNITS} {SYMBOLS}
+set_instance_parameter_value bar0_cdc {ADDRESS_WIDTH} {20}
+set_instance_parameter_value bar0_cdc {COMMAND_FIFO_DEPTH} {4}
+set_instance_parameter_value bar0_cdc {DATA_WIDTH} {32}
+set_instance_parameter_value bar0_cdc {MASTER_SYNC_DEPTH} {2}
+set_instance_parameter_value bar0_cdc {MAX_BURST_SIZE} {1}
+set_instance_parameter_value bar0_cdc {RESPONSE_FIFO_DEPTH} {4}
+set_instance_parameter_value bar0_cdc {SLAVE_SYNC_DEPTH} {2}
+set_instance_parameter_value bar0_cdc {SYMBOL_WIDTH} {8}
+set_instance_parameter_value bar0_cdc {USE_AUTO_ADDRESS_WIDTH} {0}
 
-add_instance bar2_cdc altera_avalon_mm_clock_crossing_bridge 19.1
-set_instance_parameter_value bar2_cdc {ADDRESS_UNITS} {SYMBOLS}
-set_instance_parameter_value bar2_cdc {ADDRESS_WIDTH} {20}
-set_instance_parameter_value bar2_cdc {COMMAND_FIFO_DEPTH} {4}
-set_instance_parameter_value bar2_cdc {DATA_WIDTH} {32}
-set_instance_parameter_value bar2_cdc {MASTER_SYNC_DEPTH} {2}
-set_instance_parameter_value bar2_cdc {MAX_BURST_SIZE} {1}
-set_instance_parameter_value bar2_cdc {RESPONSE_FIFO_DEPTH} {4}
-set_instance_parameter_value bar2_cdc {SLAVE_SYNC_DEPTH} {2}
-set_instance_parameter_value bar2_cdc {SYMBOL_WIDTH} {8}
-set_instance_parameter_value bar2_cdc {USE_AUTO_ADDRESS_WIDTH} {0}
+add_instance csr_bridge altera_avalon_mm_clock_crossing_bridge 19.1
+set_instance_parameter_value csr_bridge {ADDRESS_UNITS} {SYMBOLS}
+set_instance_parameter_value csr_bridge {ADDRESS_WIDTH} {10}
+set_instance_parameter_value csr_bridge {COMMAND_FIFO_DEPTH} {4}
+set_instance_parameter_value csr_bridge {DATA_WIDTH} {32}
+set_instance_parameter_value csr_bridge {MASTER_SYNC_DEPTH} {2}
+set_instance_parameter_value csr_bridge {MAX_BURST_SIZE} {1}
+set_instance_parameter_value csr_bridge {RESPONSE_FIFO_DEPTH} {4}
+set_instance_parameter_value csr_bridge {SLAVE_SYNC_DEPTH} {2}
+set_instance_parameter_value csr_bridge {SYMBOL_WIDTH} {8}
+set_instance_parameter_value csr_bridge {USE_AUTO_ADDRESS_WIDTH} {1}
 
-add_instance dma_descr altera_avalon_onchip_memory2 19.1
-set_instance_parameter_value dma_descr {allowInSystemMemoryContentEditor} {0}
-set_instance_parameter_value dma_descr {blockType} {AUTO}
-set_instance_parameter_value dma_descr {copyInitFile} {0}
-set_instance_parameter_value dma_descr {dataWidth} {256}
-set_instance_parameter_value dma_descr {dataWidth2} {32}
-set_instance_parameter_value dma_descr {dualPort} {1}
-set_instance_parameter_value dma_descr {ecc_enabled} {0}
-set_instance_parameter_value dma_descr {enPRInitMode} {0}
-set_instance_parameter_value dma_descr {enableDiffWidth} {0}
-set_instance_parameter_value dma_descr {initMemContent} {0}
-set_instance_parameter_value dma_descr {initializationFileName} {onchip_mem.hex}
-set_instance_parameter_value dma_descr {instanceID} {NONE}
-set_instance_parameter_value dma_descr {memorySize} {4096.0}
-set_instance_parameter_value dma_descr {readDuringWriteMode} {DONT_CARE}
-set_instance_parameter_value dma_descr {resetrequest_enabled} {1}
-set_instance_parameter_value dma_descr {simAllowMRAMContentsFile} {0}
-set_instance_parameter_value dma_descr {simMemInitOnlyFilename} {0}
-set_instance_parameter_value dma_descr {singleClockOperation} {0}
-set_instance_parameter_value dma_descr {slave1Latency} {1}
-set_instance_parameter_value dma_descr {slave2Latency} {1}
-set_instance_parameter_value dma_descr {useNonDefaultInitFile} {0}
-set_instance_parameter_value dma_descr {useShallowMemBlocks} {0}
-set_instance_parameter_value dma_descr {writable} {1}
+add_instance mem_req_fifo altera_avalon_sc_fifo 19.1
+set_instance_parameter_value mem_req_fifo {BITS_PER_SYMBOL} {128}
+set_instance_parameter_value mem_req_fifo {CHANNEL_WIDTH} {0}
+set_instance_parameter_value mem_req_fifo {EMPTY_LATENCY} {3}
+set_instance_parameter_value mem_req_fifo {ENABLE_EXPLICIT_MAXCHANNEL} {0}
+set_instance_parameter_value mem_req_fifo {ERROR_WIDTH} {0}
+set_instance_parameter_value mem_req_fifo {EXPLICIT_MAXCHANNEL} {0}
+set_instance_parameter_value mem_req_fifo {FIFO_DEPTH} {64}
+set_instance_parameter_value mem_req_fifo {SYMBOLS_PER_BEAT} {1}
+set_instance_parameter_value mem_req_fifo {USE_ALMOST_EMPTY_IF} {0}
+set_instance_parameter_value mem_req_fifo {USE_ALMOST_FULL_IF} {0}
+set_instance_parameter_value mem_req_fifo {USE_FILL_LEVEL} {0}
+set_instance_parameter_value mem_req_fifo {USE_MEMORY_BLOCKS} {1}
+set_instance_parameter_value mem_req_fifo {USE_PACKETS} {0}
+set_instance_parameter_value mem_req_fifo {USE_STORE_FORWARD} {0}
 
-add_instance dma_rd_pipeline altera_avalon_mm_bridge 19.1
-set_instance_parameter_value dma_rd_pipeline {ADDRESS_UNITS} {SYMBOLS}
-set_instance_parameter_value dma_rd_pipeline {ADDRESS_WIDTH} {10}
-set_instance_parameter_value dma_rd_pipeline {DATA_WIDTH} {256}
-set_instance_parameter_value dma_rd_pipeline {LINEWRAPBURSTS} {0}
-set_instance_parameter_value dma_rd_pipeline {MAX_BURST_SIZE} {16}
-set_instance_parameter_value dma_rd_pipeline {MAX_PENDING_RESPONSES} {4}
-set_instance_parameter_value dma_rd_pipeline {PIPELINE_COMMAND} {1}
-set_instance_parameter_value dma_rd_pipeline {PIPELINE_RESPONSE} {1}
-set_instance_parameter_value dma_rd_pipeline {SYMBOL_WIDTH} {8}
-set_instance_parameter_value dma_rd_pipeline {USE_AUTO_ADDRESS_WIDTH} {1}
-set_instance_parameter_value dma_rd_pipeline {USE_RESPONSE} {0}
-
-add_instance dma_wr_pipeline altera_avalon_mm_bridge 19.1
-set_instance_parameter_value dma_wr_pipeline {ADDRESS_UNITS} {SYMBOLS}
-set_instance_parameter_value dma_wr_pipeline {ADDRESS_WIDTH} {10}
-set_instance_parameter_value dma_wr_pipeline {DATA_WIDTH} {256}
-set_instance_parameter_value dma_wr_pipeline {LINEWRAPBURSTS} {0}
-set_instance_parameter_value dma_wr_pipeline {MAX_BURST_SIZE} {16}
-set_instance_parameter_value dma_wr_pipeline {MAX_PENDING_RESPONSES} {4}
-set_instance_parameter_value dma_wr_pipeline {PIPELINE_COMMAND} {1}
-set_instance_parameter_value dma_wr_pipeline {PIPELINE_RESPONSE} {1}
-set_instance_parameter_value dma_wr_pipeline {SYMBOL_WIDTH} {8}
-set_instance_parameter_value dma_wr_pipeline {USE_AUTO_ADDRESS_WIDTH} {1}
-set_instance_parameter_value dma_wr_pipeline {USE_RESPONSE} {0}
+add_instance mem_resp_fifo altera_avalon_sc_fifo 19.1
+set_instance_parameter_value mem_resp_fifo {BITS_PER_SYMBOL} {128}
+set_instance_parameter_value mem_resp_fifo {CHANNEL_WIDTH} {0}
+set_instance_parameter_value mem_resp_fifo {EMPTY_LATENCY} {3}
+set_instance_parameter_value mem_resp_fifo {ENABLE_EXPLICIT_MAXCHANNEL} {0}
+set_instance_parameter_value mem_resp_fifo {ERROR_WIDTH} {0}
+set_instance_parameter_value mem_resp_fifo {EXPLICIT_MAXCHANNEL} {0}
+set_instance_parameter_value mem_resp_fifo {FIFO_DEPTH} {64}
+set_instance_parameter_value mem_resp_fifo {SYMBOLS_PER_BEAT} {1}
+set_instance_parameter_value mem_resp_fifo {USE_ALMOST_EMPTY_IF} {0}
+set_instance_parameter_value mem_resp_fifo {USE_ALMOST_FULL_IF} {0}
+set_instance_parameter_value mem_resp_fifo {USE_FILL_LEVEL} {0}
+set_instance_parameter_value mem_resp_fifo {USE_MEMORY_BLOCKS} {1}
+set_instance_parameter_value mem_resp_fifo {USE_PACKETS} {0}
+set_instance_parameter_value mem_resp_fifo {USE_STORE_FORWARD} {0}
 
 add_instance mgmt_clk altera_clock_bridge 19.1
 set_instance_parameter_value mgmt_clk {EXPLICIT_CLOCK_RATE} {0.0}
@@ -97,31 +75,24 @@ set_instance_parameter_value mgmt_rst {NUM_RESET_OUTPUTS} {1}
 set_instance_parameter_value mgmt_rst {SYNCHRONOUS_EDGES} {deassert}
 set_instance_parameter_value mgmt_rst {USE_RESET_REQUEST} {0}
 
-add_instance pcie_reconfig_driver_0 altera_pcie_reconfig_driver 19.1
-set_instance_parameter_value pcie_reconfig_driver_0 {enable_cal_busy_hwtcl} {0}
-set_instance_parameter_value pcie_reconfig_driver_0 {gen123_lane_rate_mode_hwtcl} {Gen3 (8.0 Gbps)}
-set_instance_parameter_value pcie_reconfig_driver_0 {number_of_reconfig_interfaces} {11}
+add_instance msi_intr pcie_msi_intr 1.0
+
+add_instance pcie_avalon fejkon_pcie_avalon 1.0
+
+add_instance pcie_clk altera_clock_bridge 19.1
+set_instance_parameter_value pcie_clk {EXPLICIT_CLOCK_RATE} {0.0}
+set_instance_parameter_value pcie_clk {NUM_CLOCK_OUTPUTS} {1}
+
+add_instance pcie_data fejkon_pcie_data 1.0
+
+add_instance pcie_reconfig altera_pcie_reconfig_driver 19.1
+set_instance_parameter_value pcie_reconfig {enable_cal_busy_hwtcl} {0}
+set_instance_parameter_value pcie_reconfig {gen123_lane_rate_mode_hwtcl} {Gen3 (8.0 Gbps)}
+set_instance_parameter_value pcie_reconfig {number_of_reconfig_interfaces} {11}
 
 add_instance pcie_reset pcie_reset 1.0
 
-add_instance phy altera_pcie_256_hip_avmm 19.1
-set_instance_parameter_value phy {CB_P2A_AVALON_ADDR_B0} {0}
-set_instance_parameter_value phy {CB_P2A_AVALON_ADDR_B1} {0}
-set_instance_parameter_value phy {CB_P2A_AVALON_ADDR_B2} {0}
-set_instance_parameter_value phy {CB_P2A_AVALON_ADDR_B3} {0}
-set_instance_parameter_value phy {CB_P2A_AVALON_ADDR_B4} {0}
-set_instance_parameter_value phy {CB_P2A_AVALON_ADDR_B5} {0}
-set_instance_parameter_value phy {CB_P2A_FIXED_AVALON_ADDR_B0} {0}
-set_instance_parameter_value phy {CB_P2A_FIXED_AVALON_ADDR_B1} {0}
-set_instance_parameter_value phy {CB_P2A_FIXED_AVALON_ADDR_B2} {0}
-set_instance_parameter_value phy {CB_P2A_FIXED_AVALON_ADDR_B3} {0}
-set_instance_parameter_value phy {CB_P2A_FIXED_AVALON_ADDR_B4} {0}
-set_instance_parameter_value phy {CB_P2A_FIXED_AVALON_ADDR_B5} {0}
-set_instance_parameter_value phy {CG_COMMON_CLOCK_MODE} {1}
-set_instance_parameter_value phy {CG_RXM_IRQ_NUM} {16}
-set_instance_parameter_value phy {NUM_PREFETCH_MASTERS} {1}
-set_instance_parameter_value phy {TX_S_ADDR_WIDTH} {32}
-set_instance_parameter_value phy {add_pll_to_hip_coreclkout} {0}
+add_instance phy altera_pcie_sv_hip_ast 19.1
 set_instance_parameter_value phy {advanced_default_hwtcl_atomic_malformed} {true}
 set_instance_parameter_value phy {advanced_default_hwtcl_atomic_op_completer_32bit} {false}
 set_instance_parameter_value phy {advanced_default_hwtcl_atomic_op_completer_64bit} {false}
@@ -186,98 +157,283 @@ set_instance_parameter_value phy {advanced_default_hwtcl_tx_cdc_almost_empty} {5
 set_instance_parameter_value phy {advanced_default_hwtcl_vc0_clk_enable} {true}
 set_instance_parameter_value phy {advanced_default_hwtcl_wrong_device_id} {disable}
 set_instance_parameter_value phy {advanced_default_parameter_override} {0}
-set_instance_parameter_value phy {altpcie_avmm_hwtcl} {1}
-set_instance_parameter_value phy {app_interface_width_hwtcl} {256}
-set_instance_parameter_value phy {av_rpre_emph_a_val_hwtcl} {12}
-set_instance_parameter_value phy {av_rpre_emph_b_val_hwtcl} {0}
-set_instance_parameter_value phy {av_rpre_emph_c_val_hwtcl} {19}
-set_instance_parameter_value phy {av_rpre_emph_d_val_hwtcl} {13}
-set_instance_parameter_value phy {av_rpre_emph_e_val_hwtcl} {21}
-set_instance_parameter_value phy {av_rvod_sel_a_val_hwtcl} {42}
-set_instance_parameter_value phy {av_rvod_sel_b_val_hwtcl} {30}
-set_instance_parameter_value phy {av_rvod_sel_c_val_hwtcl} {43}
-set_instance_parameter_value phy {av_rvod_sel_d_val_hwtcl} {43}
-set_instance_parameter_value phy {av_rvod_sel_e_val_hwtcl} {9}
-set_instance_parameter_value phy {avmm_width_hwtcl} {256}
-set_instance_parameter_value phy {bar0_type_hwtcl} {64}
-set_instance_parameter_value phy {bar1_type_hwtcl} {1}
-set_instance_parameter_value phy {bar2_type_hwtcl} {32}
-set_instance_parameter_value phy {bar3_type_hwtcl} {32}
-set_instance_parameter_value phy {bar4_type_hwtcl} {1}
-set_instance_parameter_value phy {bar5_type_hwtcl} {1}
-set_instance_parameter_value phy {cdc_dummy_insert_limit_advanced_default_hwtcl} {11}
+set_instance_parameter_value phy {ast_width_hwtcl} {Avalon-ST 256-bit}
+set_instance_parameter_value phy {bar0_size_mask_hwtcl} {19}
+set_instance_parameter_value phy {bar0_type_hwtcl} {2}
+set_instance_parameter_value phy {bar1_size_mask_hwtcl} {0}
+set_instance_parameter_value phy {bar1_type_hwtcl} {0}
+set_instance_parameter_value phy {bar2_size_mask_hwtcl} {0}
+set_instance_parameter_value phy {bar2_type_hwtcl} {0}
+set_instance_parameter_value phy {bar3_size_mask_hwtcl} {0}
+set_instance_parameter_value phy {bar3_type_hwtcl} {0}
+set_instance_parameter_value phy {bar4_size_mask_hwtcl} {0}
+set_instance_parameter_value phy {bar4_type_hwtcl} {0}
+set_instance_parameter_value phy {bar5_size_mask_hwtcl} {0}
+set_instance_parameter_value phy {bar5_type_hwtcl} {0}
+set_instance_parameter_value phy {change_deemphasis_hwtcl} {1}
 set_instance_parameter_value phy {class_code_hwtcl} {787456}
-set_instance_parameter_value phy {completion_timeout_hwtcl} {NONE}
-set_instance_parameter_value phy {cv_rpre_emph_a_val_hwtcl} {11}
-set_instance_parameter_value phy {cv_rpre_emph_b_val_hwtcl} {0}
-set_instance_parameter_value phy {cv_rpre_emph_c_val_hwtcl} {22}
-set_instance_parameter_value phy {cv_rpre_emph_d_val_hwtcl} {12}
-set_instance_parameter_value phy {cv_rpre_emph_e_val_hwtcl} {21}
-set_instance_parameter_value phy {cv_rvod_sel_a_val_hwtcl} {50}
-set_instance_parameter_value phy {cv_rvod_sel_b_val_hwtcl} {34}
-set_instance_parameter_value phy {cv_rvod_sel_c_val_hwtcl} {50}
-set_instance_parameter_value phy {cv_rvod_sel_d_val_hwtcl} {50}
-set_instance_parameter_value phy {cv_rvod_sel_e_val_hwtcl} {9}
-set_instance_parameter_value phy {d0_pme_advanced_default_hwtcl} {false}
-set_instance_parameter_value phy {d1_pme_advanced_default_hwtcl} {false}
-set_instance_parameter_value phy {d1_support_advanced_default_hwtcl} {false}
-set_instance_parameter_value phy {d2_pme_advanced_default_hwtcl} {false}
-set_instance_parameter_value phy {d2_support_advanced_default_hwtcl} {false}
-set_instance_parameter_value phy {d3_cold_pme_advanced_default_hwtcl} {false}
-set_instance_parameter_value phy {d3_hot_pme_advanced_default_hwtcl} {false}
-set_instance_parameter_value phy {deemphasis_enable_advanced_default_hwtcl} {false}
+set_instance_parameter_value phy {completion_timeout_hwtcl} {ABCD}
 set_instance_parameter_value phy {device_id_hwtcl} {3557}
-set_instance_parameter_value phy {device_number_advanced_default_hwtcl} {0}
-set_instance_parameter_value phy {diffclock_nfts_count_advanced_default_hwtcl} {255}
-set_instance_parameter_value phy {disable_link_x2_support_advanced_default_hwtcl} {false}
 set_instance_parameter_value phy {dll_active_report_support_hwtcl} {0}
-set_instance_parameter_value phy {dma_use_scfifo_ext_hwtcl} {0}
 set_instance_parameter_value phy {ecrc_check_capable_hwtcl} {0}
 set_instance_parameter_value phy {ecrc_gen_capable_hwtcl} {0}
-set_instance_parameter_value phy {ei_delay_powerdown_count_advanced_default_hwtcl} {10}
-set_instance_parameter_value phy {eie_before_nfts_count_advanced_default_hwtcl} {4}
 set_instance_parameter_value phy {enable_completion_timeout_disable_hwtcl} {1}
-set_instance_parameter_value phy {enable_cra_hwtcl} {1}
 set_instance_parameter_value phy {enable_function_msix_support_hwtcl} {0}
-set_instance_parameter_value phy {enable_l1_aspm_advanced_default_hwtcl} {false}
 set_instance_parameter_value phy {enable_pcisigtest_hwtcl} {0}
+set_instance_parameter_value phy {enable_pipe32_phyip_ser_driver_hwtcl} {0}
+set_instance_parameter_value phy {enable_pipe32_sim_hwtcl} {0}
 set_instance_parameter_value phy {enable_power_on_rst_pulse_hwtcl} {0}
-set_instance_parameter_value phy {enable_rx_buffer_checking_advanced_default_hwtcl} {false}
-set_instance_parameter_value phy {enable_rxm_burst_hwtcl} {0}
 set_instance_parameter_value phy {enable_slot_register_hwtcl} {0}
 set_instance_parameter_value phy {enable_tl_only_sim_hwtcl} {0}
 set_instance_parameter_value phy {endpoint_l0_latency_hwtcl} {0}
 set_instance_parameter_value phy {endpoint_l1_latency_hwtcl} {0}
 set_instance_parameter_value phy {expansion_base_address_register_hwtcl} {0}
 set_instance_parameter_value phy {extend_tag_field_hwtcl} {32}
-set_instance_parameter_value phy {fc_init_timer_advanced_default_hwtcl} {1024}
-set_instance_parameter_value phy {fixed_address_mode} {0}
-set_instance_parameter_value phy {flow_control_timeout_count_advanced_default_hwtcl} {200}
-set_instance_parameter_value phy {flow_control_update_count_advanced_default_hwtcl} {30}
+set_instance_parameter_value phy {fixed_preset_on} {0}
 set_instance_parameter_value phy {force_hrc} {0}
 set_instance_parameter_value phy {force_src} {0}
+set_instance_parameter_value phy {full_swing_hwtcl} {35}
 set_instance_parameter_value phy {gen123_lane_rate_mode_hwtcl} {Gen3 (8.0 Gbps)}
-set_instance_parameter_value phy {gen2_diffclock_nfts_count_advanced_default_hwtcl} {255}
-set_instance_parameter_value phy {gen2_sameclock_nfts_count_advanced_default_hwtcl} {255}
+set_instance_parameter_value phy {gen3_coeff_10_ber_meas_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_10_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_10_nxtber_less_hwtcl} {g3_coeff_10_nxtber_less}
+set_instance_parameter_value phy {gen3_coeff_10_nxtber_less_ptr_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_10_nxtber_more_hwtcl} {g3_coeff_10_nxtber_more}
+set_instance_parameter_value phy {gen3_coeff_10_nxtber_more_ptr_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_10_preset_hint_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_10_reqber_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_10_sel_hwtcl} {preset_10}
+set_instance_parameter_value phy {gen3_coeff_11_ber_meas_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_11_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_11_nxtber_less_hwtcl} {g3_coeff_11_nxtber_less}
+set_instance_parameter_value phy {gen3_coeff_11_nxtber_less_ptr_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_11_nxtber_more_hwtcl} {g3_coeff_11_nxtber_more}
+set_instance_parameter_value phy {gen3_coeff_11_nxtber_more_ptr_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_11_preset_hint_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_11_reqber_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_11_sel_hwtcl} {preset_11}
+set_instance_parameter_value phy {gen3_coeff_12_ber_meas_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_12_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_12_nxtber_less_hwtcl} {g3_coeff_12_nxtber_less}
+set_instance_parameter_value phy {gen3_coeff_12_nxtber_less_ptr_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_12_nxtber_more_hwtcl} {g3_coeff_12_nxtber_more}
+set_instance_parameter_value phy {gen3_coeff_12_nxtber_more_ptr_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_12_preset_hint_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_12_reqber_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_12_sel_hwtcl} {preset_12}
+set_instance_parameter_value phy {gen3_coeff_13_ber_meas_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_13_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_13_nxtber_less_hwtcl} {g3_coeff_13_nxtber_less}
+set_instance_parameter_value phy {gen3_coeff_13_nxtber_less_ptr_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_13_nxtber_more_hwtcl} {g3_coeff_13_nxtber_more}
+set_instance_parameter_value phy {gen3_coeff_13_nxtber_more_ptr_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_13_preset_hint_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_13_reqber_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_13_sel_hwtcl} {preset_13}
+set_instance_parameter_value phy {gen3_coeff_14_ber_meas_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_14_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_14_nxtber_less_hwtcl} {g3_coeff_14_nxtber_less}
+set_instance_parameter_value phy {gen3_coeff_14_nxtber_less_ptr_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_14_nxtber_more_hwtcl} {g3_coeff_14_nxtber_more}
+set_instance_parameter_value phy {gen3_coeff_14_nxtber_more_ptr_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_14_preset_hint_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_14_reqber_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_14_sel_hwtcl} {preset_14}
+set_instance_parameter_value phy {gen3_coeff_15_ber_meas_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_15_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_15_nxtber_less_hwtcl} {g3_coeff_15_nxtber_less}
+set_instance_parameter_value phy {gen3_coeff_15_nxtber_less_ptr_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_15_nxtber_more_hwtcl} {g3_coeff_15_nxtber_more}
+set_instance_parameter_value phy {gen3_coeff_15_nxtber_more_ptr_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_15_preset_hint_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_15_reqber_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_15_sel_hwtcl} {preset_15}
+set_instance_parameter_value phy {gen3_coeff_16_ber_meas_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_16_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_16_nxtber_less_hwtcl} {g3_coeff_16_nxtber_less}
+set_instance_parameter_value phy {gen3_coeff_16_nxtber_less_ptr_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_16_nxtber_more_hwtcl} {g3_coeff_16_nxtber_more}
+set_instance_parameter_value phy {gen3_coeff_16_nxtber_more_ptr_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_16_preset_hint_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_16_reqber_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_16_sel_hwtcl} {preset_16}
+set_instance_parameter_value phy {gen3_coeff_17_ber_meas_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_17_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_17_nxtber_less_hwtcl} {g3_coeff_17_nxtber_less}
+set_instance_parameter_value phy {gen3_coeff_17_nxtber_less_ptr_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_17_nxtber_more_hwtcl} {g3_coeff_17_nxtber_more}
+set_instance_parameter_value phy {gen3_coeff_17_nxtber_more_ptr_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_17_preset_hint_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_17_reqber_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_17_sel_hwtcl} {preset_17}
+set_instance_parameter_value phy {gen3_coeff_18_ber_meas_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_18_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_18_nxtber_less_hwtcl} {g3_coeff_18_nxtber_less}
+set_instance_parameter_value phy {gen3_coeff_18_nxtber_less_ptr_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_18_nxtber_more_hwtcl} {g3_coeff_18_nxtber_more}
+set_instance_parameter_value phy {gen3_coeff_18_nxtber_more_ptr_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_18_preset_hint_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_18_reqber_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_18_sel_hwtcl} {preset_18}
+set_instance_parameter_value phy {gen3_coeff_19_ber_meas_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_19_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_19_nxtber_less_hwtcl} {g3_coeff_19_nxtber_less}
+set_instance_parameter_value phy {gen3_coeff_19_nxtber_less_ptr_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_19_nxtber_more_hwtcl} {g3_coeff_19_nxtber_more}
+set_instance_parameter_value phy {gen3_coeff_19_nxtber_more_ptr_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_19_preset_hint_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_19_reqber_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_19_sel_hwtcl} {preset_19}
+set_instance_parameter_value phy {gen3_coeff_1_ber_meas_hwtcl} {2}
+set_instance_parameter_value phy {gen3_coeff_1_hwtcl} {7}
+set_instance_parameter_value phy {gen3_coeff_1_nxtber_less_hwtcl} {g3_coeff_1_nxtber_less}
+set_instance_parameter_value phy {gen3_coeff_1_nxtber_less_ptr_hwtcl} {1}
+set_instance_parameter_value phy {gen3_coeff_1_nxtber_more_hwtcl} {g3_coeff_1_nxtber_more}
+set_instance_parameter_value phy {gen3_coeff_1_nxtber_more_ptr_hwtcl} {1}
+set_instance_parameter_value phy {gen3_coeff_1_preset_hint_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_1_reqber_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_1_sel_hwtcl} {preset_1}
+set_instance_parameter_value phy {gen3_coeff_20_ber_meas_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_20_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_20_nxtber_less_hwtcl} {g3_coeff_20_nxtber_less}
+set_instance_parameter_value phy {gen3_coeff_20_nxtber_less_ptr_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_20_nxtber_more_hwtcl} {g3_coeff_20_nxtber_more}
+set_instance_parameter_value phy {gen3_coeff_20_nxtber_more_ptr_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_20_preset_hint_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_20_reqber_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_20_sel_hwtcl} {preset_20}
+set_instance_parameter_value phy {gen3_coeff_21_ber_meas_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_21_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_21_nxtber_less_hwtcl} {g3_coeff_21_nxtber_less}
+set_instance_parameter_value phy {gen3_coeff_21_nxtber_less_ptr_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_21_nxtber_more_hwtcl} {g3_coeff_21_nxtber_more}
+set_instance_parameter_value phy {gen3_coeff_21_nxtber_more_ptr_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_21_preset_hint_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_21_reqber_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_21_sel_hwtcl} {preset_21}
+set_instance_parameter_value phy {gen3_coeff_22_ber_meas_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_22_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_22_nxtber_less_hwtcl} {g3_coeff_22_nxtber_less}
+set_instance_parameter_value phy {gen3_coeff_22_nxtber_less_ptr_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_22_nxtber_more_hwtcl} {g3_coeff_22_nxtber_more}
+set_instance_parameter_value phy {gen3_coeff_22_nxtber_more_ptr_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_22_preset_hint_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_22_reqber_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_22_sel_hwtcl} {preset_22}
+set_instance_parameter_value phy {gen3_coeff_23_ber_meas_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_23_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_23_nxtber_less_hwtcl} {g3_coeff_23_nxtber_less}
+set_instance_parameter_value phy {gen3_coeff_23_nxtber_less_ptr_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_23_nxtber_more_hwtcl} {g3_coeff_23_nxtber_more}
+set_instance_parameter_value phy {gen3_coeff_23_nxtber_more_ptr_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_23_preset_hint_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_23_reqber_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_23_sel_hwtcl} {preset_23}
+set_instance_parameter_value phy {gen3_coeff_24_ber_meas_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_24_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_24_nxtber_less_hwtcl} {g3_coeff_24_nxtber_less}
+set_instance_parameter_value phy {gen3_coeff_24_nxtber_less_ptr_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_24_nxtber_more_hwtcl} {g3_coeff_24_nxtber_more}
+set_instance_parameter_value phy {gen3_coeff_24_nxtber_more_ptr_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_24_preset_hint_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_24_reqber_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_24_sel_hwtcl} {preset_24}
+set_instance_parameter_value phy {gen3_coeff_2_ber_meas_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_2_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_2_nxtber_less_hwtcl} {g3_coeff_2_nxtber_less}
+set_instance_parameter_value phy {gen3_coeff_2_nxtber_less_ptr_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_2_nxtber_more_hwtcl} {g3_coeff_2_nxtber_more}
+set_instance_parameter_value phy {gen3_coeff_2_nxtber_more_ptr_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_2_preset_hint_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_2_reqber_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_2_sel_hwtcl} {preset_2}
+set_instance_parameter_value phy {gen3_coeff_3_ber_meas_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_3_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_3_nxtber_less_hwtcl} {g3_coeff_3_nxtber_less}
+set_instance_parameter_value phy {gen3_coeff_3_nxtber_less_ptr_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_3_nxtber_more_hwtcl} {g3_coeff_3_nxtber_more}
+set_instance_parameter_value phy {gen3_coeff_3_nxtber_more_ptr_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_3_preset_hint_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_3_reqber_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_3_sel_hwtcl} {preset_3}
+set_instance_parameter_value phy {gen3_coeff_4_ber_meas_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_4_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_4_nxtber_less_hwtcl} {g3_coeff_4_nxtber_less}
+set_instance_parameter_value phy {gen3_coeff_4_nxtber_less_ptr_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_4_nxtber_more_hwtcl} {g3_coeff_4_nxtber_more}
+set_instance_parameter_value phy {gen3_coeff_4_nxtber_more_ptr_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_4_preset_hint_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_4_reqber_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_4_sel_hwtcl} {preset_4}
+set_instance_parameter_value phy {gen3_coeff_5_ber_meas_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_5_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_5_nxtber_less_hwtcl} {g3_coeff_5_nxtber_less}
+set_instance_parameter_value phy {gen3_coeff_5_nxtber_less_ptr_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_5_nxtber_more_hwtcl} {g3_coeff_5_nxtber_more}
+set_instance_parameter_value phy {gen3_coeff_5_nxtber_more_ptr_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_5_preset_hint_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_5_reqber_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_5_sel_hwtcl} {preset_5}
+set_instance_parameter_value phy {gen3_coeff_6_ber_meas_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_6_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_6_nxtber_less_hwtcl} {g3_coeff_6_nxtber_less}
+set_instance_parameter_value phy {gen3_coeff_6_nxtber_less_ptr_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_6_nxtber_more_hwtcl} {g3_coeff_6_nxtber_more}
+set_instance_parameter_value phy {gen3_coeff_6_nxtber_more_ptr_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_6_preset_hint_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_6_reqber_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_6_sel_hwtcl} {preset_6}
+set_instance_parameter_value phy {gen3_coeff_7_ber_meas_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_7_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_7_nxtber_less_hwtcl} {g3_coeff_7_nxtber_less}
+set_instance_parameter_value phy {gen3_coeff_7_nxtber_less_ptr_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_7_nxtber_more_hwtcl} {g3_coeff_7_nxtber_more}
+set_instance_parameter_value phy {gen3_coeff_7_nxtber_more_ptr_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_7_preset_hint_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_7_reqber_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_7_sel_hwtcl} {preset_7}
+set_instance_parameter_value phy {gen3_coeff_8_ber_meas_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_8_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_8_nxtber_less_hwtcl} {g3_coeff_8_nxtber_less}
+set_instance_parameter_value phy {gen3_coeff_8_nxtber_less_ptr_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_8_nxtber_more_hwtcl} {g3_coeff_8_nxtber_more}
+set_instance_parameter_value phy {gen3_coeff_8_nxtber_more_ptr_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_8_preset_hint_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_8_reqber_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_8_sel_hwtcl} {preset_8}
+set_instance_parameter_value phy {gen3_coeff_9_ber_meas_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_9_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_9_nxtber_less_hwtcl} {g3_coeff_9_nxtber_less}
+set_instance_parameter_value phy {gen3_coeff_9_nxtber_less_ptr_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_9_nxtber_more_hwtcl} {g3_coeff_9_nxtber_more}
+set_instance_parameter_value phy {gen3_coeff_9_nxtber_more_ptr_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_9_preset_hint_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_9_reqber_hwtcl} {0}
+set_instance_parameter_value phy {gen3_coeff_9_sel_hwtcl} {preset_9}
+set_instance_parameter_value phy {gen3_full_swing_hwtcl} {35}
+set_instance_parameter_value phy {gen3_low_freq_hwtcl} {0}
+set_instance_parameter_value phy {gen3_preset_coeff_10_hwtcl} {0}
+set_instance_parameter_value phy {gen3_preset_coeff_11_hwtcl} {0}
+set_instance_parameter_value phy {gen3_preset_coeff_1_hwtcl} {0}
+set_instance_parameter_value phy {gen3_preset_coeff_2_hwtcl} {0}
+set_instance_parameter_value phy {gen3_preset_coeff_3_hwtcl} {0}
+set_instance_parameter_value phy {gen3_preset_coeff_4_hwtcl} {0}
+set_instance_parameter_value phy {gen3_preset_coeff_5_hwtcl} {0}
+set_instance_parameter_value phy {gen3_preset_coeff_6_hwtcl} {0}
+set_instance_parameter_value phy {gen3_preset_coeff_7_hwtcl} {0}
+set_instance_parameter_value phy {gen3_preset_coeff_8_hwtcl} {0}
+set_instance_parameter_value phy {gen3_preset_coeff_9_hwtcl} {0}
 set_instance_parameter_value phy {gen3_rxfreqlock_counter_hwtcl} {0}
-set_instance_parameter_value phy {generate_sdc_for_qsys_design_example} {0}
 set_instance_parameter_value phy {hip_reconfig_hwtcl} {0}
 set_instance_parameter_value phy {hip_tag_checking_hwtcl} {1}
-set_instance_parameter_value phy {hot_plug_support_advanced_default_hwtcl} {0}
 set_instance_parameter_value phy {hwtcl_override_g2_txvod} {1}
+set_instance_parameter_value phy {hwtcl_override_g3rxcoef} {0}
+set_instance_parameter_value phy {hwtcl_override_g3txcoef} {0}
 set_instance_parameter_value phy {in_cvp_mode_hwtcl} {0}
-set_instance_parameter_value phy {indicator_advanced_default_hwtcl} {0}
-set_instance_parameter_value phy {internal_controller_hwtcl} {1}
 set_instance_parameter_value phy {io_window_addr_width_hwtcl} {0}
-set_instance_parameter_value phy {l01_entry_latency_advanced_default_hwtcl} {31}
-set_instance_parameter_value phy {l0_exit_latency_diffclock_advanced_default_hwtcl} {6}
-set_instance_parameter_value phy {l0_exit_latency_sameclock_advanced_default_hwtcl} {6}
-set_instance_parameter_value phy {l1_exit_latency_diffclock_advanced_default_hwtcl} {0}
-set_instance_parameter_value phy {l1_exit_latency_sameclock_advanced_default_hwtcl} {0}
-set_instance_parameter_value phy {l2_async_logic_advanced_default_hwtcl} {disable}
 set_instance_parameter_value phy {lane_mask_hwtcl} {x8}
-set_instance_parameter_value phy {low_priority_vc_advanced_default_hwtcl} {single_vc}
-set_instance_parameter_value phy {max_payload_size_hwtcl} {256}
+set_instance_parameter_value phy {low_latency_mode_hwtcl} {0}
+set_instance_parameter_value phy {max_payload_size_hwtcl} {128}
 set_instance_parameter_value phy {msi_64bit_addressing_capable_hwtcl} {true}
 set_instance_parameter_value phy {msi_masking_capable_hwtcl} {false}
 set_instance_parameter_value phy {msi_multi_message_capable_hwtcl} {32}
@@ -287,21 +443,16 @@ set_instance_parameter_value phy {msix_pba_offset_hwtcl} {0.0}
 set_instance_parameter_value phy {msix_table_bir_hwtcl} {0}
 set_instance_parameter_value phy {msix_table_offset_hwtcl} {0.0}
 set_instance_parameter_value phy {msix_table_size_hwtcl} {0}
-set_instance_parameter_value phy {no_command_completed_advanced_default_hwtcl} {false}
-set_instance_parameter_value phy {no_soft_reset_advanced_default_hwtcl} {false}
+set_instance_parameter_value phy {multiple_packets_per_cycle_hwtcl} {0}
 set_instance_parameter_value phy {override_rxbuffer_cred_preset} {0}
 set_instance_parameter_value phy {override_tbpartner_driver_setting_hwtcl} {0}
 set_instance_parameter_value phy {pcie_inspector_hwtcl} {0}
 set_instance_parameter_value phy {pcie_qsys} {1}
-set_instance_parameter_value phy {pclk_out_sel_advanced_default_hwtcl} {pclk}
-set_instance_parameter_value phy {pipex1_debug_sel_advanced_default_hwtcl} {disable}
+set_instance_parameter_value phy {pcie_spec_version_hwtcl} {3.0}
 set_instance_parameter_value phy {pll_refclk_freq_hwtcl} {100 MHz}
 set_instance_parameter_value phy {port_link_number_hwtcl} {1}
 set_instance_parameter_value phy {port_type_hwtcl} {Native endpoint}
 set_instance_parameter_value phy {prefetchable_mem_window_addr_width_hwtcl} {0}
-set_instance_parameter_value phy {register_pipe_signals_advanced_default_hwtcl} {true}
-set_instance_parameter_value phy {reserved_debug_advanced_default_hwtcl} {0}
-set_instance_parameter_value phy {retry_buffer_last_active_address_advanced_default_hwtcl} {255}
 set_instance_parameter_value phy {revision_id_hwtcl} {1}
 set_instance_parameter_value phy {rpre_emph_a_val_hwtcl} {9}
 set_instance_parameter_value phy {rpre_emph_b_val_hwtcl} {0}
@@ -313,14 +464,9 @@ set_instance_parameter_value phy {rvod_sel_b_val_hwtcl} {38}
 set_instance_parameter_value phy {rvod_sel_c_val_hwtcl} {38}
 set_instance_parameter_value phy {rvod_sel_d_val_hwtcl} {43}
 set_instance_parameter_value phy {rvod_sel_e_val_hwtcl} {15}
-set_instance_parameter_value phy {rx_cdc_almost_full_advanced_default_hwtcl} {12}
-set_instance_parameter_value phy {rx_l0s_count_idl_advanced_default_hwtcl} {0}
-set_instance_parameter_value phy {rxbuffer_rxreq_hwtcl} {Low}
-set_instance_parameter_value phy {sameclock_nfts_count_advanced_default_hwtcl} {255}
+set_instance_parameter_value phy {rxbuffer_rxreq_hwtcl} {Balanced}
 set_instance_parameter_value phy {serial_sim_hwtcl} {1}
 set_instance_parameter_value phy {set_pld_clk_x1_625MHz_hwtcl} {0}
-set_instance_parameter_value phy {set_pll_coreclkout_slack} {10}
-set_instance_parameter_value phy {skp_os_schedule_count_advanced_default_hwtcl} {0}
 set_instance_parameter_value phy {slot_number_hwtcl} {0}
 set_instance_parameter_value phy {slot_power_limit_hwtcl} {0}
 set_instance_parameter_value phy {slot_power_scale_hwtcl} {0}
@@ -334,111 +480,48 @@ set_instance_parameter_value phy {tlp_insp_trg_dw2_hwtcl} {0}
 set_instance_parameter_value phy {tlp_insp_trg_dw3_hwtcl} {0}
 set_instance_parameter_value phy {tlp_inspector_hwtcl} {0}
 set_instance_parameter_value phy {tlp_inspector_use_signal_probe_hwtcl} {0}
-set_instance_parameter_value phy {tx_cdc_almost_empty_advanced_default_hwtcl} {5}
-set_instance_parameter_value phy {tx_cdc_almost_full_advanced_default_hwtcl} {11}
+set_instance_parameter_value phy {track_rxfc_cplbuf_ovf_hwtcl} {0}
 set_instance_parameter_value phy {use_aer_hwtcl} {0}
 set_instance_parameter_value phy {use_ast_parity} {0}
 set_instance_parameter_value phy {use_atx_pll_hwtcl} {0}
+set_instance_parameter_value phy {use_config_bypass_hwtcl} {0}
 set_instance_parameter_value phy {use_crc_forwarding_hwtcl} {0}
 set_instance_parameter_value phy {use_cvp_update_core_pof_hwtcl} {0}
+set_instance_parameter_value phy {use_pci_ext_hwtcl} {0}
+set_instance_parameter_value phy {use_pcie_ext_hwtcl} {0}
 set_instance_parameter_value phy {use_rx_st_be_hwtcl} {0}
-set_instance_parameter_value phy {use_tl_cfg_sync_advanced_default_hwtcl} {1}
-set_instance_parameter_value phy {vc0_clk_enable_advanced_default_hwtcl} {true}
+set_instance_parameter_value phy {use_tx_cons_cred_sel_hwtcl} {1}
+set_instance_parameter_value phy {user_id_hwtcl} {0}
 set_instance_parameter_value phy {vendor_id_hwtcl} {61888}
-set_instance_parameter_value phy {vsec_id_hwtcl} {40960}
+set_instance_parameter_value phy {vsec_id_hwtcl} {4466}
 set_instance_parameter_value phy {vsec_rev_hwtcl} {0}
 
-add_instance read_mem altera_avalon_onchip_memory2 19.1
-set_instance_parameter_value read_mem {allowInSystemMemoryContentEditor} {0}
-set_instance_parameter_value read_mem {blockType} {AUTO}
-set_instance_parameter_value read_mem {copyInitFile} {0}
-set_instance_parameter_value read_mem {dataWidth} {256}
-set_instance_parameter_value read_mem {dataWidth2} {32}
-set_instance_parameter_value read_mem {dualPort} {1}
-set_instance_parameter_value read_mem {ecc_enabled} {0}
-set_instance_parameter_value read_mem {enPRInitMode} {0}
-set_instance_parameter_value read_mem {enableDiffWidth} {0}
-set_instance_parameter_value read_mem {initMemContent} {0}
-set_instance_parameter_value read_mem {initializationFileName} {onchip_mem.hex}
-set_instance_parameter_value read_mem {instanceID} {NONE}
-set_instance_parameter_value read_mem {memorySize} {1048576.0}
-set_instance_parameter_value read_mem {readDuringWriteMode} {DONT_CARE}
-set_instance_parameter_value read_mem {resetrequest_enabled} {0}
-set_instance_parameter_value read_mem {simAllowMRAMContentsFile} {0}
-set_instance_parameter_value read_mem {simMemInitOnlyFilename} {0}
-set_instance_parameter_value read_mem {singleClockOperation} {0}
-set_instance_parameter_value read_mem {slave1Latency} {1}
-set_instance_parameter_value read_mem {slave2Latency} {1}
-set_instance_parameter_value read_mem {useNonDefaultInitFile} {0}
-set_instance_parameter_value read_mem {useShallowMemBlocks} {0}
-set_instance_parameter_value read_mem {writable} {1}
-
-add_instance read_mem_cb altera_clock_bridge 19.1
-set_instance_parameter_value read_mem_cb {EXPLICIT_CLOCK_RATE} {0.0}
-set_instance_parameter_value read_mem_cb {NUM_CLOCK_OUTPUTS} {1}
-
-add_instance read_s2_pipeline altera_avalon_mm_bridge 19.1
-set_instance_parameter_value read_s2_pipeline {ADDRESS_UNITS} {SYMBOLS}
-set_instance_parameter_value read_s2_pipeline {ADDRESS_WIDTH} {10}
-set_instance_parameter_value read_s2_pipeline {DATA_WIDTH} {256}
-set_instance_parameter_value read_s2_pipeline {LINEWRAPBURSTS} {0}
-set_instance_parameter_value read_s2_pipeline {MAX_BURST_SIZE} {32}
-set_instance_parameter_value read_s2_pipeline {MAX_PENDING_RESPONSES} {4}
-set_instance_parameter_value read_s2_pipeline {PIPELINE_COMMAND} {1}
-set_instance_parameter_value read_s2_pipeline {PIPELINE_RESPONSE} {1}
-set_instance_parameter_value read_s2_pipeline {SYMBOL_WIDTH} {8}
-set_instance_parameter_value read_s2_pipeline {USE_AUTO_ADDRESS_WIDTH} {1}
-set_instance_parameter_value read_s2_pipeline {USE_RESPONSE} {0}
-
-add_instance write_mem altera_avalon_onchip_memory2 19.1
-set_instance_parameter_value write_mem {allowInSystemMemoryContentEditor} {0}
-set_instance_parameter_value write_mem {blockType} {AUTO}
-set_instance_parameter_value write_mem {copyInitFile} {0}
-set_instance_parameter_value write_mem {dataWidth} {256}
-set_instance_parameter_value write_mem {dataWidth2} {32}
-set_instance_parameter_value write_mem {dualPort} {1}
-set_instance_parameter_value write_mem {ecc_enabled} {0}
-set_instance_parameter_value write_mem {enPRInitMode} {0}
-set_instance_parameter_value write_mem {enableDiffWidth} {0}
-set_instance_parameter_value write_mem {initMemContent} {0}
-set_instance_parameter_value write_mem {initializationFileName} {onchip_mem.hex}
-set_instance_parameter_value write_mem {instanceID} {NONE}
-set_instance_parameter_value write_mem {memorySize} {1048576.0}
-set_instance_parameter_value write_mem {readDuringWriteMode} {DONT_CARE}
-set_instance_parameter_value write_mem {resetrequest_enabled} {0}
-set_instance_parameter_value write_mem {simAllowMRAMContentsFile} {0}
-set_instance_parameter_value write_mem {simMemInitOnlyFilename} {0}
-set_instance_parameter_value write_mem {singleClockOperation} {0}
-set_instance_parameter_value write_mem {slave1Latency} {1}
-set_instance_parameter_value write_mem {slave2Latency} {1}
-set_instance_parameter_value write_mem {useNonDefaultInitFile} {0}
-set_instance_parameter_value write_mem {useShallowMemBlocks} {0}
-set_instance_parameter_value write_mem {writable} {1}
-
-add_instance write_mem_cb altera_clock_bridge 19.1
-set_instance_parameter_value write_mem_cb {EXPLICIT_CLOCK_RATE} {0.0}
-set_instance_parameter_value write_mem_cb {NUM_CLOCK_OUTPUTS} {1}
-
-add_instance write_s2_pipeline altera_avalon_mm_bridge 19.1
-set_instance_parameter_value write_s2_pipeline {ADDRESS_UNITS} {SYMBOLS}
-set_instance_parameter_value write_s2_pipeline {ADDRESS_WIDTH} {10}
-set_instance_parameter_value write_s2_pipeline {DATA_WIDTH} {256}
-set_instance_parameter_value write_s2_pipeline {LINEWRAPBURSTS} {0}
-set_instance_parameter_value write_s2_pipeline {MAX_BURST_SIZE} {32}
-set_instance_parameter_value write_s2_pipeline {MAX_PENDING_RESPONSES} {4}
-set_instance_parameter_value write_s2_pipeline {PIPELINE_COMMAND} {1}
-set_instance_parameter_value write_s2_pipeline {PIPELINE_RESPONSE} {1}
-set_instance_parameter_value write_s2_pipeline {SYMBOL_WIDTH} {8}
-set_instance_parameter_value write_s2_pipeline {USE_AUTO_ADDRESS_WIDTH} {1}
-set_instance_parameter_value write_s2_pipeline {USE_RESPONSE} {0}
+add_instance xcvr_reconfig alt_xcvr_reconfig 19.1
+set_instance_parameter_value xcvr_reconfig {ber_en} {0}
+set_instance_parameter_value xcvr_reconfig {enable_adce} {0}
+set_instance_parameter_value xcvr_reconfig {enable_analog} {1}
+set_instance_parameter_value xcvr_reconfig {enable_dcd} {0}
+set_instance_parameter_value xcvr_reconfig {enable_dcd_power_up} {1}
+set_instance_parameter_value xcvr_reconfig {enable_dfe} {0}
+set_instance_parameter_value xcvr_reconfig {enable_eyemon} {0}
+set_instance_parameter_value xcvr_reconfig {enable_mif} {0}
+set_instance_parameter_value xcvr_reconfig {enable_offset} {1}
+set_instance_parameter_value xcvr_reconfig {gui_cal_status_port} {0}
+set_instance_parameter_value xcvr_reconfig {gui_enable_pll} {0}
+set_instance_parameter_value xcvr_reconfig {gui_split_sizes} {}
+set_instance_parameter_value xcvr_reconfig {number_of_reconfig_interfaces} {11}
 
 # exported interfaces
-add_interface bar2_clk clock sink
-set_interface_property bar2_clk EXPORT_OF bar2_cdc.m0_clk
-add_interface bar2_mm avalon master
-set_interface_property bar2_mm EXPORT_OF bar2_cdc.m0
-add_interface bar2_reset reset sink
-set_interface_property bar2_reset EXPORT_OF bar2_cdc.m0_reset
+add_interface bar0_mm avalon master
+set_interface_property bar0_mm EXPORT_OF bar0_cdc.m0
+add_interface csr_mm avalon slave
+set_interface_property csr_mm EXPORT_OF csr_bridge.s0
+add_interface data_clk clock source
+set_interface_property data_clk EXPORT_OF pcie_clk.out_clk
+add_interface data_tx avalon_streaming sink
+set_interface_property data_tx EXPORT_OF pcie_data.data_tx
+add_interface irq interrupt receiver
+set_interface_property irq EXPORT_OF msi_intr.irq
 add_interface mgmt_clk clock sink
 set_interface_property mgmt_clk EXPORT_OF mgmt_clk.in_clk
 add_interface mgmt_rst reset sink
@@ -449,72 +532,91 @@ add_interface pcie_reset_pin conduit end
 set_interface_property pcie_reset_pin EXPORT_OF pcie_reset.pin
 add_interface phy_serial conduit end
 set_interface_property phy_serial EXPORT_OF phy.hip_serial
-add_interface read_mem_clk clock sink
-set_interface_property read_mem_clk EXPORT_OF read_mem_cb.in_clk
-add_interface read_mem_mm avalon slave
-set_interface_property read_mem_mm EXPORT_OF read_s2_pipeline.s0
-add_interface write_mem_clk clock sink
-set_interface_property write_mem_clk EXPORT_OF write_mem_cb.in_clk
-add_interface write_mem_mm avalon slave
-set_interface_property write_mem_mm EXPORT_OF write_s2_pipeline.s0
 
 # connections and connection parameters
-add_connection alt_xcvr_reconfig_0.reconfig_to_xcvr phy.reconfig_to_xcvr
-set_connection_parameter_value alt_xcvr_reconfig_0.reconfig_to_xcvr/phy.reconfig_to_xcvr endPort {}
-set_connection_parameter_value alt_xcvr_reconfig_0.reconfig_to_xcvr/phy.reconfig_to_xcvr endPortLSB {0}
-set_connection_parameter_value alt_xcvr_reconfig_0.reconfig_to_xcvr/phy.reconfig_to_xcvr startPort {}
-set_connection_parameter_value alt_xcvr_reconfig_0.reconfig_to_xcvr/phy.reconfig_to_xcvr startPortLSB {0}
-set_connection_parameter_value alt_xcvr_reconfig_0.reconfig_to_xcvr/phy.reconfig_to_xcvr width {0}
+add_connection csr_bridge.m0 pcie_data.csr
+set_connection_parameter_value csr_bridge.m0/pcie_data.csr arbitrationPriority {1}
+set_connection_parameter_value csr_bridge.m0/pcie_data.csr baseAddress {0x0000}
+set_connection_parameter_value csr_bridge.m0/pcie_data.csr defaultConnection {0}
 
-add_connection dma_rd_pipeline.m0 read_mem.s1
-set_connection_parameter_value dma_rd_pipeline.m0/read_mem.s1 arbitrationPriority {1}
-set_connection_parameter_value dma_rd_pipeline.m0/read_mem.s1 baseAddress {0x00800000}
-set_connection_parameter_value dma_rd_pipeline.m0/read_mem.s1 defaultConnection {0}
+add_connection mem_req_fifo.out pcie_avalon.mem_access_req
 
-add_connection dma_wr_pipeline.m0 write_mem.s1
-set_connection_parameter_value dma_wr_pipeline.m0/write_mem.s1 arbitrationPriority {1}
-set_connection_parameter_value dma_wr_pipeline.m0/write_mem.s1 baseAddress {0x00c00000}
-set_connection_parameter_value dma_wr_pipeline.m0/write_mem.s1 defaultConnection {0}
+add_connection mem_resp_fifo.out pcie_data.mem_access_resp
 
-add_connection mgmt_clk.out_clk alt_xcvr_reconfig_0.mgmt_clk_clk
+add_connection mgmt_clk.out_clk bar0_cdc.m0_clk
+
+add_connection mgmt_clk.out_clk csr_bridge.s0_clk
 
 add_connection mgmt_clk.out_clk mgmt_rst.clk
 
-add_connection mgmt_clk.out_clk pcie_reconfig_driver_0.reconfig_xcvr_clk
+add_connection mgmt_clk.out_clk pcie_reconfig.pld_clk
+
+add_connection mgmt_clk.out_clk pcie_reconfig.reconfig_xcvr_clk
 
 add_connection mgmt_clk.out_clk pcie_reset.clk
 
-add_connection mgmt_rst.out_reset alt_xcvr_reconfig_0.mgmt_rst_reset
+add_connection mgmt_clk.out_clk xcvr_reconfig.mgmt_clk_clk
 
-add_connection mgmt_rst.out_reset dma_descr.reset2
+add_connection mgmt_rst.out_reset bar0_cdc.m0_reset
 
-add_connection mgmt_rst.out_reset pcie_reconfig_driver_0.reconfig_xcvr_rst
+add_connection mgmt_rst.out_reset bar0_cdc.s0_reset
+
+add_connection mgmt_rst.out_reset csr_bridge.m0_reset
+
+add_connection mgmt_rst.out_reset csr_bridge.s0_reset
+
+add_connection mgmt_rst.out_reset mem_req_fifo.clk_reset
+
+add_connection mgmt_rst.out_reset mem_resp_fifo.clk_reset
+
+add_connection mgmt_rst.out_reset msi_intr.reset
+
+add_connection mgmt_rst.out_reset pcie_avalon.reset
+
+add_connection mgmt_rst.out_reset pcie_data.reset
+
+add_connection mgmt_rst.out_reset pcie_reconfig.reconfig_xcvr_rst
 
 add_connection mgmt_rst.out_reset pcie_reset.reset
 
-add_connection mgmt_rst.out_reset read_mem.reset1
+add_connection mgmt_rst.out_reset xcvr_reconfig.mgmt_rst_reset
 
-add_connection mgmt_rst.out_reset read_mem.reset2
+add_connection pcie_avalon.mem_access_resp mem_resp_fifo.in
 
-add_connection mgmt_rst.out_reset read_s2_pipeline.reset
+add_connection pcie_avalon.mm bar0_cdc.s0
+set_connection_parameter_value pcie_avalon.mm/bar0_cdc.s0 arbitrationPriority {1}
+set_connection_parameter_value pcie_avalon.mm/bar0_cdc.s0 baseAddress {0x0000}
+set_connection_parameter_value pcie_avalon.mm/bar0_cdc.s0 defaultConnection {0}
 
-add_connection mgmt_rst.out_reset write_mem.reset1
+add_connection pcie_data.config_tl phy.config_tl
+set_connection_parameter_value pcie_data.config_tl/phy.config_tl endPort {}
+set_connection_parameter_value pcie_data.config_tl/phy.config_tl endPortLSB {0}
+set_connection_parameter_value pcie_data.config_tl/phy.config_tl startPort {}
+set_connection_parameter_value pcie_data.config_tl/phy.config_tl startPortLSB {0}
+set_connection_parameter_value pcie_data.config_tl/phy.config_tl width {0}
 
-add_connection mgmt_rst.out_reset write_mem.reset2
+add_connection pcie_data.mem_access_req mem_req_fifo.in
 
-add_connection mgmt_rst.out_reset write_s2_pipeline.reset
+add_connection pcie_data.tx_st phy.tx_st
 
-add_connection pcie_reconfig_driver_0.reconfig_busy alt_xcvr_reconfig_0.reconfig_busy
-set_connection_parameter_value pcie_reconfig_driver_0.reconfig_busy/alt_xcvr_reconfig_0.reconfig_busy endPort {}
-set_connection_parameter_value pcie_reconfig_driver_0.reconfig_busy/alt_xcvr_reconfig_0.reconfig_busy endPortLSB {0}
-set_connection_parameter_value pcie_reconfig_driver_0.reconfig_busy/alt_xcvr_reconfig_0.reconfig_busy startPort {}
-set_connection_parameter_value pcie_reconfig_driver_0.reconfig_busy/alt_xcvr_reconfig_0.reconfig_busy startPortLSB {0}
-set_connection_parameter_value pcie_reconfig_driver_0.reconfig_busy/alt_xcvr_reconfig_0.reconfig_busy width {0}
+add_connection pcie_reconfig.hip_status_drv phy.hip_status
+set_connection_parameter_value pcie_reconfig.hip_status_drv/phy.hip_status endPort {}
+set_connection_parameter_value pcie_reconfig.hip_status_drv/phy.hip_status endPortLSB {0}
+set_connection_parameter_value pcie_reconfig.hip_status_drv/phy.hip_status startPort {}
+set_connection_parameter_value pcie_reconfig.hip_status_drv/phy.hip_status startPortLSB {0}
+set_connection_parameter_value pcie_reconfig.hip_status_drv/phy.hip_status width {0}
 
-add_connection pcie_reconfig_driver_0.reconfig_mgmt alt_xcvr_reconfig_0.reconfig_mgmt
-set_connection_parameter_value pcie_reconfig_driver_0.reconfig_mgmt/alt_xcvr_reconfig_0.reconfig_mgmt arbitrationPriority {1}
-set_connection_parameter_value pcie_reconfig_driver_0.reconfig_mgmt/alt_xcvr_reconfig_0.reconfig_mgmt baseAddress {0x0000}
-set_connection_parameter_value pcie_reconfig_driver_0.reconfig_mgmt/alt_xcvr_reconfig_0.reconfig_mgmt defaultConnection {0}
+add_connection pcie_reconfig.reconfig_busy xcvr_reconfig.reconfig_busy
+set_connection_parameter_value pcie_reconfig.reconfig_busy/xcvr_reconfig.reconfig_busy endPort {}
+set_connection_parameter_value pcie_reconfig.reconfig_busy/xcvr_reconfig.reconfig_busy endPortLSB {0}
+set_connection_parameter_value pcie_reconfig.reconfig_busy/xcvr_reconfig.reconfig_busy startPort {}
+set_connection_parameter_value pcie_reconfig.reconfig_busy/xcvr_reconfig.reconfig_busy startPortLSB {0}
+set_connection_parameter_value pcie_reconfig.reconfig_busy/xcvr_reconfig.reconfig_busy width {0}
+
+add_connection pcie_reconfig.reconfig_mgmt xcvr_reconfig.reconfig_mgmt
+set_connection_parameter_value pcie_reconfig.reconfig_mgmt/xcvr_reconfig.reconfig_mgmt arbitrationPriority {1}
+set_connection_parameter_value pcie_reconfig.reconfig_mgmt/xcvr_reconfig.reconfig_mgmt baseAddress {0x0000}
+set_connection_parameter_value pcie_reconfig.reconfig_mgmt/xcvr_reconfig.reconfig_mgmt defaultConnection {0}
 
 add_connection pcie_reset.npor phy.npor
 set_connection_parameter_value pcie_reset.npor/phy.npor endPort {}
@@ -523,118 +625,60 @@ set_connection_parameter_value pcie_reset.npor/phy.npor startPort {}
 set_connection_parameter_value pcie_reset.npor/phy.npor startPortLSB {0}
 set_connection_parameter_value pcie_reset.npor/phy.npor width {0}
 
-add_connection phy.Rxm_BAR2 bar2_cdc.s0
-set_connection_parameter_value phy.Rxm_BAR2/bar2_cdc.s0 arbitrationPriority {1}
-set_connection_parameter_value phy.Rxm_BAR2/bar2_cdc.s0 baseAddress {0x0000}
-set_connection_parameter_value phy.Rxm_BAR2/bar2_cdc.s0 defaultConnection {0}
+add_connection phy.coreclkout_hip bar0_cdc.s0_clk
 
-add_connection phy.Rxm_BAR3 dma_descr.s2
-set_connection_parameter_value phy.Rxm_BAR3/dma_descr.s2 arbitrationPriority {1}
-set_connection_parameter_value phy.Rxm_BAR3/dma_descr.s2 baseAddress {0x0f000000}
-set_connection_parameter_value phy.Rxm_BAR3/dma_descr.s2 defaultConnection {0}
+add_connection phy.coreclkout_hip csr_bridge.m0_clk
 
-add_connection phy.coreclkout bar2_cdc.s0_clk
+add_connection phy.coreclkout_hip mem_req_fifo.clk
 
-add_connection phy.coreclkout dma_descr.clk1
+add_connection phy.coreclkout_hip mem_resp_fifo.clk
 
-add_connection phy.coreclkout dma_descr.clk2
+add_connection phy.coreclkout_hip msi_intr.clk
 
-add_connection phy.coreclkout dma_rd_pipeline.clk
+add_connection phy.coreclkout_hip pcie_avalon.clk
 
-add_connection phy.coreclkout dma_wr_pipeline.clk
+add_connection phy.coreclkout_hip pcie_clk.in_clk
 
-add_connection phy.coreclkout pcie_reconfig_driver_0.pld_clk
+add_connection phy.coreclkout_hip pcie_data.clk
 
-add_connection phy.coreclkout read_mem.clk1
+add_connection phy.coreclkout_hip phy.pld_clk
 
-add_connection phy.coreclkout write_mem.clk1
+add_connection phy.hip_currentspeed pcie_reconfig.hip_currentspeed
+set_connection_parameter_value phy.hip_currentspeed/pcie_reconfig.hip_currentspeed endPort {}
+set_connection_parameter_value phy.hip_currentspeed/pcie_reconfig.hip_currentspeed endPortLSB {0}
+set_connection_parameter_value phy.hip_currentspeed/pcie_reconfig.hip_currentspeed startPort {}
+set_connection_parameter_value phy.hip_currentspeed/pcie_reconfig.hip_currentspeed startPortLSB {0}
+set_connection_parameter_value phy.hip_currentspeed/pcie_reconfig.hip_currentspeed width {0}
 
-add_connection phy.dma_rd_master dma_descr.s2
-set_connection_parameter_value phy.dma_rd_master/dma_descr.s2 arbitrationPriority {1}
-set_connection_parameter_value phy.dma_rd_master/dma_descr.s2 baseAddress {0x0f000000}
-set_connection_parameter_value phy.dma_rd_master/dma_descr.s2 defaultConnection {0}
+add_connection phy.int_msi msi_intr.int_msi
+set_connection_parameter_value phy.int_msi/msi_intr.int_msi endPort {}
+set_connection_parameter_value phy.int_msi/msi_intr.int_msi endPortLSB {0}
+set_connection_parameter_value phy.int_msi/msi_intr.int_msi startPort {}
+set_connection_parameter_value phy.int_msi/msi_intr.int_msi startPortLSB {0}
+set_connection_parameter_value phy.int_msi/msi_intr.int_msi width {0}
 
-add_connection phy.dma_rd_master dma_rd_pipeline.s0
-set_connection_parameter_value phy.dma_rd_master/dma_rd_pipeline.s0 arbitrationPriority {1}
-set_connection_parameter_value phy.dma_rd_master/dma_rd_pipeline.s0 baseAddress {0x0000}
-set_connection_parameter_value phy.dma_rd_master/dma_rd_pipeline.s0 defaultConnection {0}
+add_connection phy.rx_bar_be pcie_data.rx_bar_be
+set_connection_parameter_value phy.rx_bar_be/pcie_data.rx_bar_be endPort {}
+set_connection_parameter_value phy.rx_bar_be/pcie_data.rx_bar_be endPortLSB {0}
+set_connection_parameter_value phy.rx_bar_be/pcie_data.rx_bar_be startPort {}
+set_connection_parameter_value phy.rx_bar_be/pcie_data.rx_bar_be startPortLSB {0}
+set_connection_parameter_value phy.rx_bar_be/pcie_data.rx_bar_be width {0}
 
-add_connection phy.dma_rd_master phy.rd_dts_slave
-set_connection_parameter_value phy.dma_rd_master/phy.rd_dts_slave arbitrationPriority {1}
-set_connection_parameter_value phy.dma_rd_master/phy.rd_dts_slave baseAddress {0x01002000}
-set_connection_parameter_value phy.dma_rd_master/phy.rd_dts_slave defaultConnection {0}
+add_connection phy.rx_st pcie_data.rx_st
 
-add_connection phy.dma_rd_master phy.wr_dts_slave
-set_connection_parameter_value phy.dma_rd_master/phy.wr_dts_slave arbitrationPriority {1}
-set_connection_parameter_value phy.dma_rd_master/phy.wr_dts_slave baseAddress {0x01000000}
-set_connection_parameter_value phy.dma_rd_master/phy.wr_dts_slave defaultConnection {0}
+add_connection xcvr_reconfig.reconfig_from_xcvr phy.reconfig_from_xcvr
+set_connection_parameter_value xcvr_reconfig.reconfig_from_xcvr/phy.reconfig_from_xcvr endPort {}
+set_connection_parameter_value xcvr_reconfig.reconfig_from_xcvr/phy.reconfig_from_xcvr endPortLSB {0}
+set_connection_parameter_value xcvr_reconfig.reconfig_from_xcvr/phy.reconfig_from_xcvr startPort {}
+set_connection_parameter_value xcvr_reconfig.reconfig_from_xcvr/phy.reconfig_from_xcvr startPortLSB {0}
+set_connection_parameter_value xcvr_reconfig.reconfig_from_xcvr/phy.reconfig_from_xcvr width {0}
 
-add_connection phy.dma_wr_master dma_descr.s1
-set_connection_parameter_value phy.dma_wr_master/dma_descr.s1 arbitrationPriority {1}
-set_connection_parameter_value phy.dma_wr_master/dma_descr.s1 baseAddress {0x0f000000}
-set_connection_parameter_value phy.dma_wr_master/dma_descr.s1 defaultConnection {0}
-
-add_connection phy.dma_wr_master dma_wr_pipeline.s0
-set_connection_parameter_value phy.dma_wr_master/dma_wr_pipeline.s0 arbitrationPriority {1}
-set_connection_parameter_value phy.dma_wr_master/dma_wr_pipeline.s0 baseAddress {0x0000}
-set_connection_parameter_value phy.dma_wr_master/dma_wr_pipeline.s0 defaultConnection {0}
-
-add_connection phy.hip_currentspeed pcie_reconfig_driver_0.hip_currentspeed
-set_connection_parameter_value phy.hip_currentspeed/pcie_reconfig_driver_0.hip_currentspeed endPort {}
-set_connection_parameter_value phy.hip_currentspeed/pcie_reconfig_driver_0.hip_currentspeed endPortLSB {0}
-set_connection_parameter_value phy.hip_currentspeed/pcie_reconfig_driver_0.hip_currentspeed startPort {}
-set_connection_parameter_value phy.hip_currentspeed/pcie_reconfig_driver_0.hip_currentspeed startPortLSB {0}
-set_connection_parameter_value phy.hip_currentspeed/pcie_reconfig_driver_0.hip_currentspeed width {0}
-
-add_connection phy.hip_status pcie_reconfig_driver_0.hip_status_drv
-set_connection_parameter_value phy.hip_status/pcie_reconfig_driver_0.hip_status_drv endPort {}
-set_connection_parameter_value phy.hip_status/pcie_reconfig_driver_0.hip_status_drv endPortLSB {0}
-set_connection_parameter_value phy.hip_status/pcie_reconfig_driver_0.hip_status_drv startPort {}
-set_connection_parameter_value phy.hip_status/pcie_reconfig_driver_0.hip_status_drv startPortLSB {0}
-set_connection_parameter_value phy.hip_status/pcie_reconfig_driver_0.hip_status_drv width {0}
-
-add_connection phy.nreset_status bar2_cdc.s0_reset
-
-add_connection phy.nreset_status dma_descr.reset1
-
-add_connection phy.nreset_status dma_rd_pipeline.reset
-
-add_connection phy.nreset_status dma_wr_pipeline.reset
-
-add_connection phy.rd_dcm_master phy.Txs
-set_connection_parameter_value phy.rd_dcm_master/phy.Txs arbitrationPriority {1}
-set_connection_parameter_value phy.rd_dcm_master/phy.Txs baseAddress {0x0000}
-set_connection_parameter_value phy.rd_dcm_master/phy.Txs defaultConnection {0}
-
-add_connection phy.reconfig_from_xcvr alt_xcvr_reconfig_0.reconfig_from_xcvr
-set_connection_parameter_value phy.reconfig_from_xcvr/alt_xcvr_reconfig_0.reconfig_from_xcvr endPort {}
-set_connection_parameter_value phy.reconfig_from_xcvr/alt_xcvr_reconfig_0.reconfig_from_xcvr endPortLSB {0}
-set_connection_parameter_value phy.reconfig_from_xcvr/alt_xcvr_reconfig_0.reconfig_from_xcvr startPort {}
-set_connection_parameter_value phy.reconfig_from_xcvr/alt_xcvr_reconfig_0.reconfig_from_xcvr startPortLSB {0}
-set_connection_parameter_value phy.reconfig_from_xcvr/alt_xcvr_reconfig_0.reconfig_from_xcvr width {0}
-
-add_connection phy.wr_dcm_master phy.Txs
-set_connection_parameter_value phy.wr_dcm_master/phy.Txs arbitrationPriority {1}
-set_connection_parameter_value phy.wr_dcm_master/phy.Txs baseAddress {0x0000}
-set_connection_parameter_value phy.wr_dcm_master/phy.Txs defaultConnection {0}
-
-add_connection read_mem_cb.out_clk read_mem.clk2
-
-add_connection read_mem_cb.out_clk read_s2_pipeline.clk
-
-add_connection read_s2_pipeline.m0 read_mem.s2
-set_connection_parameter_value read_s2_pipeline.m0/read_mem.s2 arbitrationPriority {1}
-set_connection_parameter_value read_s2_pipeline.m0/read_mem.s2 baseAddress {0x0000}
-set_connection_parameter_value read_s2_pipeline.m0/read_mem.s2 defaultConnection {0}
-
-add_connection write_mem_cb.out_clk write_mem.clk2
-
-add_connection write_mem_cb.out_clk write_s2_pipeline.clk
-
-add_connection write_s2_pipeline.m0 write_mem.s2
-set_connection_parameter_value write_s2_pipeline.m0/write_mem.s2 arbitrationPriority {1}
-set_connection_parameter_value write_s2_pipeline.m0/write_mem.s2 baseAddress {0x0000}
-set_connection_parameter_value write_s2_pipeline.m0/write_mem.s2 defaultConnection {0}
+add_connection xcvr_reconfig.reconfig_to_xcvr phy.reconfig_to_xcvr
+set_connection_parameter_value xcvr_reconfig.reconfig_to_xcvr/phy.reconfig_to_xcvr endPort {}
+set_connection_parameter_value xcvr_reconfig.reconfig_to_xcvr/phy.reconfig_to_xcvr endPortLSB {0}
+set_connection_parameter_value xcvr_reconfig.reconfig_to_xcvr/phy.reconfig_to_xcvr startPort {}
+set_connection_parameter_value xcvr_reconfig.reconfig_to_xcvr/phy.reconfig_to_xcvr startPortLSB {0}
+set_connection_parameter_value xcvr_reconfig.reconfig_to_xcvr/phy.reconfig_to_xcvr width {0}
 
 # interconnect requirements
 set_interconnect_requirement {$system} {qsys_mm.clockCrossingAdapter} {HANDSHAKE}

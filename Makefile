@@ -31,7 +31,7 @@ fejkon.sof: ip/altera_fc_phy/fc_phy.qip fejkon.qsys de5net.sdc de5net.tcl $(wild
 
 # Temporarily program over JTAG
 program: fejkon.sof
-	${QPATH}/bin/quartus_pgm -m jtag -c 1 -o "p;fejkon.sof"
+	$(QPATH)/bin/quartus_pgm -m jtag -c 1 -o "p;fejkon.sof"
 
 # Permanently upload to DE5-Net flash
 flash: fejkon.sof
@@ -45,6 +45,7 @@ config.tcl: .config config.py
 	python3 config.py > config.tcl
 
 fejkon.qsys: fejkon.tcl fejkon_apply_config.tcl fejkon_sfp.qsys fejkon_pcie.qsys config.tcl
+	touch ip/fejkon_identity/version.sv
 	$(QPATH)/sopc_builder/bin/qsys-script --script=fejkon_apply_config.tcl
 
 %.qsys: %.tcl

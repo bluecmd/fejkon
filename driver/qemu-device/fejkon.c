@@ -42,7 +42,7 @@
 
 typedef struct {
   PCIDevice pdev;
-  MemoryRegion bar2;
+  MemoryRegion bar0;
   struct avalon_i2c sfp1_i2c;
   struct avalon_i2c sfp2_i2c;
 } FejkonState;
@@ -77,7 +77,7 @@ static uint32_t fejkon_temperature(void)
   return (1 << 8) | ((128 + local) & 0xff);
 }
 
-static uint64_t fejkon_bar2_read(void *opaque, hwaddr addr, unsigned size)
+static uint64_t fejkon_bar0_read(void *opaque, hwaddr addr, unsigned size)
 {
   FejkonState *card = opaque;
   uint64_t val = 0ULL;
@@ -121,14 +121,14 @@ static uint64_t fejkon_bar2_read(void *opaque, hwaddr addr, unsigned size)
       val = 0x3;
       break;
     default:
-      printf("fejkon: Read from unknown bar2 space: 0x%lx\n", addr);
+      printf("fejkon: Read from unknown bar0 space: 0x%lx\n", addr);
       break;
   }
 
   return val;
 }
 
-static void fejkon_bar2_write(void *opaque, hwaddr addr, uint64_t val,
+static void fejkon_bar0_write(void *opaque, hwaddr addr, uint64_t val,
     unsigned size)
 {
   FejkonState *card = opaque;
@@ -148,12 +148,12 @@ static void fejkon_bar2_write(void *opaque, hwaddr addr, uint64_t val,
   }
 
   /* TODO */
-  printf("fejkon: Write to unknown bar2 space: 0x%lx\n", addr);
+  printf("fejkon: Write to unknown bar0 space: 0x%lx\n", addr);
 }
 
-static const MemoryRegionOps fejkon_bar2_ops = {
-  .read = fejkon_bar2_read,
-  .write = fejkon_bar2_write,
+static const MemoryRegionOps fejkon_bar0_ops = {
+  .read = fejkon_bar0_read,
+  .write = fejkon_bar0_write,
   .endianness = DEVICE_NATIVE_ENDIAN,
   .valid = {
     .min_access_size = 4,
@@ -177,9 +177,9 @@ static void pci_fejkon_realize(PCIDevice *pdev, Error **errp)
     return;
   }
 
-  memory_region_init_io(&card->bar2, OBJECT(card), &fejkon_bar2_ops, card,
-      "fejkon-bar2", 512 * KiB);
-  pci_register_bar(pdev, 2, PCI_BASE_ADDRESS_SPACE_MEMORY, &card->bar2);
+  memory_region_init_io(&card->bar0, OBJECT(card), &fejkon_bar0_ops, card,
+      "fejkon-bar0", 512 * KiB);
+  pci_register_bar(pdev, 0, PCI_BASE_ADDRESS_SPACE_MEMORY, &card->bar0);
 
   card->sfp1_i2c.name = "sfp1";
   card->sfp1_i2c.intr = sfp1_intr;

@@ -174,6 +174,7 @@ static void pci_fejkon_realize(PCIDevice *pdev, Error **errp)
   pci_config_set_interrupt_pin(pci_conf, 1);
 
   if (msi_init(pdev, 0, 32, true, false, errp)) {
+    hw_error("Failed to initialize MSI interrupts");
     return;
   }
 
@@ -191,6 +192,13 @@ static void pci_fejkon_realize(PCIDevice *pdev, Error **errp)
   card->sfp2_i2c.intr = sfp2_intr;
   card->sfp2_i2c.extra = card;
   memcpy(&card->sfp2_i2c.data[0], &card->sfp1_i2c.data[0], 256);
+
+  if (pcie_endpoint_cap_init(pdev, 0x80) < 0) {
+    hw_error("Failed to initialize PCIe capability");
+  }
+  if (pcie_aer_init(pdev, PCI_ERR_VER, 0x100, PCI_ERR_SIZEOF, NULL) < 0) {
+    hw_error("Failed to initialize AER capability");
+  }
 }
 
 static void pci_fejkon_uninit(PCIDevice *pdev)
@@ -221,7 +229,7 @@ static void fejkon_class_init(ObjectClass *class, void *data)
 static void pci_fejkon_register_types(void)
 {
   static InterfaceInfo interfaces[] = {
-    { INTERFACE_CONVENTIONAL_PCI_DEVICE },
+    { INTERFACE_PCIE_DEVICE },
     { },
   };
   static const TypeInfo fejkon_info = {

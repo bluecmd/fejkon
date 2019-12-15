@@ -326,6 +326,21 @@ static int probe(struct pci_dev *pcidev, const struct pci_device_id *id)
   card->pci = pcidev;
   card->bar0 = pci_iomap(pcidev, 0 /* bar */, BAR0_AREA_SIZE);
 
+#if 1
+  /* Temporary performance benchmark */
+  {
+    ktime_t start = ktime_get();
+    ktime_t end;
+    int perf;
+    for (ret = 0; ret < 0x80000; ret++) {
+      version = ioread32(card->bar0 + 0x0);
+    }
+    end = ktime_get();
+    perf = (0x80000*4*8)/((end - start) / 1000);
+    dev_dbg(&pcidev->dev, "debug performance result: %d Mbit/s", perf);
+  }
+#endif
+
   version = ioread32(card->bar0 + 0x0);
   if ((version & 0xffff) != 0x0de5) {
     dev_dbg(&pcidev->dev, "ignoring card with unknown magic: %04x", version & 0xffff);

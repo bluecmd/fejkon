@@ -114,8 +114,35 @@ module test;
     .irq()
   );
 
-  // TODO(bluecmd): Have a simple mem_access module to emulate Avalon
-  // responses
+  logic [31:0] scratch_reg = ~32'h0;
+
+  logic [31:0] mem_access_req_address;
+  assign mem_access_req_address = {mem_access_req_data[94:33], 2'b0};
+
+  always @(posedge clk) begin
+    mem_access_req_ready <= 1'b1;
+    mem_access_resp_data <= 128'b0;
+    mem_access_resp_valid <= 1'b0;
+    if (mem_access_req_valid) begin
+      if (mem_access_req_data[0]) begin
+        // Only support writing to scratch register
+        if (mem_access_req_address == 32'h80) begin
+          scratch_reg <= mem_access_req_data[32:1];
+        end
+      end else begin
+        // Read
+        mem_access_resp_valid <= 1'b1;
+        mem_access_resp_data[23:0] <= mem_access_req_data[24:1];    // Requester & Tag ID
+        mem_access_resp_data[28:24] <= mem_access_req_address[7:2]; // Lower address
+        case (mem_access_req_address)
+          32'h0: mem_access_resp_data[63:32] <= 32'h02010de5;
+          32'h4: mem_access_resp_data[63:32] <= 32'hdeadbeef;
+          32'h80: mem_access_resp_data[63:32] <= scratch_reg;
+          default: mem_access_resp_data[63:32] <= ~32'h0;
+        endcase
+      end
+    end
+  end
 
   initial begin
     $dumpfile("wave.fst");

@@ -8,6 +8,10 @@
 // Personal note:
 // Oh well, most likely not going to use MyHDL and iverilog in the future, it
 // was been quite annoying to rely on its quirks.
+//
+// Requirements:
+//  - Lower Address should never contain the BAR region, so ensure it's bigger
+//    than 2^7 bytes => 128 bytes
 
 `timescale 1 ps / 1 ps
 module fejkon_pcie_data (
@@ -98,7 +102,7 @@ module fejkon_pcie_data (
 
   logic is_ready;
   // Signal indicating if we are happy to process work
-  assign is_ready =  ~reset & my_id_valid;
+  assign is_ready = ~reset & my_id_valid;
 
   logic rx_st_ok;
   // Signal indicating if we should process the current RX TLP stream
@@ -141,13 +145,15 @@ module fejkon_pcie_data (
   logic [15:0] rx_frm_requester_id = 0;
   logic        rx_frm_is_start = 0;
   logic        rx_frm_is_end = 0;
-  logic [63:0] rx_frm_addr = 0;
+  logic [63:0] rx_frm_address = 0;
+  logic [63:0] rx_frm_masked_address = 0;       // Address within region
   logic [3:0]  rx_frm_1st_be = 0;
   logic        rx_frm_is_npr = 0;               // Non-Posted Request
   logic        rx_frm_is_pr = 0;                // Posted Request
   logic        rx_frm_unsupported = 0;
   logic [9:0]  rx_frm_len = 0;
   logic [11:0] rx_frm_total_byte_count = 0;
+  logic [31:0] rx_frm_data = 0;
 
   // Process incoming TLP
   // This process converts from the Avalon-ST (rx_st_*) to the internal
@@ -166,13 +172,21 @@ module fejkon_pcie_data (
         rx_frm_tag <= rx_st_dword[1][15:8];
         rx_frm_requester_id <= rx_st_dword[1][31:16];
         if (rx_st_is_4dw) begin
-          rx_frm_addr <= {rx_st_dword[2], rx_st_dword[3][31:2], 2'b0};
+          rx_frm_address <= {rx_st_dword[2], rx_st_dword[3][31:2], 2'b0};
+          rx_frm_data <= rx_st_dword[4];
         end else begin
-          rx_frm_addr <= {32'b0, rx_st_dword[2][31:2], 2'b0};
+          rx_frm_address <= {32'b0, rx_st_dword[2][31:2], 2'b0};
+          rx_frm_data <= rx_st_dword[3];
         end
       end
     end
     rx_frm_is_end <= rx_st_valid && rx_st_endofpacket;
+  end
+
+  // Masked address calculation
+  always @(*) begin
+    // TODO(bluecmd): Hard-coded to 512 KiB region
+    rx_frm_masked_address = rx_frm_address & 64'h000000000007FFFF;
   end
 
   // Posted/Non-posted Request classification
@@ -251,6 +265,47 @@ module fejkon_pcie_data (
     end
   end
 
+  logic         mem_access_out_valid = 0;
+  logic [94:0] mem_access_out = 0;
+  // Post incoming access to outgoing FIFO
+  always @(posedge clk) begin
+    mem_access_out_valid <= 1'b0;
+    // TODO(bluecmd): mem_access_req_ready is not handled currently. It should
+    // not overflow however, given the number of pending tags are the same as
+    // the FIFO queue.
+    if (is_ready && rx_frm_is_end && ~rx_frm_unsupported) begin
+      mem_access_out_valid <= 1'b1;
+      if (rx_frm_type == TLP_MRD) begin
+        // Format for MRD:
+        // [0]     0
+        // [16:1]  rx_frm_requester_id
+        // [24:17] rx_frm_tag
+        // [32:25] unused
+        // [94:33] rx_frm_masked_address[63:2]
+        mem_access_out <= {rx_frm_masked_address[63:2], 8'b0, rx_frm_tag, rx_frm_requester_id, 1'b0};
+      end else if (rx_frm_type == TLP_MWR) begin
+        // Format for MWR:
+        // [0]     1
+        // [32:1]  rx_frm_data
+        // [94:33] rx_frm_masked_address[31:2]
+        mem_access_out <= {rx_frm_masked_address[63:2], rx_frm_data, 1'b1};
+      end
+    end
+  end
+
+  //
+  // Incoming memory access response field accessors
+  //
+  logic [15:0] mem_access_resp_requester_id;
+  logic [7:0]  mem_access_resp_tag;
+  logic [6:0]  mem_access_resp_lower_address;
+  logic [31:0] mem_access_resp_rddata;
+
+  assign mem_access_resp_requester_id = mem_access_resp_data[15:0];
+  assign mem_access_resp_tag = mem_access_resp_data[23:16];
+  assign mem_access_resp_lower_address = {mem_access_resp_data[28:24], 2'b0};
+  assign mem_access_resp_rddata = mem_access_resp_data[63:32];
+
   //
   // Outgoing TLP construction
   //
@@ -261,59 +316,55 @@ module fejkon_pcie_data (
   logic [7:0] [31:0] tx_frm_dword = 0;
 
   // TODO(bluecmd): Abort any TLP if we get !rx_st_valid - from example code
-
-  // TODO(bluecmd): Put the values needed (requester_id, tag, addr, size, ..?)
-  // in a 64 element deep FIFO - it seems the hard IP core supports only 64
-  // incoming non-posted requests so we should be good.
-  // Then, create a sub-module that reads from the FIFO and produces Avalon-MM
-  // transactions and writes the response into another 64 FIFO with the same
-  // data and the read response. Using the same queues for MRD and MWR should
-  // be fine, and we should only support 4 byte read/writes so the FIFO
-  // size should be fine.
-  // HMM. Thinking about this, I feel we should just export a pair of
-  // Avalon-ST source/sinks with this information, and let the FIFO stuff
-  // happen in Qsys. Then we create a dedicated Avalon-MM core and use the
-  // Intel BFMs for that verification, keeping this core as clean as possible.
   always @(posedge clk) begin
     tx_frm_valid <= 1'b0;
     tx_frm_startofpacket <= 1'b0;
     tx_frm_endofpacket <= 1'b0;
     tx_frm_empty <= 2'h0;
-    if (rx_st_ready && rx_frm_is_end && rx_frm_is_npr) begin
+    // TODO(bluecmd): tx_st_ready is unused, it would probably be good to
+    // consider it
+    // TODO(bluecmd): This is going to become more advanced when the data
+    // stream is processing. Possibly we will reject any new non-posted
+    // requests when waiting to send UR or something. Figure that out later.
+    // Right now there is a collision risk when the mem access is returned
+    // back at the same time as a new UR needs to be sent
+    if (is_ready && rx_frm_is_end && rx_frm_is_npr && rx_frm_unsupported) begin
+      // Unsupported Request Completion
       tx_frm_dword <= 256'b0;
-      if (rx_frm_unsupported) begin
-        // Unsupported Request Completion
-        tx_frm_dword[0][31:29] <= 3'b000;   // Cpl Fmt
-        tx_frm_dword[0][28:24] <= 5'b01010; // Cpl Type
-        tx_frm_dword[0][9:0] <= 10'h0;      // Length
-        tx_frm_dword[1][31:16] <= my_id;    // Completer ID
-        tx_frm_dword[1][15:13] <= 3'h1;     // Status Unsupported Request (UR)
-        tx_frm_dword[1][11:0] <= rx_frm_total_byte_count;
-        tx_frm_dword[2][31:16] <= rx_frm_requester_id;
-        tx_frm_dword[2][15:8] <= rx_frm_tag;
-        tx_frm_dword[2][6:0] <= rx_frm_addr[6:0]; // Lower address
+      tx_frm_dword[0][31:29] <= 3'b000;   // Cpl Fmt
+      tx_frm_dword[0][28:24] <= 5'b01010; // Cpl Type
+      tx_frm_dword[0][9:0] <= 10'h0;      // Length
+      tx_frm_dword[1][31:16] <= my_id;    // Completer ID
+      tx_frm_dword[1][15:13] <= 3'h1;     // Status Unsupported Request (UR)
+      tx_frm_dword[1][11:0] <= rx_frm_total_byte_count;
+      tx_frm_dword[2][31:16] <= rx_frm_requester_id;
+      tx_frm_dword[2][15:8] <= rx_frm_tag;
+      tx_frm_dword[2][6:0] <= rx_frm_address[6:0]; // Lower address
+      tx_frm_empty <= 2'h2;
+      tx_frm_valid <= 1'b1;
+      tx_frm_startofpacket <= 1'b1;
+      tx_frm_endofpacket <= 1'b1;
+    end else if (is_ready && mem_access_resp_valid) begin
+      tx_frm_dword <= 256'b0;
+      tx_frm_dword[0][31:29] <= 3'b010;   // CplD Fmt
+      tx_frm_dword[0][28:24] <= 5'b01010; // CplD Type
+      tx_frm_dword[0][9:0] <= 10'h1;      // Length
+      tx_frm_dword[1][31:16] <= my_id;    // Completer ID
+      tx_frm_dword[1][15:13] <= 0;        // Status OK
+      tx_frm_dword[1][11:0] <= 4;         // Byte Count
+      tx_frm_dword[2][31:16] <= mem_access_resp_requester_id;
+      tx_frm_dword[2][15:8] <= mem_access_resp_tag;
+      tx_frm_dword[2][6:0] <= mem_access_resp_lower_address;
+      // Note: This is really poorly documented, but for some reason, if the
+      // offset of the lower address *is* 8-aligned, we have to pad the
+      // header with one dword - essentially shifting everything 4 bytes.
+      if (mem_access_resp_lower_address[2] == 0) begin
+        // Align header to 8-bytes, start data at 5th DW
+        tx_frm_empty <= 2'h1;
+        tx_frm_dword[4] <= mem_access_resp_rddata;
+      end else begin
         tx_frm_empty <= 2'h2;
-      end else if (rx_frm_type == TLP_MRD) begin
-        tx_frm_dword[0][31:29] <= 3'b010;   // CplD Fmt
-        tx_frm_dword[0][28:24] <= 5'b01010; // CplD Type
-        tx_frm_dword[0][9:0] <= 10'h1;      // Length
-        tx_frm_dword[1][31:16] <= my_id;    // Completer ID
-        tx_frm_dword[1][15:13] <= 0;        // Status OK
-        tx_frm_dword[1][11:0] <= 4;         // Byte Count
-        tx_frm_dword[2][31:16] <= rx_frm_requester_id;
-        tx_frm_dword[2][15:8] <= rx_frm_tag;
-        tx_frm_dword[2][6:0] <= rx_frm_addr[6:0]; // Lower address
-        // Note: This is really poorly documented, but for some reason, if the
-        // offset of the lower address *is* 8-aligned, we have to pad the
-        // header with one dword - essentially shifting everything 4 bytes.
-        if (rx_frm_addr[2] == 0) begin
-          // Align header to 8-bytes, start data at 5th DW
-          tx_frm_empty <= 2'h1;
-          tx_frm_dword[4] <= {rx_frm_tag, rx_frm_requester_id, rx_frm_addr[7:0]};
-        end else begin
-          tx_frm_empty <= 2'h2;
-          tx_frm_dword[3] <= {rx_frm_tag, rx_frm_requester_id, rx_frm_addr[7:0]};
-        end
+        tx_frm_dword[3] <= mem_access_resp_rddata;
       end
       tx_frm_valid <= 1'b1;
       tx_frm_startofpacket <= 1'b1;
@@ -421,9 +472,8 @@ module fejkon_pcie_data (
   // cpl_err[6]: Log header.
   assign cpl_err = {1'b0, cpl_err_ur_np, cpl_err_ur_p, 4'b0};
 
-  // TODO
-  assign mem_access_req_valid = 1'b0;
-  assign mem_access_req_data = 128'b0;
-  assign mem_access_resp_ready = 1'b0;
+  assign mem_access_req_valid = mem_access_out_valid;
+  assign mem_access_req_data = {33'b0, mem_access_out};
+  assign mem_access_resp_ready = is_ready;
 
 endmodule

@@ -117,7 +117,7 @@ module test;
   logic [31:0] scratch_reg = ~32'h0;
 
   logic [31:0] mem_access_req_address;
-  assign mem_access_req_address = {mem_access_req_data[94:33], 2'b0};
+  assign mem_access_req_address = {mem_access_req_data[62:33], 2'b0};
 
   always @(posedge clk) begin
     mem_access_req_ready <= 1'b1;
@@ -133,7 +133,7 @@ module test;
         // Read
         mem_access_resp_valid <= 1'b1;
         mem_access_resp_data[23:0] <= mem_access_req_data[24:1];    // Requester & Tag ID
-        mem_access_resp_data[28:24] <= mem_access_req_address[7:2]; // Lower address
+        mem_access_resp_data[28:24] <= mem_access_req_address[6:2]; // Lower address
         case (mem_access_req_address)
           32'h0: mem_access_resp_data[63:32] <= 32'h02010de5;
           32'h4: mem_access_resp_data[63:32] <= 32'hdeadbeef;

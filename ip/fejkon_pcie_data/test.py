@@ -120,10 +120,12 @@ class Test(unittest.TestCase):
         """Test reading standard 4 byte reads."""
         yield from self.reset()
         bar0 = self.ep.bar[0]
-        ident = yield from self.rc.mem_read(bar0, 4)
-        log.info("Identity: 0x%08x", int.from_bytes(ident, byteorder='little', signed=False))
-        githash = yield from self.rc.mem_read(bar0 + 4, 4)
-        log.info("Git hash: 0x%08x", int.from_bytes(githash, byteorder='little', signed=False))
+        ident_raw = yield from self.rc.mem_read(bar0, 4)
+        ident = int.from_bytes(ident_raw, byteorder='little', signed=False)
+        githash_raw = yield from self.rc.mem_read(bar0 + 4, 4)
+        githash = int.from_bytes(githash_raw, byteorder='little', signed=False)
+        self.assertEqual(ident, 0x02010de5)
+        self.assertEqual(githash, 0xdeadbeef)
 
     @testcase(clkgen, dutgen)
     def test_too_small_read(self):

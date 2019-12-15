@@ -265,7 +265,7 @@ module fejkon_pcie_data (
     end
   end
 
-  logic         mem_access_out_valid = 0;
+  logic        mem_access_out_valid = 0;
   logic [94:0] mem_access_out = 0;
   // Post incoming access to outgoing FIFO
   always @(posedge clk) begin

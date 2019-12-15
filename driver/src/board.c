@@ -327,7 +327,6 @@ static int probe(struct pci_dev *pcidev, const struct pci_device_id *id)
   card->bar0 = pci_iomap(pcidev, 0 /* bar */, BAR0_AREA_SIZE);
 
   version = ioread32(card->bar0 + 0x0);
-  dev_dbg(&pcidev->dev, "DEBUG RESULT: %08x", version);
   if ((version & 0xffff) != 0x0de5) {
     dev_dbg(&pcidev->dev, "ignoring card with unknown magic: %04x", version & 0xffff);
     ret = -EINVAL;

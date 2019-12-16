@@ -153,6 +153,7 @@ set_interface_property tlp_rx_st SVD_ADDRESS_GROUP ""
 add_interface_port tlp_rx_st tlp_rx_st_data data Output 256
 add_interface_port tlp_rx_st tlp_rx_st_empty empty Output 3
 add_interface_port tlp_rx_st tlp_rx_st_endofpacket endofpacket Output 1
+add_interface_port tlp_rx_st tlp_rx_st_error error Output 1
 add_interface_port tlp_rx_st tlp_rx_st_startofpacket startofpacket Output 1
 add_interface_port tlp_rx_st tlp_rx_st_valid valid Output 1
 add_interface_port tlp_rx_st tlp_rx_st_ready ready Input 1

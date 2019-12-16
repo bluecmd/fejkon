@@ -19,6 +19,7 @@ module intel_pcie_tlp_adapter (
     output wire [255:0] tlp_rx_st_data,          // tlp_rx_st.data
     output wire [2:0]   tlp_rx_st_empty,         //          .empty
     output wire         tlp_rx_st_endofpacket,   //          .endofpacket
+    output wire         tlp_rx_st_error,         //          .error
     output wire         tlp_rx_st_startofpacket, //          .startofpacket
     output wire         tlp_rx_st_valid,         //          .valid
     input  wire         tlp_rx_st_ready,         //          .ready
@@ -67,6 +68,7 @@ module intel_pcie_tlp_adapter (
   assign phy_rx_st_ready = tlp_rx_st_ready;
 
   assign tlp_rx_st_valid = phy_rx_st_valid;
+  assign tlp_rx_st_error = phy_rx_st_error;
   assign tlp_rx_st_data = phy_rx_st_data;
   assign tlp_rx_st_startofpacket = phy_rx_st_startofpacket;
   assign tlp_rx_st_endofpacket = phy_rx_st_endofpacket;

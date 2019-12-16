@@ -25,6 +25,8 @@ module fejkon_pcie_data (
     input  wire         tlp_rx_st_endofpacket,            //                   .endofpacket
     output wire         tlp_rx_st_ready,                  //                   .ready
     input  wire         tlp_rx_st_valid,                  //                   .valid
+    // WARNING! This one is not processed through the adapter logic, so it is
+    // something like ~3 cycles behind the TLP RX bus - so don't use it
     input  wire [7:0]   rx_st_bar,                        //          rx_bar_be.rx_st_bar
     output wire         rx_st_mask,                       //                   .rx_st_mask
     // Used for outgoing DMA TLPs

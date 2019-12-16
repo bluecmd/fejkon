@@ -458,9 +458,13 @@ module fejkon_pcie_data (
         // Mask out the parts we're supposed to only care about
         if (tlp_tx_data_frm_endofpacket) begin
           case (tlp_tx_data_frm_empty)
+            3'h1: csr_tx_data_tlp[7:7] <= ~0;
             3'h2: csr_tx_data_tlp[7:6] <= ~0;
+            3'h3: csr_tx_data_tlp[7:5] <= ~0;
             3'h4: csr_tx_data_tlp[7:4] <= ~0;
+            3'h5: csr_tx_data_tlp[7:3] <= ~0;
             3'h6: csr_tx_data_tlp[7:2] <= ~0;
+            3'h7: csr_tx_data_tlp[7:1] <= ~0;
             default: ;
           endcase
         end
@@ -471,9 +475,13 @@ module fejkon_pcie_data (
         // Mask out the parts we're supposed to only care about
         if (tlp_tx_instant_frm_endofpacket) begin
           case (tlp_tx_instant_frm_empty)
+            3'h1: csr_tx_instant_tlp[7:7] <= ~0;
             3'h2: csr_tx_instant_tlp[7:6] <= ~0;
+            3'h3: csr_tx_instant_tlp[7:5] <= ~0;
             3'h4: csr_tx_instant_tlp[7:4] <= ~0;
+            3'h5: csr_tx_instant_tlp[7:3] <= ~0;
             3'h6: csr_tx_instant_tlp[7:2] <= ~0;
+            3'h7: csr_tx_instant_tlp[7:1] <= ~0;
             default: ;
           endcase
         end
@@ -484,9 +492,13 @@ module fejkon_pcie_data (
         // Mask out the parts we're supposed to only care about
         if (tlp_tx_response_frm_endofpacket) begin
           case (tlp_tx_response_frm_empty)
+            3'h1: csr_tx_response_tlp[7:7] <= ~0;
             3'h2: csr_tx_response_tlp[7:6] <= ~0;
+            3'h3: csr_tx_response_tlp[7:5] <= ~0;
             3'h4: csr_tx_response_tlp[7:4] <= ~0;
+            3'h5: csr_tx_response_tlp[7:3] <= ~0;
             3'h6: csr_tx_response_tlp[7:2] <= ~0;
+            3'h7: csr_tx_response_tlp[7:1] <= ~0;
             default: ;
           endcase
         end

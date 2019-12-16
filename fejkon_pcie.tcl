@@ -496,6 +496,67 @@ set_instance_parameter_value phy {vendor_id_hwtcl} {61888}
 set_instance_parameter_value phy {vsec_id_hwtcl} {4466}
 set_instance_parameter_value phy {vsec_rev_hwtcl} {0}
 
+add_instance tlp_adapter intel_pcie_tlp_adapter 1.0
+
+add_instance tlp_data_fifo altera_avalon_sc_fifo 19.1
+set_instance_parameter_value tlp_data_fifo {BITS_PER_SYMBOL} {32}
+set_instance_parameter_value tlp_data_fifo {CHANNEL_WIDTH} {0}
+set_instance_parameter_value tlp_data_fifo {EMPTY_LATENCY} {3}
+set_instance_parameter_value tlp_data_fifo {ENABLE_EXPLICIT_MAXCHANNEL} {0}
+set_instance_parameter_value tlp_data_fifo {ERROR_WIDTH} {0}
+set_instance_parameter_value tlp_data_fifo {EXPLICIT_MAXCHANNEL} {0}
+set_instance_parameter_value tlp_data_fifo {FIFO_DEPTH} {1024}
+set_instance_parameter_value tlp_data_fifo {SYMBOLS_PER_BEAT} {8}
+set_instance_parameter_value tlp_data_fifo {USE_ALMOST_EMPTY_IF} {0}
+set_instance_parameter_value tlp_data_fifo {USE_ALMOST_FULL_IF} {0}
+set_instance_parameter_value tlp_data_fifo {USE_FILL_LEVEL} {1}
+set_instance_parameter_value tlp_data_fifo {USE_MEMORY_BLOCKS} {1}
+set_instance_parameter_value tlp_data_fifo {USE_PACKETS} {1}
+set_instance_parameter_value tlp_data_fifo {USE_STORE_FORWARD} {0}
+
+add_instance tlp_instant_fifo altera_avalon_sc_fifo 19.1
+set_instance_parameter_value tlp_instant_fifo {BITS_PER_SYMBOL} {32}
+set_instance_parameter_value tlp_instant_fifo {CHANNEL_WIDTH} {0}
+set_instance_parameter_value tlp_instant_fifo {EMPTY_LATENCY} {3}
+set_instance_parameter_value tlp_instant_fifo {ENABLE_EXPLICIT_MAXCHANNEL} {0}
+set_instance_parameter_value tlp_instant_fifo {ERROR_WIDTH} {0}
+set_instance_parameter_value tlp_instant_fifo {EXPLICIT_MAXCHANNEL} {0}
+set_instance_parameter_value tlp_instant_fifo {FIFO_DEPTH} {1024}
+set_instance_parameter_value tlp_instant_fifo {SYMBOLS_PER_BEAT} {8}
+set_instance_parameter_value tlp_instant_fifo {USE_ALMOST_EMPTY_IF} {0}
+set_instance_parameter_value tlp_instant_fifo {USE_ALMOST_FULL_IF} {0}
+set_instance_parameter_value tlp_instant_fifo {USE_FILL_LEVEL} {1}
+set_instance_parameter_value tlp_instant_fifo {USE_MEMORY_BLOCKS} {1}
+set_instance_parameter_value tlp_instant_fifo {USE_PACKETS} {1}
+set_instance_parameter_value tlp_instant_fifo {USE_STORE_FORWARD} {0}
+
+add_instance tlp_response_fifo altera_avalon_sc_fifo 19.1
+set_instance_parameter_value tlp_response_fifo {BITS_PER_SYMBOL} {32}
+set_instance_parameter_value tlp_response_fifo {CHANNEL_WIDTH} {0}
+set_instance_parameter_value tlp_response_fifo {EMPTY_LATENCY} {3}
+set_instance_parameter_value tlp_response_fifo {ENABLE_EXPLICIT_MAXCHANNEL} {0}
+set_instance_parameter_value tlp_response_fifo {ERROR_WIDTH} {0}
+set_instance_parameter_value tlp_response_fifo {EXPLICIT_MAXCHANNEL} {0}
+set_instance_parameter_value tlp_response_fifo {FIFO_DEPTH} {1024}
+set_instance_parameter_value tlp_response_fifo {SYMBOLS_PER_BEAT} {8}
+set_instance_parameter_value tlp_response_fifo {USE_ALMOST_EMPTY_IF} {0}
+set_instance_parameter_value tlp_response_fifo {USE_ALMOST_FULL_IF} {0}
+set_instance_parameter_value tlp_response_fifo {USE_FILL_LEVEL} {1}
+set_instance_parameter_value tlp_response_fifo {USE_MEMORY_BLOCKS} {1}
+set_instance_parameter_value tlp_response_fifo {USE_PACKETS} {1}
+set_instance_parameter_value tlp_response_fifo {USE_STORE_FORWARD} {0}
+
+add_instance tlp_tx_multiplexer multiplexer 19.1
+set_instance_parameter_value tlp_tx_multiplexer {bitsPerSymbol} {32}
+set_instance_parameter_value tlp_tx_multiplexer {errorWidth} {0}
+set_instance_parameter_value tlp_tx_multiplexer {numInputInterfaces} {3}
+set_instance_parameter_value tlp_tx_multiplexer {outChannelWidth} {2}
+set_instance_parameter_value tlp_tx_multiplexer {packetScheduling} {1}
+set_instance_parameter_value tlp_tx_multiplexer {schedulingSize} {2}
+set_instance_parameter_value tlp_tx_multiplexer {symbolsPerBeat} {8}
+set_instance_parameter_value tlp_tx_multiplexer {useHighBitsOfChannel} {1}
+set_instance_parameter_value tlp_tx_multiplexer {usePackets} {1}
+
 add_instance xcvr_reconfig alt_xcvr_reconfig 19.1
 set_instance_parameter_value xcvr_reconfig {ber_en} {0}
 set_instance_parameter_value xcvr_reconfig {enable_adce} {0}
@@ -539,6 +600,21 @@ set_connection_parameter_value csr_bridge.m0/pcie_data.csr arbitrationPriority {
 set_connection_parameter_value csr_bridge.m0/pcie_data.csr baseAddress {0x0000}
 set_connection_parameter_value csr_bridge.m0/pcie_data.csr defaultConnection {0}
 
+add_connection csr_bridge.m0 tlp_data_fifo.csr
+set_connection_parameter_value csr_bridge.m0/tlp_data_fifo.csr arbitrationPriority {1}
+set_connection_parameter_value csr_bridge.m0/tlp_data_fifo.csr baseAddress {0x0100}
+set_connection_parameter_value csr_bridge.m0/tlp_data_fifo.csr defaultConnection {0}
+
+add_connection csr_bridge.m0 tlp_instant_fifo.csr
+set_connection_parameter_value csr_bridge.m0/tlp_instant_fifo.csr arbitrationPriority {1}
+set_connection_parameter_value csr_bridge.m0/tlp_instant_fifo.csr baseAddress {0x0110}
+set_connection_parameter_value csr_bridge.m0/tlp_instant_fifo.csr defaultConnection {0}
+
+add_connection csr_bridge.m0 tlp_response_fifo.csr
+set_connection_parameter_value csr_bridge.m0/tlp_response_fifo.csr arbitrationPriority {1}
+set_connection_parameter_value csr_bridge.m0/tlp_response_fifo.csr baseAddress {0x0120}
+set_connection_parameter_value csr_bridge.m0/tlp_response_fifo.csr defaultConnection {0}
+
 add_connection mem_req_fifo.out pcie_avalon.mem_access_req
 
 add_connection mem_resp_fifo.out pcie_data.mem_access_resp
@@ -579,6 +655,16 @@ add_connection mgmt_rst.out_reset pcie_reconfig.reconfig_xcvr_rst
 
 add_connection mgmt_rst.out_reset pcie_reset.reset
 
+add_connection mgmt_rst.out_reset tlp_adapter.reset
+
+add_connection mgmt_rst.out_reset tlp_data_fifo.clk_reset
+
+add_connection mgmt_rst.out_reset tlp_instant_fifo.clk_reset
+
+add_connection mgmt_rst.out_reset tlp_response_fifo.clk_reset
+
+add_connection mgmt_rst.out_reset tlp_tx_multiplexer.reset
+
 add_connection mgmt_rst.out_reset xcvr_reconfig.mgmt_rst_reset
 
 add_connection pcie_avalon.mem_access_resp mem_resp_fifo.in
@@ -597,7 +683,11 @@ set_connection_parameter_value pcie_data.config_tl/phy.config_tl width {0}
 
 add_connection pcie_data.mem_access_req mem_req_fifo.in
 
-add_connection pcie_data.tx_st phy.tx_st
+add_connection pcie_data.tlp_tx_data_st tlp_data_fifo.in
+
+add_connection pcie_data.tlp_tx_instant_st tlp_instant_fifo.in
+
+add_connection pcie_data.tlp_tx_response_st tlp_response_fifo.in
 
 add_connection pcie_reconfig.hip_status_drv phy.hip_status
 set_connection_parameter_value pcie_reconfig.hip_status_drv/phy.hip_status endPort {}
@@ -643,6 +733,16 @@ add_connection phy.coreclkout_hip pcie_data.clk
 
 add_connection phy.coreclkout_hip phy.pld_clk
 
+add_connection phy.coreclkout_hip tlp_adapter.clk
+
+add_connection phy.coreclkout_hip tlp_data_fifo.clk
+
+add_connection phy.coreclkout_hip tlp_instant_fifo.clk
+
+add_connection phy.coreclkout_hip tlp_response_fifo.clk
+
+add_connection phy.coreclkout_hip tlp_tx_multiplexer.clk
+
 add_connection phy.hip_currentspeed pcie_reconfig.hip_currentspeed
 set_connection_parameter_value phy.hip_currentspeed/pcie_reconfig.hip_currentspeed endPort {}
 set_connection_parameter_value phy.hip_currentspeed/pcie_reconfig.hip_currentspeed endPortLSB {0}
@@ -664,7 +764,19 @@ set_connection_parameter_value phy.rx_bar_be/pcie_data.rx_bar_be startPort {}
 set_connection_parameter_value phy.rx_bar_be/pcie_data.rx_bar_be startPortLSB {0}
 set_connection_parameter_value phy.rx_bar_be/pcie_data.rx_bar_be width {0}
 
-add_connection phy.rx_st pcie_data.rx_st
+add_connection phy.rx_st tlp_adapter.phy_rx_st
+
+add_connection tlp_adapter.phy_tx_st phy.tx_st
+
+add_connection tlp_adapter.tlp_rx_st pcie_data.tlp_rx_st
+
+add_connection tlp_data_fifo.out tlp_tx_multiplexer.in0
+
+add_connection tlp_instant_fifo.out tlp_tx_multiplexer.in2
+
+add_connection tlp_response_fifo.out tlp_tx_multiplexer.in1
+
+add_connection tlp_tx_multiplexer.out tlp_adapter.tlp_tx_st
 
 add_connection xcvr_reconfig.reconfig_from_xcvr phy.reconfig_from_xcvr
 set_connection_parameter_value xcvr_reconfig.reconfig_from_xcvr/phy.reconfig_from_xcvr endPort {}

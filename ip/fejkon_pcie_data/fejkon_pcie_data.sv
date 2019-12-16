@@ -160,7 +160,7 @@ module fejkon_pcie_data (
   // registers for the current frame (rx_frm_*)
   always @(posedge clk) begin
     rx_frm_is_start <= 1'b0;
-    if (rx_st_valid && rx_st_startofpacket) begin
+    if (is_ready && rx_st_valid && rx_st_startofpacket) begin
       rx_frm_is_start <= 1'b1;
       rx_frm_type <= rx_st_type;
       rx_frm_len <= rx_st_len;
@@ -180,7 +180,7 @@ module fejkon_pcie_data (
         end
       end
     end
-    rx_frm_is_end <= rx_st_valid && rx_st_endofpacket;
+    rx_frm_is_end <= is_ready && rx_st_valid && rx_st_endofpacket;
   end
 
   // Masked address calculation

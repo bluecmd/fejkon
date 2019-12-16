@@ -41,13 +41,16 @@ proc enable {id} {
 
 proc pcie {} {
   global m
-  set off [expr 0x100]
-  puts [format " My ID       : %s" [master_read_16  $m [expr $off + 0x00] 1]]
-  puts [format " TLP RX/TX   : %s %s" \
-    [master_read_32 $m [expr $off + 0x04] 1] \
-    [master_read_32 $m [expr $off + 0x08] 1]]
-  puts [format " Last TLP RX : %s" [master_read_32 $m [expr $off + 0x20] 8]]
-  puts [format " Last TLP TX : %s" [master_read_32 $m [expr $off + 0x40] 8]]
+  set off [expr 0x800]
+  puts [format " My ID                : %s" [master_read_16 $m [expr $off + 0x00] 1]]
+  puts [format " TLP RX               : %s" [master_read_32 $m [expr $off + 0x04] 1]]
+  puts [format " TLP TX Data          : %s" [master_read_32 $m [expr $off + 0x08] 1]]
+  puts [format " TLP TX Instant       : %s" [master_read_32 $m [expr $off + 0x0c] 1]]
+  puts [format " TLP TX Response      : %s" [master_read_32 $m [expr $off + 0x10] 1]]
+  puts [format " Last TLP RX          : %s" [master_read_32 $m [expr $off + 0x20] 8]]
+  puts [format " Last TLP TX Data     : %s" [master_read_32 $m [expr $off + 0x40] 8]]
+  puts [format " Last TLP TX Instant  : %s" [master_read_32 $m [expr $off + 0x60] 8]]
+  puts [format " Last TLP TX Response : %s" [master_read_32 $m [expr $off + 0x80] 8]]
 }
 
 proc fcstat {id} {

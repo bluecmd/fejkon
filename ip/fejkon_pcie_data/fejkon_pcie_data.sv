@@ -277,7 +277,7 @@ module fejkon_pcie_data (
     else if (tlp_rx_st_is_4dw)
       tlp_rx_frm_unsupported = 1'b1; // Unsupported 64 bit addressing
     else if (tlp_rx_frm_type == TLP_MRD || tlp_rx_frm_type == TLP_MWR) begin
-      if (tlp_rx_st_len != 10'h1)
+      if (tlp_rx_frm_len != 10'h1)
         tlp_rx_frm_unsupported = 1'b1; // Only 1DW read/writes are allowed
       else if (tlp_rx_frm_total_byte_count != 12'h0 && tlp_rx_frm_total_byte_count != 12'h4)
         tlp_rx_frm_unsupported = 1'b1; // Only allow 32 bit reads, or zero-length

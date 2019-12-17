@@ -105,7 +105,10 @@ Accesses need to be 4 byte wide.
 |-------|-------|-----------------------------------|
 | 0x000 | 4     | Endpoint address                  |
 | 0x004 | 4     | RX TLP counter                    |
-| 0x008 | 4     | TX TLP counter                    |
+| 0x008 | 4     | RX Unsupported TLP counter        |
+| 0x00C | 4     | TX Data TLP counter               |
+| 0x010 | 4     | TX Instant TLP counter            |
+| 0x014 | 4     | TX Response TLP counter           |
 | 0x020 | 32    | Last RX TLP (8 DWs)               |
 | 0x040 | 32    | Last TX TLP (8 DWs)               |
 | 0x100 | 4     | Data TX TLP Fill Level            |

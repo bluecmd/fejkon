@@ -418,6 +418,7 @@ module fejkon_pcie_data (
   //
 
   int csr_rx_tlp_counter = 0;
+  int csr_rx_unsupported_tlp_counter = 0;
   int csr_tx_data_tlp_counter = 0;
   int csr_tx_instant_tlp_counter = 0;
   int csr_tx_response_tlp_counter = 0;
@@ -431,6 +432,7 @@ module fejkon_pcie_data (
   always @(posedge clk) begin
     if (reset) begin
       csr_rx_tlp_counter <= 0;
+      csr_rx_unsupported_tlp_counter <= 0;
       csr_tx_data_tlp_counter <= 0;
       csr_tx_instant_tlp_counter <= 0;
       csr_tx_response_tlp_counter <= 0;
@@ -451,6 +453,9 @@ module fejkon_pcie_data (
             default: ;
           endcase
         end
+      end
+      if (tlp_rx_frm_is_end && tlp_rx_frm_unsupported) begin
+        csr_rx_unsupported_tlp_counter <= csr_rx_unsupported_tlp_counter + 1;
       end
       if (tlp_tx_data_frm_valid && tlp_tx_data_frm_startofpacket) begin
         csr_tx_data_tlp_counter <= csr_tx_data_tlp_counter + 1;
@@ -515,9 +520,10 @@ module fejkon_pcie_data (
       casez (csr_address)
         6'h0: csr_readdata_reg <= {16'b0, my_id};
         6'h1: csr_readdata_reg <= csr_rx_tlp_counter;
-        6'h2: csr_readdata_reg <= csr_tx_data_tlp_counter;
-        6'h3: csr_readdata_reg <= csr_tx_instant_tlp_counter;
-        6'h4: csr_readdata_reg <= csr_tx_response_tlp_counter;
+        6'h2: csr_readdata_reg <= csr_rx_unsupported_tlp_counter;
+        6'h3: csr_readdata_reg <= csr_tx_data_tlp_counter;
+        6'h4: csr_readdata_reg <= csr_tx_instant_tlp_counter;
+        6'h5: csr_readdata_reg <= csr_tx_response_tlp_counter;
         6'b001???: csr_readdata_reg <= csr_rx_tlp[csr_address[2:0]];
         6'b010???: csr_readdata_reg <= csr_tx_data_tlp[csr_address[2:0]];
         6'b011???: csr_readdata_reg <= csr_tx_instant_tlp[csr_address[2:0]];

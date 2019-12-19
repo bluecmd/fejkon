@@ -12,6 +12,36 @@ translates "fake". It is pronounced similarly to the "FIC" in "FICON".
 It is meant to be one of the possible access ports to [fikonfarm](https://github.com/bluecmd/fikonfarm) enabling
 IBM mainframes to e.g. use [Hercules](https://en.wikipedia.org/wiki/Hercules_(emulator)) disks natively.
 
+In the past there existed a commerical product called FLEXCUB that seems to
+have done something similar for ESCON.
+
+## Design
+
+The overall system design is as shown below. Using quad SFP+ ports Fejkon is
+configured to communicate using 8GFC (no speed negotiation will be implemented).
+
+```
+8G Fibre Channel
+
+ +-----------+
+ | FC Port 0 +<-------------------------------+
+ +-----+-----+                                |
+       ^                                      |
+       |  (Optional) Traffic Bridging         |
+       v                                      |
+ +-----+-----+                                |
+ | FC Port 1 +<--------+                      v
+ +-----------+         |        +-------------+--------------+
+                       +------->+                            |        +----------------+
+ +-----------+                  |                            |        |                |
+ | FC Port 2 +<---------------->+       Packet Stream        +<------>+  PCIe 3.0 x8   |
+ +-----------+                  |   Input/Output Mux/Demux   |        |                |
+                       +------->+                            |        +----------------+
+ +-----------+         |        |                            |
+ | FC Port 3 +<--------+        +----------------------------+
+ +-----------+
+```
+
 ## Board
 
 Target board right now is the DE5-Net from Terasic. They are available for $300 - $600 on eBay as of this writing
@@ -65,6 +95,46 @@ $ sudo cp myhdl.vpi /usr/lib/x86_64-linux-gnu/ivl/
 The board uses vendor/device ID `f1c0:0de5`. Mnemonic is **FICO**n **DE5**-net.
 
 The PCIe endpoint has one Base Address Register (BAR).
+
+```
+
+                                          Avalon-St               Avalon-MM
+                                   +-------------------+      +---------------->   BAR 0
+                                   |                   |      |
+                                   |                   v      |
+                                   |           +-------+------+--------+
+                                   |           |                       |
+                                   |           |   Fejkon PCIe Data    +<------+   Packet Data DMA
+                                +--+--+        |       Facility        +------->   TX/RX Avalon-St
+                                |     |        |                       |
+                                |  A  |        +---+-------+-------+---+
+                                |     |            |       |       |
+                                |  D  |            v       v       v
++----------------------+        |     |         +--+--+-+--+--+-+--+--+
+|                      |        |  A  |         |     | |     | |     |
+|                      +------->+     |         |  F  | |  F  | |  F  |     3 TLP streams:
+|    Intel PCIe Core   |        |  P  |         |  I  | |  I  | |  I  |     * Packet Data (DMA)
+|                      +<-------+     |         |  F  | |  F  | |  F  |     * Failed Completions
+|                      |        |  T  |         |  O  | |  O  | |  O  |     * Successful Completions
++----------+-----------+        |     |         |     | |     | |     |
+           ^                    |  E  |         +--+--+ +--+--+ +--+--+
+           |                    |     |            |       |       |
+           v                    |  R  |            v       v       v
+                                |     |         +--+-------+-------+--+
+      PCIe 3.0 x8               +--+--+         |                     |
+                                   ^            |     Stream Mux      |
+                                   |            |                     |
+                                   |            +----------+----------+
+                                   |                       |
+                                   |       Avalon-St       |
+                                   +-----------------------+
+```
+
+The design uses components from Quartus Platform Design to minimize development
+and debug time. All FPGA platforms offer some sort of FIFOs and streaming
+interface that allows merging, so there is little value re-inventing those.
+The PCIe adapter is a bug-fix for the V-Series Intel PCIe core where the
+streaming interface is not correctly defined to be Avalon-ST compliant.
 
 ### BAR 0
 
@@ -293,24 +363,6 @@ OE Polarity: OE active high
 Temperature Stability / Total Stability: 50 ppm / 61.5 ppm
 Frequency Range: 10 - 810 MHz
 Operating Temp Range (°C): -40 to +85
-```
-
-### MSI limit to 32
-
-For some reason the limit is set to 16 in the stock IP. Change it to 32.
-
-```patch
---- /home/bluecmd/intelFPGA/19.1/ip/altera/altera_pcie/altera_pcie_hip_256_avmm/pcie_256_avmm_parameters.tcl.org	2019-10-07 22:32:09.828337496 +0200
-+++ /home/bluecmd/intelFPGA/19.1/ip/altera/altera_pcie/altera_pcie_hip_256_avmm/pcie_256_avmm_parameters.tcl	2019-10-07 22:32:18.536266216 +0200
-@@ -731,7 +731,7 @@
- 
-    add_parameter          msi_multi_message_capable_hwtcl string        "4"
-    set_parameter_property msi_multi_message_capable_hwtcl DISPLAY_NAME "Number of MSI messages requested"
--   set_parameter_property msi_multi_message_capable_hwtcl ALLOWED_RANGES { "1" "2" "4" "8" "16"}
-+   set_parameter_property msi_multi_message_capable_hwtcl ALLOWED_RANGES { "1" "2" "4" "8" "16" "32"}
-    set_parameter_property msi_multi_message_capable_hwtcl GROUP $group_name
-    set_parameter_property msi_multi_message_capable_hwtcl VISIBLE true
-    set_parameter_property msi_multi_message_capable_hwtcl HDL_PARAMETER true
 ```
 
 ### Confused Perl

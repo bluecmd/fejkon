@@ -102,6 +102,7 @@ class Test(unittest.TestCase):
 
     def reset(self):
         yield myhdl.delay(10)
+        self.ep.reset()
         self.rst.next = 1
         yield myhdl.delay(10)
         self.rst.next = 0

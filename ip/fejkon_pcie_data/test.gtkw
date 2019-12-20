@@ -1,7 +1,7 @@
-[timestart] 33355400
+[timestart] 33410700
 [size] 1920 1016
 [pos] 6 38
-*-16.158356 33628200 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-16.158356 33739000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] test.
 [sst_width] 588
 [signals_width] 350
@@ -10,6 +10,8 @@
 @28
 test.dut.clk
 test.dut.reset
+@22
+test.dut.my_id[15:0]
 @200
 -
 -
@@ -26,41 +28,87 @@ test.dut.data_tx_valid
 test.dut.data_tx_data[255:0]
 @200
 -
+@22
+test.dut.tlp_rx_st_data[255:0]
 @28
-test.dut.rx_st_startofpacket
-test.dut.rx_st_endofpacket
+test.dut.tlp_rx_st_endofpacket
+test.dut.tlp_rx_st_startofpacket
+test.dut.tlp_rx_st_ready
+test.dut.tlp_rx_st_valid
+test.dut.tlp_rx_st_empty[2:0]
 test.dut.rx_st_mask
 @22
 test.dut.rx_st_bar[7:0]
-@28
-test.dut.rx_st_error
-test.dut.rx_st_ready
-test.dut.rx_st_valid
-@24
-test.dut.rx_st_empty[1:0]
-@22
-test.dut.rx_st_data[255:0]
-@200
--
-@29
-test.dut.tx_st_startofpacket
-@28
-test.dut.tx_st_endofpacket
-test.dut.tx_st_error
-test.dut.tx_st_ready
-test.dut.tx_st_valid
-@24
-test.dut.tx_st_empty[1:0]
-@22
-test.dut.tx_st_data[255:0]
 @200
 -
 @22
-test.dut.my_id[15:0]
+test.dut.tlp_tx_instant_st_data[255:0]
 @28
-test.dut.my_id_valid
+test.dut.tlp_tx_instant_st_empty[2:0]
+test.dut.tlp_tx_instant_st_endofpacket
+test.dut.tlp_tx_instant_st_ready
+test.dut.tlp_tx_instant_st_startofpacket
+test.dut.tlp_tx_instant_st_valid
+@200
+-
 @22
-test.dut.tl_cfg_add[3:0]
-test.dut.tl_cfg_ctl[31:0]
+test.dut.tlp_tx_response_st_data[255:0]
+@28
+test.dut.tlp_tx_response_st_empty[2:0]
+test.dut.tlp_tx_response_st_endofpacket
+test.dut.tlp_tx_response_st_ready
+test.dut.tlp_tx_response_st_startofpacket
+test.dut.tlp_tx_response_st_valid
+@200
+-
+@22
+test.dut.tlp_tx_data_st_data[255:0]
+@28
+test.dut.tlp_tx_data_st_empty[2:0]
+test.dut.tlp_tx_data_st_endofpacket
+test.dut.tlp_tx_data_st_ready
+test.dut.tlp_tx_data_st_startofpacket
+test.dut.tlp_tx_data_st_valid
+@200
+-
+@22
+test.mem_access_req_data[127:0]
+@28
+test.mem_access_req_ready
+test.mem_access_req_valid
+@22
+test.mem_access_resp_data[127:0]
+@28
+test.mem_access_resp_ready
+test.mem_access_resp_valid
+@200
+-
+@22
+test.compl_data[31:0]
+test.compl_lower_address[6:0]
+test.compl_requester_id[15:0]
+@28
+test.compl_valid
+@22
+test.compl_tag[7:0]
+@200
+-
+@28
+test.tlp_tx_multiplexer.out_channel[1:0]
+@22
+test.tlp_tx_multiplexer.out_data[255:0]
+@28
+test.tlp_tx_multiplexer.out_empty[2:0]
+test.tlp_tx_multiplexer.out_endofpacket
+@22
+test.tlp_tx_multiplexer.out_payload[260:0]
+@28
+test.tlp_tx_multiplexer.out_ready
+test.tlp_tx_multiplexer.out_select[1:0]
+test.tlp_tx_multiplexer.out_startofpacket
+test.tlp_tx_multiplexer.out_valid
+test.tlp_tx_multiplexer.out_valid_wire
+@200
+-
 [pattern_trace] 1
 [pattern_trace] 0

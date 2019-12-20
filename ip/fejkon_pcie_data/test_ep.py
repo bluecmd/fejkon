@@ -62,6 +62,9 @@ class FejkonEP(pcie.Endpoint, pcie.MSICapability):
         self.tl_cfg_ctl = myhdl.Signal(myhdl.intbv()[32:])
         self.tl_cfg_sts = myhdl.Signal(myhdl.intbv()[53:])
 
+    def reset(self):
+        self.tx_st_ready.next = 1
+
     def handle_config_0_tlp(self, tlp):
         yield from super(FejkonEP, self).handle_config_0_tlp(tlp)
         # Send the bus/dev number
@@ -112,7 +115,7 @@ class FejkonEP(pcie.Endpoint, pcie.MSICapability):
 
     def handle_mem_read_tlp(self, tlp):
         """Handle ordinary 32 and 64 bit memory read TLPs"""
-        log.info("Got read TLP: %s", tlp)
+        log.info("MRd TLP: %s", tlp)
         yield from self._tlp_to_dut(tlp)
         self.tx_sem.release()
         yield self.tx_st_valid.posedge, myhdl.delay(1000)
@@ -149,7 +152,7 @@ class FejkonEP(pcie.Endpoint, pcie.MSICapability):
             val = val >> 32
         cpl = pcie.TLP()
         cpl.unpack(dws)
-        log.info("TLP returned: %s", cpl)
+        log.info("Completion TLP: %s", cpl)
         assert cpl.lower_address == tlp.get_lower_address()
         yield from self.send(cpl)
 

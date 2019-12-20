@@ -24,10 +24,8 @@ struct fejkon_port {
   int id;
 };
 
-#define PORT_RX_IRQ(x)      (1 + x * 4)
-#define PORT_TX_IRQ(x)      (2 + x * 4)
-#define PORT_SFP_IRQ(x)     (3 + x * 4)
-#define PORT_SFP_I2C_IRQ(x) (4 + x * 4)
+#define PORT_SFP_IRQ(x)     (3 + x * 2)
+#define PORT_SFP_I2C_IRQ(x) (4 + x * 2)
 
 #define SFP_PRESENT    (1 << 0)
 #define SFP_LOS        (1 << 1)

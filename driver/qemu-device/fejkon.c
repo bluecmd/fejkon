@@ -40,11 +40,29 @@
 #define PCI_VENDOR_ID_FEJKON 0xf1c0
 #define PCI_DEVICE_ID_FEJKON 0x0de5
 
+#define FRAME_SIZE 4096
+
+typedef struct {
+  dma_addr_t start;
+  dma_addr_t end;
+  dma_addr_t write;
+  dma_addr_t read;
+} FejkonDmaBuf;
+
 typedef struct {
   PCIDevice pdev;
   MemoryRegion bar0;
   struct avalon_i2c sfp1_i2c;
   struct avalon_i2c sfp2_i2c;
+  bool stopping;
+  QemuThread rx_thread;
+  QemuThread rx_irq_thread;
+  QemuThread tx_thread;
+  FejkonDmaBuf rx_buf;
+  FejkonDmaBuf tx_buf;
+  QemuMutex rx_buf_mutex;
+  QemuMutex tx_buf_mutex;
+  bool rx_buf_irq_enabled;
 } FejkonState;
 
 static bool fejkon_msi_enabled(FejkonState *card)
@@ -52,22 +70,22 @@ static bool fejkon_msi_enabled(FejkonState *card)
   return msi_enabled(&card->pdev);
 }
 
-static void sfp1_intr(void *opaque) {
+static void sfp1_i2c_intr(void *opaque) {
   FejkonState *card = opaque;
   if (!fejkon_msi_enabled(card)) {
-    printf("fejkon: SFP1 interrupt without MSI enabled\n");
+    printf("fejkon: SFP1 I2C interrupt without MSI enabled\n");
     return;
   }
   msi_notify(&card->pdev, 4);
 }
 
-static void sfp2_intr(void *opaque) {
+static void sfp2_i2c_intr(void *opaque) {
   FejkonState *card = opaque;
   if (!fejkon_msi_enabled(card)) {
-    printf("fejkon: SFP1 interrupt without MSI enabled\n");
+    printf("fejkon: SFP2 I2C interrupt without MSI enabled\n");
     return;
   }
-  msi_notify(&card->pdev, 8);
+  msi_notify(&card->pdev, 6);
 }
 
 static uint32_t fejkon_temperature(void)
@@ -147,8 +165,55 @@ static void fejkon_bar0_write(void *opaque, hwaddr addr, uint64_t val,
     return;
   }
 
-  /* TODO */
-  printf("fejkon: Write to unknown bar0 space: 0x%lx\n", addr);
+  switch (addr) {
+    case 0xA00:
+      /* DMA RX Start */
+      qemu_mutex_lock(&card->rx_buf_mutex);
+      card->rx_buf.start = (uint32_t)val;
+      card->rx_buf.read = (uint32_t)val;
+      card->rx_buf.write = (uint32_t)val;
+      card->rx_buf.end = (uint32_t)val;
+      qemu_mutex_unlock(&card->rx_buf_mutex);
+      break;
+    case 0xA04:
+      /* DMA RX End */
+      qemu_mutex_lock(&card->rx_buf_mutex);
+      card->rx_buf.end = (uint32_t)val;
+      qemu_mutex_unlock(&card->rx_buf_mutex);
+      break;
+    case 0xA08:
+      /* DMA RX Read pointer */
+      qemu_mutex_lock(&card->rx_buf_mutex);
+      card->rx_buf.read = (uint32_t)val;
+      // Re-enable IRQ
+      card->rx_buf_irq_enabled = 1;
+      qemu_mutex_unlock(&card->rx_buf_mutex);
+      break;
+    case 0xB00:
+      /* DMA TX Start */
+      qemu_mutex_lock(&card->tx_buf_mutex);
+      card->tx_buf.start = (uint32_t)val;
+      card->tx_buf.read = (uint32_t)val;
+      card->tx_buf.write = (uint32_t)val;
+      card->tx_buf.end = (uint32_t)val;
+      qemu_mutex_unlock(&card->tx_buf_mutex);
+      break;
+    case 0xB04:
+      /* DMA TX End */
+      qemu_mutex_lock(&card->tx_buf_mutex);
+      card->tx_buf.end = (uint32_t)val;
+      qemu_mutex_unlock(&card->tx_buf_mutex);
+      break;
+    case 0xB0C:
+      /* DMA TX Write pointer */
+      qemu_mutex_lock(&card->tx_buf_mutex);
+      card->tx_buf.read = (uint32_t)val;
+      qemu_mutex_unlock(&card->tx_buf_mutex);
+      break;
+    default:
+      printf("fejkon: Write to unknown bar0 space: 0x%lx\n", addr);
+      break;
+  }
 }
 
 static const MemoryRegionOps fejkon_bar0_ops = {
@@ -165,6 +230,63 @@ static const MemoryRegionOps fejkon_bar0_ops = {
   },
 
 };
+
+static dma_addr_t dma_incr(FejkonDmaBuf *b, dma_addr_t *var, size_t x)
+{
+  if (b->end > (*var+x))
+    return *var + x;
+  return b->start + ((*var + x) - b->end);
+}
+
+static void *fejkon_rx_thread(void *opaque)
+{
+  FejkonState *card = opaque;
+  dma_addr_t new_write;
+  char test[80] = "HELLO HELLO HELLO HELLO HELLO HELLO HELLO";
+  while (!card->stopping) {
+    usleep(100000);
+    if (card->rx_buf.start == card->rx_buf.end) {
+      continue;
+    }
+    printf("fejkon_rx_thread: processing\n");
+    pci_dma_write(&card->pdev, card->rx_buf.write, test, 32);
+    qemu_mutex_lock(&card->rx_buf_mutex);
+    new_write = dma_incr(&card->rx_buf, &card->rx_buf.write, FRAME_SIZE);
+    if (new_write == card->rx_buf.read) {
+      msi_notify(&card->pdev, 2);
+      hw_error("Fejkon RX buffer overflown, packets dropped");
+    } else {
+      card->rx_buf.write += new_write;
+    }
+    qemu_mutex_unlock(&card->rx_buf_mutex);
+  }
+  return NULL;
+}
+
+static void *fejkon_rx_irq_thread(void *opaque)
+{
+  FejkonState *card = opaque;
+  while (!card->stopping) {
+    usleep(100000);
+    // Emulate FPGA IRQ behavior
+    qemu_mutex_lock(&card->rx_buf_mutex);
+    if (card->rx_buf.read != card->rx_buf.write && card->rx_buf_irq_enabled) {
+      msi_notify(&card->pdev, 1);
+      card->rx_buf_irq_enabled = 0;
+    }
+    qemu_mutex_unlock(&card->rx_buf_mutex);
+  }
+  return NULL;
+}
+
+static void *fejkon_tx_thread(void *opaque)
+{
+  FejkonState *card = opaque;
+  while (!card->stopping) {
+    sleep(1);
+  }
+  return NULL;
+}
 
 static void pci_fejkon_realize(PCIDevice *pdev, Error **errp)
 {
@@ -183,13 +305,13 @@ static void pci_fejkon_realize(PCIDevice *pdev, Error **errp)
   pci_register_bar(pdev, 0, PCI_BASE_ADDRESS_SPACE_MEMORY, &card->bar0);
 
   card->sfp1_i2c.name = "sfp1";
-  card->sfp1_i2c.intr = sfp1_intr;
+  card->sfp1_i2c.intr = sfp1_i2c_intr;
   card->sfp1_i2c.extra = card;
   card->sfp1_i2c.data[0] = 0x3;
   card->sfp1_i2c.data[1] = 0x4;
   strcpy((char*)&card->sfp1_i2c.data[20], "FEJKON TEST");
   card->sfp2_i2c.name = "sfp2";
-  card->sfp2_i2c.intr = sfp2_intr;
+  card->sfp2_i2c.intr = sfp2_i2c_intr;
   card->sfp2_i2c.extra = card;
   memcpy(&card->sfp2_i2c.data[0], &card->sfp1_i2c.data[0], 256);
 
@@ -199,12 +321,24 @@ static void pci_fejkon_realize(PCIDevice *pdev, Error **errp)
   if (pcie_aer_init(pdev, PCI_ERR_VER, 0x100, PCI_ERR_SIZEOF, NULL) < 0) {
     hw_error("Failed to initialize AER capability");
   }
+
+  qemu_mutex_init(&card->rx_buf_mutex);
+  qemu_mutex_init(&card->tx_buf_mutex);
+  qemu_thread_create(&card->rx_thread, "fejkon-port-rx", fejkon_rx_thread,
+      card, QEMU_THREAD_JOINABLE);
+  qemu_thread_create(&card->rx_irq_thread, "fejkon-port-rx-irq",
+      fejkon_rx_irq_thread, card, QEMU_THREAD_JOINABLE);
+  qemu_thread_create(&card->tx_thread, "fejkon-port-tx", fejkon_tx_thread,
+      card, QEMU_THREAD_JOINABLE);
 }
 
 static void pci_fejkon_uninit(PCIDevice *pdev)
 {
-  /* FejkonState *card = FEJKON(pdev); */
+  FejkonState *card = FEJKON(pdev);
   msi_uninit(pdev);
+  qemu_thread_join(&card->rx_thread);
+  qemu_thread_join(&card->rx_irq_thread);
+  qemu_thread_join(&card->tx_thread);
 }
 
 static void fejkon_instance_init(Object *obj)

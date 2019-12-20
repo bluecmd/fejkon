@@ -31,6 +31,50 @@ static const struct ethtool_ops net_ethtool_ops = {
 
 struct class *fejkon_class;
 
+static void port_refresh_status(struct fejkon_port *port)
+{
+  int status;
+  status = ioread32(port->card->bar0 + BAR0_SFP_STATUS_OFFSET(port->id));
+  if ((status & SFP_PRESENT) == 0 || status & SFP_LOS || status & SFP_TX_FAIL) {
+    netif_carrier_off(port->net);
+  } else {
+    netif_carrier_on(port->net);
+  }
+}
+
+static irqreturn_t card_irq(int irq, void *opaque)
+{
+  struct fejkon_card *card = opaque;
+  pr_info("card_irq irq = %d dev = %p\n", irq, card);
+  return IRQ_HANDLED;
+}
+
+static irqreturn_t rx_irq(int irq, void *opaque)
+{
+  struct fejkon_card *card = opaque;
+  pr_info("rx_irq irq = %d dev = %p\n", irq, card);
+  // TODO: Schedule reading of packets using napi_schedule
+  // TODO: Re-enable IRQ in NAPI handler
+  return IRQ_HANDLED;
+}
+
+static irqreturn_t rx_dropped_irq(int irq, void *opaque)
+{
+  struct fejkon_card *card = opaque;
+  dev_err(&card->pci->dev, "packet dropped");
+  // TODO: Counters
+  return IRQ_HANDLED;
+}
+
+static irqreturn_t port_sfp_irq(int irq, void *opaque)
+{
+  struct fejkon_port *port = opaque;
+  pr_info("port_sfp_irq port = %d, irq = %d dev = %p\n",
+      port->id, irq, port);
+  port_refresh_status(port);
+  return IRQ_HANDLED;
+}
+
 static int net_open(struct net_device *net)
 {
   netdev_notice(net, "%s up\n", net->name);
@@ -57,47 +101,6 @@ static const struct net_device_ops net_netdev_ops = {
   .ndo_stop       = net_stop,
   .ndo_start_xmit = net_tx,
 };
-
-static void port_refresh_status(struct fejkon_port *port)
-{
-  int status;
-  status = ioread32(port->card->bar0 + BAR0_SFP_STATUS_OFFSET(port->id));
-  if ((status & SFP_PRESENT) == 0 || status & SFP_LOS || status & SFP_TX_FAIL) {
-    netif_carrier_off(port->net);
-  } else {
-    netif_carrier_on(port->net);
-  }
-}
-
-static irqreturn_t card_irq(int irq, void *dev)
-{
-  struct fejkon_card *card = dev;
-  pr_info("card_irq irq = %d dev = %p\n", irq, card);
-  return IRQ_HANDLED;
-}
-
-static irqreturn_t port_rx_irq(int irq, void *dev)
-{
-  struct fejkon_port *port = dev;
-  pr_info("port_rx_irq port = %d, irq = %d dev = %d\n", port->id, irq, *(int *)dev);
-  return IRQ_HANDLED;
-}
-
-static irqreturn_t port_tx_irq(int irq, void *dev)
-{
-  struct fejkon_port *port = dev;
-  pr_info("port_tx_irq port = %d, irq = %d dev = %d\n", port->id, irq, *(int *)dev);
-  return IRQ_HANDLED;
-}
-
-static irqreturn_t port_sfp_irq(int irq, void *dev)
-{
-  struct fejkon_port *port = dev;
-  pr_info("port_sfp_irq port = %d, irq = %d dev = %d\n",
-      port->id, irq, *(int *)dev);
-  port_refresh_status(port);
-  return IRQ_HANDLED;
-}
 
 static void init_netdev(struct net_device *net)
 {
@@ -219,20 +222,6 @@ static int probe_port(struct fejkon_card *card, int port_id)
       "%s port%d", dev_name(&card->pci->dev), port->id);
   SET_NETDEV_DEV(net, port->dev);
 
-  irq = pci_irq_vector(card->pci, PORT_RX_IRQ(port->id));
-  ret = request_irq(irq, port_rx_irq, IRQF_SHARED, KBUILD_MODNAME, port);
-  if (ret < 0) {
-    dev_err(port->dev, "request_irq for port_rx_irq\n");
-    goto error;
-  }
-
-  irq = pci_irq_vector(card->pci, PORT_TX_IRQ(port->id));
-  ret = request_irq(irq, port_tx_irq, IRQF_SHARED, KBUILD_MODNAME, port);
-  if (ret < 0) {
-    dev_err(port->dev, "request_irq for port_tx_irq\n");
-    goto error;
-  }
-
   irq = pci_irq_vector(card->pci, PORT_SFP_IRQ(port->id));
   ret = request_irq(irq, port_sfp_irq, IRQF_SHARED, KBUILD_MODNAME, port);
   if (ret < 0) {
@@ -272,10 +261,19 @@ static void remove_port(struct fejkon_card *card, int port_id)
   }
   unregister_netdevice(port->net);
   fejkon_i2c_remove(port->i2c);
-  free_irq(pci_irq_vector(card->pci, PORT_RX_IRQ(port_id)), port);
-  free_irq(pci_irq_vector(card->pci, PORT_TX_IRQ(port_id)), port);
   free_irq(pci_irq_vector(card->pci, PORT_SFP_IRQ(port_id)), port);
   device_unregister(port->dev);
+}
+
+static int setup_buffers(struct fejkon_card *card)
+{
+  iowrite32(0xdeadbeef, card->bar0 + 0xA00);
+  iowrite32(0xdeadbeef + 0x8000, card->bar0 + 0xA04);
+  // Enable IRQ
+  iowrite32(0xdeadbeef, card->bar0 + 0xA08);
+  iowrite32(0xdeadbeef, card->bar0 + 0xB00);
+  iowrite32(0xdeadbeef + 0x8000, card->bar0 + 0xB04);
+  return 0;
 }
 
 static int probe(struct pci_dev *pcidev, const struct pci_device_id *id)
@@ -393,6 +391,20 @@ static int probe(struct pci_dev *pcidev, const struct pci_device_id *id)
     goto error_sysfs_register;
   }
 
+  irq = pci_irq_vector(card->pci, 1);
+  ret = request_irq(irq, rx_irq, IRQF_SHARED, KBUILD_MODNAME, card);
+  if (ret < 0) {
+    dev_err(&pcidev->dev, "request_irq for rx_irq\n");
+    goto error_rx_irq;
+  }
+
+  irq = pci_irq_vector(card->pci, 2);
+  ret = request_irq(irq, rx_dropped_irq, IRQF_SHARED, KBUILD_MODNAME, card);
+  if (ret < 0) {
+    dev_err(&pcidev->dev, "request_irq for rx_dropped_irq\n");
+    goto error_rx_dropped_irq;
+  }
+
   /* card initialized, register netdev for ports */
   for (port_init = 0; port_init < ports; port_init++) {
     ret = probe_port(card, port_init);
@@ -401,14 +413,24 @@ static int probe(struct pci_dev *pcidev, const struct pci_device_id *id)
     }
   }
 
+  ret =setup_buffers(card);
+  if (ret < 0) {
+    goto error_setup_buffers;
+  }
+
   pci_set_drvdata(pcidev, card);
   return 0;
+error_setup_buffers:
 error_port_init:
   rtnl_lock();
   for (port_init--; port_init >= 0; port_init--) {
     remove_port(card, port_init);
   }
   rtnl_unlock();
+  free_irq(pci_irq_vector(pcidev, 2), card);
+error_rx_dropped_irq:
+  free_irq(pci_irq_vector(pcidev, 1), card);
+error_rx_irq:
   device_remove_file(&pcidev->dev, &dev_attr_phy_freq);
 error_sysfs_register:
   /* hwmon is deregistered with device, nothing to clean up*/
@@ -440,6 +462,8 @@ static void remove(struct pci_dev *pcidev)
     remove_port(card, i);
   }
   rtnl_unlock();
+  free_irq(pci_irq_vector(pcidev, 2), card);
+  free_irq(pci_irq_vector(pcidev, 1), card);
   device_remove_file(&pcidev->dev, &dev_attr_phy_freq);
   free_irq(pci_irq_vector(pcidev, 0), card);
   pci_free_irq_vectors(pcidev);

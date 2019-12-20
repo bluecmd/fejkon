@@ -304,12 +304,13 @@ be easier. However, it is quite likely MSI-X has its own pitfalls.
 | Vector | Description        |
 |--------|--------------------|
 | 0      | Card status        |
-| 1      | Port 0 SFP status  |
-| 2      | Port 0 SFP I2C     |
-| 3-4    | Port 1 ...         |
-| 5-6    | Port 2 ...         |
-| 7-8    | Port 3 ...         |
-| 16-31  | RX/TX Queues       |
+| 1      | RX Data available  |
+| 2      | RX Packet dropped  |
+| 3      | Port 0 SFP status  |
+| 4      | Port 0 SFP I2C     |
+| 5-6    | Port 1 ...         |
+| 7-8    | Port 2 ...         |
+| 9-10   | Port 3 ...         |
 
 ## Debugging
 

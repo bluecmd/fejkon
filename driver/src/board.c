@@ -49,12 +49,58 @@ static irqreturn_t card_irq(int irq, void *opaque)
   return IRQ_HANDLED;
 }
 
+static int poll(struct napi_struct *napi, int budget)
+{
+  struct fejkon_card *card = container_of(napi, struct fejkon_card, napi);
+  // "The poll() function may also process TX completions, in which case if
+  // it processes the entire TX ring then it should count that work as the rest
+  // of the budget. Otherwise, TX completions are not counted."
+  // TODO: TX
+  int work_done = 0;
+
+  int write_ptr = ioread32(card->bar0 + 0xA0C) - card->rx_buf_start_dma;
+  void *rx_buf_write = card->rx_buf_start + write_ptr;
+  while(rx_buf_write != card->rx_buf_read) {
+    int port_id;
+    int len;
+    struct sk_buff *skb;
+    struct fejkon_port *port;
+    if (work_done >= budget)
+      return work_done;
+
+    port_id = be32_to_cpu(*(uint32_t*)(card->rx_buf_read + 4092));
+    len = be32_to_cpu(*(uint32_t*)(card->rx_buf_read + 4088));
+    port = card->port[port_id];
+    skb = netdev_alloc_skb(port->net, len);
+    if (!skb) {
+      dev_warn(port->dev, "failed to allocate skb, len %d", len);
+      return work_done;
+    }
+    //memcpy_fromio(skb_put(skb, len), card->rx_buf_read, len);
+    // TODO: This crashes for some reason
+    netif_receive_skb(skb);
+    work_done++;
+    card->rx_buf_read += 4096;
+    if (card->rx_buf_read == card->rx_buf_end) {
+      card->rx_buf_read = card->rx_buf_start;
+    }
+  }
+
+  pr_info("poll budget = %d, processed = %d\n", budget, work_done);
+  if (work_done < budget) {
+    napi_complete(napi);
+    // Update read pointer and re-enable IRQ
+    iowrite32(
+        card->rx_buf_start_dma + (card->rx_buf_read - card->rx_buf_start),
+        card->bar0 + 0xA08);
+  }
+  return work_done;
+}
+
 static irqreturn_t rx_irq(int irq, void *opaque)
 {
   struct fejkon_card *card = opaque;
-  pr_info("rx_irq irq = %d dev = %p\n", irq, card);
-  // TODO: Schedule reading of packets using napi_schedule
-  // TODO: Re-enable IRQ in NAPI handler
+  napi_schedule(&card->napi);
   return IRQ_HANDLED;
 }
 
@@ -91,8 +137,7 @@ static netdev_tx_t net_tx(struct sk_buff *skb, struct net_device *net)
 {
   netdev_notice(net, "tx len %d, bytes: %02x %02x %02x %02x\n",
       skb->len, skb->data[0], skb->data[1], skb->data[2], skb->data[3]);
-  /* Loop the packet back for now */
-  netif_rx(skb);
+  // TODO
   return NETDEV_TX_OK;
 }
 
@@ -237,16 +282,20 @@ static int probe_port(struct fejkon_card *card, int port_id)
     goto error;
   }
 
+  netif_napi_add(net, &card->napi, poll, 64 /* weight */);
+
   ret = register_netdev(net);
   if (ret) {
     dev_err(port->dev, "unable to register netdev\n");
-    goto error;
+    goto error_register_netdev;
   }
 
   card->port[port->id] = port;
   port_refresh_status(port);
   dev_notice(port->dev, "registered port %d netdev %s\n", port->id, net->name);
 
+error_register_netdev:
+  netif_napi_del(&card->napi);
 error:
   /* TODO: Error breakdown and cleanup */
   return ret;
@@ -260,6 +309,7 @@ static void remove_port(struct fejkon_card *card, int port_id)
     return;
   }
   unregister_netdevice(port->net);
+  netif_napi_del(&port->card->napi);
   fejkon_i2c_remove(port->i2c);
   free_irq(pci_irq_vector(card->pci, PORT_SFP_IRQ(port_id)), port);
   device_unregister(port->dev);
@@ -267,12 +317,28 @@ static void remove_port(struct fejkon_card *card, int port_id)
 
 static int setup_buffers(struct fejkon_card *card)
 {
-  iowrite32(0xdeadbeef, card->bar0 + 0xA00);
-  iowrite32(0xdeadbeef + 0x8000, card->bar0 + 0xA04);
-  // Enable IRQ
-  iowrite32(0xdeadbeef, card->bar0 + 0xA08);
-  iowrite32(0xdeadbeef, card->bar0 + 0xB00);
-  iowrite32(0xdeadbeef + 0x8000, card->bar0 + 0xB04);
+  dma_addr_t rx_dma;
+  dma_addr_t tx_dma;
+  card->rx_buf_start = dma_alloc_coherent(
+      &card->pci->dev, 4096 * 128, &rx_dma, GFP_KERNEL);
+  card->rx_buf_read = card->rx_buf_start;
+  card->rx_buf_end = card->rx_buf_start + 4096 * 128;
+  card->tx_buf_start = dma_alloc_coherent(
+      &card->pci->dev, 4096 * 128, &tx_dma, GFP_KERNEL);
+  card->tx_buf_write = card->tx_buf_start;
+  card->tx_buf_end = card->tx_buf_start + 4096 * 128;
+  // Set RX buffer start and end
+  iowrite32(rx_dma, card->bar0 + 0xA00);
+  iowrite32(rx_dma + 4096 * 128, card->bar0 + 0xA04);
+  // Set TX buffer start and end
+  iowrite32(rx_dma, card->bar0 + 0xB00);
+  iowrite32(rx_dma + 4096 * 128, card->bar0 + 0xB04);
+  // Enable RX by confirming our read pointer at the start
+  iowrite32(rx_dma, card->bar0 + 0xA08);
+
+  // Save DMA addresses for later calculations
+  card->rx_buf_start_dma = rx_dma;
+  card->tx_buf_start_dma = tx_dma;
   return 0;
 }
 
@@ -417,12 +483,14 @@ static int probe(struct pci_dev *pcidev, const struct pci_device_id *id)
     }
   }
 
-  ret =setup_buffers(card);
+  ret = setup_buffers(card);
   if (ret < 0) {
     goto error_setup_buffers;
   }
 
+  pci_set_master(pcidev);
   pci_set_drvdata(pcidev, card);
+  napi_enable(&card->napi);
   return 0;
 error_setup_buffers:
 error_port_init:
@@ -461,6 +529,11 @@ static void remove(struct pci_dev *pcidev)
   if (!card) {
     return;
   }
+  napi_disable(&card->napi);
+  // Disable buffers
+  iowrite32(0, card->bar0 + 0xA00);
+  iowrite32(0, card->bar0 + 0xB00);
+  pci_clear_master(pcidev);
   rtnl_lock();
   for (i = 0; i < MAX_PORTS; i++) {
     remove_port(card, i);

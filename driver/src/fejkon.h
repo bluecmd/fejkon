@@ -2,11 +2,11 @@
 #define _FEJKON_H_
 
 #include <linux/i2c.h>
+#include <linux/netdevice.h>
 #include <linux/pci.h>
 
 #define MAX_PORTS 4
 
-struct net_device;
 struct i2c_dev;
 struct fejkon_port;
 
@@ -14,6 +14,15 @@ struct fejkon_card {
   struct pci_dev *pci;
   void __iomem *bar0;
   struct fejkon_port *port[MAX_PORTS];
+  struct napi_struct napi;
+  void *rx_buf_start;
+  dma_addr_t rx_buf_start_dma;
+  void *rx_buf_read;
+  void *rx_buf_end;
+  void *tx_buf_start;
+  dma_addr_t tx_buf_start_dma;
+  void *tx_buf_write;
+  void *tx_buf_end;
 };
 
 struct fejkon_port {

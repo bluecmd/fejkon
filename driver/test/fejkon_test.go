@@ -23,7 +23,7 @@ import (
 	"github.com/vishvananda/netlink"
 )
 
-func TestSemdPacket(t *testing.T) {
+func TestSendPacket(t *testing.T) {
 	ifi, err := net.InterfaceByName("fc0")
 	if err != nil {
 		log.Fatalf("failed to open interface: %v", err)

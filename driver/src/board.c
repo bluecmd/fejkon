@@ -331,7 +331,11 @@ static int probe(struct pci_dev *pcidev, const struct pci_device_id *id)
     ktime_t end;
     int perf;
     for (ret = 0; ret < 0x80000; ret++) {
-      version = ioread32(card->bar0 + 0x0);
+      if (ioread32(card->bar0 + 0x0) == ~0) {
+        dev_err(&pcidev->dev, "stress test failed");
+        ret = -EIO;
+        goto error_sanity;
+      }
     }
     end = ktime_get();
     perf = (0x80000*4*8)/((end - start) / 1000);

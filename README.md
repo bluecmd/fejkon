@@ -148,7 +148,7 @@ Accesses need to be 4 byte wide.
 | 0x00004 | 4     | Card   | Git hash      | Git hash of HDL built        |
 | 0x00010 | 1     | Card   | Temprature    | FPGA Core Temperature (1)    |
 | 0x00020 | 4     | Card   | Freq. Gauge   | PHY effective clock gauge    |
-| 0x00100 | 256   | Card   | PCIe Facility | PCIe counters and status (2) |
+| 0x00800 | 512   | Card   | PCIe Facility | PCIe counters and status (2) |
 | 0x01000 | 1     | Port 0 | SFP Status    | SFP Status Word (3)          |
 | 0x01040 | 64    | Port 0 | SFP Port I2C  | SFP I2C core (4)             |
 | 0x02x00 | ...   | Port 1 | SFP Port      |                              |
@@ -171,13 +171,19 @@ Accesses need to be 4 byte wide.
 
 #### PCIe Facility
 
-| Addr | Width | Name                  |
-|------|-------|-----------------------|
-| 0x00 | 4     | Endpoint address      |
-| 0x04 | 4     | RX TLP counter        |
-| 0x08 | 4     | TX TLP counter        |
-| 0x20 | 32    | Last RX TLP (8 DWs)   |
-| 0x40 | 32    | Last TX TLP (8 DWs)   |
+| Addr  | Width | Name                              |
+|-------|-------|-----------------------------------|
+| 0x000 | 4     | Endpoint address                  |
+| 0x004 | 4     | RX TLP counter                    |
+| 0x008 | 4     | RX Unsupported TLP counter        |
+| 0x00C | 4     | TX Data TLP counter               |
+| 0x010 | 4     | TX Instant TLP counter            |
+| 0x014 | 4     | TX Response TLP counter           |
+| 0x020 | 32    | Last RX TLP (8 DWs)               |
+| 0x040 | 32    | Last TX TLP (8 DWs)               |
+| 0x100 | 4     | Data TX TLP Fill Level            |
+| 0x110 | 4     | Instant TX TLP Fill Level         |
+| 0x120 | 4     | Response TX TLP Fill Level        |
 
 #### Temperature
 

@@ -2,7 +2,8 @@
 
 .DELETE_ON_ERROR:
 
-SRCS := ../pcie_msi_intr/pcie_msi_intr.sv fejkon_pcie_data.sv tl_cfg_module.sv test.sv
+SRCS := fejkon_pcie_data.sv tl_cfg_module.sv test.sv \
+	../intel_pcie_tlp_adapter/intel_pcie_tlp_adapter.sv
 
 lint: $(SRCS)
 	pylint3 --rcfile=pylintrc test.py test_ep.py --exit-zero
@@ -10,7 +11,7 @@ lint: $(SRCS)
 	iverilog -g2012 -t null $^
 
 test.vvp: $(SRCS)
-	iverilog -g2012 -o $@ $^
+	iverilog -g2012 -o $@ $^ $(wildcard test/*)
 
 test: test.vvp
 ifneq ($(TEST),)

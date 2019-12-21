@@ -124,6 +124,7 @@ module fejkon_pcie_data (
 
   logic tlp_rx_st_ok;
   // Signal indicating if we should process the current RX TLP stream
+  // TODO(bluecmd): What about tlp_rx_st_error ?
   assign tlp_rx_st_ok = is_ready & tlp_rx_st_valid;
 
   //

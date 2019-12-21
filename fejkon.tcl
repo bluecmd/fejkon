@@ -491,16 +491,10 @@ add_connection pcie.data_clk fc1_pcie_tx.out_clk
 add_connection pcie.data_clk pcie_data_tx_multiplex.clk
 
 add_connection pcie.irq sfp0.i2c_irq
-set_connection_parameter_value pcie.irq/sfp0.i2c_irq irqNumber {0}
-
-add_connection pcie.irq sfp0.sfp_irq
-set_connection_parameter_value pcie.irq/sfp0.sfp_irq irqNumber {4}
+set_connection_parameter_value pcie.irq/sfp0.i2c_irq irqNumber {3}
 
 add_connection pcie.irq sfp1.i2c_irq
-set_connection_parameter_value pcie.irq/sfp1.i2c_irq irqNumber {1}
-
-add_connection pcie.irq sfp1.sfp_irq
-set_connection_parameter_value pcie.irq/sfp1.sfp_irq irqNumber {5}
+set_connection_parameter_value pcie.irq/sfp1.i2c_irq irqNumber {4}
 
 add_connection pcie_data_tx_multiplex.out pcie.data_tx
 

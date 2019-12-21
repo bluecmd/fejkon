@@ -28,9 +28,6 @@
 static const struct header_ops net_header_ops = {
 };
 
-static const struct ethtool_ops net_ethtool_ops = {
-};
-
 struct class *fejkon_class;
 
 static void port_refresh_status(struct timer_list *timer)
@@ -90,9 +87,9 @@ static int poll(struct napi_struct *napi, int budget)
     port_id = be32_to_cpu(*(uint32_t*)(card->rx_buf_read + 4092));
     len = be32_to_cpu(*(uint32_t*)(card->rx_buf_read + 4088));
     port = card->port[port_id];
-    if (!netif_carrier_ok(port->net)) {
+    if (!netif_oper_up(port->net)) {
       dev_notice(port->dev,
-          "received packet on interface without carrier, ignoring");
+          "received packet on inactive interface, ignoring");
     } else {
       skb = netdev_alloc_skb(port->net, len);
       if (!skb) {
@@ -167,6 +164,29 @@ static const struct net_device_ops net_netdev_ops = {
   .ndo_open       = net_open,
   .ndo_stop       = net_stop,
   .ndo_start_xmit = net_tx,
+};
+
+static void ethtool_get_drvinfo(struct net_device *net,
+    struct ethtool_drvinfo *info)
+{
+  struct fejkon_port *port = netdev_priv(net);
+  unsigned int githash;
+  strlcpy(info->driver, KBUILD_MODNAME, sizeof(info->driver));
+
+  githash = ioread32(port->card->bar0 + 0x4);
+  snprintf(info->fw_version, sizeof(info->fw_version), "git:%08x", githash);
+  strlcpy(info->bus_info, dev_name(port->dev), sizeof(info->bus_info));
+  // TODO: There are probably many more interesting fields to fill in
+}
+
+static u32 ethtool_get_link(struct net_device *net)
+{
+  return netif_carrier_ok(net);
+}
+
+static const struct ethtool_ops net_ethtool_ops = {
+  .get_link = ethtool_get_link,
+  .get_drvinfo = ethtool_get_drvinfo,
 };
 
 static void init_netdev(struct net_device *net)
@@ -265,7 +285,6 @@ static ssize_t phy_freq_show(struct device *dev, struct device_attribute *attr,
 }
 
 static DEVICE_ATTR_RO(phy_freq);
-
 
 static int probe_port(struct fejkon_card *card, int port_id)
 {

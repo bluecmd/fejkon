@@ -89,14 +89,24 @@ func TestDumpEthtool(t *testing.T) {
 	log.Printf("ethtool fc0:\n%v", string(out))
 }
 
-func TestDumpEthtoolSfp(t *testing.T) {
-	out, err := exec.Command("/bin/ethtool", "-m", "fc0").CombinedOutput()
+func TestDumpEthtoolDriver(t *testing.T) {
+	out, err := exec.Command("/bin/ethtool", "-i", "fc0").CombinedOutput()
 	if err != nil {
-		t.Errorf("ethtool -m fc0: err: %s, out: %s", err, string(out))
+		t.Errorf("ethtool -i fc0: err: %s, out: %s", err, string(out))
 		return
 	}
-	log.Printf("ethtool -m fc0:\n%v", string(out))
+	log.Printf("ethtool -i fc0:\n%v", string(out))
 }
+
+// TODO: Implement?
+//func TestDumpEthtoolSfp(t *testing.T) {
+//	out, err := exec.Command("/bin/ethtool", "-m", "fc0").CombinedOutput()
+//	if err != nil {
+//		t.Errorf("ethtool -m fc0: err: %s, out: %s", err, string(out))
+//		return
+//	}
+//	log.Printf("ethtool -m fc0:\n%v", string(out))
+//}
 
 func TestDumpInterrupts(t *testing.T) {
 	t.Skip("needs to be manually enabled")

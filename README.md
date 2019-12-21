@@ -74,7 +74,8 @@ $ make
 The recommended flow is using Quartus Platform Designer to make changes.
 
 To build the qsys files needed simply execute `make QPATH=/path/to/quartus` in the root directory.
-Then use platform designer to edit `fejkon.qsys`. When you are done, export the system
+Then use platform designer to edit `fejkon.qsys` using `make edit-clean`.
+When you are done, export the system
 using "Export System as Platform Designer script (.tcl)" under the "File" menu. If you
 have updated any subsystems you need to this for those systems as well.
 
@@ -154,12 +155,14 @@ Accesses need to be 4 byte wide.
 | 0x02x00 | ...   | Port 1 | SFP Port      |                              |
 | 0x03x00 | ...   | Port 2 | SFP Port      |                              |
 | 0x04x00 | ...   | Port 3 | SFP Port      |                              |
-| 0x10000 | 2048  | Port 0 | FC XCVR IP    | Fejkon FC XCVR Core (5)      |
-| 0x10800 | 2048  | Port 0 | TX XCVR Mgmt  | V-Series Transceiver PHY (6) |
-| 0x12000 | 32    | Port 0 | FC Framer     | Fibre Channel Framer (7)     |
-| 0x2xxxx | ...   | Port 1 | ...           |                              |
-| 0x3xxxx | ...   | Port 2 | ...           |                              |
-| 0x4xxxx | ...   | Port 3 | ...           |                              |
+| 0x80000 | 2048  | Port 0 | FC XCVR IP    | Fejkon FC XCVR Core (5)      |
+| 0x80800 | 2048  | Port 0 | TX XCVR Mgmt  | V-Series Transceiver PHY (6) |
+| 0x82000 | 32    | Port 0 | FC Framer     | Fibre Channel Framer (7)     |
+| 0x84000 | 8     | Port 0 | PCIe CDC FIFO | (Undoc.) fc0\_rx\_cdc        |
+| 0x9xxxx | ...   | Port 1 | ...           |                              |
+| 0xAxxxx | ...   | Port 2 | ...           |                              |
+| 0xBxxxx | ...   | Port 3 | ...           |                              |
+| 0xCxxxx | ...   | Card   | XCVR Reconfig | (Undoc.) xcvr\_reconfig      |
 
 1) Details in section below
 2) Details in section below

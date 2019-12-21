@@ -795,14 +795,7 @@ set_connection_parameter_value xcvr_reconfig.reconfig_to_xcvr/phy.reconfig_to_xc
 # interconnect requirements
 set_interconnect_requirement {$system} {qsys_mm.clockCrossingAdapter} {HANDSHAKE}
 set_interconnect_requirement {$system} {qsys_mm.enableEccProtection} {FALSE}
-set_interconnect_requirement {$system} {qsys_mm.enableInstrumentation} {TRUE}
 set_interconnect_requirement {$system} {qsys_mm.insertDefaultSlave} {FALSE}
 set_interconnect_requirement {$system} {qsys_mm.maxAdditionalLatency} {1}
-set_interconnect_requirement {dma_descr.s1} {qsys_mm.insertPerformanceMonitor} {FALSE}
-set_interconnect_requirement {dma_descr.s2} {qsys_mm.insertPerformanceMonitor} {FALSE}
-set_interconnect_requirement {dma_rd_pipeline.m0} {qsys_mm.insertPerformanceMonitor} {FALSE}
-set_interconnect_requirement {dma_wr_pipeline.m0} {qsys_mm.insertPerformanceMonitor} {FALSE}
-set_interconnect_requirement {phy.dma_rd_master} {qsys_mm.insertPerformanceMonitor} {TRUE}
-set_interconnect_requirement {phy.dma_wr_master} {qsys_mm.insertPerformanceMonitor} {TRUE}
 
 save_system {fejkon_pcie.qsys}

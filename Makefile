@@ -1,17 +1,14 @@
 QPATH ?= "$(HOME)/intelFPGA/19.1/quartus"
 
-.DELETE_ON_ERROR:
+#.DELETE_ON_ERROR:
 
-.PHONY: all syscon program flash editor sim ports defconfig menuconfig
+.PHONY: all syscon program flash editor defconfig menuconfig
 
 all: fejkon.sof
 
 clean:
 	rm -f fejkon.sof
 	rm -fr gen
-
-ports:
-	@cat gen/db/ip/fejkon/fejkon.v | awk '/module/,/\);/'
 
 fejkon.sof: ip/altera_fc_phy/fc_phy.qip fejkon.qsys de5net.sdc de5net.tcl $(wildcard ip/*/*.sv)
 	echo "\`define FEJKON_GIT_HASH 32'h$(shell git describe --long --always --abbrev=8)" > ip/fejkon_identity/version.sv
@@ -37,35 +34,42 @@ program: fejkon.sof
 flash: fejkon.sof
 	QPATH=$(QPATH) utils/flash.sh fejkon.sof
 
+syscon:
+	$(QPATH)/sopc_builder/bin/system-console --desktop_script=syscon.tcl -debug
+
 ip/altera_fc_phy/fc_phy.qip: ip/altera_fc_phy/fc_phy.v
 	(cd ip/altera_fc_phy; $(QPATH)/bin/qmegawiz  -silent $(PWD)/$<)
 	touch $@
 
+ip/fejkon_identity/version.sv:
+	touch ip/fejkon_identity/version.sv
+
 config.tcl: .config config.py
 	python3 config.py > config.tcl
 
-fejkon.qsys: fejkon.tcl fejkon_apply_config.tcl fejkon_sfp.qsys fejkon_pcie.qsys config.tcl
-	touch ip/fejkon_identity/version.sv
+fejkon.qsys: $(wildcard fejkon_*.tcl) config.tcl .qsys-configured
+
+.qsys-clean:
+	# Generate clean platform files
+	rm -f .qsys-configured \
+		fejkon_pcie.qsys fejkon_fc.qsys fejkon_sfp.qsys fejkon.qsys
+	$(QPATH)/sopc_builder/bin/qsys-script --script=fejkon_pcie.tcl
+	$(QPATH)/sopc_builder/bin/qsys-script --script=fejkon_fc.tcl
+	$(QPATH)/sopc_builder/bin/qsys-script --script=fejkon_sfp.tcl
+	$(QPATH)/sopc_builder/bin/qsys-script --script=fejkon.tcl
+	touch $@
+
+.qsys-configured:
+	make -C $(PWD) .qsys-clean
 	$(QPATH)/sopc_builder/bin/qsys-script --script=fejkon_apply_config.tcl
+	rm .qsys-clean
+	touch $@
 
-%.qsys: %.tcl
-	$(QPATH)/sopc_builder/bin/qsys-script --script=$< --search-path='$(wildcard ip/**/*_hw.tcl),$$'
-
-syscon:
-	$(QPATH)/sopc_builder/bin/system-console --desktop_script=syscon.tcl -debug
-
-editor: fejkon.qsys
+edit-clean: .qsys-clean
 	$(QPATH)/sopc_builder/bin/qsys-edit fejkon.qsys
 
-testbench: fejkon.qsys
-	$(QPATH)/sopc_builder/bin/qsys-generate \
-		--testbench=STANDARD \
-		--testbench-simulation=VERILOG \
-		--output-directory=$(PWD) \
-		fejkon.qsys
-
-sim: testbench
-	vsim -do msim.do
+edit: fejkon.qsys
+	$(QPATH)/sopc_builder/bin/qsys-edit fejkon.qsys
 
 menuconfig: .config
 	menuconfig

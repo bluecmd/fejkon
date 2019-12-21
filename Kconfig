@@ -1,21 +1,24 @@
-config PCIE
-  bool "Enable PCIe functionality"
-  help
-    Needed if you intend to use the card for something useful.
+config AGGRESSIVE_OPT
+  bool "Optimize aggressively for performance when building"
 
 menu "SFP+ Ports"
 
-config FCPORT0
-  bool "Enable Port 0 (next to LEDs)"
+comment "Port 0 always enabled"
 
 config FCPORT1
   bool "Enable Port 1"
 
-endmenu
-
 config LOOPBACK_01
   bool "Loopback port 0 and port 1"
-  depends on FCPORT0 && FCPORT1
+  depends on FCPORT1
+
+config FCPORT2
+  bool "Enable Port 2 (TODO)"
+
+config FCPORT3
+  bool "Enable Port 3 (TODO)"
+
+endmenu
 
 config STP_FILE
   string "SignalTap file to enable"

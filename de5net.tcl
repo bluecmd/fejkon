@@ -157,7 +157,6 @@ set_location_assignment PIN_BC37 -to reset_reset_n ; # CPU_RESET_n
 #============================================================
 # PCIe x 8
 #============================================================
-if {$CONFIG_PCIE == "y"} {
 set_instance_assignment -name IO_STANDARD "2.5 V" -to pcie_reset_pin_perst_n ; # PCIE_PERST_n
 set_instance_assignment -name IO_STANDARD "HCSL" -to pcie_refclk_clk ; # PCIE_REFCLK_p
 set_instance_assignment -name IO_STANDARD "1.5-V PCML" -to pcie_serial_rx_in0 ; # PCIE_RX_p[0]
@@ -200,7 +199,6 @@ set_location_assignment PIN_AL41 -to pcie_serial_tx_out5 ; # PCIE_TX_p[5]
 set_location_assignment PIN_AJ41 -to pcie_serial_tx_out6 ; # PCIE_TX_p[6]
 set_location_assignment PIN_AG41 -to pcie_serial_tx_out7 ; # PCIE_TX_p[7]
 # set_location_assignment PIN_BD35 -to PCIE_WAKE_n
-}  ; # if CONFIG_PCIE == y
 
 #============================================================
 # Flash/MAX Address/Data Share Bus
@@ -1449,7 +1447,6 @@ set_location_assignment PIN_AG41 -to pcie_serial_tx_out7 ; # PCIE_TX_p[7]
 #============================================================
 # SFP+ A
 #============================================================
-if {$CONFIG_FCPORT0 == "y"} {
 set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp0_sfp_los                   ; # SFPA_LOS
 set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp0_sfp_prsnt_n               ; # SFPA_MOD0_PRSNT_n
 set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp0_sfp_scl                   ; # SFPA_MOD1_SCL
@@ -1470,7 +1467,6 @@ set_location_assignment PIN_AK2 -to fcport0_line_rd_lvds                        
 set_location_assignment PIN_B22 -to sfp0_sfp_txdis                                   ; # SFPA_TXDISABLE
 set_location_assignment PIN_A22 -to sfp0_sfp_txfail                                  ; # SFPA_TXFAULT
 set_location_assignment PIN_AG4 -to fcport0_line_td_lvds                             ; # SFPA_TX_p
-}  ; # if CONFIG_FCPORT0 == y
 
 #============================================================
 # SFP+ B

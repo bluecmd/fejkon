@@ -23,7 +23,9 @@ set_global_assignment -name SDC_FILE ../de5net.sdc
 set_global_assignment -name NUM_PARALLEL_PROCESSORS [exec nproc]
 set_global_assignment -name RAPID_RECOMPILE_MODE ON
 set_global_assignment -name TIMEQUEST_REPORT_SCRIPT ../timing.tcl
-set_global_assignment -name OPTIMIZATION_MODE "AGGRESSIVE PERFORMANCE"
+if {$CONFIG_AGGRESSIVE_OPT == "y"} {
+  set_global_assignment -name OPTIMIZATION_MODE "AGGRESSIVE PERFORMANCE"
+}
 set_global_assignment -name FLOW_ENABLE_POWER_ANALYZER ON
 
 set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
@@ -31,12 +33,10 @@ set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_RO
 set_global_assignment -name PARTITION_COLOR [expr 0xff0000] -section_id Top
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
 
-if {$CONFIG_PCIE == "y"} {
-  set_global_assignment -name PARTITION_NETLIST_TYPE POST_SYNTH -section_id "fejkon_pcie:pcie"
-  set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id "fejkon_pcie:pcie"
-  set_global_assignment -name PARTITION_COLOR [expr 0x0dbaab] -section_id "fejkon_pcie:pcie"
-  set_instance_assignment -name PARTITION_HIERARCHY fejkon_pcie -to "fejkon_pcie:pcie" -section_id "fejkon_pcie:pcie"
-}
+set_global_assignment -name PARTITION_NETLIST_TYPE POST_SYNTH -section_id "fejkon_pcie:pcie"
+set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id "fejkon_pcie:pcie"
+set_global_assignment -name PARTITION_COLOR [expr 0x0dbaab] -section_id "fejkon_pcie:pcie"
+set_instance_assignment -name PARTITION_HIERARCHY fejkon_pcie -to "fejkon_pcie:pcie" -section_id "fejkon_pcie:pcie"
 
 source ../de5net.tcl
 

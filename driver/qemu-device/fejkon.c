@@ -63,6 +63,8 @@ typedef struct {
   QemuMutex rx_buf_mutex;
   QemuMutex tx_buf_mutex;
   bool rx_buf_irq_enabled;
+  bool sfp1_tx_enabled;
+  bool sfp2_tx_enabled;
 } FejkonState;
 
 static bool fejkon_msi_enabled(FejkonState *card)
@@ -76,7 +78,7 @@ static void sfp1_i2c_intr(void *opaque) {
     printf("fejkon: SFP1 I2C interrupt without MSI enabled\n");
     return;
   }
-  msi_notify(&card->pdev, 4);
+  msi_notify(&card->pdev, 3);
 }
 
 static void sfp2_i2c_intr(void *opaque) {
@@ -85,7 +87,7 @@ static void sfp2_i2c_intr(void *opaque) {
     printf("fejkon: SFP2 I2C interrupt without MSI enabled\n");
     return;
   }
-  msi_notify(&card->pdev, 6);
+  msi_notify(&card->pdev, 4);
 }
 
 static uint32_t fejkon_temperature(void)
@@ -141,12 +143,19 @@ static uint64_t fejkon_bar0_read(void *opaque, hwaddr addr, unsigned size)
       qemu_mutex_unlock(&card->tx_buf_mutex);
       break;
     case 0x1000:
-      /* Port status, SFP present and link OK */
-      val = 0x1;
+      // If TX is enabled, report good signal
+      val = card->sfp1_tx_enabled ? 0x1 : 0xb;
       break;
     case 0x2000:
-      /* Port status, SFP present but link not present */
-      val = 0x3;
+      val = card->sfp2_tx_enabled ? 0x1 : 0xb;
+      break;
+    case 0x12000:
+      // If TX is enabled, report active state, otherwise OL2
+      val = card->sfp1_tx_enabled ? 0 : 7;
+      break;
+    case 0x22000:
+      // Always report not active to test "dormant" state
+      val = card->sfp2_tx_enabled ? 1 : 7;
       break;
     default:
       printf("fejkon: Read from unknown bar0 space: 0x%lx\n", addr);
@@ -219,6 +228,12 @@ static void fejkon_bar0_write(void *opaque, hwaddr addr, uint64_t val,
       qemu_mutex_lock(&card->tx_buf_mutex);
       card->tx_buf.read = (uint32_t)val;
       qemu_mutex_unlock(&card->tx_buf_mutex);
+      break;
+    case 0x1000:
+      card->sfp1_tx_enabled = !(val & 0x8);
+      break;
+    case 0x2000:
+      card->sfp2_tx_enabled = !(val & 0x8);
       break;
     default:
       printf("fejkon: Write to unknown bar0 space: 0x%lx\n", addr);

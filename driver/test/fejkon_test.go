@@ -80,6 +80,24 @@ func TestDumpLinkState(t *testing.T) {
 	log.Printf("ip link:\n%v", string(out))
 }
 
+func TestDumpEthtool(t *testing.T) {
+	out, err := exec.Command("/bin/ethtool", "fc0").CombinedOutput()
+	if err != nil {
+		t.Errorf("ethtool fc0: err: %s, out: %s", err, string(out))
+		return
+	}
+	log.Printf("ethtool fc0:\n%v", string(out))
+}
+
+func TestDumpEthtoolSfp(t *testing.T) {
+	out, err := exec.Command("/bin/ethtool", "-m", "fc0").CombinedOutput()
+	if err != nil {
+		t.Errorf("ethtool -m fc0: err: %s, out: %s", err, string(out))
+		return
+	}
+	log.Printf("ethtool -m fc0:\n%v", string(out))
+}
+
 func TestDumpInterrupts(t *testing.T) {
 	t.Skip("needs to be manually enabled")
 	out, err := ioutil.ReadFile("/proc/interrupts")
@@ -168,17 +186,14 @@ func TestSFPPort(t *testing.T) {
 }
 
 func TestLOSIsNoCarrier(t *testing.T) {
-	// fc1 is set up to have a loss-of-signal
+	// fc1 is set up to have not-active state
 	fc0, _ := netlink.LinkByName("fc0")
-	// TODO(bluecmd): Not really sure what the expected sequence to get to OPER_UP
-	// is supposed to be, for now accept the default of OPER_UNKNOWN which seems
-	// common enough on other interfaces.
-	if fc0.Attrs().OperState != netlink.OperUnknown {
-		t.Errorf("fc0 expected to be unknown, is %s", fc0.Attrs().OperState)
+	if fc0.Attrs().OperState != netlink.OperUp {
+		t.Errorf("fc0 expected to be up, is %s", fc0.Attrs().OperState)
 	}
 	fc1, _ := netlink.LinkByName("fc1")
-	if fc1.Attrs().OperState != netlink.OperDown {
-		t.Errorf("fc1 expected to be down, is %s", fc1.Attrs().OperState)
+	if fc1.Attrs().OperState != netlink.OperDormant {
+		t.Errorf("fc1 expected to be dormant, is %s", fc1.Attrs().OperState)
 	}
 }
 
@@ -283,6 +298,7 @@ func TestMain(m *testing.M) {
 	log.Printf("lspci after module load:\n%v", string(out))
 
 	ifup("fc0")
+	ifup("fc1")
 
 	// Run tests
 	if m.Run() != 0 {

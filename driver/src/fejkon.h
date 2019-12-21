@@ -4,6 +4,7 @@
 #include <linux/i2c.h>
 #include <linux/netdevice.h>
 #include <linux/pci.h>
+#include <linux/timer.h>
 
 #define MAX_PORTS 4
 
@@ -30,11 +31,11 @@ struct fejkon_port {
   struct device *dev;
   struct net_device *net;
   struct i2c_dev *i2c;
+  struct timer_list refresh_timer;
   int id;
 };
 
-#define PORT_SFP_IRQ(x)     (3 + x * 2)
-#define PORT_SFP_I2C_IRQ(x) (4 + x * 2)
+#define PORT_SFP_I2C_IRQ(x) (3 + x)
 
 #define SFP_PRESENT    (1 << 0)
 #define SFP_LOS        (1 << 1)
@@ -47,6 +48,7 @@ struct fejkon_port {
 
 #define BAR0_SFP_I2C_OFFSET(x)    (0x1000 * (x + 1) + 0x40)
 #define BAR0_SFP_STATUS_OFFSET(x) (0x1000 * (x + 1) + 0x0)
+#define BAR0_FC_STATE_OFFSET(x) (0x10000 * (x + 1) + 0x2000)
 
 struct i2c_dev * fejkon_i2c_probe(struct device *dev, void __iomem *base, int irq);
 

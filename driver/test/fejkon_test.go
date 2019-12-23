@@ -1,6 +1,8 @@
 package main
 
 import (
+	"encoding/binary"
+	"errors"
 	"golang.org/x/sys/unix"
 	"io/ioutil"
 	"log"
@@ -16,11 +18,15 @@ import (
 	"github.com/bluecmd/go-sff"
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
-	"github.com/google/gopacket/pcap"
+	"github.com/google/gopacket/afpacket"
 	"github.com/mdlayher/raw"
 	"github.com/u-root/u-root/pkg/kmodule"
 	"github.com/u-root/u-root/pkg/mount"
 	"github.com/vishvananda/netlink"
+)
+
+var (
+	LayerTypeFC = gopacket.RegisterLayerType(8000, gopacket.LayerTypeMetadata{Name: "Fibre Channel", Decoder: gopacket.DecodeFunc(decodeFC)})
 )
 
 func TestSendPacket(t *testing.T) {
@@ -50,17 +56,56 @@ func TestSendPacket(t *testing.T) {
 	}()
 }
 
+// TODO: Move to fikonfarm
+type FibreChannel struct {
+	layers.BaseLayer
+	SOF     uint32
+	// TODO
+	CRC     uint32
+	EOF     uint32
+}
+
+func (l *FibreChannel) LayerType() gopacket.LayerType { return LayerTypeFC }
+
+func decodeFC(data []byte, p gopacket.PacketBuilder) error {
+	l := &FibreChannel{}
+	err := l.DecodeFromBytes(data, p)
+	if err != nil {
+		return err
+	}
+	p.AddLayer(l)
+	return p.NextDecoder(l.NextLayerType())
+}
+
+// DecodeFromBytes decodes the given bytes into this layer.
+func (l *FibreChannel) DecodeFromBytes(data []byte, df gopacket.DecodeFeedback) error {
+	c := len(data)
+	if c < 28 {
+		return errors.New("Fibre Channel header too small")
+	}
+	l.SOF = binary.BigEndian.Uint32(data[0:4])
+	l.CRC = binary.BigEndian.Uint32(data[c-8:c-4])
+	l.EOF = binary.BigEndian.Uint32(data[c-4:c])
+	l.Contents = data[:28]
+	l.Payload = data[28:c-8]
+	return nil
+}
+
+func (l *FibreChannel) CanDecode() gopacket.LayerClass {
+	return LayerTypeFC
+}
+
+func (l *FibreChannel) NextLayerType() gopacket.LayerType {
+	return gopacket.LayerTypeZero
+}
+
 func TestReadPacket(t *testing.T) {
-	handle, err := pcap.OpenLive("fc0", 4096, true, pcap.BlockForever)
+	handle, err := afpacket.NewTPacket(afpacket.OptInterface("fc0"))
 	if err != nil {
-		t.Fatalf("OpenLive: %v", err)
+		t.Fatalf("NewTPacket: %v", err)
 	}
-	// TODO: https://github.com/google/gopacket/pull/712
-	err = handle.SetLinkType(layers.LinkType(225))
-	if err != nil {
-		t.Fatalf("SetLinkType: %v", err)
-	}
-	ps := gopacket.NewPacketSource(handle, handle.LinkType())
+	// TODO: Figure out best way to filter from reading our own sent packets
+	ps := gopacket.NewPacketSource(handle, LayerTypeFC)
 
 	i := 0
 	for packet := range ps.Packets() {

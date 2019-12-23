@@ -14,6 +14,7 @@ test: build-qemu/x86_64-softmmu/qemu-system-x86_64 linux/arch/x86/boot/bzImage r
 		-device fejkon \
 		-append "earlyprintk=serial root=hostfs rootfstype=9p rootflags=trans=virtio noinitrd console=ttyS0 loglevel=8" \
 		| tail -n+10
+	stty sane
 
 qemu:
 	git clone https://github.com/qemu/qemu

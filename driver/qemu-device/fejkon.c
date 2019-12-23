@@ -269,14 +269,14 @@ static void *fejkon_rx_thread(void *opaque)
   dma_addr_t new_write;
   char test[80] = "HELLO HELLO HELLO HELLO HELLO HELLO HELLO";
   while (!card->stopping) {
-    usleep(1000);
+    usleep(10000);
     if (card->rx_buf.start == card->rx_buf.end) {
       continue;
     }
-    pci_dma_write(&card->pdev, card->rx_buf.write, test, 32);
+    pci_dma_write(&card->pdev, card->rx_buf.write, test, 36);
     // Write packet data to end of packet frame
     pci_dma_write(&card->pdev, card->rx_buf.write+4092, "\0\0\0\0", 4);   // Port
-    pci_dma_write(&card->pdev, card->rx_buf.write+4088, "\0\0\0\x20", 4); // Length
+    pci_dma_write(&card->pdev, card->rx_buf.write+4088, "\0\0\0\x24", 4); // Length
     qemu_mutex_lock(&card->rx_buf_mutex);
     new_write = dma_incr(&card->rx_buf, &card->rx_buf.write, FRAME_SIZE);
     if (new_write == card->rx_buf.read) {

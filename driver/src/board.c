@@ -25,6 +25,11 @@
 
 #define PORT_REFRESH_INTERVAL_MS 100
 
+struct packet_meta {
+  __be32 length;
+  __be32 port_id;
+};
+
 static const struct header_ops net_header_ops = {
 };
 
@@ -81,23 +86,39 @@ static int poll(struct napi_struct *napi, int budget)
     int len;
     struct sk_buff *skb;
     struct fejkon_port *port;
+    struct packet_meta *meta;
     if (work_done >= budget)
       return work_done;
 
-    port_id = be32_to_cpu(*(uint32_t*)(card->rx_buf_read + 4092));
-    len = be32_to_cpu(*(uint32_t*)(card->rx_buf_read + 4088));
+    // We don't use RX descriptors, we store all metadata in known positions
+    // inside the ring buffer. For RX this is at the end of the element.
+    meta = card->rx_buf_read + 4096 - sizeof(*meta);
+    port_id = be32_to_cpu(meta->port_id);
+    len = be32_to_cpu(meta->length);
     port = card->port[port_id];
     if (!netif_oper_up(port->net)) {
+      // TODO(bluecmd): drop counter
       dev_notice(port->dev,
-          "received packet on inactive interface, ignoring");
+          "received packet on inactive interface, dropping");
+    } else if (len < 36) {
+      // TODO(bluecmd): drop counter
+      dev_notice(port->dev,
+          "received undersized packet on interface, dropping");
     } else {
       skb = netdev_alloc_skb(port->net, len);
       if (!skb) {
+        // TODO(bluecmd): drop counter
         dev_warn(port->dev, "failed to allocate skb, len %d", len);
         return work_done;
       }
-      //memcpy_fromio(skb_put(skb, len), card->rx_buf_read, len);
-      //netif_receive_skb(skb);
+      skb_put_data(skb, card->rx_buf_read, len);
+      // Since we're not doing Ethernet we have to set these manually or
+      // the kernel will try to guess them (incorrectly)
+      skb_set_mac_header(skb, 0);
+      skb_set_network_header(skb, 0);
+      skb_set_transport_header(skb, 0);
+      skb_reset_mac_len(skb);
+      netif_receive_skb(skb);
     }
     work_done++;
     card->rx_buf_read += 4096;
@@ -139,7 +160,6 @@ static int net_open(struct net_device *net)
   iowrite32(0, port->card->bar0 + BAR0_SFP_STATUS_OFFSET(port->id));
   // Try to trigger refresh of port status ASAP
   mod_timer(&port->refresh_timer, jiffies + 1);
-  netdev_notice(net, "%s up\n", net->name);
   return 0;
 }
 
@@ -148,7 +168,6 @@ static int net_stop(struct net_device *net)
   struct fejkon_port *port = netdev_priv(net);
   // Disable TX
   iowrite32(1 << 3, port->card->bar0 + BAR0_SFP_STATUS_OFFSET(port->id));
-  netdev_notice(net, "%s close\n", net->name);
   return 0;
 }
 
@@ -362,6 +381,8 @@ static int setup_buffers(struct fejkon_card *card)
 {
   dma_addr_t rx_dma;
   dma_addr_t tx_dma;
+  // TODO(bluecmd): There appears to be a number of rx/tx queues in the
+  // net_device structure, figure out what the idea is with those
   card->rx_buf_start = dma_alloc_coherent(
       &card->pci->dev, 4096 * 128, &rx_dma, GFP_KERNEL);
   card->rx_buf_read = card->rx_buf_start;

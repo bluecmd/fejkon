@@ -88,8 +88,7 @@ static int poll(struct napi_struct *napi, int budget)
     if (work_done >= budget)
       return work_done;
 
-    // We don't use RX descriptors, we store all metadata in known positions
-    // inside the ring buffer. For RX this is at the end of the element.
+    // See explaination in net_tx for why this format is used
     meta = card->rx_buf_read + 4096 - sizeof(*meta);
     port_id = be32_to_cpu(meta->port_id);
     len = be32_to_cpu(meta->length);
@@ -172,15 +171,51 @@ static int net_stop(struct net_device *net)
 
 static netdev_tx_t net_tx(struct sk_buff *skb, struct net_device *net)
 {
+  struct fejkon_port *port = netdev_priv(net);
+  struct fejkon_card *card = port->card;
+  struct packet_meta *meta;
+  void *data;
+
   // Fibre Channel fragmentation, does it even exist?
   BUG_ON(skb_is_gso(skb));
   BUG_ON(skb_shinfo(skb)->nr_frags);
-  // TODO: Send the packet data and advance write pointer
-  netdev_notice(net, "tx len %d, bytes: %02x %02x %02x %02x\n",
-      skb->len, skb->data[0], skb->data[1], skb->data[2], skb->data[3]);
+
+  if (card->tx_buf_write + 4096 == card->tx_buf_read_cached) {
+    // Possibly buffer full, update read pointer from card
+    int read_ptr = ioread32(card->bar0 + 0xB08) - card->tx_buf_start_dma;
+    void *tx_buf_read = card->tx_buf_start + read_ptr;
+    if (tx_buf_read == card->tx_buf_read_cached) {
+      // TODO: drop and free
+      netdev_err(net, "tx queue full, dropping packet");
+      return NETDEV_TX_OK;
+    } else {
+      // Read pointer has moved, we're good this time
+      card->tx_buf_read_cached = tx_buf_read;
+    }
+  }
+
+  // We don't use RX descriptors, we store all metadata in known positions
+  // inside the ring buffer. For TX this is at the start of the element, for
+  // RX it's the end.
+  // Why? Start is easier to implement in hardware for TX and for RX it's easier
+  // at the end (since we don't know the size ahead of time and we're doing
+  // cut-through switching).
+  meta = card->tx_buf_write;
+  data = card->tx_buf_write + sizeof(*meta);
+  meta->port_id = cpu_to_be32(port->id);
+  meta->length = cpu_to_be32(skb->len);
+
+  memcpy(data, skb->data, skb->len);
+
+  card->tx_buf_write += 4096;
+  if (card->tx_buf_write == card->tx_buf_end) {
+    card->tx_buf_write = card->tx_buf_start;
+  }
+
   if (!netdev_xmit_more()) {
-    // TODO, we're done, update the card's view of the write pointer to process
-    netdev_notice(net, "todo: tx done, flush write pointer");
+    iowrite32(
+        card->tx_buf_start_dma + (card->tx_buf_write - card->tx_buf_start),
+        card->bar0 + 0xB0C);
   }
   return NETDEV_TX_OK;
 }
@@ -396,13 +431,14 @@ static int setup_buffers(struct fejkon_card *card)
   card->tx_buf_start = dma_alloc_coherent(
       &card->pci->dev, 4096 * 128, &tx_dma, GFP_KERNEL);
   card->tx_buf_write = card->tx_buf_start;
+  card->tx_buf_read_cached = card->tx_buf_start;
   card->tx_buf_end = card->tx_buf_start + 4096 * 128;
   // Set RX buffer start and end
   iowrite32(rx_dma, card->bar0 + 0xA00);
   iowrite32(rx_dma + 4096 * 128, card->bar0 + 0xA04);
   // Set TX buffer start and end
-  iowrite32(rx_dma, card->bar0 + 0xB00);
-  iowrite32(rx_dma + 4096 * 128, card->bar0 + 0xB04);
+  iowrite32(tx_dma, card->bar0 + 0xB00);
+  iowrite32(tx_dma + 4096 * 128, card->bar0 + 0xB04);
   // Enable RX by confirming our read pointer at the start
   iowrite32(rx_dma, card->bar0 + 0xA08);
 

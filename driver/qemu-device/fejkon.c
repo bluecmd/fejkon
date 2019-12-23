@@ -232,7 +232,7 @@ static void fejkon_bar0_write(void *opaque, hwaddr addr, uint64_t val,
     case 0xB0C:
       /* DMA TX Write pointer */
       qemu_mutex_lock(&card->tx_buf_mutex);
-      card->tx_buf.read = (uint32_t)val;
+      card->tx_buf.write = (uint32_t)val;
       qemu_mutex_unlock(&card->tx_buf_mutex);
       break;
     default:
@@ -263,29 +263,35 @@ static dma_addr_t dma_incr(FejkonDmaBuf *b, dma_addr_t *var, size_t x)
   return b->start + ((*var + x) - b->end);
 }
 
+static void fejkon_rx_pkt(FejkonState *card, uint32_t port_id, void *data,
+    uint32_t length) {
+  dma_addr_t new_write;
+  qemu_mutex_lock(&card->rx_buf_mutex);
+  pci_dma_write(&card->pdev, card->rx_buf.write, data, length);
+  length = htobe32(length);
+  port_id = htobe32(port_id);
+  pci_dma_write(&card->pdev, card->rx_buf.write + 4092, &port_id, 4);
+  pci_dma_write(&card->pdev, card->rx_buf.write + 4088, &length, 4);
+  new_write = dma_incr(&card->rx_buf, &card->rx_buf.write, FRAME_SIZE);
+  if (new_write == card->rx_buf.read) {
+    // Signal buffer overflow and drop packet
+    msi_notify(&card->pdev, 2);
+  } else {
+    card->rx_buf.write = new_write;
+  }
+  qemu_mutex_unlock(&card->rx_buf_mutex);
+}
+
 static void *fejkon_rx_thread(void *opaque)
 {
   FejkonState *card = opaque;
-  dma_addr_t new_write;
-  char test[80] = "HELLO HELLO HELLO HELLO HELLO HELLO HELLO";
+  char test[] = "DUMMY DUMMY DUMMY DUMMY DUMMY DUMMY DUMMY";
   while (!card->stopping) {
-    usleep(10000);
+    usleep(100000);
     if (card->rx_buf.start == card->rx_buf.end) {
       continue;
     }
-    pci_dma_write(&card->pdev, card->rx_buf.write, test, 36);
-    // Write packet data to end of packet frame
-    pci_dma_write(&card->pdev, card->rx_buf.write+4092, "\0\0\0\0", 4);   // Port
-    pci_dma_write(&card->pdev, card->rx_buf.write+4088, "\0\0\0\x24", 4); // Length
-    qemu_mutex_lock(&card->rx_buf_mutex);
-    new_write = dma_incr(&card->rx_buf, &card->rx_buf.write, FRAME_SIZE);
-    if (new_write == card->rx_buf.read) {
-      // Signal buffer overflow and drop packet
-      msi_notify(&card->pdev, 2);
-    } else {
-      card->rx_buf.write = new_write;
-    }
-    qemu_mutex_unlock(&card->rx_buf_mutex);
+    fejkon_rx_pkt(card, 0 /* port_id */, test, sizeof(test));
   }
   return NULL;
 }
@@ -308,9 +314,27 @@ static void *fejkon_rx_irq_thread(void *opaque)
 
 static void *fejkon_tx_thread(void *opaque)
 {
+  char pkt[2148];
   FejkonState *card = opaque;
+  memset(pkt, 0, sizeof(pkt));
   while (!card->stopping) {
-    sleep(1);
+    uint32_t port_id = 0;
+    uint32_t length = 0;
+    usleep(1000);
+    if (card->tx_buf.read == card->tx_buf.write) {
+      continue;
+    }
+    // Read packet metadata
+    pci_dma_read(&card->pdev, card->tx_buf.read, &length, 4);
+    pci_dma_read(&card->pdev, card->tx_buf.read + 4, &port_id, 4);
+    port_id = be32toh(port_id);
+    length = be32toh(length);
+    pci_dma_read(&card->pdev, card->tx_buf.read + 8, pkt, length);
+    fejkon_rx_pkt(card, port_id, pkt, length);
+    qemu_mutex_lock(&card->tx_buf_mutex);
+    card->tx_buf.read = dma_incr(
+        &card->tx_buf, &card->tx_buf.read, FRAME_SIZE);
+    qemu_mutex_unlock(&card->tx_buf_mutex);
   }
   return NULL;
 }

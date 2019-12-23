@@ -23,6 +23,7 @@ struct fejkon_card {
   void *tx_buf_start;
   dma_addr_t tx_buf_start_dma;
   void *tx_buf_write;
+  void *tx_buf_read_cached;
   void *tx_buf_end;
 };
 

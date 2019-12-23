@@ -39,11 +39,15 @@ func TestSendPacket(t *testing.T) {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
-	b := []byte{1, 2, 3, 4}
+	b := make([]byte, 2148)
 	addr := &raw.Addr{HardwareAddr: []byte{0xff, 0xff, 0xff}}
-	if _, err := c.WriteTo(b, addr); err != nil {
-		log.Fatalf("failed to write frame: %v", err)
-	}
+	go func() {
+		for {
+			if _, err := c.WriteTo(b, addr); err != nil {
+				log.Fatalf("failed to write frame: %v", err)
+			}
+		}
+	}()
 
 	// Continue to send this packet in the background for now
 	go func() {
@@ -80,8 +84,8 @@ func decodeFC(data []byte, p gopacket.PacketBuilder) error {
 // DecodeFromBytes decodes the given bytes into this layer.
 func (l *FibreChannel) DecodeFromBytes(data []byte, df gopacket.DecodeFeedback) error {
 	c := len(data)
-	if c < 28 {
-		return errors.New("Fibre Channel header too small")
+	if c < 36 {
+		return errors.New("Fibre Channel frame size too small")
 	}
 	l.SOF = binary.BigEndian.Uint32(data[0:4])
 	l.CRC = binary.BigEndian.Uint32(data[c-8:c-4])

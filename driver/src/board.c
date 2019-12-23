@@ -125,7 +125,8 @@ static int poll(struct napi_struct *napi, int budget)
     }
   }
 
-  pr_info("poll budget = %d, processed = %d\n", budget, work_done);
+  dev_dbg(&card->pci->dev, "poll budget = %d, processed = %d",
+      budget, work_done);
   if (work_done < budget) {
     napi_complete(napi);
     // Update read pointer and re-enable IRQ
@@ -171,9 +172,16 @@ static int net_stop(struct net_device *net)
 
 static netdev_tx_t net_tx(struct sk_buff *skb, struct net_device *net)
 {
+  // Fibre Channel fragmentation, does it even exist?
+  BUG_ON(skb_is_gso(skb));
+  BUG_ON(skb_shinfo(skb)->nr_frags);
+  // TODO: Send the packet data and advance write pointer
   netdev_notice(net, "tx len %d, bytes: %02x %02x %02x %02x\n",
       skb->len, skb->data[0], skb->data[1], skb->data[2], skb->data[3]);
-  // TODO
+  if (!netdev_xmit_more()) {
+    // TODO, we're done, update the card's view of the write pointer to process
+    netdev_notice(net, "todo: tx done, flush write pointer");
+  }
   return NETDEV_TX_OK;
 }
 

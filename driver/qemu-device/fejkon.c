@@ -63,6 +63,8 @@ typedef struct {
   QemuMutex rx_buf_mutex;
   QemuMutex tx_buf_mutex;
   bool rx_buf_irq_enabled;
+  bool sfp1_tx_enabled;
+  bool sfp2_tx_enabled;
 } FejkonState;
 
 static bool fejkon_msi_enabled(FejkonState *card)
@@ -76,7 +78,7 @@ static void sfp1_i2c_intr(void *opaque) {
     printf("fejkon: SFP1 I2C interrupt without MSI enabled\n");
     return;
   }
-  msi_notify(&card->pdev, 4);
+  msi_notify(&card->pdev, 3);
 }
 
 static void sfp2_i2c_intr(void *opaque) {
@@ -85,7 +87,7 @@ static void sfp2_i2c_intr(void *opaque) {
     printf("fejkon: SFP2 I2C interrupt without MSI enabled\n");
     return;
   }
-  msi_notify(&card->pdev, 6);
+  msi_notify(&card->pdev, 4);
 }
 
 static uint32_t fejkon_temperature(void)
@@ -130,13 +132,30 @@ static uint64_t fejkon_bar0_read(void *opaque, hwaddr addr, unsigned size)
       /* PHY frequency, report running close to 106.25 MHz */
       val = htole64(106249998);
       break;
+    case 0xA0C:
+      qemu_mutex_lock(&card->rx_buf_mutex);
+      val = card->rx_buf.write;
+      qemu_mutex_unlock(&card->rx_buf_mutex);
+      break;
+    case 0xB08:
+      qemu_mutex_lock(&card->tx_buf_mutex);
+      val = card->tx_buf.read;
+      qemu_mutex_unlock(&card->tx_buf_mutex);
+      break;
     case 0x1000:
-      /* Port status, SFP present and link OK */
-      val = 0x1;
+      // If TX is enabled, report good signal
+      val = card->sfp1_tx_enabled ? 0x1 : 0xb;
       break;
     case 0x2000:
-      /* Port status, SFP present but link not present */
-      val = 0x3;
+      val = card->sfp2_tx_enabled ? 0x1 : 0xb;
+      break;
+    case 0x12000:
+      // If TX is enabled, report active state, otherwise OL2
+      val = card->sfp1_tx_enabled ? 0 : 7;
+      break;
+    case 0x22000:
+      // Always report not active to test "dormant" state
+      val = card->sfp2_tx_enabled ? 1 : 7;
       break;
     default:
       printf("fejkon: Read from unknown bar0 space: 0x%lx\n", addr);
@@ -210,6 +229,12 @@ static void fejkon_bar0_write(void *opaque, hwaddr addr, uint64_t val,
       card->tx_buf.read = (uint32_t)val;
       qemu_mutex_unlock(&card->tx_buf_mutex);
       break;
+    case 0x1000:
+      card->sfp1_tx_enabled = !(val & 0x8);
+      break;
+    case 0x2000:
+      card->sfp2_tx_enabled = !(val & 0x8);
+      break;
     default:
       printf("fejkon: Write to unknown bar0 space: 0x%lx\n", addr);
       break;
@@ -244,19 +269,21 @@ static void *fejkon_rx_thread(void *opaque)
   dma_addr_t new_write;
   char test[80] = "HELLO HELLO HELLO HELLO HELLO HELLO HELLO";
   while (!card->stopping) {
-    usleep(100000);
+    usleep(10000);
     if (card->rx_buf.start == card->rx_buf.end) {
       continue;
     }
-    printf("fejkon_rx_thread: processing\n");
-    pci_dma_write(&card->pdev, card->rx_buf.write, test, 32);
+    pci_dma_write(&card->pdev, card->rx_buf.write, test, 36);
+    // Write packet data to end of packet frame
+    pci_dma_write(&card->pdev, card->rx_buf.write+4092, "\0\0\0\0", 4);   // Port
+    pci_dma_write(&card->pdev, card->rx_buf.write+4088, "\0\0\0\x24", 4); // Length
     qemu_mutex_lock(&card->rx_buf_mutex);
     new_write = dma_incr(&card->rx_buf, &card->rx_buf.write, FRAME_SIZE);
     if (new_write == card->rx_buf.read) {
       msi_notify(&card->pdev, 2);
-      hw_error("Fejkon RX buffer overflown, packets dropped");
+      hw_error("Fejkon RX buffer overflown, packets dropped\n");
     } else {
-      card->rx_buf.write += new_write;
+      card->rx_buf.write = new_write;
     }
     qemu_mutex_unlock(&card->rx_buf_mutex);
   }

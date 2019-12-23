@@ -1,6 +1,8 @@
 package main
 
 import (
+	"encoding/binary"
+	"errors"
 	"golang.org/x/sys/unix"
 	"io/ioutil"
 	"log"
@@ -16,14 +18,18 @@ import (
 	"github.com/bluecmd/go-sff"
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
-	"github.com/google/gopacket/pcap"
+	"github.com/google/gopacket/afpacket"
 	"github.com/mdlayher/raw"
 	"github.com/u-root/u-root/pkg/kmodule"
 	"github.com/u-root/u-root/pkg/mount"
 	"github.com/vishvananda/netlink"
 )
 
-func TestSemdPacket(t *testing.T) {
+var (
+	LayerTypeFC = gopacket.RegisterLayerType(8000, gopacket.LayerTypeMetadata{Name: "Fibre Channel", Decoder: gopacket.DecodeFunc(decodeFC)})
+)
+
+func TestSendPacket(t *testing.T) {
 	ifi, err := net.InterfaceByName("fc0")
 	if err != nil {
 		log.Fatalf("failed to open interface: %v", err)
@@ -50,17 +56,56 @@ func TestSemdPacket(t *testing.T) {
 	}()
 }
 
+// TODO: Move to fikonfarm
+type FibreChannel struct {
+	layers.BaseLayer
+	SOF     uint32
+	// TODO
+	CRC     uint32
+	EOF     uint32
+}
+
+func (l *FibreChannel) LayerType() gopacket.LayerType { return LayerTypeFC }
+
+func decodeFC(data []byte, p gopacket.PacketBuilder) error {
+	l := &FibreChannel{}
+	err := l.DecodeFromBytes(data, p)
+	if err != nil {
+		return err
+	}
+	p.AddLayer(l)
+	return p.NextDecoder(l.NextLayerType())
+}
+
+// DecodeFromBytes decodes the given bytes into this layer.
+func (l *FibreChannel) DecodeFromBytes(data []byte, df gopacket.DecodeFeedback) error {
+	c := len(data)
+	if c < 28 {
+		return errors.New("Fibre Channel header too small")
+	}
+	l.SOF = binary.BigEndian.Uint32(data[0:4])
+	l.CRC = binary.BigEndian.Uint32(data[c-8:c-4])
+	l.EOF = binary.BigEndian.Uint32(data[c-4:c])
+	l.Contents = data[:28]
+	l.Payload = data[28:c-8]
+	return nil
+}
+
+func (l *FibreChannel) CanDecode() gopacket.LayerClass {
+	return LayerTypeFC
+}
+
+func (l *FibreChannel) NextLayerType() gopacket.LayerType {
+	return gopacket.LayerTypeZero
+}
+
 func TestReadPacket(t *testing.T) {
-	handle, err := pcap.OpenLive("fc0", 4096, true, pcap.BlockForever)
+	handle, err := afpacket.NewTPacket(afpacket.OptInterface("fc0"))
 	if err != nil {
-		t.Fatalf("OpenLive: %v", err)
+		t.Fatalf("NewTPacket: %v", err)
 	}
-	// TODO: https://github.com/google/gopacket/pull/712
-	err = handle.SetLinkType(layers.LinkType(225))
-	if err != nil {
-		t.Fatalf("SetLinkType: %v", err)
-	}
-	ps := gopacket.NewPacketSource(handle, handle.LinkType())
+	// TODO: Figure out best way to filter from reading our own sent packets
+	ps := gopacket.NewPacketSource(handle, LayerTypeFC)
 
 	i := 0
 	for packet := range ps.Packets() {
@@ -79,6 +124,34 @@ func TestDumpLinkState(t *testing.T) {
 	}
 	log.Printf("ip link:\n%v", string(out))
 }
+
+func TestDumpEthtool(t *testing.T) {
+	out, err := exec.Command("/bin/ethtool", "fc0").CombinedOutput()
+	if err != nil {
+		t.Errorf("ethtool fc0: err: %s, out: %s", err, string(out))
+		return
+	}
+	log.Printf("ethtool fc0:\n%v", string(out))
+}
+
+func TestDumpEthtoolDriver(t *testing.T) {
+	out, err := exec.Command("/bin/ethtool", "-i", "fc0").CombinedOutput()
+	if err != nil {
+		t.Errorf("ethtool -i fc0: err: %s, out: %s", err, string(out))
+		return
+	}
+	log.Printf("ethtool -i fc0:\n%v", string(out))
+}
+
+// TODO: Implement?
+//func TestDumpEthtoolSfp(t *testing.T) {
+//	out, err := exec.Command("/bin/ethtool", "-m", "fc0").CombinedOutput()
+//	if err != nil {
+//		t.Errorf("ethtool -m fc0: err: %s, out: %s", err, string(out))
+//		return
+//	}
+//	log.Printf("ethtool -m fc0:\n%v", string(out))
+//}
 
 func TestDumpInterrupts(t *testing.T) {
 	t.Skip("needs to be manually enabled")
@@ -168,17 +241,14 @@ func TestSFPPort(t *testing.T) {
 }
 
 func TestLOSIsNoCarrier(t *testing.T) {
-	// fc1 is set up to have a loss-of-signal
+	// fc1 is set up to have not-active state
 	fc0, _ := netlink.LinkByName("fc0")
-	// TODO(bluecmd): Not really sure what the expected sequence to get to OPER_UP
-	// is supposed to be, for now accept the default of OPER_UNKNOWN which seems
-	// common enough on other interfaces.
-	if fc0.Attrs().OperState != netlink.OperUnknown {
-		t.Errorf("fc0 expected to be unknown, is %s", fc0.Attrs().OperState)
+	if fc0.Attrs().OperState != netlink.OperUp {
+		t.Errorf("fc0 expected to be up, is %s", fc0.Attrs().OperState)
 	}
 	fc1, _ := netlink.LinkByName("fc1")
-	if fc1.Attrs().OperState != netlink.OperDown {
-		t.Errorf("fc1 expected to be down, is %s", fc1.Attrs().OperState)
+	if fc1.Attrs().OperState != netlink.OperDormant {
+		t.Errorf("fc1 expected to be dormant, is %s", fc1.Attrs().OperState)
 	}
 }
 
@@ -283,6 +353,7 @@ func TestMain(m *testing.M) {
 	log.Printf("lspci after module load:\n%v", string(out))
 
 	ifup("fc0")
+	ifup("fc1")
 
 	// Run tests
 	if m.Run() != 0 {

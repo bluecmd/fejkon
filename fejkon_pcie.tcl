@@ -11,7 +11,7 @@ set_project_property HIDE_FROM_IP_CATALOG {false}
 # (disabled instances are intentionally culled)
 add_instance bar0_cdc altera_avalon_mm_clock_crossing_bridge 19.1
 set_instance_parameter_value bar0_cdc {ADDRESS_UNITS} {SYMBOLS}
-set_instance_parameter_value bar0_cdc {ADDRESS_WIDTH} {20}
+set_instance_parameter_value bar0_cdc {ADDRESS_WIDTH} {16}
 set_instance_parameter_value bar0_cdc {COMMAND_FIFO_DEPTH} {4}
 set_instance_parameter_value bar0_cdc {DATA_WIDTH} {32}
 set_instance_parameter_value bar0_cdc {MASTER_SYNC_DEPTH} {2}
@@ -158,7 +158,7 @@ set_instance_parameter_value phy {advanced_default_hwtcl_vc0_clk_enable} {true}
 set_instance_parameter_value phy {advanced_default_hwtcl_wrong_device_id} {disable}
 set_instance_parameter_value phy {advanced_default_parameter_override} {0}
 set_instance_parameter_value phy {ast_width_hwtcl} {Avalon-ST 256-bit}
-set_instance_parameter_value phy {bar0_size_mask_hwtcl} {19}
+set_instance_parameter_value phy {bar0_size_mask_hwtcl} {16}
 set_instance_parameter_value phy {bar0_type_hwtcl} {2}
 set_instance_parameter_value phy {bar1_size_mask_hwtcl} {0}
 set_instance_parameter_value phy {bar1_type_hwtcl} {0}

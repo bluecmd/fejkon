@@ -205,8 +205,8 @@ module fejkon_pcie_data (
 
   // Masked address calculation
   always @(*) begin
-    // TODO(bluecmd): Hard-coded to 512 KiB region
-    tlp_rx_frm_masked_address = tlp_rx_frm_address & 64'h000000000007FFFF;
+    // TODO(bluecmd): Hard-coded to 64 KiB region
+    tlp_rx_frm_masked_address = tlp_rx_frm_address & 64'h000000000000ffff;
   end
 
   // Posted/Non-posted Request classification

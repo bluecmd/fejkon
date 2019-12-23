@@ -108,11 +108,11 @@ static uint64_t fejkon_bar0_read(void *opaque, hwaddr addr, unsigned size)
   }
 
   /* SFP I2C */
-  if (addr >= 0x1040 && addr <= 0x1068) {
-    return avalon_i2c_read(&card->sfp1_i2c, addr - 0x1040);
+  if (addr >= 0x140 && addr <= 0x168) {
+    return avalon_i2c_read(&card->sfp1_i2c, addr - 0x140);
   }
-  if (addr >= 0x2040 && addr <= 0x2068) {
-    return avalon_i2c_read(&card->sfp2_i2c, addr - 0x2040);
+  if (addr >= 0x240 && addr <= 0x268) {
+    return avalon_i2c_read(&card->sfp2_i2c, addr - 0x240);
   }
 
   switch (addr) {
@@ -132,6 +132,13 @@ static uint64_t fejkon_bar0_read(void *opaque, hwaddr addr, unsigned size)
       /* PHY frequency, report running close to 106.25 MHz */
       val = htole64(106249998);
       break;
+    case 0x100:
+      // If TX is enabled, report good signal
+      val = card->sfp1_tx_enabled ? 0x1 : 0xb;
+      break;
+    case 0x200:
+      val = card->sfp2_tx_enabled ? 0x1 : 0xb;
+      break;
     case 0xA0C:
       qemu_mutex_lock(&card->rx_buf_mutex);
       val = card->rx_buf.write;
@@ -142,18 +149,11 @@ static uint64_t fejkon_bar0_read(void *opaque, hwaddr addr, unsigned size)
       val = card->tx_buf.read;
       qemu_mutex_unlock(&card->tx_buf_mutex);
       break;
-    case 0x1000:
-      // If TX is enabled, report good signal
-      val = card->sfp1_tx_enabled ? 0x1 : 0xb;
-      break;
-    case 0x2000:
-      val = card->sfp2_tx_enabled ? 0x1 : 0xb;
-      break;
-    case 0x12000:
+    case 0x9000:
       // If TX is enabled, report active state, otherwise OL2
       val = card->sfp1_tx_enabled ? 0 : 7;
       break;
-    case 0x22000:
+    case 0xB000:
       // Always report not active to test "dormant" state
       val = card->sfp2_tx_enabled ? 1 : 7;
       break;
@@ -175,16 +175,22 @@ static void fejkon_bar0_write(void *opaque, hwaddr addr, uint64_t val,
   }
 
   /* SFP I2C */
-  if (addr >= 0x1040 && addr <= 0x1068) {
-    avalon_i2c_write(&card->sfp1_i2c, addr - 0x1040, val);
+  if (addr >= 0x140 && addr <= 0x168) {
+    avalon_i2c_write(&card->sfp1_i2c, addr - 0x140, val);
     return;
   }
-  if (addr >= 0x2040 && addr <= 0x2068) {
-    avalon_i2c_write(&card->sfp2_i2c, addr - 0x2040, val);
+  if (addr >= 0x240 && addr <= 0x268) {
+    avalon_i2c_write(&card->sfp2_i2c, addr - 0x240, val);
     return;
   }
 
   switch (addr) {
+    case 0x100:
+      card->sfp1_tx_enabled = !(val & 0x8);
+      break;
+    case 0x200:
+      card->sfp2_tx_enabled = !(val & 0x8);
+      break;
     case 0xA00:
       /* DMA RX Start */
       qemu_mutex_lock(&card->rx_buf_mutex);
@@ -228,12 +234,6 @@ static void fejkon_bar0_write(void *opaque, hwaddr addr, uint64_t val,
       qemu_mutex_lock(&card->tx_buf_mutex);
       card->tx_buf.read = (uint32_t)val;
       qemu_mutex_unlock(&card->tx_buf_mutex);
-      break;
-    case 0x1000:
-      card->sfp1_tx_enabled = !(val & 0x8);
-      break;
-    case 0x2000:
-      card->sfp2_tx_enabled = !(val & 0x8);
       break;
     default:
       printf("fejkon: Write to unknown bar0 space: 0x%lx\n", addr);
@@ -280,8 +280,8 @@ static void *fejkon_rx_thread(void *opaque)
     qemu_mutex_lock(&card->rx_buf_mutex);
     new_write = dma_incr(&card->rx_buf, &card->rx_buf.write, FRAME_SIZE);
     if (new_write == card->rx_buf.read) {
+      // Signal buffer overflow and drop packet
       msi_notify(&card->pdev, 2);
-      hw_error("Fejkon RX buffer overflown, packets dropped\n");
     } else {
       card->rx_buf.write = new_write;
     }
@@ -328,7 +328,7 @@ static void pci_fejkon_realize(PCIDevice *pdev, Error **errp)
   }
 
   memory_region_init_io(&card->bar0, OBJECT(card), &fejkon_bar0_ops, card,
-      "fejkon-bar0", 512 * KiB);
+      "fejkon-bar0", 64 * KiB);
   pci_register_bar(pdev, 0, PCI_BASE_ADDRESS_SPACE_MEMORY, &card->bar0);
 
   card->sfp1_i2c.name = "sfp1";

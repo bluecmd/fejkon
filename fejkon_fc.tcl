@@ -285,22 +285,22 @@ add_connection mgmt_clk.out_clk xcvr_reconfig.mgmt_clk_clk
 
 add_connection mm.m0 fc0.mgmt_mm
 set_connection_parameter_value mm.m0/fc0.mgmt_mm arbitrationPriority {1}
-set_connection_parameter_value mm.m0/fc0.mgmt_mm baseAddress {0x2000}
+set_connection_parameter_value mm.m0/fc0.mgmt_mm baseAddress {0x1000}
 set_connection_parameter_value mm.m0/fc0.mgmt_mm defaultConnection {0}
 
 add_connection mm.m0 fc0_rx_cdc.in_csr
 set_connection_parameter_value mm.m0/fc0_rx_cdc.in_csr arbitrationPriority {1}
-set_connection_parameter_value mm.m0/fc0_rx_cdc.in_csr baseAddress {0x4000}
+set_connection_parameter_value mm.m0/fc0_rx_cdc.in_csr baseAddress {0x1100}
 set_connection_parameter_value mm.m0/fc0_rx_cdc.in_csr defaultConnection {0}
 
 add_connection mm.m0 fc1.mgmt_mm
 set_connection_parameter_value mm.m0/fc1.mgmt_mm arbitrationPriority {1}
-set_connection_parameter_value mm.m0/fc1.mgmt_mm baseAddress {0x00012000}
+set_connection_parameter_value mm.m0/fc1.mgmt_mm baseAddress {0x3000}
 set_connection_parameter_value mm.m0/fc1.mgmt_mm defaultConnection {0}
 
 add_connection mm.m0 fc1_rx_cdc.in_csr
 set_connection_parameter_value mm.m0/fc1_rx_cdc.in_csr arbitrationPriority {1}
-set_connection_parameter_value mm.m0/fc1_rx_cdc.in_csr baseAddress {0x00014000}
+set_connection_parameter_value mm.m0/fc1_rx_cdc.in_csr baseAddress {0x3100}
 set_connection_parameter_value mm.m0/fc1_rx_cdc.in_csr defaultConnection {0}
 
 add_connection mm.m0 xcvr0.mgmt_mm
@@ -310,12 +310,12 @@ set_connection_parameter_value mm.m0/xcvr0.mgmt_mm defaultConnection {0}
 
 add_connection mm.m0 xcvr1.mgmt_mm
 set_connection_parameter_value mm.m0/xcvr1.mgmt_mm arbitrationPriority {1}
-set_connection_parameter_value mm.m0/xcvr1.mgmt_mm baseAddress {0x00010000}
+set_connection_parameter_value mm.m0/xcvr1.mgmt_mm baseAddress {0x2000}
 set_connection_parameter_value mm.m0/xcvr1.mgmt_mm defaultConnection {0}
 
 add_connection mm.m0 xcvr_reconfig.reconfig_mgmt
 set_connection_parameter_value mm.m0/xcvr_reconfig.reconfig_mgmt arbitrationPriority {1}
-set_connection_parameter_value mm.m0/xcvr_reconfig.reconfig_mgmt baseAddress {0x00040000}
+set_connection_parameter_value mm.m0/xcvr_reconfig.reconfig_mgmt baseAddress {0x7e00}
 set_connection_parameter_value mm.m0/xcvr_reconfig.reconfig_mgmt defaultConnection {0}
 
 add_connection phy_clk.out_clk xcvr0.phy_clk

@@ -18,8 +18,6 @@
 #endif
 #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
 
-#define BAR0_AREA_SIZE 0x50000
-
 #define FEJKON_VENDOR_ID 0xf1c0
 #define FEJKON_DEVICE_ID 0x0de5
 
@@ -452,7 +450,7 @@ static int probe(struct pci_dev *pcidev, const struct pci_device_id *id)
   pci_set_master(pcidev);
 
   card->pci = pcidev;
-  card->bar0 = pci_iomap(pcidev, 0 /* bar */, BAR0_AREA_SIZE);
+  card->bar0 = pci_iomap(pcidev, 0 /* bar */, 0);
 
 #if 1
   /* Temporary performance benchmark */
@@ -539,6 +537,8 @@ static int probe(struct pci_dev *pcidev, const struct pci_device_id *id)
     goto error_rx_dropped_irq;
   }
 
+  pci_set_drvdata(pcidev, card);
+
   /* card initialized, register netdev for ports */
   for (port_init = 0; port_init < ports; port_init++) {
     ret = probe_port(card, port_init);
@@ -547,16 +547,17 @@ static int probe(struct pci_dev *pcidev, const struct pci_device_id *id)
     }
   }
 
+  pci_set_master(pcidev);
+  napi_enable(&card->napi);
   ret = setup_buffers(card);
   if (ret < 0) {
     goto error_setup_buffers;
   }
 
-  pci_set_master(pcidev);
-  pci_set_drvdata(pcidev, card);
-  napi_enable(&card->napi);
   return 0;
 error_setup_buffers:
+  napi_disable(&card->napi);
+  pci_clear_master(pcidev);
 error_port_init:
   rtnl_lock();
   for (port_init--; port_init >= 0; port_init--) {

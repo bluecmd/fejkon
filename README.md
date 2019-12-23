@@ -141,28 +141,28 @@ streaming interface is not correctly defined to be Avalon-ST compliant.
 
 Accesses need to be 4 byte wide.
 
-| Addr    | Width | Part   | Name          | Description                  |
-|---------|-------|--------|---------------|------------------------------|
-| 0x00000 | 2     | Card   | Version       | The constant 0x0DE5          |
-| 0x00002 | 1     | Card   | Version       | Version of the Fejkon card   |
-| 0x00003 | 1     | Card   | Port options  | Number of ports              |
-| 0x00004 | 4     | Card   | Git hash      | Git hash of HDL built        |
-| 0x00010 | 1     | Card   | Temprature    | FPGA Core Temperature (1)    |
-| 0x00020 | 4     | Card   | Freq. Gauge   | PHY effective clock gauge    |
-| 0x00800 | 512   | Card   | PCIe Facility | PCIe counters and status (2) |
-| 0x01000 | 1     | Port 0 | SFP Status    | SFP Status Word (3)          |
-| 0x01040 | 64    | Port 0 | SFP Port I2C  | SFP I2C core (4)             |
-| 0x02x00 | ...   | Port 1 | SFP Port      |                              |
-| 0x03x00 | ...   | Port 2 | SFP Port      |                              |
-| 0x04x00 | ...   | Port 3 | SFP Port      |                              |
-| 0x80000 | 2048  | Port 0 | FC XCVR IP    | Fejkon FC XCVR Core (5)      |
-| 0x80800 | 2048  | Port 0 | TX XCVR Mgmt  | V-Series Transceiver PHY (6) |
-| 0x82000 | 32    | Port 0 | FC Framer     | Fibre Channel Framer (7)     |
-| 0x84000 | 8     | Port 0 | PCIe CDC FIFO | (Undoc.) fc0\_rx\_cdc        |
-| 0x9xxxx | ...   | Port 1 | ...           |                              |
-| 0xAxxxx | ...   | Port 2 | ...           |                              |
-| 0xBxxxx | ...   | Port 3 | ...           |                              |
-| 0xCxxxx | ...   | Card   | XCVR Reconfig | (Undoc.) xcvr\_reconfig      |
+| Addr   | Width | Part   | Name          | Description                  |
+|--------|-------|--------|---------------|------------------------------|
+| 0x0000 | 2     | Card   | Version       | The constant 0x0DE5          |
+| 0x0002 | 1     | Card   | Version       | Version of the Fejkon card   |
+| 0x0003 | 1     | Card   | Port options  | Number of ports              |
+| 0x0004 | 4     | Card   | Git hash      | Git hash of HDL built        |
+| 0x0010 | 1     | Card   | Temprature    | FPGA Core Temperature (1)    |
+| 0x0020 | 4     | Card   | Freq. Gauge   | PHY effective clock gauge    |
+| 0x0100 | 1     | Port 0 | SFP Status    | SFP Status Word (3)          |
+| 0x0140 | 64    | Port 0 | SFP Port I2C  | SFP I2C core (4)             |
+| 0x02x0 | ...   | Port 1 | SFP Port      |                              |
+| 0x03x0 | ...   | Port 2 | SFP Port      |                              |
+| 0x04x0 | ...   | Port 3 | SFP Port      |                              |
+| 0x0800 | 512   | Card   | PCIe Facility | PCIe counters and status (2) |
+| 0x8000 | 2048  | Port 0 | FC XCVR IP    | Fejkon FC XCVR Core (5)      |
+| 0x8800 | 2048  | Port 0 | TX XCVR Mgmt  | V-Series Transceiver PHY (6) |
+| 0x9000 | 32    | Port 0 | FC Framer     | Fibre Channel Framer (7)     |
+| 0x9100 | 8     | Port 0 | PCIe CDC FIFO | (Undoc.) fc0\_rx\_cdc        |
+| 0xAxxx | ...   | Port 1 | ...           |                              |
+| 0xCxxx | ...   | Port 2 | ...           |                              |
+| 0xExxx | ...   | Port 3 | ...           |                              |
+| 0xFE00 | 512   | Card   | XCVR Reconfig | (Undoc.) xcvr\_reconfig      |
 
 1) Details in section below
 2) Details in section below

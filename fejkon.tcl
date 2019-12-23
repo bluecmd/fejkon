@@ -183,7 +183,7 @@ set_connection_parameter_value fc.xcvr1_aligned/led.fcport1_aligned width {0}
 
 add_connection jtagm.master fc.mgmt_mm
 set_connection_parameter_value jtagm.master/fc.mgmt_mm arbitrationPriority {1}
-set_connection_parameter_value jtagm.master/fc.mgmt_mm baseAddress {0x00080000}
+set_connection_parameter_value jtagm.master/fc.mgmt_mm baseAddress {0x8000}
 set_connection_parameter_value jtagm.master/fc.mgmt_mm defaultConnection {0}
 
 add_connection jtagm.master ident.mm
@@ -203,12 +203,12 @@ set_connection_parameter_value jtagm.master/phy_clk_gauge.mm defaultConnection {
 
 add_connection jtagm.master sfp0.mm
 set_connection_parameter_value jtagm.master/sfp0.mm arbitrationPriority {1}
-set_connection_parameter_value jtagm.master/sfp0.mm baseAddress {0x1000}
+set_connection_parameter_value jtagm.master/sfp0.mm baseAddress {0x0100}
 set_connection_parameter_value jtagm.master/sfp0.mm defaultConnection {0}
 
 add_connection jtagm.master sfp1.mm
 set_connection_parameter_value jtagm.master/sfp1.mm arbitrationPriority {1}
-set_connection_parameter_value jtagm.master/sfp1.mm baseAddress {0x2000}
+set_connection_parameter_value jtagm.master/sfp1.mm baseAddress {0x0200}
 set_connection_parameter_value jtagm.master/sfp1.mm defaultConnection {0}
 
 add_connection jtagm.master temp.temp_mm
@@ -227,7 +227,7 @@ set_connection_parameter_value led.xcvr_reconfig/fc.reconfig_busy width {0}
 
 add_connection pcie.bar0_mm fc.mgmt_mm
 set_connection_parameter_value pcie.bar0_mm/fc.mgmt_mm arbitrationPriority {1}
-set_connection_parameter_value pcie.bar0_mm/fc.mgmt_mm baseAddress {0x00080000}
+set_connection_parameter_value pcie.bar0_mm/fc.mgmt_mm baseAddress {0x8000}
 set_connection_parameter_value pcie.bar0_mm/fc.mgmt_mm defaultConnection {0}
 
 add_connection pcie.bar0_mm ident.mm
@@ -247,12 +247,12 @@ set_connection_parameter_value pcie.bar0_mm/phy_clk_gauge.mm defaultConnection {
 
 add_connection pcie.bar0_mm sfp0.mm
 set_connection_parameter_value pcie.bar0_mm/sfp0.mm arbitrationPriority {1}
-set_connection_parameter_value pcie.bar0_mm/sfp0.mm baseAddress {0x1000}
+set_connection_parameter_value pcie.bar0_mm/sfp0.mm baseAddress {0x0100}
 set_connection_parameter_value pcie.bar0_mm/sfp0.mm defaultConnection {0}
 
 add_connection pcie.bar0_mm sfp1.mm
 set_connection_parameter_value pcie.bar0_mm/sfp1.mm arbitrationPriority {1}
-set_connection_parameter_value pcie.bar0_mm/sfp1.mm baseAddress {0x2000}
+set_connection_parameter_value pcie.bar0_mm/sfp1.mm baseAddress {0x0200}
 set_connection_parameter_value pcie.bar0_mm/sfp1.mm defaultConnection {0}
 
 add_connection pcie.bar0_mm temp.temp_mm

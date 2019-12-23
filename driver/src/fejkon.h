@@ -46,9 +46,9 @@ struct fejkon_port {
 
 #define CLK 50 * 1000 * 1000
 
-#define BAR0_SFP_I2C_OFFSET(x)    (0x1000 * (x + 1) + 0x40)
-#define BAR0_SFP_STATUS_OFFSET(x) (0x1000 * (x + 1) + 0x0)
-#define BAR0_FC_STATE_OFFSET(x) (0x10000 * (x + 1) + 0x2000)
+#define BAR0_SFP_I2C_OFFSET(x)    (0x100 * ((x) + 1) + 0x40)
+#define BAR0_SFP_STATUS_OFFSET(x) (0x100 * ((x) + 1) + 0x0)
+#define BAR0_FC_STATE_OFFSET(x)   (0x2000 * (x) + 0x9000)
 
 struct i2c_dev * fejkon_i2c_probe(struct device *dev, void __iomem *base, int irq);
 

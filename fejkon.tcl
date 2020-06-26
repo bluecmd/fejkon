@@ -9,7 +9,7 @@ set_project_property HIDE_FROM_IP_CATALOG {false}
 
 # Instances and instance parameters
 # (disabled instances are intentionally culled)
-add_instance ext0 clock_source 19.1
+add_instance ext0 clock_source 20.1
 set_instance_parameter_value ext0 {clockFrequency} {50000000.0}
 set_instance_parameter_value ext0 {clockFrequencyKnown} {1}
 set_instance_parameter_value ext0 {resetSynchronousEdges} {NONE}
@@ -19,7 +19,7 @@ add_instance fc fejkon_fc 1.0
 add_instance ident fejkon_identity 1.0
 set_instance_parameter_value ident {Ports} {2}
 
-add_instance jtagm altera_jtag_avalon_master 19.1
+add_instance jtagm altera_jtag_avalon_master 20.1
 set_instance_parameter_value jtagm {FAST_VER} {0}
 set_instance_parameter_value jtagm {FIFO_DEPTHS} {2}
 set_instance_parameter_value jtagm {PLI_PORT} {50000}
@@ -29,17 +29,17 @@ add_instance led fejkon_led 1.0
 
 add_instance pcie fejkon_pcie 1.0
 
-add_instance phy_clk altera_clock_bridge 19.1
+add_instance phy_clk altera_clock_bridge 20.1
 set_instance_parameter_value phy_clk {EXPLICIT_CLOCK_RATE} {106250000.0}
 set_instance_parameter_value phy_clk {NUM_CLOCK_OUTPUTS} {1}
 
 add_instance phy_clk_gauge freq_gauge 1.0
 
-add_instance phy_clk_out altera_clock_bridge 19.1
+add_instance phy_clk_out altera_clock_bridge 20.1
 set_instance_parameter_value phy_clk_out {EXPLICIT_CLOCK_RATE} {0.0}
 set_instance_parameter_value phy_clk_out {NUM_CLOCK_OUTPUTS} {1}
 
-add_instance reset_ctrl altera_reset_controller 19.1
+add_instance reset_ctrl altera_reset_controller 20.1
 set_instance_parameter_value reset_ctrl {MIN_RST_ASSERTION_TIME} {3}
 set_instance_parameter_value reset_ctrl {NUM_RESET_INPUTS} {3}
 set_instance_parameter_value reset_ctrl {OUTPUT_RESET_SYNC_EDGES} {deassert}
@@ -76,7 +76,7 @@ set_instance_parameter_value si570_ctrl {TargetFrequency} {106250000}
 
 add_instance temp intel_temp 1.0
 
-add_instance temp_sense altera_temp_sense 19.1
+add_instance temp_sense altera_temp_sense 20.1
 set_instance_parameter_value temp_sense {CBX_AUTO_BLACKBOX} {ALL}
 set_instance_parameter_value temp_sense {CE_CHECK} {0}
 set_instance_parameter_value temp_sense {CLK_FREQUENCY} {50.0}

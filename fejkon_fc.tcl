@@ -11,7 +11,7 @@ set_project_property HIDE_FROM_IP_CATALOG {false}
 # (disabled instances are intentionally culled)
 add_instance fc0 fc_framer 1.0
 
-add_instance fc0_256_rx altera_avalon_st_adapter 19.1
+add_instance fc0_256_rx altera_avalon_st_adapter 20.1
 set_instance_parameter_value fc0_256_rx {inBitsPerSymbol} {8}
 set_instance_parameter_value fc0_256_rx {inChannelWidth} {0}
 set_instance_parameter_value fc0_256_rx {inDataWidth} {32}
@@ -33,7 +33,7 @@ set_instance_parameter_value fc0_256_rx {outUseEmptyPort} {1}
 set_instance_parameter_value fc0_256_rx {outUseReady} {1}
 set_instance_parameter_value fc0_256_rx {outUseValid} {1}
 
-add_instance fc0_rx_cdc altera_avalon_dc_fifo 19.1
+add_instance fc0_rx_cdc altera_avalon_dc_fifo 20.1
 set_instance_parameter_value fc0_rx_cdc {BITS_PER_SYMBOL} {8}
 set_instance_parameter_value fc0_rx_cdc {CHANNEL_WIDTH} {0}
 set_instance_parameter_value fc0_rx_cdc {ENABLE_EXPLICIT_MAXCHANNEL} {0}
@@ -47,7 +47,7 @@ set_instance_parameter_value fc0_rx_cdc {USE_OUT_FILL_LEVEL} {0}
 set_instance_parameter_value fc0_rx_cdc {USE_PACKETS} {1}
 set_instance_parameter_value fc0_rx_cdc {WR_SYNC_DEPTH} {3}
 
-add_instance fc0_rx_split altera_avalon_st_splitter 19.1
+add_instance fc0_rx_split altera_avalon_st_splitter 20.1
 set_instance_parameter_value fc0_rx_split {BITS_PER_SYMBOL} {8}
 set_instance_parameter_value fc0_rx_split {CHANNEL_WIDTH} {1}
 set_instance_parameter_value fc0_rx_split {DATA_WIDTH} {32}
@@ -66,7 +66,7 @@ set_instance_parameter_value fc0_rx_split {USE_VALID} {1}
 
 add_instance fc1 fc_framer 1.0
 
-add_instance fc1_256_rx altera_avalon_st_adapter 19.1
+add_instance fc1_256_rx altera_avalon_st_adapter 20.1
 set_instance_parameter_value fc1_256_rx {inBitsPerSymbol} {8}
 set_instance_parameter_value fc1_256_rx {inChannelWidth} {0}
 set_instance_parameter_value fc1_256_rx {inDataWidth} {32}
@@ -88,7 +88,7 @@ set_instance_parameter_value fc1_256_rx {outUseEmptyPort} {1}
 set_instance_parameter_value fc1_256_rx {outUseReady} {1}
 set_instance_parameter_value fc1_256_rx {outUseValid} {1}
 
-add_instance fc1_rx_cdc altera_avalon_dc_fifo 19.1
+add_instance fc1_rx_cdc altera_avalon_dc_fifo 20.1
 set_instance_parameter_value fc1_rx_cdc {BITS_PER_SYMBOL} {8}
 set_instance_parameter_value fc1_rx_cdc {CHANNEL_WIDTH} {0}
 set_instance_parameter_value fc1_rx_cdc {ENABLE_EXPLICIT_MAXCHANNEL} {0}
@@ -102,7 +102,7 @@ set_instance_parameter_value fc1_rx_cdc {USE_OUT_FILL_LEVEL} {0}
 set_instance_parameter_value fc1_rx_cdc {USE_PACKETS} {1}
 set_instance_parameter_value fc1_rx_cdc {WR_SYNC_DEPTH} {3}
 
-add_instance fc1_rx_split altera_avalon_st_splitter 19.1
+add_instance fc1_rx_split altera_avalon_st_splitter 20.1
 set_instance_parameter_value fc1_rx_split {BITS_PER_SYMBOL} {8}
 set_instance_parameter_value fc1_rx_split {CHANNEL_WIDTH} {1}
 set_instance_parameter_value fc1_rx_split {DATA_WIDTH} {32}
@@ -119,7 +119,7 @@ set_instance_parameter_value fc1_rx_split {USE_PACKETS} {1}
 set_instance_parameter_value fc1_rx_split {USE_READY} {1}
 set_instance_parameter_value fc1_rx_split {USE_VALID} {1}
 
-add_instance fifo_0to1 altera_avalon_dc_fifo 19.1
+add_instance fifo_0to1 altera_avalon_dc_fifo 20.1
 set_instance_parameter_value fifo_0to1 {BITS_PER_SYMBOL} {8}
 set_instance_parameter_value fifo_0to1 {CHANNEL_WIDTH} {0}
 set_instance_parameter_value fifo_0to1 {ENABLE_EXPLICIT_MAXCHANNEL} {0}
@@ -133,7 +133,7 @@ set_instance_parameter_value fifo_0to1 {USE_OUT_FILL_LEVEL} {0}
 set_instance_parameter_value fifo_0to1 {USE_PACKETS} {1}
 set_instance_parameter_value fifo_0to1 {WR_SYNC_DEPTH} {3}
 
-add_instance fifo_1to0 altera_avalon_dc_fifo 19.1
+add_instance fifo_1to0 altera_avalon_dc_fifo 20.1
 set_instance_parameter_value fifo_1to0 {BITS_PER_SYMBOL} {8}
 set_instance_parameter_value fifo_1to0 {CHANNEL_WIDTH} {0}
 set_instance_parameter_value fifo_1to0 {ENABLE_EXPLICIT_MAXCHANNEL} {0}
@@ -147,11 +147,11 @@ set_instance_parameter_value fifo_1to0 {USE_OUT_FILL_LEVEL} {0}
 set_instance_parameter_value fifo_1to0 {USE_PACKETS} {1}
 set_instance_parameter_value fifo_1to0 {WR_SYNC_DEPTH} {3}
 
-add_instance mgmt_clk altera_clock_bridge 19.1
+add_instance mgmt_clk altera_clock_bridge 20.1
 set_instance_parameter_value mgmt_clk {EXPLICIT_CLOCK_RATE} {0.0}
 set_instance_parameter_value mgmt_clk {NUM_CLOCK_OUTPUTS} {1}
 
-add_instance mm altera_avalon_mm_bridge 19.1
+add_instance mm altera_avalon_mm_bridge 20.1
 set_instance_parameter_value mm {ADDRESS_UNITS} {SYMBOLS}
 set_instance_parameter_value mm {ADDRESS_WIDTH} {10}
 set_instance_parameter_value mm {DATA_WIDTH} {32}
@@ -164,17 +164,17 @@ set_instance_parameter_value mm {SYMBOL_WIDTH} {8}
 set_instance_parameter_value mm {USE_AUTO_ADDRESS_WIDTH} {1}
 set_instance_parameter_value mm {USE_RESPONSE} {0}
 
-add_instance phy_clk altera_clock_bridge 19.1
+add_instance phy_clk altera_clock_bridge 20.1
 set_instance_parameter_value phy_clk {EXPLICIT_CLOCK_RATE} {106250000.0}
 set_instance_parameter_value phy_clk {NUM_CLOCK_OUTPUTS} {1}
 
-add_instance reset altera_reset_bridge 19.1
+add_instance reset altera_reset_bridge 20.1
 set_instance_parameter_value reset {ACTIVE_LOW_RESET} {0}
 set_instance_parameter_value reset {NUM_RESET_OUTPUTS} {1}
 set_instance_parameter_value reset {SYNCHRONOUS_EDGES} {deassert}
 set_instance_parameter_value reset {USE_RESET_REQUEST} {0}
 
-add_instance rx_mux multiplexer 19.1
+add_instance rx_mux multiplexer 20.1
 set_instance_parameter_value rx_mux {bitsPerSymbol} {8}
 set_instance_parameter_value rx_mux {errorWidth} {0}
 set_instance_parameter_value rx_mux {numInputInterfaces} {2}
@@ -185,7 +185,7 @@ set_instance_parameter_value rx_mux {symbolsPerBeat} {32}
 set_instance_parameter_value rx_mux {useHighBitsOfChannel} {1}
 set_instance_parameter_value rx_mux {usePackets} {1}
 
-add_instance rx_mux_clk altera_clock_bridge 19.1
+add_instance rx_mux_clk altera_clock_bridge 20.1
 set_instance_parameter_value rx_mux_clk {EXPLICIT_CLOCK_RATE} {0.0}
 set_instance_parameter_value rx_mux_clk {NUM_CLOCK_OUTPUTS} {1}
 

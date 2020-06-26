@@ -9,7 +9,7 @@ set_project_property HIDE_FROM_IP_CATALOG {false}
 
 # Instances and instance parameters
 # (disabled instances are intentionally culled)
-add_instance bar0_cdc altera_avalon_mm_clock_crossing_bridge 19.1
+add_instance bar0_cdc altera_avalon_mm_clock_crossing_bridge 20.1
 set_instance_parameter_value bar0_cdc {ADDRESS_UNITS} {SYMBOLS}
 set_instance_parameter_value bar0_cdc {ADDRESS_WIDTH} {16}
 set_instance_parameter_value bar0_cdc {COMMAND_FIFO_DEPTH} {4}
@@ -21,7 +21,7 @@ set_instance_parameter_value bar0_cdc {SLAVE_SYNC_DEPTH} {2}
 set_instance_parameter_value bar0_cdc {SYMBOL_WIDTH} {8}
 set_instance_parameter_value bar0_cdc {USE_AUTO_ADDRESS_WIDTH} {0}
 
-add_instance csr_bridge altera_avalon_mm_clock_crossing_bridge 19.1
+add_instance csr_bridge altera_avalon_mm_clock_crossing_bridge 20.1
 set_instance_parameter_value csr_bridge {ADDRESS_UNITS} {SYMBOLS}
 set_instance_parameter_value csr_bridge {ADDRESS_WIDTH} {10}
 set_instance_parameter_value csr_bridge {COMMAND_FIFO_DEPTH} {4}
@@ -33,7 +33,7 @@ set_instance_parameter_value csr_bridge {SLAVE_SYNC_DEPTH} {2}
 set_instance_parameter_value csr_bridge {SYMBOL_WIDTH} {8}
 set_instance_parameter_value csr_bridge {USE_AUTO_ADDRESS_WIDTH} {1}
 
-add_instance mem_req_fifo altera_avalon_sc_fifo 19.1
+add_instance mem_req_fifo altera_avalon_sc_fifo 20.1
 set_instance_parameter_value mem_req_fifo {BITS_PER_SYMBOL} {128}
 set_instance_parameter_value mem_req_fifo {CHANNEL_WIDTH} {0}
 set_instance_parameter_value mem_req_fifo {EMPTY_LATENCY} {3}
@@ -49,7 +49,7 @@ set_instance_parameter_value mem_req_fifo {USE_MEMORY_BLOCKS} {1}
 set_instance_parameter_value mem_req_fifo {USE_PACKETS} {0}
 set_instance_parameter_value mem_req_fifo {USE_STORE_FORWARD} {0}
 
-add_instance mem_resp_fifo altera_avalon_sc_fifo 19.1
+add_instance mem_resp_fifo altera_avalon_sc_fifo 20.1
 set_instance_parameter_value mem_resp_fifo {BITS_PER_SYMBOL} {128}
 set_instance_parameter_value mem_resp_fifo {CHANNEL_WIDTH} {0}
 set_instance_parameter_value mem_resp_fifo {EMPTY_LATENCY} {3}
@@ -65,11 +65,11 @@ set_instance_parameter_value mem_resp_fifo {USE_MEMORY_BLOCKS} {1}
 set_instance_parameter_value mem_resp_fifo {USE_PACKETS} {0}
 set_instance_parameter_value mem_resp_fifo {USE_STORE_FORWARD} {0}
 
-add_instance mgmt_clk altera_clock_bridge 19.1
+add_instance mgmt_clk altera_clock_bridge 20.1
 set_instance_parameter_value mgmt_clk {EXPLICIT_CLOCK_RATE} {0.0}
 set_instance_parameter_value mgmt_clk {NUM_CLOCK_OUTPUTS} {1}
 
-add_instance mgmt_rst altera_reset_bridge 19.1
+add_instance mgmt_rst altera_reset_bridge 20.1
 set_instance_parameter_value mgmt_rst {ACTIVE_LOW_RESET} {0}
 set_instance_parameter_value mgmt_rst {NUM_RESET_OUTPUTS} {1}
 set_instance_parameter_value mgmt_rst {SYNCHRONOUS_EDGES} {deassert}
@@ -79,20 +79,20 @@ add_instance msi_intr pcie_msi_intr 1.0
 
 add_instance pcie_avalon fejkon_pcie_avalon 1.0
 
-add_instance pcie_clk altera_clock_bridge 19.1
+add_instance pcie_clk altera_clock_bridge 20.1
 set_instance_parameter_value pcie_clk {EXPLICIT_CLOCK_RATE} {0.0}
 set_instance_parameter_value pcie_clk {NUM_CLOCK_OUTPUTS} {1}
 
 add_instance pcie_data fejkon_pcie_data 1.0
 
-add_instance pcie_reconfig altera_pcie_reconfig_driver 19.1
+add_instance pcie_reconfig altera_pcie_reconfig_driver 20.1
 set_instance_parameter_value pcie_reconfig {enable_cal_busy_hwtcl} {0}
 set_instance_parameter_value pcie_reconfig {gen123_lane_rate_mode_hwtcl} {Gen3 (8.0 Gbps)}
 set_instance_parameter_value pcie_reconfig {number_of_reconfig_interfaces} {11}
 
 add_instance pcie_reset pcie_reset 1.0
 
-add_instance phy altera_pcie_sv_hip_ast 19.1
+add_instance phy altera_pcie_sv_hip_ast 20.1
 set_instance_parameter_value phy {advanced_default_hwtcl_atomic_malformed} {true}
 set_instance_parameter_value phy {advanced_default_hwtcl_atomic_op_completer_32bit} {false}
 set_instance_parameter_value phy {advanced_default_hwtcl_atomic_op_completer_64bit} {false}
@@ -498,7 +498,7 @@ set_instance_parameter_value phy {vsec_rev_hwtcl} {0}
 
 add_instance tlp_adapter intel_pcie_tlp_adapter 1.0
 
-add_instance tlp_data_fifo altera_avalon_sc_fifo 19.1
+add_instance tlp_data_fifo altera_avalon_sc_fifo 20.1
 set_instance_parameter_value tlp_data_fifo {BITS_PER_SYMBOL} {32}
 set_instance_parameter_value tlp_data_fifo {CHANNEL_WIDTH} {0}
 set_instance_parameter_value tlp_data_fifo {EMPTY_LATENCY} {3}
@@ -514,7 +514,7 @@ set_instance_parameter_value tlp_data_fifo {USE_MEMORY_BLOCKS} {1}
 set_instance_parameter_value tlp_data_fifo {USE_PACKETS} {1}
 set_instance_parameter_value tlp_data_fifo {USE_STORE_FORWARD} {0}
 
-add_instance tlp_instant_fifo altera_avalon_sc_fifo 19.1
+add_instance tlp_instant_fifo altera_avalon_sc_fifo 20.1
 set_instance_parameter_value tlp_instant_fifo {BITS_PER_SYMBOL} {32}
 set_instance_parameter_value tlp_instant_fifo {CHANNEL_WIDTH} {0}
 set_instance_parameter_value tlp_instant_fifo {EMPTY_LATENCY} {3}
@@ -530,7 +530,7 @@ set_instance_parameter_value tlp_instant_fifo {USE_MEMORY_BLOCKS} {1}
 set_instance_parameter_value tlp_instant_fifo {USE_PACKETS} {1}
 set_instance_parameter_value tlp_instant_fifo {USE_STORE_FORWARD} {0}
 
-add_instance tlp_response_fifo altera_avalon_sc_fifo 19.1
+add_instance tlp_response_fifo altera_avalon_sc_fifo 20.1
 set_instance_parameter_value tlp_response_fifo {BITS_PER_SYMBOL} {32}
 set_instance_parameter_value tlp_response_fifo {CHANNEL_WIDTH} {0}
 set_instance_parameter_value tlp_response_fifo {EMPTY_LATENCY} {3}
@@ -546,7 +546,7 @@ set_instance_parameter_value tlp_response_fifo {USE_MEMORY_BLOCKS} {1}
 set_instance_parameter_value tlp_response_fifo {USE_PACKETS} {1}
 set_instance_parameter_value tlp_response_fifo {USE_STORE_FORWARD} {0}
 
-add_instance tlp_tx_multiplexer multiplexer 19.1
+add_instance tlp_tx_multiplexer multiplexer 20.1
 set_instance_parameter_value tlp_tx_multiplexer {bitsPerSymbol} {32}
 set_instance_parameter_value tlp_tx_multiplexer {errorWidth} {0}
 set_instance_parameter_value tlp_tx_multiplexer {numInputInterfaces} {3}

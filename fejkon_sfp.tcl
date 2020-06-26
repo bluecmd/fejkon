@@ -9,15 +9,15 @@ set_project_property HIDE_FROM_IP_CATALOG {false}
 
 # Instances and instance parameters
 # (disabled instances are intentionally culled)
-add_instance clk altera_clock_bridge 19.1
+add_instance clk altera_clock_bridge 20.1
 set_instance_parameter_value clk {EXPLICIT_CLOCK_RATE} {0.0}
 set_instance_parameter_value clk {NUM_CLOCK_OUTPUTS} {1}
 
-add_instance i2c altera_avalon_i2c 19.1
+add_instance i2c altera_avalon_i2c 20.1
 set_instance_parameter_value i2c {FIFO_DEPTH} {64}
 set_instance_parameter_value i2c {USE_AV_ST} {0}
 
-add_instance mm altera_avalon_mm_bridge 19.1
+add_instance mm altera_avalon_mm_bridge 20.1
 set_instance_parameter_value mm {ADDRESS_UNITS} {SYMBOLS}
 set_instance_parameter_value mm {ADDRESS_WIDTH} {10}
 set_instance_parameter_value mm {DATA_WIDTH} {32}
@@ -30,7 +30,7 @@ set_instance_parameter_value mm {SYMBOL_WIDTH} {8}
 set_instance_parameter_value mm {USE_AUTO_ADDRESS_WIDTH} {1}
 set_instance_parameter_value mm {USE_RESPONSE} {0}
 
-add_instance reset altera_reset_bridge 19.1
+add_instance reset altera_reset_bridge 20.1
 set_instance_parameter_value reset {ACTIVE_LOW_RESET} {0}
 set_instance_parameter_value reset {NUM_RESET_OUTPUTS} {1}
 set_instance_parameter_value reset {SYNCHRONOUS_EDGES} {deassert}

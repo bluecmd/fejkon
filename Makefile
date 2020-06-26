@@ -1,4 +1,4 @@
-QPATH ?= "$(HOME)/intelFPGA/19.1/quartus"
+QPATH ?= "$(HOME)/intelFPGA/20.1/quartus"
 
 #.DELETE_ON_ERROR:
 
@@ -49,7 +49,7 @@ config.tcl: .config config.py
 
 fejkon.qsys: $(wildcard fejkon_*.tcl) config.tcl .qsys-configured
 
-.qsys-clean:
+.qsys-clean: ip/fejkon_identity/version.sv
 	# Generate clean platform files
 	rm -f .qsys-configured \
 		fejkon_pcie.qsys fejkon_fc.qsys fejkon_sfp.qsys fejkon.qsys

@@ -41,6 +41,12 @@ set_fileset_property QUARTUS_SYNTH ENABLE_RELATIVE_INCLUDE_PATHS false
 set_fileset_property QUARTUS_SYNTH ENABLE_FILE_OVERWRITE_MODE true
 add_fileset_file intel_pcie_tlp_adapter.sv SYSTEM_VERILOG PATH intel_pcie_tlp_adapter.sv TOP_LEVEL_FILE
 
+add_fileset SIM_VERILOG SIM_VERILOG "" ""
+set_fileset_property SIM_VERILOG TOP_LEVEL intel_pcie_tlp_adapter
+set_fileset_property SIM_VERILOG ENABLE_RELATIVE_INCLUDE_PATHS false
+set_fileset_property SIM_VERILOG ENABLE_FILE_OVERWRITE_MODE true
+add_fileset_file intel_pcie_tlp_adapter.sv SYSTEM_VERILOG PATH intel_pcie_tlp_adapter.sv TOP_LEVEL_FILE
+
 
 # 
 # parameters

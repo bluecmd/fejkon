@@ -25,6 +25,12 @@ module intel_pcie_tlp_adapter (
     input  wire         tlp_rx_st_ready,         //          .ready
     input  wire [255:0] tlp_tx_st_data,          // tlp_tx_st.data
     input  wire [2:0]   tlp_tx_st_empty,         //          .empty
+    // NOTE: If we do not define channel here the standard way for Qsys
+    // to convert a bus with channel to one without is to drop any data
+    // not belonging to channel 0. Since we want all data, but don't care
+    // which channel it is from, we declare we support 255 channels and
+    // then simply ignore the input.
+    input  wire [7:0]   tlp_tx_st_channel,       //          .channel
     input  wire         tlp_tx_st_endofpacket,   //          .endofpacket
     input  wire         tlp_tx_st_startofpacket, //          .startofpacket
     output wire         tlp_tx_st_ready,         //          .ready

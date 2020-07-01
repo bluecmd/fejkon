@@ -282,12 +282,12 @@ static int fejkon_hwmon_read(struct device *dev, enum hwmon_sensor_types type,
     switch (attr) {
     case hwmon_temp_input:
       // Unit is millidegree C
-      reg = ioread16(card->bar0 + 0x10);
+      reg = ioread32(card->bar0 + 0x10);
       if ((reg & (1<<8)) == 0) {
         // No value available
         return -ERANGE;
       }
-      *val = ((ioread16(card->bar0 + 0x10) & 0xff) - 128) * 1000;
+      *val = ((ioread32(card->bar0 + 0x10) & 0xff) - 128) * 1000;
       break;
     default:
       return -EINVAL;

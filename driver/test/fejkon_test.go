@@ -13,7 +13,6 @@ import (
 	"strconv"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/bluecmd/go-sff"
 	"github.com/google/gopacket"
@@ -42,20 +41,10 @@ func TestSendPacket(t *testing.T) {
 	b := make([]byte, 2148)
 	addr := &raw.Addr{HardwareAddr: []byte{0xff, 0xff, 0xff}}
 	go func() {
-		for {
+		for i := 0; i < 10; i++ {
 			if _, err := c.WriteTo(b, addr); err != nil {
 				log.Fatalf("failed to write frame: %v", err)
 			}
-		}
-	}()
-
-	// Continue to send this packet in the background for now
-	go func() {
-		for {
-			if _, err := c.WriteTo(b, addr); err != nil {
-				log.Printf("failed to write frame: %v", err)
-			}
-			time.Sleep(time.Millisecond * 100)
 		}
 	}()
 }
@@ -145,6 +134,15 @@ func TestDumpEthtoolDriver(t *testing.T) {
 		return
 	}
 	log.Printf("ethtool -i fc0:\n%v", string(out))
+}
+
+func TestDumpIprouteStats(t *testing.T) {
+	out, err := exec.Command("/bin/ip", "-s", "link", "show", "dev", "fc0").CombinedOutput()
+	if err != nil {
+		t.Errorf("ip -s link show dev fc0: err: %s, out: %s", err, string(out))
+		return
+	}
+	log.Printf("ip -s link show dev fc0:\n%v", string(out))
 }
 
 // TODO: Implement?

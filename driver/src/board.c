@@ -93,18 +93,20 @@ static int poll(struct napi_struct *napi, int budget)
     port_id = be32_to_cpu(meta->port_id);
     len = be32_to_cpu(meta->length);
     port = card->port[port_id];
+    port->net->stats.rx_bytes += len;
+    port->net->stats.rx_packets++;
     if (!netif_oper_up(port->net)) {
-      // TODO(bluecmd): drop counter
+      port->net->stats.rx_dropped++;
       dev_notice(port->dev,
           "received packet on inactive interface, dropping");
     } else if (len < 36) {
-      // TODO(bluecmd): drop counter
+      port->net->stats.rx_dropped++;
       dev_notice(port->dev,
           "received undersized packet on interface, dropping");
     } else {
       skb = netdev_alloc_skb(port->net, len);
       if (!skb) {
-        // TODO(bluecmd): drop counter
+        port->net->stats.rx_dropped++;
         dev_warn(port->dev, "failed to allocate skb, len %d", len);
         return work_done;
       }
@@ -147,7 +149,7 @@ static irqreturn_t rx_dropped_irq(int irq, void *opaque)
 {
   struct fejkon_card *card = opaque;
   dev_err(&card->pci->dev, "packet dropped");
-  // TODO: Counters
+  // TODO: read drop counters from card and add onto corresponding netdev
   return IRQ_HANDLED;
 }
 
@@ -186,6 +188,7 @@ static netdev_tx_t net_tx(struct sk_buff *skb, struct net_device *net)
     void *tx_buf_read = card->tx_buf_start + read_ptr;
     if (tx_buf_read == card->tx_buf_read_cached) {
       // TODO: drop and free
+      net->stats.tx_dropped++;
       netdev_err(net, "tx queue full, dropping packet");
       return NETDEV_TX_OK;
     } else {
@@ -208,6 +211,9 @@ static netdev_tx_t net_tx(struct sk_buff *skb, struct net_device *net)
   memcpy(data, skb->data, skb->len);
 
   card->tx_buf_write += 4096;
+  net->stats.tx_packets++;
+  net->stats.tx_bytes += skb->len;
+
   if (card->tx_buf_write == card->tx_buf_end) {
     card->tx_buf_write = card->tx_buf_start;
   }
@@ -221,9 +227,9 @@ static netdev_tx_t net_tx(struct sk_buff *skb, struct net_device *net)
 }
 
 static const struct net_device_ops net_netdev_ops = {
-  .ndo_open       = net_open,
-  .ndo_stop       = net_stop,
-  .ndo_start_xmit = net_tx,
+  .ndo_open        = net_open,
+  .ndo_stop        = net_stop,
+  .ndo_start_xmit  = net_tx,
 };
 
 static void ethtool_get_drvinfo(struct net_device *net,

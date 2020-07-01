@@ -27,10 +27,12 @@ qemu/hw/fejkon/Makefile.objs: qemu/.git/config
 	echo "obj-y += fejkon/" >> qemu/hw/Makefile.objs
 	touch $@
 
-build-qemu/config-all-devices.mak: qemu qemu/hw/fejkon/Makefile.objs qemu-device/Makefile.objs
+build-qemu/config-all-devices.mak: qemu/.git/config qemu/hw/fejkon/Makefile.objs qemu-device/Makefile.objs
 	(mkdir -p build-qemu && \
 		cd build-qemu && \
-		../qemu/configure --target-list=x86_64-softmmu --enable-virtfs)
+		../qemu/configure \
+			--target-list=x86_64-softmmu \
+			--enable-virtfs)
 	touch $@
 
 build-qemu/x86_64-softmmu/qemu-system-x86_64: build-qemu/config-all-devices.mak $(wildcard qemu-device/*.c qemu-device/*.h)

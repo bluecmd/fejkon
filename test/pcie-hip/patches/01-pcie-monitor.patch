@@ -1,0 +1,114 @@
+--- gen/simulation/submodules/altpcie_monitor_sv_dlhip_sim.sv	2020-06-28 17:00:15.313032500 +0200
++++ gen/simulation/submodules/altpcie_monitor_sv_dlhip_sim.sv.fix	2020-06-28 17:00:48.338959400 +0200
+@@ -76,7 +76,7 @@
+ `define ALTPCIE_MONITOR_SV_HIP_DL_DLP_FILE_LOG "altpcie_monitor_sv_dlhip_dlp_file_log.log"
+ `define ALTPCIE_MONITOR_SV_HIP_DL_EP_ONLY 1
+ `define ALTPCIE_MONITOR_SV_HIP_DL_DUMP_IN_PROMPT 0
+-`define ALTPCIE_MONITOR_SV_HIP_DL_DUMP_IN_LOG_FILE 1
++`define ALTPCIE_MONITOR_SV_HIP_DL_DUMP_IN_LOG_FILE 0
+ 
+ module altpcie_monitor_sv_dlhip_sim (
+ 
+@@ -138,7 +138,7 @@
+    wire srst_int;
+ 
+ `ifdef  ALTPCIE_MONITOR_SV_HIP_DLTL_PROMPT
+-   localparam PCIE_DUMP_PROMPT=1 `ALTPCIE_MONITOR_SV_HIP_DL_DUMP_IN_PROMPT;
++   localparam PCIE_DUMP_PROMPT=1;
+ `else
+    localparam PCIE_DUMP_PROMPT=`ALTPCIE_MONITOR_SV_HIP_DL_DUMP_IN_PROMPT;
+ `endif
+@@ -402,16 +402,6 @@
+ 
+    reg         tx_sop_p;
+    reg         rx_sop_p;
+-   reg [127:0] tx_tlp_header0;
+-   reg [127:0] tx_tlp_header1;
+-   reg [127:0] tx_tlp_header2;
+-   reg [127:0] tx_tlp_header3;
+-
+-   reg [127:0] rx_tlp_header0;
+-   reg [127:0] rx_tlp_header1;
+-   reg [127:0] rx_tlp_header2;
+-   reg [127:0] rx_tlp_header3;
+-
+ 
+    reg [64*8:1] tlpstring;
+ 
+@@ -465,7 +455,6 @@
+          end
+          else begin
+             itime = ($time/1000) ;
+-            rx_tlp_p    <= 128'h0;
+             if ((tx_st_valid>4'h0)&&(tx_st_ready==1'b1)) begin
+                tx_tlp_p <= tx_st_data;
+                tx_sop_p <= tx_st_sop[3];
+@@ -502,42 +491,42 @@
+                   if (PCIE_DUMP_FILE==1) $fwrite(filedump, "| %d TX | %s\n", itime, tlpstring );
+                end
+             end
+-            if (rx_st_valid[0] == 1'b1) begin          // Display EP only k_gbl[15:12]=4'h0
+-               rx_sop_p    <= rx_st_sop[0];
+-               rx_tlp_p    <= rx_st_data;
+-               if (rx_st_sop[3]==1'b1) begin
+-                  tlpstring =  PCieTlpDecode(rx_st_data[255:224],
+-                                             rx_st_data[223:192],
+-                                             rx_st_data[191:160],
+-                                             rx_st_data[159:128]);
++            if (rx_st_valid>4'h0) begin
++               rx_tlp_p <= rx_st_data;
++               rx_sop_p <= rx_st_sop[3];
++               if (rx_st_sop[0]==1'b1) begin
++                  tlpstring = PCieTlpDecode(rx_st_data[ 31:  0],
++                                            rx_st_data[ 63: 32],
++                                            rx_st_data[ 95: 64],
++                                            rx_st_data[127: 96]);
++                  if (PCIE_DUMP_PROMPT==1) $display("%d RX | %s", itime, tlpstring );
++                  if (PCIE_DUMP_FILE==1) $fwrite(filedump, "| %d RX | %s\n", itime, tlpstring );
++               end
++               if (rx_st_sop[1]==1'b1) begin
++                  tlpstring = PCieTlpDecode(rx_st_data[ 95: 64],
++                                            rx_st_data[127: 96],
++                                            rx_st_data[159:128],
++                                            rx_st_data[191:160]);
+                   if (PCIE_DUMP_PROMPT==1) $display("%d RX | %s", itime, tlpstring );
+                   if (PCIE_DUMP_FILE==1) $fwrite(filedump, "| %d RX | %s\n", itime, tlpstring );
+                end
+                if (rx_st_sop[2]==1'b1) begin
+-                  tlpstring =  PCieTlpDecode(rx_st_data[191:160],
+-                                             rx_st_data[159:128],
+-                                             rx_st_data[127: 96],
+-                                             rx_st_data[95 : 64]);
++                  tlpstring =PCieTlpDecode(rx_st_data[159:128],
++                                           rx_st_data[191:160],
++                                           rx_st_data[223:192],
++                                           rx_st_data[255:224]);
+                   if (PCIE_DUMP_PROMPT==1) $display("%d RX | %s", itime, tlpstring );
+                   if (PCIE_DUMP_FILE==1) $fwrite(filedump, "| %d RX | %s\n", itime, tlpstring );
+                end
+-               if (rx_st_sop[1]==1'b1) begin
+-                  tlpstring =  PCieTlpDecode(rx_st_data[127:96],
+-                                             rx_st_data[95 :64],
+-                                             rx_st_data[63 :32],
+-                                             rx_st_data[31 : 0]);
++               if (rx_sop_p==1'b1) begin
++                  tlpstring = PCieTlpDecode(rx_tlp_p  [223:192],
++                                            rx_tlp_p  [255:224],
++                                            rx_st_data[ 31:  0],
++                                            rx_st_data[ 63: 32]);
+                   if (PCIE_DUMP_PROMPT==1) $display("%d RX | %s", itime, tlpstring );
+                   if (PCIE_DUMP_FILE==1) $fwrite(filedump, "| %d RX | %s\n", itime, tlpstring );
+                end
+-            end // if (rx_st_valid>4'h0)
+-            if (rx_sop_p==1'b1) begin
+-               tlpstring =  PCieTlpDecode(rx_tlp_p  [63 : 32],
+-                                          rx_tlp_p  [31 :  0],
+-                                          rx_st_data[255:224],
+-                                          rx_st_data[223:192]);
+-               if (PCIE_DUMP_PROMPT==1) $display("%d RX | %s", itime, tlpstring );
+-               if (PCIE_DUMP_FILE==1) $fwrite(filedump, "| %d RX | %s\n", itime, tlpstring );
+-            end // if (rx_sop_p==1'b1)
++            end
+          end // else: !if(srst_int == 1'b1)
+       end
+    end

@@ -1,4 +1,4 @@
-QPATH ?= "$(HOME)/intelFPGA/19.1/quartus"
+QPATH ?= "$(HOME)/intelFPGA/20.1/quartus"
 
 .DELETE_ON_ERROR:
 

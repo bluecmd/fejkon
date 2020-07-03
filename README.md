@@ -81,7 +81,7 @@ have updated any subsystems you need to this for those systems as well.
 
 Finally review any changes to the \*.tcl files and commit them if they look reasonable.
 
-To run the tests, install these:
+To run the tests first install the dependencies:
 
 ```
 $ sudo apt install iverilog gtkwave verilator myhdl-cosimulation python3-myhdl
@@ -89,6 +89,13 @@ $ cd /usr/share/myhdl/cosimulation/icarus
 $ sudo make
 $ sudo cp myhdl.vpi /usr/lib/x86_64-linux-gnu/ivl/
 ```
+
+Then to execute all tests run:
+```
+$ make test
+```
+
+NOTE: The driver tests are located under `driver` and are not automatically run.
 
 ## PCIe specification
 

@@ -9,7 +9,7 @@ set_project_property HIDE_FROM_IP_CATALOG {false}
 
 # Instances and instance parameters
 # (disabled instances are intentionally culled)
-add_instance fifo_AtoB altera_avalon_dc_fifo 19.1
+add_instance fifo_AtoB altera_avalon_dc_fifo 20.1
 set_instance_parameter_value fifo_AtoB {BITS_PER_SYMBOL} {9}
 set_instance_parameter_value fifo_AtoB {CHANNEL_WIDTH} {0}
 set_instance_parameter_value fifo_AtoB {ENABLE_EXPLICIT_MAXCHANNEL} {0}
@@ -23,7 +23,7 @@ set_instance_parameter_value fifo_AtoB {USE_OUT_FILL_LEVEL} {0}
 set_instance_parameter_value fifo_AtoB {USE_PACKETS} {0}
 set_instance_parameter_value fifo_AtoB {WR_SYNC_DEPTH} {3}
 
-add_instance fifo_BtoA altera_avalon_dc_fifo 19.1
+add_instance fifo_BtoA altera_avalon_dc_fifo 20.1
 set_instance_parameter_value fifo_BtoA {BITS_PER_SYMBOL} {9}
 set_instance_parameter_value fifo_BtoA {CHANNEL_WIDTH} {0}
 set_instance_parameter_value fifo_BtoA {ENABLE_EXPLICIT_MAXCHANNEL} {0}
@@ -41,27 +41,27 @@ add_instance framer0 fc_framer 1.0
 
 add_instance framer1 fc_framer 1.0
 
-add_instance mgmt_clk clock_source 19.1
+add_instance mgmt_clk clock_source 20.1
 set_instance_parameter_value mgmt_clk {clockFrequency} {50000000.0}
 set_instance_parameter_value mgmt_clk {clockFrequencyKnown} {1}
 set_instance_parameter_value mgmt_clk {resetSynchronousEdges} {DEASSERT}
 
-add_instance phy0_clk clock_source 19.1
+add_instance phy0_clk clock_source 20.1
 set_instance_parameter_value phy0_clk {clockFrequency} {106255000.0}
 set_instance_parameter_value phy0_clk {clockFrequencyKnown} {1}
 set_instance_parameter_value phy0_clk {resetSynchronousEdges} {NONE}
 
-add_instance phy1_clk clock_source 19.1
+add_instance phy1_clk clock_source 20.1
 set_instance_parameter_value phy1_clk {clockFrequency} {106253000.0}
 set_instance_parameter_value phy1_clk {clockFrequencyKnown} {1}
 set_instance_parameter_value phy1_clk {resetSynchronousEdges} {NONE}
 
-add_instance phyA_clk clock_source 19.1
+add_instance phyA_clk clock_source 20.1
 set_instance_parameter_value phyA_clk {clockFrequency} {106247000.0}
 set_instance_parameter_value phyA_clk {clockFrequencyKnown} {1}
 set_instance_parameter_value phyA_clk {resetSynchronousEdges} {NONE}
 
-add_instance phyB_clk clock_source 19.1
+add_instance phyB_clk clock_source 20.1
 set_instance_parameter_value phyB_clk {clockFrequency} {106245000.0}
 set_instance_parameter_value phyB_clk {clockFrequencyKnown} {1}
 set_instance_parameter_value phyB_clk {resetSynchronousEdges} {NONE}
@@ -81,19 +81,19 @@ set_instance_parameter_value reconfig {gui_enable_pll} {0}
 set_instance_parameter_value reconfig {gui_split_sizes} {2,2,2,2}
 set_instance_parameter_value reconfig {number_of_reconfig_interfaces} {8}
 
-add_instance rx0_clk_bridge altera_clock_bridge 19.1
+add_instance rx0_clk_bridge altera_clock_bridge 20.1
 set_instance_parameter_value rx0_clk_bridge {EXPLICIT_CLOCK_RATE} {0.0}
 set_instance_parameter_value rx0_clk_bridge {NUM_CLOCK_OUTPUTS} {1}
 
-add_instance rx1_clk_bridge altera_clock_bridge 19.1
+add_instance rx1_clk_bridge altera_clock_bridge 20.1
 set_instance_parameter_value rx1_clk_bridge {EXPLICIT_CLOCK_RATE} {0.0}
 set_instance_parameter_value rx1_clk_bridge {NUM_CLOCK_OUTPUTS} {1}
 
-add_instance tx0_clk_bridge altera_clock_bridge 19.1
+add_instance tx0_clk_bridge altera_clock_bridge 20.1
 set_instance_parameter_value tx0_clk_bridge {EXPLICIT_CLOCK_RATE} {0.0}
 set_instance_parameter_value tx0_clk_bridge {NUM_CLOCK_OUTPUTS} {1}
 
-add_instance tx1_clk_bridge altera_clock_bridge 19.1
+add_instance tx1_clk_bridge altera_clock_bridge 20.1
 set_instance_parameter_value tx1_clk_bridge {EXPLICIT_CLOCK_RATE} {0.0}
 set_instance_parameter_value tx1_clk_bridge {NUM_CLOCK_OUTPUTS} {1}
 

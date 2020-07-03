@@ -2,7 +2,7 @@ QPATH ?= "$(HOME)/intelFPGA/20.1/quartus"
 
 #.DELETE_ON_ERROR:
 
-.PHONY: all syscon program flash editor defconfig menuconfig
+.PHONY: all syscon program flash editor defconfig menuconfig test
 
 all: fejkon.sof
 
@@ -79,3 +79,13 @@ defconfig:
 
 .config:
 	cp defconfig .config
+
+test:
+	make QPATH=${QPATH} -C ip/fc_xcvr test
+	make QPATH=${QPATH} -C ip/fejkon_led test
+	make QPATH=${QPATH} -C ip/fejkon_pcie_avalon test
+	make QPATH=${QPATH} -C ip/fejkon_pcie_data test
+	make QPATH=${QPATH} -C ip/freq_gauge test
+	make QPATH=${QPATH} -C ip/si570_ctrl test
+	# Not yet complete
+	#make QPATH=${QPATH} -C test/pcie-hip test

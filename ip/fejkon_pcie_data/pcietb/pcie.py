@@ -4302,7 +4302,7 @@ class RootComplex(Switch):
                         # unimplemented BAR
                         bar += 1
                         continue
-                    
+
                     # logging
                     pciePrint("[%s] Configure %02x:%02x.%x BAR%d" % (highlight(self.get_desc()), bus, d, f, bar))
 

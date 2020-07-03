@@ -87,5 +87,4 @@ test:
 	make QPATH=${QPATH} -C ip/fejkon_pcie_data test
 	make QPATH=${QPATH} -C ip/freq_gauge test
 	make QPATH=${QPATH} -C ip/si570_ctrl test
-	# Not yet complete
-	#make QPATH=${QPATH} -C test/pcie-hip test
+	make QPATH=${QPATH} -C test/pcie-hip test

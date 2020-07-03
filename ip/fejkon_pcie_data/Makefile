@@ -8,10 +8,10 @@ SRCS := fejkon_pcie_data.sv tl_cfg_module.sv test.sv \
 lint: $(SRCS)
 	pylint3 --rcfile=pylintrc test.py test_ep.py --exit-zero
 	verilator --lint-only fejkon_pcie_data.sv tl_cfg_module.sv
-	iverilog -g2012 -t null $^ $(wildcard test/*)
+	iverilog -g2012 -t null $^ $(wildcard test/*.v test/*.sv)
 
 test.vvp: $(SRCS)
-	iverilog -g2012 -o $@ $^ $(wildcard test/*)
+	iverilog -g2012 -o $@ $^ $(wildcard test/*.v test/*.sv)
 
 test: test.vvp
 ifneq ($(TEST),)

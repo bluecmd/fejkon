@@ -30,34 +30,50 @@ module fejkon_pcie_avalon (
   logic [31:0] compl_data = 0;
   logic [6:0]  compl_lower_address = 0;
 
+  logic [31:0] m_address = 0;
+  logic        m_read = 0;
+  logic        m_write = 0;
+  logic [31:0] m_writedata = 0;
+  logic        m_busy = 0;
+
   always @(posedge clk) begin
-    compl_valid <= 1'b0;
-    if (mem_access_req_valid) begin
+    // Read finished
+    if (mm_readdatavalid) begin
+      compl_valid <= 1'b1;
+      compl_data <= mm_readdata;
+      m_busy <= 1'b0;
+    end else begin
+      compl_valid <= 1'b0;
+    end
+    // New read starting
+    if (mem_access_req_valid && ~m_busy) begin
       if (mem_access_req_data[0]) begin
-        // No write support
+        m_write <= 1'b1;
+        m_address <= mem_access_req_address;
+        m_writedata <= mem_access_req_data[32:1];
       end else begin
         // Read
-        compl_valid <= 1'b1;
+        m_busy <= 1'b1;
+        m_read <= 1'b1;
+        m_address <= mem_access_req_address;
         compl_requester_id <= mem_access_req_data[16:1];
         compl_tag <= mem_access_req_data[24:17];
         compl_lower_address <= mem_access_req_address[6:0];
-        case (mem_access_req_address)
-          32'h0: compl_data <= 32'h02010de5;
-          32'h4: compl_data <= 32'hdeadbeef;
-          default: compl_data <= ~32'h0;
-        endcase
       end
+    end else begin
+      m_write <= 1'b0;
+      m_read  <= 1'b0;
     end
   end
 
   assign mem_access_resp_valid = compl_valid;
   assign mem_access_resp_data = {64'b0, compl_data, 3'b0, compl_lower_address[6:2], compl_tag, compl_requester_id};
-  assign mem_access_req_ready = 1'b1;
+  assign mem_access_req_ready = ~m_busy;
 
-  assign mm_address = 32'b0;
-  assign mm_byteenable = 4'b0000;
-  assign mm_read = 1'b0;
-  assign mm_write = 1'b0;
-  assign mm_writedata = 32'b0;
+  assign mm_address = m_address;
+  assign mm_byteenable = 4'b1111;
+  assign mm_read = m_read;
+  assign mm_write = m_write;
+  assign mm_writedata = m_writedata;
 
 endmodule

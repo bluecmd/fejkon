@@ -84,6 +84,14 @@ class FejkonEP(pcie.Endpoint, pcie.MSICapability):
                 raise Exception("Timeout waiting for rx_st_ready")
 
         dws = tlp.pack()
+        # Altera/Intel alignment
+        # Check "Data Alignment and Timing for 256-Bit # Avalon-ST RX Interface" in
+        # the "Stratix V Hard IP for PCI Express User Guide" for why the following needs to be done.
+        # Quote: "Non-qword aligned address occur when address[2] is set"
+        # => start with data at dw[4] when address[2] is not set.
+        # (We do the same for TX)
+        if tlp.lower_address & 0x4 == 0:
+            dws.insert(3, 0)
         frames = int(math.ceil(len(dws)/8.0))
         # Pad to 32 word alignment
         empty_dws = 8 - len(dws) % 8

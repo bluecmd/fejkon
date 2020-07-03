@@ -196,7 +196,17 @@ module fejkon_pcie_data (
           tlp_rx_frm_data <= tlp_rx_st_dword[4];
         end else begin
           tlp_rx_frm_address <= {32'b0, tlp_rx_st_dword[2][31:2], 2'b0};
-          tlp_rx_frm_data <= tlp_rx_st_dword[3];
+          // Check "Data Alignment and Timing for 256-Bit
+          // Avalon-ST RX Interface" in the "Stratix V Hard IP for PCI Express
+          // User Guide" for why the following needs to be done.
+          // "Non-qword aligned address occur when address[2] is set"
+          // => use aligned (4) when address[2] is not set.
+          // (We do the same for TX)
+          if (~tlp_rx_st_dword[2][2]) begin
+            tlp_rx_frm_data <= tlp_rx_st_dword[4];
+          end else begin
+            tlp_rx_frm_data <= tlp_rx_st_dword[3];
+          end
         end
       end
     end
@@ -307,7 +317,7 @@ module fejkon_pcie_data (
         // Format for MWR:
         // [0]     1
         // [32:1]  tlp_rx_frm_data
-        // [94:33] tlp_rx_frm_masked_address[31:2]
+        // [94:33] tlp_rx_frm_masked_address[63:2]
         mem_access_out <= {tlp_rx_frm_masked_address[63:2], tlp_rx_frm_data, 1'b1};
       end
     end
@@ -397,6 +407,7 @@ module fejkon_pcie_data (
       // Note: This is really poorly documented, but for some reason, if the
       // offset of the lower address *is* 8-aligned, we have to pad the
       // header with one dword - essentially shifting everything 4 bytes.
+      // (We do the same for RX)
       if (mem_access_resp_lower_address[2] == 0) begin
         // Align header to 8-bytes, start data at 5th DW
         tlp_tx_response_frm_empty <= 3'h3;

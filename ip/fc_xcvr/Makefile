@@ -25,19 +25,19 @@ testbench/tb_tb.qsys: tb.qsys fc_8g_xcvr_hw.tcl
 	$(QPATH)/sopc_builder/bin/qsys-generate \
 		--testbench=STANDARD \
 		--testbench-simulation=VERILOG \
-		--output-directory=$(PWD) \
+		--output-directory=$(CURDIR) \
 		$<
 	# Avoid having a long re-compilation, symlink our files instead
 	# These will be re-compiled specifically by msim.do
-	ln -sf $(PWD)/fc_8g_xcvr.sv \
+	ln -sf $(CURDIR)/fc_8g_xcvr.sv \
 		testbench/tb_tb/simulation/submodules/fc_8g_xcvr.sv
-	ln -sf $(PWD)/../fc.sv \
+	ln -sf $(CURDIR)/../fc.sv \
 		testbench/tb_tb/simulation/submodules/fc.sv
-	ln -sf $(PWD)/../fc_framer/fc_framer.sv \
+	ln -sf $(CURDIR)/../fc_framer/fc_framer.sv \
 		testbench/tb_tb/simulation/submodules/fc_framer.sv
-	ln -sf $(PWD)/../fc_framer/fc_state_tx.sv \
+	ln -sf $(CURDIR)/../fc_framer/fc_state_tx.sv \
 		testbench/tb_tb/simulation/submodules/fc_state_tx.sv
-	ln -sf $(PWD)/../fc_framer/fc_state_rx.sv \
+	ln -sf $(CURDIR)/../fc_framer/fc_state_rx.sv \
 		testbench/tb_tb/simulation/submodules/fc_state_rx.sv
 
 sim: testbench/tb_tb.qsys

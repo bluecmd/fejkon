@@ -31,6 +31,11 @@ source $QSYS_SIMDIR/mentor/msim_setup.tcl
 if $compile_all {
   dev_com
   com
+} else {
+  # Only re-compile our internal IPs
+  vlog -sv gen/simulation/submodules/fejkon_pcie_data.sv
+  vlog -sv gen/simulation/submodules/fejkon_pcie_avalon.sv
+  vlog -sv gen/simulation/submodules/intel_pcie_tlp_adapter.sv
 }
 
 # The EDA space is not really know to make bugless software, it seems these

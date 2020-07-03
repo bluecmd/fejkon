@@ -23,11 +23,6 @@ module tb;
     $sformat(message, "%m: svpcie simulation starting");
     print(VERBOSITY_INFO, message);
 
-    //`DRVR.ebfm_cfg_rp_ep(
-    //  BAR_TABLE_POINTER, 1, /* ep_bus_num */ 1, /* ep_dev_num */,
-    //  4096 /* maximum read size */, 1 /* display ep config */,
-    //  0 /* disable 4GB address limit */);
-
     `DRVR.ebfm_barrd_wait(bar_table, 0, 0, 0, 4, 0);
 
     $sformat(message, "%m: BAR0 read complete");

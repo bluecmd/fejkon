@@ -36,8 +36,16 @@ gen: svpcie_sim_tb.qsys
 		--output-directory=gen \
 		--family="Stratix V" \
 		--part=5SGXEA7N2F45C2
+	# Avoid having a long re-compilation, symlink our files instead
+	# These will be re-compiled specifically by msim.do
+	ln -sf $(CURDIR)/../../ip/fejkon_pcie_data/fejkon_pcie_data.sv gen/simulation/submodules/
+	ln -sf $(CURDIR)/../../ip/fejkon_pcie_avalon/fejkon_pcie_avalon.sv gen/simulation/submodules/
+	ln -sf $(CURDIR)/../../ip/intel_pcie_tlp_adapter/intel_pcie_tlp_adapter.sv gen/simulation/submodules/
 	patch -p0 < patches/01-pcie-monitor.patch
 	rm -fr libraries/
+
+edit: svpcie_sim_tb.qsys
+	$(QPATH)/sopc_builder/bin/qsys-edit $<
 
 clean:
 	\rm -fr libraries/

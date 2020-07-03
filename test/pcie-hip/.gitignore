@@ -1,5 +1,6 @@
 gen/
 libraries/
+svpcie_sim_tb/
 svpcie_sim_tb.qsys
 svpcie_sim_tb.sopcinfo
 transcript

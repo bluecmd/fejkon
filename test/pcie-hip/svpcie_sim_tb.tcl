@@ -19,14 +19,14 @@ set_instance_parameter_value clk {CLOCK_UNIT} {1}
 
 add_instance data_bfm altera_avalon_st_source_bfm 20.1
 set_instance_parameter_value data_bfm {ST_BEATSPERCYCLE} {1}
-set_instance_parameter_value data_bfm {ST_CHANNEL_W} {1}
+set_instance_parameter_value data_bfm {ST_CHANNEL_W} {2}
 set_instance_parameter_value data_bfm {ST_ERROR_DESCRIPTOR} {}
 set_instance_parameter_value data_bfm {ST_ERROR_W} {1}
 set_instance_parameter_value data_bfm {ST_MAX_CHANNELS} {1}
 set_instance_parameter_value data_bfm {ST_NUMSYMBOLS} {1}
 set_instance_parameter_value data_bfm {ST_READY_LATENCY} {0}
 set_instance_parameter_value data_bfm {ST_SYMBOL_W} {8}
-set_instance_parameter_value data_bfm {USE_CHANNEL} {0}
+set_instance_parameter_value data_bfm {USE_CHANNEL} {1}
 set_instance_parameter_value data_bfm {USE_EMPTY} {0}
 set_instance_parameter_value data_bfm {USE_ERROR} {0}
 set_instance_parameter_value data_bfm {USE_PACKET} {1}
@@ -506,50 +506,55 @@ set_instance_parameter_value mm_mgmt_bfm {USE_WRITERESPONSE} {0}
 set_instance_parameter_value mm_mgmt_bfm {USE_WRITE_DATA} {1}
 set_instance_parameter_value mm_mgmt_bfm {VHDL_ID} {0}
 
-add_instance mm_pcie_bfm altera_avalon_mm_slave_bfm 20.1
-set_instance_parameter_value mm_pcie_bfm {ADDRESS_UNITS} {WORDS}
-set_instance_parameter_value mm_pcie_bfm {ASSERT_HIGH_ARBITERLOCK} {1}
-set_instance_parameter_value mm_pcie_bfm {ASSERT_HIGH_BYTEENABLE} {1}
-set_instance_parameter_value mm_pcie_bfm {ASSERT_HIGH_LOCK} {1}
-set_instance_parameter_value mm_pcie_bfm {ASSERT_HIGH_READ} {1}
-set_instance_parameter_value mm_pcie_bfm {ASSERT_HIGH_READDATAVALID} {1}
-set_instance_parameter_value mm_pcie_bfm {ASSERT_HIGH_RESET} {1}
-set_instance_parameter_value mm_pcie_bfm {ASSERT_HIGH_WAITREQUEST} {1}
-set_instance_parameter_value mm_pcie_bfm {ASSERT_HIGH_WRITE} {1}
-set_instance_parameter_value mm_pcie_bfm {AV_ADDRESS_W} {20}
-set_instance_parameter_value mm_pcie_bfm {AV_BURSTCOUNT_W} {3}
-set_instance_parameter_value mm_pcie_bfm {AV_BURST_BNDR_ONLY} {1}
-set_instance_parameter_value mm_pcie_bfm {AV_BURST_LINEWRAP} {1}
-set_instance_parameter_value mm_pcie_bfm {AV_FIX_READ_LATENCY} {0}
-set_instance_parameter_value mm_pcie_bfm {AV_MAX_PENDING_READS} {1}
-set_instance_parameter_value mm_pcie_bfm {AV_MAX_PENDING_WRITES} {0}
-set_instance_parameter_value mm_pcie_bfm {AV_NUMSYMBOLS} {4}
-set_instance_parameter_value mm_pcie_bfm {AV_READRESPONSE_W} {8}
-set_instance_parameter_value mm_pcie_bfm {AV_READ_WAIT_TIME} {1}
-set_instance_parameter_value mm_pcie_bfm {AV_REGISTERINCOMINGSIGNALS} {0}
-set_instance_parameter_value mm_pcie_bfm {AV_SYMBOL_W} {8}
-set_instance_parameter_value mm_pcie_bfm {AV_WRITERESPONSE_W} {8}
-set_instance_parameter_value mm_pcie_bfm {AV_WRITE_WAIT_TIME} {0}
-set_instance_parameter_value mm_pcie_bfm {REGISTER_WAITREQUEST} {0}
-set_instance_parameter_value mm_pcie_bfm {USE_ADDRESS} {1}
-set_instance_parameter_value mm_pcie_bfm {USE_ARBITERLOCK} {0}
-set_instance_parameter_value mm_pcie_bfm {USE_BEGIN_BURST_TRANSFER} {0}
-set_instance_parameter_value mm_pcie_bfm {USE_BEGIN_TRANSFER} {0}
-set_instance_parameter_value mm_pcie_bfm {USE_BURSTCOUNT} {1}
-set_instance_parameter_value mm_pcie_bfm {USE_BYTE_ENABLE} {1}
-set_instance_parameter_value mm_pcie_bfm {USE_CLKEN} {0}
-set_instance_parameter_value mm_pcie_bfm {USE_DEBUGACCESS} {0}
-set_instance_parameter_value mm_pcie_bfm {USE_LOCK} {0}
-set_instance_parameter_value mm_pcie_bfm {USE_READ} {1}
-set_instance_parameter_value mm_pcie_bfm {USE_READRESPONSE} {0}
-set_instance_parameter_value mm_pcie_bfm {USE_READ_DATA} {1}
-set_instance_parameter_value mm_pcie_bfm {USE_READ_DATA_VALID} {1}
-set_instance_parameter_value mm_pcie_bfm {USE_TRANSACTIONID} {0}
-set_instance_parameter_value mm_pcie_bfm {USE_WAIT_REQUEST} {1}
-set_instance_parameter_value mm_pcie_bfm {USE_WRITE} {1}
-set_instance_parameter_value mm_pcie_bfm {USE_WRITERESPONSE} {0}
-set_instance_parameter_value mm_pcie_bfm {USE_WRITE_DATA} {1}
-set_instance_parameter_value mm_pcie_bfm {VHDL_ID} {0}
+add_instance mm_pcie_monitor altera_avalon_mm_monitor 20.1
+set_instance_parameter_value mm_pcie_monitor {AV_ADDRESS_W} {32}
+set_instance_parameter_value mm_pcie_monitor {AV_ALWAYS_BURST_MAX_BURST} {0}
+set_instance_parameter_value mm_pcie_monitor {AV_BURSTCOUNT_W} {3}
+set_instance_parameter_value mm_pcie_monitor {AV_BURST_BNDR_ONLY} {0}
+set_instance_parameter_value mm_pcie_monitor {AV_BURST_LINEWRAP} {0}
+set_instance_parameter_value mm_pcie_monitor {AV_CONSTANT_BURST_BEHAVIOR} {1}
+set_instance_parameter_value mm_pcie_monitor {AV_FIX_READ_LATENCY} {0}
+set_instance_parameter_value mm_pcie_monitor {AV_MAX_CONTINUOUS_READ} {5}
+set_instance_parameter_value mm_pcie_monitor {AV_MAX_CONTINUOUS_READDATAVALID} {5}
+set_instance_parameter_value mm_pcie_monitor {AV_MAX_CONTINUOUS_WAITREQUEST} {5}
+set_instance_parameter_value mm_pcie_monitor {AV_MAX_CONTINUOUS_WRITE} {5}
+set_instance_parameter_value mm_pcie_monitor {AV_MAX_PENDING_READS} {1}
+set_instance_parameter_value mm_pcie_monitor {AV_MAX_PENDING_WRITES} {0}
+set_instance_parameter_value mm_pcie_monitor {AV_MAX_READ_LATENCY} {100}
+set_instance_parameter_value mm_pcie_monitor {AV_MAX_WAITREQUESTED_READ} {100}
+set_instance_parameter_value mm_pcie_monitor {AV_MAX_WAITREQUESTED_WRITE} {100}
+set_instance_parameter_value mm_pcie_monitor {AV_NUMSYMBOLS} {4}
+set_instance_parameter_value mm_pcie_monitor {AV_READRESPONSE_W} {8}
+set_instance_parameter_value mm_pcie_monitor {AV_READ_TIMEOUT} {100}
+set_instance_parameter_value mm_pcie_monitor {AV_READ_WAIT_TIME} {1}
+set_instance_parameter_value mm_pcie_monitor {AV_REGISTERINCOMINGSIGNALS} {0}
+set_instance_parameter_value mm_pcie_monitor {AV_SYMBOL_W} {8}
+set_instance_parameter_value mm_pcie_monitor {AV_WAITREQUEST_TIMEOUT} {1024}
+set_instance_parameter_value mm_pcie_monitor {AV_WRITERESPONSE_W} {8}
+set_instance_parameter_value mm_pcie_monitor {AV_WRITE_TIMEOUT} {100}
+set_instance_parameter_value mm_pcie_monitor {AV_WRITE_WAIT_TIME} {0}
+set_instance_parameter_value mm_pcie_monitor {MASTER_ADDRESS_TYPE} {SYMBOLS}
+set_instance_parameter_value mm_pcie_monitor {REGISTER_WAITREQUEST} {0}
+set_instance_parameter_value mm_pcie_monitor {SLAVE_ADDRESS_TYPE} {WORDS}
+set_instance_parameter_value mm_pcie_monitor {USE_ADDRESS} {1}
+set_instance_parameter_value mm_pcie_monitor {USE_ARBITERLOCK} {0}
+set_instance_parameter_value mm_pcie_monitor {USE_BEGIN_BURST_TRANSFER} {0}
+set_instance_parameter_value mm_pcie_monitor {USE_BEGIN_TRANSFER} {0}
+set_instance_parameter_value mm_pcie_monitor {USE_BURSTCOUNT} {0}
+set_instance_parameter_value mm_pcie_monitor {USE_BYTE_ENABLE} {1}
+set_instance_parameter_value mm_pcie_monitor {USE_CLKEN} {0}
+set_instance_parameter_value mm_pcie_monitor {USE_DEBUGACCESS} {0}
+set_instance_parameter_value mm_pcie_monitor {USE_LOCK} {0}
+set_instance_parameter_value mm_pcie_monitor {USE_READ} {1}
+set_instance_parameter_value mm_pcie_monitor {USE_READRESPONSE} {0}
+set_instance_parameter_value mm_pcie_monitor {USE_READ_DATA} {1}
+set_instance_parameter_value mm_pcie_monitor {USE_READ_DATA_VALID} {1}
+set_instance_parameter_value mm_pcie_monitor {USE_TRANSACTIONID} {0}
+set_instance_parameter_value mm_pcie_monitor {USE_WAIT_REQUEST} {1}
+set_instance_parameter_value mm_pcie_monitor {USE_WRITE} {1}
+set_instance_parameter_value mm_pcie_monitor {USE_WRITERESPONSE} {0}
+set_instance_parameter_value mm_pcie_monitor {USE_WRITE_DATA} {1}
+set_instance_parameter_value mm_pcie_monitor {VHDL_ID} {0}
 
 add_instance reset altera_avalon_reset_source 20.1
 set_instance_parameter_value reset {ASSERT_HIGH_RESET} {0}
@@ -572,6 +577,31 @@ set_instance_parameter_value root {port_type_hwtcl} {Native endpoint}
 set_instance_parameter_value root {serial_sim_hwtcl} {1}
 set_instance_parameter_value root {use_crc_forwarding_hwtcl} {0}
 set_instance_parameter_value root {use_stratixv_tb_device} {false}
+
+add_instance test_pcie_mem altera_avalon_onchip_memory2 20.1
+set_instance_parameter_value test_pcie_mem {allowInSystemMemoryContentEditor} {0}
+set_instance_parameter_value test_pcie_mem {blockType} {AUTO}
+set_instance_parameter_value test_pcie_mem {copyInitFile} {0}
+set_instance_parameter_value test_pcie_mem {dataWidth} {32}
+set_instance_parameter_value test_pcie_mem {dataWidth2} {32}
+set_instance_parameter_value test_pcie_mem {dualPort} {0}
+set_instance_parameter_value test_pcie_mem {ecc_enabled} {0}
+set_instance_parameter_value test_pcie_mem {enPRInitMode} {0}
+set_instance_parameter_value test_pcie_mem {enableDiffWidth} {0}
+set_instance_parameter_value test_pcie_mem {initMemContent} {0}
+set_instance_parameter_value test_pcie_mem {initializationFileName} {onchip_mem.hex}
+set_instance_parameter_value test_pcie_mem {instanceID} {NONE}
+set_instance_parameter_value test_pcie_mem {memorySize} {4096.0}
+set_instance_parameter_value test_pcie_mem {readDuringWriteMode} {DONT_CARE}
+set_instance_parameter_value test_pcie_mem {resetrequest_enabled} {0}
+set_instance_parameter_value test_pcie_mem {simAllowMRAMContentsFile} {0}
+set_instance_parameter_value test_pcie_mem {simMemInitOnlyFilename} {0}
+set_instance_parameter_value test_pcie_mem {singleClockOperation} {0}
+set_instance_parameter_value test_pcie_mem {slave1Latency} {2}
+set_instance_parameter_value test_pcie_mem {slave2Latency} {1}
+set_instance_parameter_value test_pcie_mem {useNonDefaultInitFile} {0}
+set_instance_parameter_value test_pcie_mem {useShallowMemBlocks} {0}
+set_instance_parameter_value test_pcie_mem {writable} {1}
 
 add_instance tlp_data_fifo altera_avalon_sc_fifo 20.1
 set_instance_parameter_value tlp_data_fifo {BITS_PER_SYMBOL} {32}
@@ -673,7 +703,9 @@ add_connection endp0.coreclkout_hip intel_pcie_tlp_adapter.clk
 
 add_connection endp0.coreclkout_hip mm_mgmt_bfm.clk
 
-add_connection endp0.coreclkout_hip mm_pcie_bfm.clk
+add_connection endp0.coreclkout_hip mm_pcie_monitor.clk
+
+add_connection endp0.coreclkout_hip test_pcie_mem.clk1
 
 add_connection endp0.coreclkout_hip tlp_data_fifo.clk
 
@@ -708,10 +740,10 @@ add_connection endp0.rx_st intel_pcie_tlp_adapter.phy_rx_st
 
 add_connection fejkon_pcie_avalon.mem_access_resp fejkon_pcie_data.mem_access_resp
 
-add_connection fejkon_pcie_avalon.mm mm_pcie_bfm.s0
-set_connection_parameter_value fejkon_pcie_avalon.mm/mm_pcie_bfm.s0 arbitrationPriority {1}
-set_connection_parameter_value fejkon_pcie_avalon.mm/mm_pcie_bfm.s0 baseAddress {0x0000}
-set_connection_parameter_value fejkon_pcie_avalon.mm/mm_pcie_bfm.s0 defaultConnection {0}
+add_connection fejkon_pcie_avalon.mm mm_pcie_monitor.s0
+set_connection_parameter_value fejkon_pcie_avalon.mm/mm_pcie_monitor.s0 arbitrationPriority {1}
+set_connection_parameter_value fejkon_pcie_avalon.mm/mm_pcie_monitor.s0 baseAddress {0x0000}
+set_connection_parameter_value fejkon_pcie_avalon.mm/mm_pcie_monitor.s0 defaultConnection {0}
 
 add_connection fejkon_pcie_data.config_tl endp0.config_tl
 set_connection_parameter_value fejkon_pcie_data.config_tl/endp0.config_tl endPort {}
@@ -742,6 +774,11 @@ set_connection_parameter_value mm_mgmt_bfm.m0/fejkon_pcie_data.csr arbitrationPr
 set_connection_parameter_value mm_mgmt_bfm.m0/fejkon_pcie_data.csr baseAddress {0x1000}
 set_connection_parameter_value mm_mgmt_bfm.m0/fejkon_pcie_data.csr defaultConnection {0}
 
+add_connection mm_pcie_monitor.m0 test_pcie_mem.s1
+set_connection_parameter_value mm_pcie_monitor.m0/test_pcie_mem.s1 arbitrationPriority {1}
+set_connection_parameter_value mm_pcie_monitor.m0/test_pcie_mem.s1 baseAddress {0x0000}
+set_connection_parameter_value mm_pcie_monitor.m0/test_pcie_mem.s1 defaultConnection {0}
+
 add_connection reset.reset data_bfm.clk_reset
 
 add_connection reset.reset endp0_reconfig.mgmt_rst_reset
@@ -754,7 +791,9 @@ add_connection reset.reset intel_pcie_tlp_adapter.reset
 
 add_connection reset.reset mm_mgmt_bfm.clk_reset
 
-add_connection reset.reset mm_pcie_bfm.clk_reset
+add_connection reset.reset mm_pcie_monitor.clk_reset
+
+add_connection reset.reset test_pcie_mem.reset1
 
 add_connection reset.reset tlp_data_fifo.clk_reset
 

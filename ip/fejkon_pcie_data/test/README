@@ -1,0 +1,6 @@
+Copied from:
+../../gen/db/ip/fejkon/submodules/altera_avalon_sc_fifo.v
+../../gen/db/ip/fejkon/submodules/fejkon_pcie_tlp_tx_multiplexer.sv
+
+Make sure to read the license on these files if you are to use them
+for something.

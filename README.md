@@ -84,10 +84,9 @@ Finally review any changes to the \*.tcl files and commit them if they look reas
 To run the tests, install these:
 
 ```
-$ pip3 install myhdl
-$ sudo apt install iverilog gtkwave verilator
-$ cd .local/share/myhdl/cosimulation/icarus
-$ make
+$ sudo apt install iverilog gtkwave verilator myhdl-cosimulation python3-myhdl
+$ cd /usr/share/myhdl/cosimulation/icarus
+$ sudo make
 $ sudo cp myhdl.vpi /usr/lib/x86_64-linux-gnu/ivl/
 ```
 

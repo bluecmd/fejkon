@@ -92,7 +92,7 @@ $ sudo cp myhdl.vpi /usr/lib/x86_64-linux-gnu/ivl/
 
 Then to execute all tests run:
 ```
-$ make test
+$ make -j test
 ```
 
 NOTE: The driver tests are located under `driver` and are not automatically run.

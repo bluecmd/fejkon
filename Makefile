@@ -80,11 +80,10 @@ defconfig:
 .config:
 	cp defconfig .config
 
-test:
-	make QPATH=${QPATH} -C ip/fc_xcvr test
-	make QPATH=${QPATH} -C ip/fejkon_led test
-	make QPATH=${QPATH} -C ip/fejkon_pcie_avalon test
-	make QPATH=${QPATH} -C ip/fejkon_pcie_data test
-	make QPATH=${QPATH} -C ip/freq_gauge test
-	make QPATH=${QPATH} -C ip/si570_ctrl test
+test: test-fc_xcvr test-fejkon_led test-fejkon_pcie_avalon test-fejkon_pcie_data test-freq_gauge test-si570_ctrl test-pcie-hip
+
+test-%: ip/%
+	make QPATH=${QPATH} -C "$<" test
+
+test-pcie-hip:
 	make QPATH=${QPATH} -C test/pcie-hip test

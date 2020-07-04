@@ -1,5 +1,5 @@
---- gen/simulation/submodules/altpcie_monitor_sv_dlhip_sim.sv	2020-06-28 17:00:15.313032500 +0200
-+++ gen/simulation/submodules/altpcie_monitor_sv_dlhip_sim.sv.fix	2020-06-28 17:00:48.338959400 +0200
+--- gen/simulation/submodules/altpcie_monitor_sv_dlhip_sim.sv	2020-07-04 18:06:57.691097000 +0200
++++ gen/simulation/submodules/altpcie_monitor_sv_dlhip_sim.sv.fix	2020-07-04 18:07:32.767113300 +0200
 @@ -76,7 +76,7 @@
  `define ALTPCIE_MONITOR_SV_HIP_DL_DLP_FILE_LOG "altpcie_monitor_sv_dlhip_dlp_file_log.log"
  `define ALTPCIE_MONITOR_SV_HIP_DL_EP_ONLY 1
@@ -35,14 +35,16 @@
  
     reg [64*8:1] tlpstring;
  
-@@ -465,7 +455,6 @@
+@@ -465,8 +455,7 @@
           end
           else begin
              itime = ($time/1000) ;
 -            rx_tlp_p    <= 128'h0;
-             if ((tx_st_valid>4'h0)&&(tx_st_ready==1'b1)) begin
+-            if ((tx_st_valid>4'h0)&&(tx_st_ready==1'b1)) begin
++            if (tx_st_valid[0]&&(tx_st_ready==1'b1)) begin
                 tx_tlp_p <= tx_st_data;
                 tx_sop_p <= tx_st_sop[3];
+                if (tx_st_sop[0]==1'b1) begin
 @@ -502,42 +491,42 @@
                    if (PCIE_DUMP_FILE==1) $fwrite(filedump, "| %d TX | %s\n", itime, tlpstring );
                 end

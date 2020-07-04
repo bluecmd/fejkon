@@ -46,7 +46,7 @@ module fejkon_pcie_avalon (
       compl_valid <= 1'b0;
     end
     // New read starting
-    if (mem_access_req_valid && ~m_busy) begin
+    if (mem_access_req_valid && ~m_busy && ~m_write) begin
       if (mem_access_req_data[0]) begin
         m_write <= 1'b1;
         m_address <= mem_access_req_address;
@@ -61,14 +61,16 @@ module fejkon_pcie_avalon (
         compl_lower_address <= mem_access_req_address[6:0];
       end
     end else begin
-      m_write <= 1'b0;
-      m_read  <= 1'b0;
+      if (~mm_waitrequest) begin
+        m_write <= 1'b0;
+        m_read  <= 1'b0;
+      end
     end
   end
 
   assign mem_access_resp_valid = compl_valid;
   assign mem_access_resp_data = {64'b0, compl_data, 3'b0, compl_lower_address[6:2], compl_tag, compl_requester_id};
-  assign mem_access_req_ready = ~m_busy;
+  assign mem_access_req_ready = ~m_busy && ~m_write;
 
   assign mm_address = m_address;
   assign mm_byteenable = 4'b1111;

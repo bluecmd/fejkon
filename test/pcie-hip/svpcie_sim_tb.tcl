@@ -459,6 +459,22 @@ add_instance fejkon_pcie_data fejkon_pcie_data 1.0
 
 add_instance intel_pcie_tlp_adapter intel_pcie_tlp_adapter 1.0
 
+add_instance mem_req_fifo altera_avalon_sc_fifo 20.1
+set_instance_parameter_value mem_req_fifo {BITS_PER_SYMBOL} {128}
+set_instance_parameter_value mem_req_fifo {CHANNEL_WIDTH} {0}
+set_instance_parameter_value mem_req_fifo {EMPTY_LATENCY} {3}
+set_instance_parameter_value mem_req_fifo {ENABLE_EXPLICIT_MAXCHANNEL} {0}
+set_instance_parameter_value mem_req_fifo {ERROR_WIDTH} {0}
+set_instance_parameter_value mem_req_fifo {EXPLICIT_MAXCHANNEL} {0}
+set_instance_parameter_value mem_req_fifo {FIFO_DEPTH} {64}
+set_instance_parameter_value mem_req_fifo {SYMBOLS_PER_BEAT} {1}
+set_instance_parameter_value mem_req_fifo {USE_ALMOST_EMPTY_IF} {0}
+set_instance_parameter_value mem_req_fifo {USE_ALMOST_FULL_IF} {0}
+set_instance_parameter_value mem_req_fifo {USE_FILL_LEVEL} {0}
+set_instance_parameter_value mem_req_fifo {USE_MEMORY_BLOCKS} {1}
+set_instance_parameter_value mem_req_fifo {USE_PACKETS} {0}
+set_instance_parameter_value mem_req_fifo {USE_STORE_FORWARD} {0}
+
 add_instance mm_mgmt_bfm altera_avalon_mm_master_bfm 20.1
 set_instance_parameter_value mm_mgmt_bfm {ADDRESS_UNITS} {SYMBOLS}
 set_instance_parameter_value mm_mgmt_bfm {ASSERT_HIGH_ARBITERLOCK} {1}
@@ -577,6 +593,14 @@ set_instance_parameter_value root {port_type_hwtcl} {Native endpoint}
 set_instance_parameter_value root {serial_sim_hwtcl} {1}
 set_instance_parameter_value root {use_crc_forwarding_hwtcl} {0}
 set_instance_parameter_value root {use_stratixv_tb_device} {false}
+
+add_instance slow_clk altera_avalon_clock_source 20.1
+set_instance_parameter_value slow_clk {CLOCK_RATE} {25}
+set_instance_parameter_value slow_clk {CLOCK_UNIT} {1000000}
+
+add_instance slow_reset altera_avalon_reset_source 20.1
+set_instance_parameter_value slow_reset {ASSERT_HIGH_RESET} {1}
+set_instance_parameter_value slow_reset {INITIAL_RESET_CYCLES} {50}
 
 add_instance test_pcie_mem altera_avalon_onchip_memory2 20.1
 set_instance_parameter_value test_pcie_mem {allowInSystemMemoryContentEditor} {0}
@@ -701,11 +725,11 @@ add_connection endp0.coreclkout_hip fejkon_pcie_data.clk
 
 add_connection endp0.coreclkout_hip intel_pcie_tlp_adapter.clk
 
+add_connection endp0.coreclkout_hip mem_req_fifo.clk
+
 add_connection endp0.coreclkout_hip mm_mgmt_bfm.clk
 
 add_connection endp0.coreclkout_hip mm_pcie_monitor.clk
-
-add_connection endp0.coreclkout_hip test_pcie_mem.clk1
 
 add_connection endp0.coreclkout_hip tlp_data_fifo.clk
 
@@ -752,7 +776,7 @@ set_connection_parameter_value fejkon_pcie_data.config_tl/endp0.config_tl startP
 set_connection_parameter_value fejkon_pcie_data.config_tl/endp0.config_tl startPortLSB {0}
 set_connection_parameter_value fejkon_pcie_data.config_tl/endp0.config_tl width {0}
 
-add_connection fejkon_pcie_data.mem_access_req fejkon_pcie_avalon.mem_access_req
+add_connection fejkon_pcie_data.mem_access_req mem_req_fifo.in
 
 add_connection fejkon_pcie_data.tlp_tx_data_st tlp_data_fifo.in
 
@@ -763,6 +787,8 @@ add_connection fejkon_pcie_data.tlp_tx_response_st tlp_response_fifo.in
 add_connection intel_pcie_tlp_adapter.phy_tx_st endp0.tx_st
 
 add_connection intel_pcie_tlp_adapter.tlp_rx_st fejkon_pcie_data.tlp_rx_st
+
+add_connection mem_req_fifo.out fejkon_pcie_avalon.mem_access_req
 
 add_connection mm_mgmt_bfm.m0 endp0_reconfig.reconfig_mgmt
 set_connection_parameter_value mm_mgmt_bfm.m0/endp0_reconfig.reconfig_mgmt arbitrationPriority {1}
@@ -789,11 +815,11 @@ add_connection reset.reset fejkon_pcie_data.reset
 
 add_connection reset.reset intel_pcie_tlp_adapter.reset
 
+add_connection reset.reset mem_req_fifo.clk_reset
+
 add_connection reset.reset mm_mgmt_bfm.clk_reset
 
 add_connection reset.reset mm_pcie_monitor.clk_reset
-
-add_connection reset.reset test_pcie_mem.reset1
 
 add_connection reset.reset tlp_data_fifo.clk_reset
 
@@ -832,6 +858,12 @@ set_connection_parameter_value root.npor/endp0.npor startPortLSB {0}
 set_connection_parameter_value root.npor/endp0.npor width {0}
 
 add_connection root.refclk endp0.refclk
+
+add_connection slow_clk.clk slow_reset.clk
+
+add_connection slow_clk.clk test_pcie_mem.clk1
+
+add_connection slow_reset.reset test_pcie_mem.reset1
 
 add_connection tlp_data_fifo.out tlp_mux.in0
 

@@ -69,11 +69,53 @@ module tb;
     $sformat(message, "%m: Invalid BAR read/write marked as UR (success!)");
     print(VERBOSITY_INFO, message);
 
+    // Stress test 31 pending reads to test all tags.
+    // It seems the PCIe BFM does not handle sending more than 32 out at the
+    // same time, which is understandable. We should not hit this in real
+    // usage anyway = but if we do we might have to do fancier signaling back
+    // to the PCIe core, as right now we are likely to just drop things at the
+    // floor if the memory request FIFO runs full. See TODOs in
+    // fejkon_pcie_data for more info.
+    for (int i = 0; i < 31; i++)
+    begin
+      barwrite32(i * 4, i * 4);
+    end
+
+    // Flush
+    barwrite32(512, 32'hdeadbeef);
+    barread32(512, res);
+    assert(res == 32'hdeadbeef);
+
+    for (int i = 0; i < 31; i++)
+    begin
+      `DRVR.ebfm_barrd_nowt(
+        BAR_TABLE_POINTER, 0 /* bar num */, i * 4 /* bar addr */,
+        1024 + i * 4 /* shmem addr */, 4 /* length */, 0 /* tclass */);
+    end
+    // Do a blocking read to wait for all completions. Technially this could
+    // be reordered in front of the others I think (we need an null write
+    // really) but we do not reorder, and I doubt the BFM does.
+    // (This is the 32rd tag)
+    barwrite32(512, 32'hdeadbeef);
+    barread32(512, res);
+    assert(res == 32'hdeadbeef);
+
+    for (int i = 0; i < 31; i++)
+    begin
+      res = `DRVR.shmem_read(1024 + i * 4 /* addr */, 4 /* length */)[31:0];
+      if (res != (i * 4)) begin
+        $sformat(message, "%m: BAR0 read stress test failed @ %x: %d != %d",
+          i * 4, i * 4, res);
+        print(VERBOSITY_INFO, message);
+      end
+      assert(res == (i * 4));
+    end
+
     // Test that read/write still works in the end
     barwrite32(512, 32'hdeadbeef);
     barread32(512, res);
     assert(res == 32'hdeadbeef);
-    $sformat(message, "%m: BAR0 read test passed");
+    $sformat(message, "%m: BAR0 read stress test passed");
     print(VERBOSITY_INFO, message);
 
     $sformat(message, "%m: Test passed");

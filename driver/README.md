@@ -11,7 +11,7 @@ various driver operations and return a test status.
 ## Usage
 
 Dependencies: `libattr1-dev build-essential flex bison libssl-dev libelf-dev
-libglib2.0-dev libpixman-1-dev libcap-ng-dev libpcap-dev bc golang`
+libglib2.0-dev libpixman-1-dev libcap-ng-dev libpcap-dev bc golang wget`
 
 Run the tests by running `make`.
 

@@ -354,29 +354,47 @@ module fejkon_pcie_data (
   logic        [2:0] tlp_tx_response_frm_empty = 0;
   logic [7:0] [31:0] tlp_tx_response_frm_dword = 0;
 
-  // Instant sender (currently only unsuccessful completions)
+  // Instant sender (UR and zero-length reads)
   always @(posedge clk) begin: instant_tlp_sender
     tlp_tx_instant_frm_valid <= 1'b0;
     tlp_tx_instant_frm_startofpacket <= 1'b0;
     tlp_tx_instant_frm_endofpacket <= 1'b0;
     tlp_tx_instant_frm_empty <= 3'h0;
     // Ready latency is zero, so we don't care about ready
-    if (is_ready && tlp_rx_frm_is_end && tlp_rx_frm_is_npr && tlp_rx_frm_unsupported) begin
-      // Unsupported Request Completion
-      tlp_tx_instant_frm_dword <= 256'b0;
-      tlp_tx_instant_frm_dword[0][31:29] <= 3'b000;   // Cpl Fmt
-      tlp_tx_instant_frm_dword[0][28:24] <= 5'b01010; // Cpl Type
-      tlp_tx_instant_frm_dword[0][9:0] <= 10'h0;      // Length
-      tlp_tx_instant_frm_dword[1][31:16] <= my_id;    // Completer ID
-      tlp_tx_instant_frm_dword[1][15:13] <= 3'h1;     // Status Unsupported Request (UR)
-      tlp_tx_instant_frm_dword[1][11:0] <= tlp_rx_frm_total_byte_count;
-      tlp_tx_instant_frm_dword[2][31:16] <= tlp_rx_frm_requester_id;
-      tlp_tx_instant_frm_dword[2][15:8] <= tlp_rx_frm_tag;
-      tlp_tx_instant_frm_dword[2][6:0] <= tlp_rx_frm_address[6:0]; // Lower address
-      tlp_tx_instant_frm_empty <= 3'h5;
-      tlp_tx_instant_frm_valid <= 1'b1;
-      tlp_tx_instant_frm_startofpacket <= 1'b1;
-      tlp_tx_instant_frm_endofpacket <= 1'b1;
+    if (is_ready && tlp_rx_frm_is_end && tlp_rx_frm_is_npr) begin
+      if (tlp_rx_frm_unsupported) begin
+        // Unsupported Request Completion
+        tlp_tx_instant_frm_dword <= 256'b0;
+        tlp_tx_instant_frm_dword[0][31:29] <= 3'b000;   // Cpl Fmt
+        tlp_tx_instant_frm_dword[0][28:24] <= 5'b01010; // Cpl Type
+        tlp_tx_instant_frm_dword[0][9:0] <= 10'h0;      // Length
+        tlp_tx_instant_frm_dword[1][31:16] <= my_id;    // Completer ID
+        tlp_tx_instant_frm_dword[1][15:13] <= 3'h1;     // Status Unsupported Request (UR)
+        tlp_tx_instant_frm_dword[1][11:0] <= tlp_rx_frm_total_byte_count;
+        tlp_tx_instant_frm_dword[2][31:16] <= tlp_rx_frm_requester_id;
+        tlp_tx_instant_frm_dword[2][15:8] <= tlp_rx_frm_tag;
+        tlp_tx_instant_frm_dword[2][6:0] <= tlp_rx_frm_address[6:0]; // Lower address
+        tlp_tx_instant_frm_empty <= 3'h5;
+        tlp_tx_instant_frm_valid <= 1'b1;
+        tlp_tx_instant_frm_startofpacket <= 1'b1;
+        tlp_tx_instant_frm_endofpacket <= 1'b1;
+      end else if (tlp_rx_frm_total_byte_count == 12'h0) begin
+        // Zero-length read
+        // TODO(bluecmd): I assume CplD with byte count 0 is what we want here?
+        tlp_tx_instant_frm_dword[0][31:29] <= 3'b010;   // CplD Fmt
+        tlp_tx_instant_frm_dword[0][28:24] <= 5'b01010; // CplD Type
+        tlp_tx_instant_frm_dword[0][9:0] <= 0;          // Length
+        tlp_tx_instant_frm_dword[1][31:16] <= my_id;    // Completer ID
+        tlp_tx_instant_frm_dword[1][15:13] <= 0;        // Status OK
+        tlp_tx_instant_frm_dword[1][11:0] <= 0;         // Byte Count
+        tlp_tx_instant_frm_dword[2][31:16] <= tlp_rx_frm_requester_id;
+        tlp_tx_instant_frm_dword[2][15:8] <= tlp_rx_frm_tag;
+        tlp_tx_instant_frm_dword[2][6:0] <= tlp_rx_frm_address[6:0]; // Lower address
+        tlp_tx_instant_frm_empty <= 3'h5;
+        tlp_tx_instant_frm_valid <= 1'b1;
+        tlp_tx_instant_frm_startofpacket <= 1'b1;
+        tlp_tx_instant_frm_endofpacket <= 1'b1;
+      end
     end
   end
 

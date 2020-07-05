@@ -50,12 +50,28 @@ module tb;
     end
   endtask
 
+  task flush;
+    begin
+      logic [31:0] res;
+      // Normally these things are what a zero-length read is for, but it
+      // seems the BFM is behaving pretty strangely when using barrd_wait
+      // without using the value for something - possibly being optimized
+      // away?
+      barwrite32(512, 32'hdeadbeef);
+      barread32(512, res);
+      assert(res == 32'hdeadbeef);
+    end
+  endtask
+
   initial begin
     logic [31:0] res;
 
     wait(`SETUP_DONE == 1);
     $sformat(message, "%m: svpcie simulation starting");
     print(VERBOSITY_INFO, message);
+
+    // NOTE: It seems the Intel/Altera PCIe BFM does not do zero-length reads,
+    // or we would have tried them here.
 
     // Test that unaligned operations are marked as unsupported requests (UR).
     barwrite32(14, 32'h1337);
@@ -82,9 +98,7 @@ module tb;
     end
 
     // Flush
-    barwrite32(512, 32'hdeadbeef);
-    barread32(512, res);
-    assert(res == 32'hdeadbeef);
+    flush();
 
     for (int i = 0; i < 31; i++)
     begin
@@ -92,13 +106,10 @@ module tb;
         BAR_TABLE_POINTER, 0 /* bar num */, i * 4 /* bar addr */,
         1024 + i * 4 /* shmem addr */, 4 /* length */, 0 /* tclass */);
     end
-    // Do a blocking read to wait for all completions. Technially this could
-    // be reordered in front of the others I think (we need an null write
-    // really) but we do not reorder, and I doubt the BFM does.
+
+    // Do a blocking read to wait for all completions.
     // (This is the 32rd tag)
-    barwrite32(512, 32'hdeadbeef);
-    barread32(512, res);
-    assert(res == 32'hdeadbeef);
+    flush();
 
     for (int i = 0; i < 31; i++)
     begin
@@ -112,9 +123,7 @@ module tb;
     end
 
     // Test that read/write still works in the end
-    barwrite32(512, 32'hdeadbeef);
-    barread32(512, res);
-    assert(res == 32'hdeadbeef);
+    flush();
     $sformat(message, "%m: BAR0 read stress test passed");
     print(VERBOSITY_INFO, message);
 

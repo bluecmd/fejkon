@@ -160,7 +160,7 @@ Accesses need to be 4 byte wide.
 | 0x02x0 | ...   | Port 1 | SFP Port      |                              |
 | 0x03x0 | ...   | Port 2 | SFP Port      |                              |
 | 0x04x0 | ...   | Port 3 | SFP Port      |                              |
-| 0x0800 | 512   | Card   | PCIe Facility | PCIe counters and status (2) |
+| 0x0800 | 1024  | Card   | PCIe Facility | PCIe counters and status (2) |
 | 0x8000 | 2048  | Port 0 | FC XCVR IP    | Fejkon FC XCVR Core (5)      |
 | 0x8800 | 2048  | Port 0 | TX XCVR Mgmt  | V-Series Transceiver PHY (6) |
 | 0x9000 | 32    | Port 0 | FC Framer     | Fibre Channel Framer (7)     |
@@ -188,11 +188,20 @@ Accesses need to be 4 byte wide.
 | 0x00C | 4     | TX Data TLP counter               |
 | 0x010 | 4     | TX Instant TLP counter            |
 | 0x014 | 4     | TX Response TLP counter           |
+| 0x018 | 4     | C2H Staging Packets counter       |
 | 0x020 | 32    | Last RX TLP (8 DWs)               |
 | 0x040 | 32    | Last TX TLP (8 DWs)               |
 | 0x100 | 4     | Data TX TLP Fill Level            |
 | 0x110 | 4     | Instant TX TLP Fill Level         |
 | 0x120 | 4     | Response TX TLP Fill Level        |
+| 0x200 | 4     | C2H DMA buffer start address      | 
+| 0x204 | 4     | C2H DMA buffer end address        |
+| 0x208 | 4     | C2H DMA host read pointer         |
+| 0x20C | 4     | C2H DMA card write pointer        |
+| 0x300 | 4     | H2C DMA buffer start address      | 
+| 0x304 | 4     | H2C DMA buffer end address        |
+| 0x308 | 4     | H2C DMA card read pointer         |
+| 0x30C | 4     | H2C DMA host write pointer        |
 
 #### Temperature
 

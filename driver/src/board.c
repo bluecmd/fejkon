@@ -24,8 +24,8 @@
 #define PORT_REFRESH_INTERVAL_MS 100
 
 struct packet_meta {
-  __be32 length;
-  __be32 port_id;
+  __be32 ctrl1;
+  uint32_t __resv[7];
 };
 
 static const struct header_ops net_header_ops = {
@@ -80,29 +80,27 @@ static int poll(struct napi_struct *napi, int budget)
   int write_ptr = ioread32(card->bar0 + 0xA0C) - card->rx_buf_start_dma;
   void *rx_buf_write = card->rx_buf_start + write_ptr;
   while(rx_buf_write != card->rx_buf_read) {
-    int port_id;
-    int len;
+    uint8_t port_id;
+    uint16_t len;
     struct sk_buff *skb;
     struct fejkon_port *port;
     struct packet_meta *meta;
     if (work_done >= budget)
       return work_done;
 
-    // See explaination in net_tx for why this format is used
-    meta = card->rx_buf_read + 4096 - sizeof(*meta);
-    port_id = be32_to_cpu(meta->port_id);
-    len = be32_to_cpu(meta->length);
+    // See explaination in net_tx for what format is used
+    meta = card->rx_buf_read;
+    port_id = (be32_to_cpu(meta->ctrl1) >> 12) & 3;
+    len = be32_to_cpu(meta->ctrl1) & 0xfff;
     port = card->port[port_id];
-    port->net->stats.rx_bytes += len;
-    port->net->stats.rx_packets++;
     if (!netif_oper_up(port->net)) {
       port->net->stats.rx_dropped++;
       dev_notice(port->dev,
-          "received packet on inactive interface, dropping");
+          "received packet on inactive interface (%d), dropping", port_id);
     } else if (len < 36) {
       port->net->stats.rx_dropped++;
       dev_notice(port->dev,
-          "received undersized packet on interface, dropping");
+          "received undersized packet (%d) on interface, dropping", len);
     } else {
       skb = netdev_alloc_skb(port->net, len);
       if (!skb) {
@@ -110,7 +108,10 @@ static int poll(struct napi_struct *napi, int budget)
         dev_warn(port->dev, "failed to allocate skb, len %d", len);
         return work_done;
       }
-      skb_put_data(skb, card->rx_buf_read, len);
+      port->net->stats.rx_bytes += len;
+      port->net->stats.rx_packets++;
+      dev_dbg(port->dev, "received frame len = %d", len);
+      skb_put_data(skb, card->rx_buf_read + sizeof(*meta), len);
       // Since we're not doing Ethernet we have to set these manually or
       // the kernel will try to guess them (incorrectly)
       skb_set_mac_header(skb, 0);
@@ -198,15 +199,13 @@ static netdev_tx_t net_tx(struct sk_buff *skb, struct net_device *net)
   }
 
   // We don't use RX descriptors, we store all metadata in known positions
-  // inside the ring buffer. For TX this is at the start of the element, for
-  // RX it's the end.
-  // Why? Start is easier to implement in hardware for TX and for RX it's easier
-  // at the end (since we don't know the size ahead of time and we're doing
-  // cut-through switching).
+  // inside the ring buffer. The metadata is at the start of the element.
+  // The frames are always stored at 4KiB boundaries, wasting memory but
+  // ensuring alignment with the PCIe 4KiB requirement => easier hardware
+  // and RAM is cheap.
   meta = card->tx_buf_write;
   data = card->tx_buf_write + sizeof(*meta);
-  meta->port_id = cpu_to_be32(port->id);
-  meta->length = cpu_to_be32(skb->len);
+  meta->ctrl1 = cpu_to_be32((port->id & 3) << 12 | (skb->len & 0xfff));
 
   memcpy(data, skb->data, skb->len);
 

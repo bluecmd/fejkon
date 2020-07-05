@@ -266,12 +266,11 @@ static dma_addr_t dma_incr(FejkonDmaBuf *b, dma_addr_t *var, size_t x)
 static void fejkon_rx_pkt(FejkonState *card, uint32_t port_id, void *data,
     uint32_t length) {
   dma_addr_t new_write;
+  uint32_t metadata;
   qemu_mutex_lock(&card->rx_buf_mutex);
-  pci_dma_write(&card->pdev, card->rx_buf.write, data, length);
-  length = htobe32(length);
-  port_id = htobe32(port_id);
-  pci_dma_write(&card->pdev, card->rx_buf.write + 4092, &port_id, 4);
-  pci_dma_write(&card->pdev, card->rx_buf.write + 4088, &length, 4);
+  metadata = htobe32(length | (port_id << 12));
+  pci_dma_write(&card->pdev, card->rx_buf.write, &metadata, 4);
+  pci_dma_write(&card->pdev, card->rx_buf.write + 32, data, length);
   new_write = dma_incr(&card->rx_buf, &card->rx_buf.write, FRAME_SIZE);
   if (new_write == card->rx_buf.read) {
     // Signal buffer overflow and drop packet

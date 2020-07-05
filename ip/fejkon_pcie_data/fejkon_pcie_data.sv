@@ -143,7 +143,7 @@ module fejkon_pcie_data (
   assign tlp_rx_st_len      = tlp_rx_st_dword[0][9:0];
   assign tlp_rx_st_is_4dw   = tlp_rx_st_fmt[0];
 
-  always @(*) begin
+  always @(*) begin: tlp_rx_st_type_driver
     case ({tlp_rx_st_fmt[1], tlp_rx_st_raw_type})
       6'b000000: tlp_rx_st_type = TLP_MRD;
       6'b000001: tlp_rx_st_type = TLP_MRDLK;
@@ -178,7 +178,7 @@ module fejkon_pcie_data (
   // Process incoming TLP
   // This process converts from the Avalon-ST (rx_st_*) to the internal
   // registers for the current frame (rx_frm_*)
-  always @(posedge clk) begin
+  always @(posedge clk) begin: process_incoming_tlp
     tlp_rx_frm_is_start <= 1'b0;
     if (is_ready && tlp_rx_st_valid && tlp_rx_st_startofpacket) begin
       tlp_rx_frm_is_start <= 1'b1;
@@ -214,13 +214,13 @@ module fejkon_pcie_data (
   end
 
   // Masked address calculation
-  always @(*) begin
+  always @(*) begin: masked_address_driver
     // TODO(bluecmd): Hard-coded to 64 KiB region
     tlp_rx_frm_masked_address = tlp_rx_frm_address & 64'h000000000000ffff;
   end
 
   // Posted/Non-posted Request classification
-  always @(posedge clk) begin
+  always @(posedge clk) begin: npr_driver
     // A NPR requires a completion to be sent, a PR does not.
     // We want to figure out what we are handling to make sure we send
     // a completion if we need to, and to account the request correctly.
@@ -239,7 +239,7 @@ module fejkon_pcie_data (
   end
 
   // Total byte count calculation
-  always @(posedge clk) begin
+  always @(posedge clk) begin: total_byte_driver
     if (tlp_rx_st_valid && tlp_rx_st_startofpacket &&
       (tlp_rx_st_type == TLP_MRD || tlp_rx_st_type == TLP_MWR)) begin
       casez ({tlp_rx_st_dword[1][3:0], tlp_rx_st_dword[1][7:4]})
@@ -279,7 +279,7 @@ module fejkon_pcie_data (
 
   // A NPR requires a completion to be sent, a PR does not.
   // Signal unsupported requests
-  always @(*) begin
+  always @(*) begin: tlp_unsupported_driver
     tlp_rx_frm_unsupported = 1'b0;
     if (tlp_rx_frm_type == TLP_UNKNOWN)
       tlp_rx_frm_unsupported = 1'b1; // Unknwon TLP type
@@ -298,7 +298,7 @@ module fejkon_pcie_data (
   logic        mem_access_out_valid = 0;
   logic [94:0] mem_access_out = 0;
   // Post incoming access to outgoing FIFO
-  always @(posedge clk) begin
+  always @(posedge clk) begin: mem_access_driver
     mem_access_out_valid <= 1'b0;
     // TODO(bluecmd): mem_access_req_ready is not handled currently. It should
     // not overflow however, given the number of pending tags are the same as
@@ -337,14 +337,11 @@ module fejkon_pcie_data (
   assign mem_access_resp_rddata = mem_access_resp_data[63:32];
 
   //
-  // Outgoing TLP construction
+  // Outgoing TLP construction for instant & response
+  //  - Response is used for responding to host mem read/writes
+  //  - Instant is used to respond with things like Unsupported Requests,
+  //    and other things that can be trivially calculated
   //
-  logic              tlp_tx_data_frm_valid = 0;
-  logic              tlp_tx_data_frm_startofpacket = 0;
-  logic              tlp_tx_data_frm_endofpacket = 0;
-  logic        [2:0] tlp_tx_data_frm_empty = 0;
-  logic [7:0] [31:0] tlp_tx_data_frm_dword = 0;
-
   logic              tlp_tx_instant_frm_valid = 0;
   logic              tlp_tx_instant_frm_startofpacket = 0;
   logic              tlp_tx_instant_frm_endofpacket = 0;
@@ -357,8 +354,8 @@ module fejkon_pcie_data (
   logic        [2:0] tlp_tx_response_frm_empty = 0;
   logic [7:0] [31:0] tlp_tx_response_frm_dword = 0;
 
-  // Unsuccessful completion sender
-  always @(posedge clk) begin
+  // Instant sender (currently only unsuccessful completions)
+  always @(posedge clk) begin: instant_tlp_sender
     tlp_tx_instant_frm_valid <= 1'b0;
     tlp_tx_instant_frm_startofpacket <= 1'b0;
     tlp_tx_instant_frm_endofpacket <= 1'b0;
@@ -384,7 +381,7 @@ module fejkon_pcie_data (
   end
 
   // Successful completion sender
-  always @(posedge clk) begin
+  always @(posedge clk) begin: response_tlp_sender
     tlp_tx_response_frm_valid <= 1'b0;
     tlp_tx_response_frm_startofpacket <= 1'b0;
     tlp_tx_response_frm_endofpacket <= 1'b0;
@@ -426,7 +423,143 @@ module fejkon_pcie_data (
   assign cpl_err_ur_p = tlp_rx_frm_unsupported & tlp_rx_frm_is_pr & tlp_rx_frm_is_start;
 
   //
-  // Internal ontrol status
+  // Incoming data (C2H) - staging
+  //
+  // input  wire [255:0] data_tx_data,                     //            data_tx.data
+  // input  wire         data_tx_valid,                    //                   .valid
+  // output wire         data_tx_ready,                    //                   .ready
+  // input  wire [1:0]   data_tx_channel,                  //                   .channel
+  // input  wire         data_tx_endofpacket,              //                   .endofpacket
+  // input  wire         data_tx_startofpacket,            //                   .startofpacket
+  // input  wire [4:0]   data_tx_empty,                    //                   .empty
+  //
+
+  // Staging data array - up to 2176 bytes (max for FC is 2148)
+  logic [255:0] c2h_staging_data  [68];
+  logic [4:0]   c2h_staging_last_empty;
+  int           c2h_staging_offset = 0;
+  logic [1:0]   c2h_staging_channel = 0;
+  logic         c2h_staging_done = 1;
+  logic         c2h_staging_done_r = 1;
+  logic         c2h_prep_ready = 1;
+
+  // Signal when the current data in staging has been fully consumed and
+  // processing is ready for the data to flip
+  logic c2h_staging_start_next;
+  // Staging streams in the acquired data at the same time as the previous
+  // packet is being transmitted. This is implemented by c2h_prep_ready
+  // being high when the first packet has been staged, but as long as
+  // the prepping stage is busy processing the packet the staging stage will
+  // only consume the current packet and nothing else.
+  assign c2h_staging_start_next = c2h_staging_done & c2h_prep_ready;
+
+  logic c2h_staging_read_ready = 0;
+
+  // Staging ingest block
+  always @(posedge clk) begin: c2h_staging_ingest
+    if (reset) begin
+      for (int i = 0; i < 68; i++) begin
+        c2h_staging_data[i] <= 0;
+      end
+      c2h_staging_done <= 1;
+      c2h_staging_done_r <= 1;
+    end else begin
+      c2h_staging_done_r <= c2h_staging_done;
+      if (c2h_staging_start_next) begin
+        c2h_staging_read_ready <= 1'b1;
+        c2h_staging_done <= 1'b0;
+      end
+      if (data_tx_valid && c2h_staging_read_ready) begin
+        if (data_tx_endofpacket) begin
+          c2h_staging_read_ready <= 1'b0;
+          c2h_staging_done <= 1'b1;
+          c2h_staging_last_empty <= data_tx_empty;
+        end
+        if (data_tx_startofpacket) begin
+          c2h_staging_channel <= data_tx_channel;
+          c2h_staging_offset = 0; // NOTE: Blocking write
+        end
+        c2h_staging_data[c2h_staging_offset] <= data_tx_data;
+        c2h_staging_offset <= c2h_staging_offset + 1;
+      end
+    end
+  end
+
+  assign data_tx_ready = c2h_staging_read_ready;
+
+  //
+  // Incoming data (C2H) - TLP MemWrite buffer and preperation
+  //
+  logic [255:0] c2h_prep_data  [69];
+  logic [4:0]   c2h_prep_empty [69];
+  int           c2h_prep_offset = 0;
+  int           c2h_prep_length = 0;
+  logic         c2h_dma_tlp_tx_send = 0;
+  logic         c2h_dma_tlp_tx_busy;
+  logic         c2h_dma_tlp_tx_busy_r = 0;
+
+  always @(posedge clk) begin: c2h_prep
+    if (reset) begin
+      c2h_prep_ready <= 1'b1;
+      c2h_dma_tlp_tx_send <= 1'b0;
+    end else begin
+      c2h_dma_tlp_tx_send <= 1'b0;
+      if (c2h_prep_ready && c2h_staging_done && ~c2h_dma_tlp_tx_busy) begin
+        c2h_dma_tlp_tx_send <= 1'b1;
+        // Format of first 32 bytes:
+        // 11:0  - length of packet (32 byte header + acquired length)
+        // 13:12 - channel
+        // 63:32 - computed CRC (TODO)
+        c2h_prep_length = c2h_staging_offset * 32 - {26'b0, c2h_staging_last_empty} + 32; // NOTE: Blocking write!
+        c2h_prep_data[0][11:0] <= c2h_prep_length[11:0];
+        c2h_prep_data[0][13:12] <= c2h_staging_channel;
+        c2h_prep_data[0][63:32] <= 32'hdeadc0de;
+        // Copy data following header
+        for (int i = 0; i < 68; i++) begin
+          c2h_prep_data[i+1] <= c2h_staging_data[i];
+        end
+        // At this point we signal to the staging stage that we are busy
+        // processing this frame, but we are done with 
+        c2h_prep_ready <= 1'b0;
+      end
+      if (~c2h_dma_tlp_tx_busy && c2h_dma_tlp_tx_busy_r) begin
+        // TLP sent
+        c2h_prep_ready <= 1'b1;
+      end
+    end
+  end
+
+  //
+  // Outgoing TLP construction for C2H DMA
+  //
+
+  // TODO: This is just to simulate processing delay for now
+  int c2h_dma_tlp_delay_hack = 0;
+  assign c2h_dma_tlp_tx_busy = c2h_dma_tlp_delay_hack > 0;
+
+  always @(posedge clk) begin: c2h_dma_tlp_sender
+    if (reset) begin
+      c2h_dma_tlp_delay_hack <= 0;
+    end else begin
+      c2h_dma_tlp_tx_busy_r <= c2h_dma_tlp_tx_busy;
+      if (c2h_dma_tlp_tx_send) begin
+        c2h_dma_tlp_delay_hack <= 100;
+      end
+      if (c2h_dma_tlp_delay_hack > 0) begin
+        c2h_dma_tlp_delay_hack <= c2h_dma_tlp_delay_hack - 1;
+      end
+    end
+  end
+
+
+  logic              tlp_tx_data_frm_valid = 0;
+  logic              tlp_tx_data_frm_startofpacket = 0;
+  logic              tlp_tx_data_frm_endofpacket = 0;
+  logic        [2:0] tlp_tx_data_frm_empty = 0;
+  logic [7:0] [31:0] tlp_tx_data_frm_dword = 0;
+
+  //
+  // Internal control status
   //
 
   int csr_rx_tlp_counter = 0;
@@ -434,6 +567,7 @@ module fejkon_pcie_data (
   int csr_tx_data_tlp_counter = 0;
   int csr_tx_instant_tlp_counter = 0;
   int csr_tx_response_tlp_counter = 0;
+  int csr_c2h_staging_counter = 0;
 
   logic [7:0] [31:0] csr_rx_tlp = 256'b0;
   logic [7:0] [31:0] csr_tx_data_tlp = 256'b0;
@@ -441,13 +575,14 @@ module fejkon_pcie_data (
   logic [7:0] [31:0] csr_tx_response_tlp = 256'b0;
 
   // Process internal statistics bookkeeping
-  always @(posedge clk) begin
+  always @(posedge clk) begin: internal_statistics
     if (reset) begin
       csr_rx_tlp_counter <= 0;
       csr_rx_unsupported_tlp_counter <= 0;
       csr_tx_data_tlp_counter <= 0;
       csr_tx_instant_tlp_counter <= 0;
       csr_tx_response_tlp_counter <= 0;
+      csr_c2h_staging_counter <= 0;
       csr_rx_tlp <= 256'b0;
       csr_tx_data_tlp <= 256'b0;
       csr_tx_instant_tlp <= 256'b0;
@@ -468,6 +603,9 @@ module fejkon_pcie_data (
       end
       if (tlp_rx_frm_is_end && tlp_rx_frm_unsupported) begin
         csr_rx_unsupported_tlp_counter <= csr_rx_unsupported_tlp_counter + 1;
+      end
+      if (c2h_staging_done && ~c2h_staging_done_r) begin
+        csr_c2h_staging_counter <= csr_c2h_staging_counter + 1;
       end
       if (tlp_tx_data_frm_valid && tlp_tx_data_frm_startofpacket) begin
         csr_tx_data_tlp_counter <= csr_tx_data_tlp_counter + 1;
@@ -546,7 +684,7 @@ module fejkon_pcie_data (
   end
 
   //
-  // Assignment of outputs
+  // Assignment of PCIe outputs
   //
 
   assign csr_readdata = csr_readdata_reg;
@@ -570,7 +708,6 @@ module fejkon_pcie_data (
   // Since we have to deal with posted TLPs anyway it seems not so useful to
   // implement it.
   assign rx_st_mask = 1'b0;
-  assign data_tx_ready = is_ready;
 
   // TODO: Set to 1 when we're waiting for completions as the master
   assign cpl_pending = 1'b0;

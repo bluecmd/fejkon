@@ -31,9 +31,17 @@ def testcase(*blocks):
 class Test(unittest.TestCase):
     """Collection of PCIe test cases"""
 
+    # pylint: disable=too-many-instance-attributes
     def setUp(self):
         self.clk = myhdl.Signal(bool(0))
         self.rst = myhdl.Signal(bool(0))
+        self.data_tx_data = myhdl.Signal(myhdl.intbv()[256:])
+        self.data_tx_empty = myhdl.Signal(myhdl.intbv()[5:])
+        self.data_tx_channel = myhdl.Signal(myhdl.intbv()[2:])
+        self.data_tx_valid = myhdl.Signal(bool(0))
+        self.data_tx_startofpacket = myhdl.Signal(bool(0))
+        self.data_tx_endofpacket = myhdl.Signal(bool(0))
+        self.data_tx_ready = myhdl.Signal(bool(0))
         # PCIe devices
         rc = pcie.RootComplex()
         ep = test_ep.FejkonEP(self.clk)
@@ -54,6 +62,7 @@ class Test(unittest.TestCase):
     def clkgen(self, unused_test):
         @myhdl.always(myhdl.delay(2))
         def block():
+            # pylint: disable=multiple-statements
             self.clk.next = not self.clk
         return block
 
@@ -85,13 +94,13 @@ class Test(unittest.TestCase):
             tx_st_empty=self.ep.tx_st_empty,
             tx_st_ready=self.ep.tx_st_ready,
             tx_st_valid=self.ep.tx_st_valid,
-            data_tx_data=self.ep.data_tx_data,
-            data_tx_valid=self.ep.data_tx_valid,
-            data_tx_ready=self.ep.data_tx_ready,
-            data_tx_channel=self.ep.data_tx_channel,
-            data_tx_endofpacket=self.ep.data_tx_endofpacket,
-            data_tx_startofpacket=self.ep.data_tx_startofpacket,
-            data_tx_empty=self.ep.data_tx_empty,
+            data_tx_data=self.data_tx_data,
+            data_tx_valid=self.data_tx_valid,
+            data_tx_ready=self.data_tx_ready,
+            data_tx_channel=self.data_tx_channel,
+            data_tx_endofpacket=self.data_tx_endofpacket,
+            data_tx_startofpacket=self.data_tx_startofpacket,
+            data_tx_empty=self.data_tx_empty,
             tl_cfg_add=self.ep.tl_cfg_add,
             tl_cfg_ctl=self.ep.tl_cfg_ctl,
             tl_cfg_sts=self.ep.tl_cfg_sts)
@@ -157,9 +166,41 @@ class Test(unittest.TestCase):
         self.assertEqual(data, readback)
 
     @testcase(clkgen, dutgen)
-    def test_dma(self):
-        # TODO
+    def test_dma_c2h(self):
+        """Test writing acquired frames to host memory."""
         yield from self.reset()
+        for i in range(68):
+            if not self.data_tx_ready:
+                val = yield self.data_tx_ready.posedge, myhdl.delay(1000)
+                if not val:
+                    raise Exception("Timeout waiting for data_tx_ready")
+            self.data_tx_valid.next = 1
+            self.data_tx_startofpacket.next = i == 0
+            self.data_tx_endofpacket.next = i == 67
+            self.data_tx_empty.next = 28 if i == 67 else 0 # 4 byte in last packet makes a 2148 FC frame
+            self.data_tx_channel.next = 0
+            self.data_tx_data.next = 0xdeadbeefcafef00d1234567890abcdefaaaaaaaaaaaaaaaa5555555555555500 + i
+            yield self.clk.posedge
+        for channel in range(4):
+            yield self.clk.negedge
+            # The core should not accept any more reads until it has been copied,
+            # which takes one clock cycle at least
+            if self.data_tx_ready == 1:
+                raise Exception("Core is accepting data even though it should not")
+            for i in range(4):
+                if not self.data_tx_ready:
+                    yield self.data_tx_ready.posedge, myhdl.delay(1000)
+                    if not self.data_tx_ready:
+                        raise Exception("Timeout waiting for data_tx_ready")
+                self.data_tx_valid.next = 1
+                self.data_tx_startofpacket.next = i == 0
+                self.data_tx_endofpacket.next = i == 3
+                self.data_tx_empty.next = 0
+                self.data_tx_channel.next = channel
+                self.data_tx_data.next = 0xdeadbeefcafef00d1234567890abcdefaaaaaaaaaaaaaaaa5555555555555500 + i
+                yield self.clk.posedge
+        self.data_tx_valid.next = 0
+        yield myhdl.delay(1000)
 
 
 if __name__ == '__main__':

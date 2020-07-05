@@ -138,7 +138,13 @@ module test;
       rx_st_bar,
       tl_cfg_add,
       tl_cfg_ctl,
-      tl_cfg_sts
+      tl_cfg_sts,
+      data_tx_data,
+      data_tx_valid,
+      data_tx_channel,
+      data_tx_endofpacket,
+      data_tx_startofpacket,
+      data_tx_empty
     );
     $to_myhdl(
       rx_st_ready,
@@ -148,7 +154,8 @@ module test;
       tx_st_error,
       tx_st_empty,
       tx_st_valid,
-      rx_st_mask
+      rx_st_mask,
+      data_tx_ready
     );
   end
 

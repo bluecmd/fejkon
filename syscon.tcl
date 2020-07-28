@@ -42,15 +42,6 @@ proc id {} {
   puts [format " Git rev. : %s" [master_read_32 $m [expr $off + 0x4] 1]]
 }
 
-proc enable {id} {
-  if {$id > 4} {
-    return
-  }
-  global m
-  set off [expr 0x1000 * $id]
-  master_write_32 $m [expr $off] 0
-}
-
 proc pcie {} {
   global m
   set off [expr 0x800]
@@ -73,15 +64,37 @@ proc clocks {} {
   puts [format " PCIe : %s MHz" [format "%.3f" [expr [master_read_32 $m [expr $off + 0x04] 1] / 1000000.0]]]
 }
 
-proc fcstat {id} {
-  if {$id > 4} {
+proc check_port {id} {
+  global m
+  set ports [master_read_8 $m 0x3 1]
+  if {$id > $ports} {
+    puts [format " ** WARNING ** Accessing past last port (# ports = %s)" $ports]
+  }
+  if {$id <= 0} {
+    puts [format "Port IDs start at 1"]
+    return false
+  }
+  return true
+}
+
+proc enable {id} {
+  if {![check_port $id]} {
     return
   }
   global m
-  set off [expr 0x10000 * $id]
+  set off [expr 0x100 * $id]
+  master_write_32 $m [expr $off] 0
+}
+
+proc fcstat {id} {
+  if {![check_port $id]} {
+    return
+  }
+  global m
+  set off [expr 0x6000 + $id * 0x2000]
   puts [format " XCVR      : %s" [master_read_32 $m [expr $off + 0x00 * 4] 1]]
   puts [format " Last Unk. : %s" [master_read_32 $m [expr $off + 0x01 * 4] 1]]
-  puts [format " State     : %s" [master_read_32 $m [expr $off + 0x2000] 1]]
+  puts [format " State     : %s" [master_read_32 $m [expr $off + 0x1000] 1]]
   puts         " -- Prims         RX         TX"
   # TODO: Calculate rate?
   puts [format " IDLE      : %s %s" [master_read_32 $m [expr $off + 0x80 + 0x00 * 4] 1] [master_read_32 $m [expr $off + 0x100 + 0x00 * 4] 1]]
@@ -106,7 +119,7 @@ proc fcstat {id} {
 }
 
 proc sfp {id} {
-  if {$id > 4} {
+  if {![check_port $id]} {
     return
   }
   global m

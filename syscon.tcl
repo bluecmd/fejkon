@@ -94,8 +94,34 @@ proc fcstat {id} {
 proc sfp {id} {
   global m
   set off [expr 0x1000 * $id]
-  puts [format " SFP status: %s" [master_read_8 $m $off 1]]
-  # TODO: Verify that there is an SFP in the slot
+  set status [master_read_8 $m $off 1]
+  puts [format " SFP status: %s" $status]
+
+  if {[expr $status & 1] != 0} {
+    puts [format " - SFP present"]
+  } else {
+    puts [format " - SFP *not* present"]
+  }
+
+  if {[expr $status & 2] != 0} {
+    puts [format " - Loss of signal detected"]
+  }
+
+  if {[expr $status & 4] != 0} {
+    puts [format " - TX fault detected"]
+  }
+
+  if {[expr $status & 8] != 0} {
+    puts [format " - TX is disabled"]
+  } else {
+    puts [format " - TX is enabled"]
+  }
+
+  if {[expr $status & 1] == 0} {
+    # Only probe the SFP port if it is reported as present
+    return
+  }
+
   master_write_32 $m [expr $off + 0x48] 0
   # Configure ISER, SCL_LOW, SCL_HIGH, SDA_HOLD register
   master_write_32 $m [expr $off + 0x4c] 0x0 ; # No interrupts

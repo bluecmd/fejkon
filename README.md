@@ -366,9 +366,12 @@ you can inspect using `make syscon` by loading the `fejkon.sof` and using
 If you need to debug a particular component, then using Signal Tap is
 recommended.
 
-## Known Issues
+### PCIe
 
-These are some changes you might need to make to build under Quartus 19.1.
+Look at the `pcie` syscon command to get more information. If the `My ID` row
+reads all zeroes that means the host PC has rejected the card for whatever reason.
+
+## Known Issues / Notes
 
 ### Si570
 
@@ -386,16 +389,6 @@ OE Polarity: OE active high
 Temperature Stability / Total Stability: 50 ppm / 61.5 ppm
 Frequency Range: 10 - 810 MHz
 Operating Temp Range (°C): -40 to +85
-```
-
-### Confused Perl
-
-The temporary LED driver will not generate without this pretty weird hack.
-This issue appeared in 19.1 and hopefully will be patched by Intel soon.
-
-```
-sudo mkdir -p /tools/perl/5.28.1/linux64/
-sudo ln -sf /home/bluecmd/intelFPGA/19.1/quartus/linux64/perl/lib /tools/perl/5.28.1/linux64/
 ```
 
 ### ModelSim Starter Edition

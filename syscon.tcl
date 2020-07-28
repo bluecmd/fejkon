@@ -26,9 +26,9 @@ if {![jtag_debug_sense_clock $m]} {
 puts " E.g:"
 puts " - master_write_32 \$m 0x000e0000 5"
 puts " - jtag_debug_reset_system \$m"
-puts " - sfp 1"
-puts " - enable 1"
-puts " - fcstat 1"
+puts " - sfp \[0-3]"
+puts " - enable \[0-3]"
+puts " - fcstat \[0-3]"
 puts " - pcie"
 
 puts ""

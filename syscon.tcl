@@ -30,6 +30,7 @@ puts " - sfp \[0-3]"
 puts " - enable \[0-3]"
 puts " - fcstat \[0-3]"
 puts " - pcie"
+puts " - clocks"
 
 puts ""
 
@@ -52,6 +53,13 @@ proc pcie {} {
   puts [format " Last TLP TX Data     : %s" [master_read_32 $m [expr $off + 0x40] 8]]
   puts [format " Last TLP TX Instant  : %s" [master_read_32 $m [expr $off + 0x60] 8]]
   puts [format " Last TLP TX Response : %s" [master_read_32 $m [expr $off + 0x80] 8]]
+}
+
+proc clocks {} {
+  global m
+  set off [expr 0x20]
+  puts [format " PHY  : %s MHz" [format "%.3f" [expr [master_read_32 $m [expr $off + 0x00] 1] / 1000000.0]]]
+  puts [format " PCIe : %s MHz" [format "%.3f" [expr [master_read_32 $m [expr $off + 0x04] 1] / 1000000.0]]]
 }
 
 proc fcstat {id} {

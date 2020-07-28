@@ -29,6 +29,8 @@ add_instance led fejkon_led 1.0
 
 add_instance pcie fejkon_pcie 1.0
 
+add_instance pcie_clk_gauge freq_gauge 1.0
+
 add_instance phy_clk altera_clock_bridge 20.1
 set_instance_parameter_value phy_clk {EXPLICIT_CLOCK_RATE} {106250000.0}
 set_instance_parameter_value phy_clk {NUM_CLOCK_OUTPUTS} {1}
@@ -131,6 +133,8 @@ add_connection ext0.clk led.clk
 
 add_connection ext0.clk pcie.mgmt_clk
 
+add_connection ext0.clk pcie_clk_gauge.ref_clk
+
 add_connection ext0.clk phy_clk_gauge.ref_clk
 
 add_connection ext0.clk reset_ctrl.clk
@@ -195,6 +199,11 @@ add_connection jtagm.master pcie.csr_mm
 set_connection_parameter_value jtagm.master/pcie.csr_mm arbitrationPriority {1}
 set_connection_parameter_value jtagm.master/pcie.csr_mm baseAddress {0x0800}
 set_connection_parameter_value jtagm.master/pcie.csr_mm defaultConnection {0}
+
+add_connection jtagm.master pcie_clk_gauge.mm
+set_connection_parameter_value jtagm.master/pcie_clk_gauge.mm arbitrationPriority {1}
+set_connection_parameter_value jtagm.master/pcie_clk_gauge.mm baseAddress {0x0024}
+set_connection_parameter_value jtagm.master/pcie_clk_gauge.mm defaultConnection {0}
 
 add_connection jtagm.master phy_clk_gauge.mm
 set_connection_parameter_value jtagm.master/phy_clk_gauge.mm arbitrationPriority {1}
@@ -262,6 +271,8 @@ set_connection_parameter_value pcie.bar0_mm/temp.temp_mm defaultConnection {0}
 
 add_connection pcie.data_clk fc.rx_mux_clk
 
+add_connection pcie.data_clk pcie_clk_gauge.probe_clk
+
 add_connection pcie.irq sfp0.i2c_irq
 set_connection_parameter_value pcie.irq/sfp0.i2c_irq irqNumber {3}
 
@@ -279,6 +290,8 @@ add_connection reset_ctrl.reset_out fc.reset
 add_connection reset_ctrl.reset_out ident.reset
 
 add_connection reset_ctrl.reset_out pcie.mgmt_rst
+
+add_connection reset_ctrl.reset_out pcie_clk_gauge.reset
 
 add_connection reset_ctrl.reset_out phy_clk_gauge.reset
 

@@ -686,7 +686,7 @@ module fejkon_pcie_data (
   always @(posedge clk) begin
     if (csr_read) begin
       casez (csr_address)
-        6'h0: csr_readdata_reg <= {16'b0, my_id};
+        6'h0: csr_readdata_reg <= {14'b0, reset, my_id_valid, my_id};
         6'h1: csr_readdata_reg <= csr_rx_tlp_counter;
         6'h2: csr_readdata_reg <= csr_rx_unsupported_tlp_counter;
         6'h3: csr_readdata_reg <= csr_tx_data_tlp_counter;

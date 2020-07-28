@@ -155,6 +155,7 @@ Accesses need to be 4 byte wide.
 | 0x0004 | 4     | Card   | Git hash      | Git hash of HDL built        |
 | 0x0010 | 1     | Card   | Temprature    | FPGA Core Temperature (1)    |
 | 0x0020 | 4     | Card   | Freq. Gauge   | PHY effective clock gauge    |
+| 0x0024 | 4     | Card   | Freq. Gauge   | PCIe effective clock gauge   |
 | 0x0100 | 1     | Port 0 | SFP Status    | SFP Status Word (3)          |
 | 0x0140 | 64    | Port 0 | SFP Port I2C  | SFP I2C core (4)             |
 | 0x02x0 | ...   | Port 1 | SFP Port      |                              |
@@ -182,7 +183,8 @@ Accesses need to be 4 byte wide.
 
 | Addr  | Width | Name                              |
 |-------|-------|-----------------------------------|
-| 0x000 | 4     | Endpoint address                  |
+| 0x000 | 2     | Endpoint address                  |
+| 0x002 | 2     | Internal status                   |
 | 0x004 | 4     | RX TLP counter                    |
 | 0x008 | 4     | RX Unsupported TLP counter        |
 | 0x00C | 4     | TX Data TLP counter               |
@@ -194,11 +196,11 @@ Accesses need to be 4 byte wide.
 | 0x100 | 4     | Data TX TLP Fill Level            |
 | 0x110 | 4     | Instant TX TLP Fill Level         |
 | 0x120 | 4     | Response TX TLP Fill Level        |
-| 0x200 | 4     | C2H DMA buffer start address      | 
+| 0x200 | 4     | C2H DMA buffer start address      |
 | 0x204 | 4     | C2H DMA buffer end address        |
 | 0x208 | 4     | C2H DMA host read pointer         |
 | 0x20C | 4     | C2H DMA card write pointer        |
-| 0x300 | 4     | H2C DMA buffer start address      | 
+| 0x300 | 4     | H2C DMA buffer start address      |
 | 0x304 | 4     | H2C DMA buffer end address        |
 | 0x308 | 4     | H2C DMA card read pointer         |
 | 0x30C | 4     | H2C DMA host write pointer        |
@@ -442,7 +444,7 @@ condition is detected.
 Possibly integrated with the above work.
 
  * Replace Si570 with soft core CPU
- 
+
  Although writing the Si570 controller was useful, in the end it is less reliable
  and much more expensive, than using a soft core to implement the equivalent logic.
  Using a soft core like NIOS, RISC-V, or OpenRISC would make it possible to control

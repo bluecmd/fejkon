@@ -26,15 +26,26 @@ if {![jtag_debug_sense_clock $m]} {
 puts " E.g:"
 puts " - master_write_32 \$m 0x000e0000 5"
 puts " - jtag_debug_reset_system \$m"
-puts " - sfp \[0-3]"
-puts " - enable \[0-3]"
-puts " - fcstat \[0-3]"
+puts " - sfp \[1-4]"
+puts " - enable \[1-4]"
+puts " - fcstat \[1-4]"
 puts " - pcie"
 puts " - clocks"
+puts " - id"
 
-puts ""
+proc id {} {
+  global m
+  set off [expr 0x0]
+  master_write_32 $m [expr $off] 0
+  puts [format " Version  : %s" [master_read_8 $m [expr $off + 0x2] 1]]
+  puts [format " Ports    : %s" [master_read_8 $m [expr $off + 0x3] 1]]
+  puts [format " Git rev. : %s" [master_read_32 $m [expr $off + 0x4] 1]]
+}
 
 proc enable {id} {
+  if {$id > 4} {
+    return
+  }
   global m
   set off [expr 0x1000 * $id]
   master_write_32 $m [expr $off] 0
@@ -63,6 +74,9 @@ proc clocks {} {
 }
 
 proc fcstat {id} {
+  if {$id > 4} {
+    return
+  }
   global m
   set off [expr 0x10000 * $id]
   puts [format " XCVR      : %s" [master_read_32 $m [expr $off + 0x00 * 4] 1]]
@@ -92,8 +106,11 @@ proc fcstat {id} {
 }
 
 proc sfp {id} {
+  if {$id > 4} {
+    return
+  }
   global m
-  set off [expr 0x1000 * $id]
+  set off [expr 0x100 * $id]
   set status [master_read_8 $m $off 1]
   puts [format " SFP status: %s" $status]
 

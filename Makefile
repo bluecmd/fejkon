@@ -47,7 +47,7 @@ ip/fejkon_identity/version.sv:
 config.tcl: .config config.py
 	python3 config.py > config.tcl
 
-fejkon.qsys: $(wildcard fejkon_*.tcl) config.tcl .qsys-configured
+fejkon.qsys: .qsys-configured
 
 .qsys-clean: ip/fejkon_identity/version.sv
 	# Generate clean platform files
@@ -59,7 +59,7 @@ fejkon.qsys: $(wildcard fejkon_*.tcl) config.tcl .qsys-configured
 	$(QPATH)/sopc_builder/bin/qsys-script --script=fejkon.tcl
 	touch $@
 
-.qsys-configured:
+.qsys-configured: fejkon.tcl $(wildcard fejkon_*.tcl) config.tcl
 	make -C $(PWD) .qsys-clean
 	$(QPATH)/sopc_builder/bin/qsys-script --script=fejkon_apply_config.tcl
 	rm .qsys-clean

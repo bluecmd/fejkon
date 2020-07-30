@@ -357,6 +357,27 @@ static void *fejkon_tx_thread(void *opaque)
   return NULL;
 }
 
+static void setup_pcie_speeds(PCIDevice *pdev)
+{
+  uint8_t *exp_cap = pdev->config + pdev->exp.exp_cap;
+  // Configure for Gen3 x8 as ideal speed
+  pci_long_test_and_clear_mask(exp_cap + PCI_EXP_LNKCAP,
+                               PCI_EXP_LNKCAP_MLW | PCI_EXP_LNKCAP_SLS);
+  pci_long_test_and_set_mask(exp_cap + PCI_EXP_LNKCAP,
+                             QEMU_PCI_EXP_LNKCAP_MLW(QEMU_PCI_EXP_LNK_X8) |
+                             QEMU_PCI_EXP_LNKCAP_MLS(QEMU_PCI_EXP_LNK_8GT));
+  pci_word_test_and_clear_mask(exp_cap + PCI_EXP_LNKCTL2,
+                               PCI_EXP_LNKCTL2_TLS);
+  pci_word_test_and_set_mask(exp_cap + PCI_EXP_LNKCTL2,
+                             QEMU_PCI_EXP_LNKCAP_MLS(QEMU_PCI_EXP_LNK_8GT) &
+                             PCI_EXP_LNKCTL2_TLS);
+  pci_long_test_and_clear_mask(exp_cap + PCI_EXP_LNKSTA,
+                               PCI_EXP_LNKSTA_NLW | PCI_EXP_LNKSTA_CLS);
+  pci_long_test_and_set_mask(exp_cap + PCI_EXP_LNKSTA,
+                             QEMU_PCI_EXP_LNKSTA_NLW(QEMU_PCI_EXP_LNK_X8) |
+                             QEMU_PCI_EXP_LNKSTA_CLS(QEMU_PCI_EXP_LNK_8GT));
+}
+
 static void pci_fejkon_realize(PCIDevice *pdev, Error **errp)
 {
   FejkonState *card = FEJKON(pdev);
@@ -390,6 +411,8 @@ static void pci_fejkon_realize(PCIDevice *pdev, Error **errp)
   if (pcie_aer_init(pdev, PCI_ERR_VER, 0x100, PCI_ERR_SIZEOF, NULL) < 0) {
     hw_error("Failed to initialize AER capability");
   }
+
+  setup_pcie_speeds(pdev);
 
   qemu_mutex_init(&card->rx_buf_mutex);
   qemu_mutex_init(&card->tx_buf_mutex);

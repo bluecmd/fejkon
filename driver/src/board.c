@@ -453,6 +453,41 @@ static int setup_buffers(struct fejkon_card *card)
   return 0;
 }
 
+static int tune_pcie_parameters(struct pci_dev *pcidev) {
+  enum pci_bus_speed speed = PCI_SPEED_UNKNOWN;
+  enum pcie_link_width width = PCIE_LNK_WIDTH_UNKNOWN;
+  struct pci_dev *limdev = NULL;
+  u32 bandwidth;
+  const char *speed_str = "Unknown PCIe speed";
+
+  bandwidth = pcie_bandwidth_available(pcidev, &limdev, &speed, &width);
+  if (speed == PCIE_SPEED_2_5GT) {
+    speed_str = "Gen 1 (2.5 GT/s)";
+  } else if (speed == PCIE_SPEED_5_0GT) {
+    speed_str = "Gen 2 (5.0 GT/s)";
+  } else if (speed == PCIE_SPEED_8_0GT) {
+    speed_str = "Gen 3 (8.0 GT/s)";
+  }
+  dev_dbg(&pcidev->dev, "bandwidth %d Mbit/s, %s x%d - "
+      "limited by %s", bandwidth, speed_str, width, pci_name(limdev));
+
+  if (speed != PCIE_SPEED_8_0GT || width != PCIE_LNK_X8) {
+    dev_err(&pcidev->dev, "only Gen3 x8 operation is supported");
+    if (limdev != pcidev) {
+      dev_err(&pcidev->dev, "bandwidth is limited upstream @ %s",
+          pci_name(limdev));
+    } else {
+      dev_err(&pcidev->dev, "bandwidth is limited by card");
+    }
+    return -EINVAL;
+  }
+  if (bandwidth < 10 * 4 * 1000) {
+    dev_warn(&pcidev->dev, "only %d Mbit/s bandwidth available, "
+        "at least 40000 Mbit/s is recommended for full usage", bandwidth);
+  }
+  return 0;
+}
+
 static int probe(struct pci_dev *pcidev, const struct pci_device_id *id)
 {
   unsigned int phy_clock;
@@ -542,6 +577,10 @@ static int probe(struct pci_dev *pcidev, const struct pci_device_id *id)
   dev_notice(&pcidev->dev, "PHY clock running at %d.%03d MHz",
       phy_clock / 1000000, (phy_clock / 1000) % 1000);
 
+  if (tune_pcie_parameters(pcidev) < 0) {
+    goto error_tune_failed;
+  }
+
   irqs = 2 + 4 * ports;
   ret = pci_alloc_irq_vectors(pcidev, irqs, irqs, PCI_IRQ_ALL_TYPES);
   if (ret < 0) {
@@ -625,6 +664,7 @@ error_hwmon_register:
 error_request_irq:
   pci_free_irq_vectors(pcidev);
 error_irq_vectors:
+error_tune_failed:
 error_sanity:
 error_set_dma_mask:
   pci_release_region(pcidev, 0 /* bar */);

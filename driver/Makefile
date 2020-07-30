@@ -11,7 +11,8 @@ test: build-qemu/x86_64-softmmu/qemu-system-x86_64 linux/arch/x86/boot/bzImage r
 		-fsdev local,id=root,path=$(CURDIR)/root,security_model=none,writeout=immediate \
 		-device virtio-9p-pci,fsdev=root,mount_tag=/dev/root \
 		-kernel linux/arch/x86/boot/bzImage \
-		-device fejkon \
+		-device pcie-root-port,id=pcie.1 \
+		-device fejkon,bus=pcie.1 \
 		-append "earlyprintk=serial root=hostfs rootfstype=9p rootflags=trans=virtio noinitrd console=ttyS0 loglevel=8" \
 		| tail -n+10
 	stty sane

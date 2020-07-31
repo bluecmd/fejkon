@@ -12,7 +12,6 @@ module fc_framer (
     input  wire         usertx_endofpacket,       //                       .endofpacket
     output wire [31:0]  userrx_data,              //                 userrx.data
     output wire         userrx_valid,             //                       .valid
-    input  wire         userrx_ready,             //                       .ready
     output wire         userrx_startofpacket,     //                       .startofpacket
     output wire         userrx_endofpacket,       //                       .endofpacket
     input  wire         reset,                    //                  reset.reset
@@ -61,14 +60,6 @@ module fc_framer (
     end
   end
 
-  //logic [31:0] user_tx_data;
-  //logic [3:0]  user_tx_datak;
-
-  //assign user_tx_data = avtx_valid ? avtx_data : fc::IDLE;
-  // The start and end primitive of a frame is a K28.5, that's the only time
-  // the avtx stream has a control character
-  //assign user_tx_datak = (avtx_valid | avtx_startofpacket | avtx_endofpacket) ? 4'b0000 : 4'b0001;
-
   // This type of CDC is probably OK since both RX and TX will have very
   // similar clocks.
   always @(posedge tx_clk) begin
@@ -103,8 +94,7 @@ module fc_framer (
 
   assign active = is_active;
 
-  assign userrx_valid = is_active;
-  assign userrx_data = avtx_data[31:0];
+  // User TX -> Av-TX
   assign usertx_ready = is_active;
 
   logic [3:0] usertx_datak;
@@ -117,5 +107,50 @@ module fc_framer (
 
   assign avtx_data = {tx_datak, tx_data};
   assign avtx_valid = 1'b1;
+
+  // Av RX -> User RX
+  logic [31:0] rx_data;
+  logic [3:0]  rx_datak;
+
+  assign rx_data = avrx_data[31:0];
+  assign rx_datak = avrx_data[35:32];
+
+  logic [31:0] urx_data = 0;
+  logic        urx_valid = 0;
+  logic        urx_startofpacket = 0;
+  logic        urx_endofpacket = 0;
+
+  always @(posedge rx_clk) begin
+    if (reset) begin
+      urx_data <= 0;
+      urx_startofpacket <= 0;
+      urx_endofpacket <= 0;
+      urx_valid <= 0;
+    end else if (avrx_valid) begin
+      urx_data <= rx_data;
+      urx_valid <= avrx_valid;
+      urx_startofpacket <= 0;
+      urx_endofpacket <= 0;
+      if (rx_datak == 4'b1000) begin
+        case (fc::map_primitive(rx_data))
+          fc::PRIM_SOFI2, fc::PRIM_SOFN2, fc::PRIM_SOFI3, fc::PRIM_SOFN3, fc::PRIM_SOFF: begin
+            urx_startofpacket <= 1;
+          end
+          fc::PRIM_EOFT, fc::PRIM_EOFA, fc::PRIM_EOFN, fc::PRIM_EOFNI: begin
+            urx_endofpacket <= 1;
+          end
+          default: begin
+            // A primitive that is not part of the user-layer packet
+            urx_valid <= 0;
+          end
+        endcase
+      end
+    end
+  end
+
+  assign userrx_data = urx_data;
+  assign userrx_valid = urx_valid;
+  assign userrx_startofpacket = urx_startofpacket;
+  assign userrx_endofpacket = urx_endofpacket;
 
 endmodule

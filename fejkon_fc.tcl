@@ -269,10 +269,6 @@ add_connection fifo_0to1.out fc1.usertx
 
 add_connection fifo_1to0.out fc0.usertx
 
-add_connection mgmt_clk.out_clk fc0.mgmt_clk
-
-add_connection mgmt_clk.out_clk fc1.mgmt_clk
-
 add_connection mgmt_clk.out_clk mm.clk
 
 add_connection mgmt_clk.out_clk reset.clk

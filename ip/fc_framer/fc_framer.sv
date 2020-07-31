@@ -44,6 +44,7 @@ module fc_framer (
 
   // Driven by fc_state_rx
   fc::state_t state;
+  fc::state_t state_r;
 
   fc::state_t state_tx_cdc1 = fc::STATE_LF2;
   fc::state_t state_tx_cdc2 = fc::STATE_LF2;
@@ -59,20 +60,34 @@ module fc_framer (
       tx_reg_readdata <= 0;
     end else if (tx_mm_read) begin
       case (tx_mm_address)
-        3'h0: tx_reg_readdata <= state;
         // TODO: Add counter for STATE_AC transitions
         default: tx_reg_readdata <= 32'hffffffff;
       endcase
     end
   end
 
+  int ac_transition_counter = 0;
+  int urx_packet_counter = 0;
+
   always @(posedge rx_clk) begin
     if (rx_reset_r) begin
       rx_reg_readdata <= 0;
     end else if (rx_mm_read) begin
       case (rx_mm_address)
+        3'h0: rx_reg_readdata <= state;
+        3'h1: rx_reg_readdata <= ac_transition_counter;
+        3'h2: rx_reg_readdata <= urx_packet_counter;
         default: rx_reg_readdata <= 32'hffffffff;
       endcase
+    end
+  end
+
+  always @(posedge rx_clk) begin
+    state_r <= state;
+    if (rx_reset_r) begin
+      ac_transition_counter <= 0;
+    end else if (state_r != fc::STATE_AC && state == fc::STATE_AC) begin
+      ac_transition_counter <= ac_transition_counter + 1;
     end
   end
 
@@ -142,6 +157,7 @@ module fc_framer (
       urx_startofpacket <= 0;
       urx_endofpacket <= 0;
       urx_valid <= 0;
+      urx_packet_counter <= 0;
     end else if (avrx_valid) begin
       urx_data <= rx_data;
       urx_valid <= avrx_valid;
@@ -154,6 +170,7 @@ module fc_framer (
           end
           fc::PRIM_EOFT, fc::PRIM_EOFA, fc::PRIM_EOFN, fc::PRIM_EOFNI: begin
             urx_endofpacket <= 1;
+            urx_packet_counter <= urx_packet_counter + 1;
           end
           default: begin
             // A primitive that is not part of the user-layer packet

@@ -273,11 +273,13 @@ A fully operational port has status `0x1001f`.
 #### FC Framer
 
 Note that internally the address space is split up so that the lower half
-contains registers related to transmit and upper half is related to receive.
+contains registers related to receive and upper half is related to transmit.
 
-| Addr    | Width | Name                   |
-|---------|-------|------------------------|
-| 0x00000 | 4     | State                  |
+| Addr  | Width | Name                          |
+|-------|-------|-------------------------------|
+| 0x000 | 4     | State                         |
+| 0x004 | 4     | # of ACTIVE state transitions |
+| 0x008 | 4     | # of FC frames received       |
 
 States:
 

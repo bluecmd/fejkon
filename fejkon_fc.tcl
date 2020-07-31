@@ -283,20 +283,30 @@ add_connection mgmt_clk.out_clk xcvr1.mgmt_clk
 
 add_connection mgmt_clk.out_clk xcvr_reconfig.mgmt_clk_clk
 
-add_connection mm.m0 fc0.mgmt_mm
-set_connection_parameter_value mm.m0/fc0.mgmt_mm arbitrationPriority {1}
-set_connection_parameter_value mm.m0/fc0.mgmt_mm baseAddress {0x1000}
-set_connection_parameter_value mm.m0/fc0.mgmt_mm defaultConnection {0}
+add_connection mm.m0 fc0.tx_mgmt_mm
+set_connection_parameter_value mm.m0/fc0.tx_mgmt_mm arbitrationPriority {1}
+set_connection_parameter_value mm.m0/fc0.tx_mgmt_mm baseAddress {0x1000}
+set_connection_parameter_value mm.m0/fc0.tx_mgmt_mm defaultConnection {0}
+
+add_connection mm.m0 fc0.rx_mgmt_mm
+set_connection_parameter_value mm.m0/fc0.rx_mgmt_mm arbitrationPriority {1}
+set_connection_parameter_value mm.m0/fc0.rx_mgmt_mm baseAddress {0x1020}
+set_connection_parameter_value mm.m0/fc0.rx_mgmt_mm defaultConnection {0}
 
 add_connection mm.m0 fc0_rx_cdc.in_csr
 set_connection_parameter_value mm.m0/fc0_rx_cdc.in_csr arbitrationPriority {1}
 set_connection_parameter_value mm.m0/fc0_rx_cdc.in_csr baseAddress {0x1100}
 set_connection_parameter_value mm.m0/fc0_rx_cdc.in_csr defaultConnection {0}
 
-add_connection mm.m0 fc1.mgmt_mm
-set_connection_parameter_value mm.m0/fc1.mgmt_mm arbitrationPriority {1}
-set_connection_parameter_value mm.m0/fc1.mgmt_mm baseAddress {0x3000}
-set_connection_parameter_value mm.m0/fc1.mgmt_mm defaultConnection {0}
+add_connection mm.m0 fc1.tx_mgmt_mm
+set_connection_parameter_value mm.m0/fc1.tx_mgmt_mm arbitrationPriority {1}
+set_connection_parameter_value mm.m0/fc1.tx_mgmt_mm baseAddress {0x3000}
+set_connection_parameter_value mm.m0/fc1.tx_mgmt_mm defaultConnection {0}
+
+add_connection mm.m0 fc1.rx_mgmt_mm
+set_connection_parameter_value mm.m0/fc1.rx_mgmt_mm arbitrationPriority {1}
+set_connection_parameter_value mm.m0/fc1.rx_mgmt_mm baseAddress {0x3020}
+set_connection_parameter_value mm.m0/fc1.rx_mgmt_mm defaultConnection {0}
 
 add_connection mm.m0 fc1_rx_cdc.in_csr
 set_connection_parameter_value mm.m0/fc1_rx_cdc.in_csr arbitrationPriority {1}

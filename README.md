@@ -164,7 +164,7 @@ Accesses need to be 4 byte wide.
 | 0x0800 | 1024  | Card   | PCIe Facility | PCIe counters and status (2) |
 | 0x8000 | 2048  | Port 0 | FC XCVR IP    | Fejkon FC XCVR Core (5)      |
 | 0x8800 | 2048  | Port 0 | TX XCVR Mgmt  | V-Series Transceiver PHY (6) |
-| 0x9000 | 32    | Port 0 | FC Framer     | Fibre Channel Framer (7)     |
+| 0x9000 | 64    | Port 0 | FC Framer     | Fibre Channel Framer (7)     |
 | 0x9100 | 8     | Port 0 | PCIe CDC FIFO | (Undoc.) fc0\_rx\_cdc        |
 | 0xAxxx | ...   | Port 1 | ...           |                              |
 | 0xCxxx | ...   | Port 2 | ...           |                              |
@@ -271,6 +271,9 @@ The data type is unsigned 32 bit integer for the primitive counters.
 A fully operational port has status `0x1001f`.
 
 #### FC Framer
+
+Note that internally the address space is split up so that the lower half
+contains registers related to transmit and upper half is related to receive.
 
 | Addr    | Width | Name                   |
 |---------|-------|------------------------|

@@ -2,7 +2,7 @@ QPATH ?= "$(HOME)/intelFPGA/20.1/quartus"
 
 .DELETE_ON_ERROR:
 
-.PHONY: editor sim lint test
+.PHONY: edit sim lint test
 
 lint: testbench/tb_tb.qsys
 	verilator --lint-only ../fc.sv fc_8g_xcvr.sv fc_phy_bbox.sv
@@ -13,7 +13,7 @@ lint: testbench/tb_tb.qsys
 %.qsys: %.tcl ip
 	$(QPATH)/sopc_builder/bin/qsys-script --script=$<
 
-editor: tb.qsys
+edit: tb.qsys
 	$(QPATH)/sopc_builder/bin/qsys-edit $<
 
 ip:

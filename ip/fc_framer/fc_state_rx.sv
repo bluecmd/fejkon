@@ -4,7 +4,8 @@ module fc_state_rx (
     input logic        reset,
     input logic [31:0] data,
     input logic [3:0]  datak,
-    output fc::state_t state
+    output fc::state_t state,
+    output is_active
   );
 
   fc::state_t state_r = fc::STATE_LF2, state_next;
@@ -64,4 +65,20 @@ module fc_state_rx (
     end
   end
 
+  // On entry to the Active State, an FC_Port shall
+  // transmit a minimum of 6 IDLES before transmitting other Transmission Words
+  logic online = 0;
+  int idle_hold_off = 6;
+
+  always @(posedge clk) begin
+    if (reset_r) begin
+      idle_hold_off <= 6;
+    end else if (state_r != fc::STATE_AC) begin
+      idle_hold_off <= 6;
+    end else if (idle_hold_off > 0) begin
+      idle_hold_off <= idle_hold_off - 1;
+    end
+  end
+
+  assign is_active = idle_hold_off == 0;
 endmodule

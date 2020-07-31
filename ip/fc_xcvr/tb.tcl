@@ -110,12 +110,16 @@ add_interface clk clock sink
 set_interface_property clk EXPORT_OF mgmt_clk.clk_in
 add_interface framer0_active conduit end
 set_interface_property framer0_active EXPORT_OF framer0.active
-add_interface framer0_mgmt_mm avalon slave
-set_interface_property framer0_mgmt_mm EXPORT_OF framer0.mgmt_mm
+add_interface framer0_rx_mgmt_mm avalon slave
+set_interface_property framer0_rx_mgmt_mm EXPORT_OF framer0.rx_mgmt_mm
+add_interface framer0_tx_mgmt_mm avalon slave
+set_interface_property framer0_tx_mgmt_mm EXPORT_OF framer0.tx_mgmt_mm
 add_interface framer1_active conduit end
 set_interface_property framer1_active EXPORT_OF framer1.active
-add_interface framer_1_mgmt_mm avalon slave
-set_interface_property framer_1_mgmt_mm EXPORT_OF framer1.mgmt_mm
+add_interface framer1_rx_mgmt_mm avalon slave
+set_interface_property framer1_rx_mgmt_mm EXPORT_OF framer1.rx_mgmt_mm
+add_interface framer1_tx_mgmt_mm avalon slave
+set_interface_property framer1_tx_mgmt_mm EXPORT_OF framer1.tx_mgmt_mm
 add_interface phy0_clk clock sink
 set_interface_property phy0_clk EXPORT_OF phy0_clk.clk_in
 add_interface phy0_reset reset sink
@@ -179,10 +183,6 @@ add_connection fifo_BtoA.out xcvrA.avtx
 add_connection framer0.avtx xcvr0.avtx
 
 add_connection framer1.avtx xcvr1.avtx
-
-add_connection mgmt_clk.clk framer0.mgmt_clk
-
-add_connection mgmt_clk.clk framer1.mgmt_clk
 
 add_connection mgmt_clk.clk reconfig.mgmt_clk_clk
 

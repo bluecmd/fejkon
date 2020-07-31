@@ -36,8 +36,11 @@ module top_tb;
     `TX0.set_transaction_sop(1);
     `TX0.set_transaction_data(fc::SOFI3);
     `TX0.push_transaction();
-    `TX0.set_transaction_data(32'b0);
-    repeat (10) `TX0.push_transaction();
+    `TX0.set_transaction_sop(0);
+    for (int i = 1; i < 10; i++) begin
+      `TX0.set_transaction_data(32'hf00f0000 + i);
+      `TX0.push_transaction();
+    end
     `TX0.set_transaction_eop(1);
     `TX0.set_transaction_data(fc::EOFT_N);
     `TX0.push_transaction();

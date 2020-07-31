@@ -27,6 +27,8 @@ vlog -sv top_tb.sv -L altera_common_sv_packages
 
 elab
 
+log -r /*
+
 set broken 0
 onbreak {
  set broken 1

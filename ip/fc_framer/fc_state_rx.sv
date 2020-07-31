@@ -49,16 +49,8 @@ module fc_state_rx (
     endcase
   end
 
-  logic reset_cdc1;
-  logic reset_r;
-
   always @(posedge clk) begin
-    reset_cdc1 <= reset;
-    reset_r <= reset_cdc1;
-  end
-
-  always @(posedge clk) begin
-    if (reset_r) begin
+    if (reset) begin
       state_r <= fc::STATE_LF2;
     end else if (datak == 4'b1000) begin
       state_r <= state_next;
@@ -71,7 +63,7 @@ module fc_state_rx (
   int idle_hold_off = 6;
 
   always @(posedge clk) begin
-    if (reset_r) begin
+    if (reset) begin
       idle_hold_off <= 6;
     end else if (state_r != fc::STATE_AC) begin
       idle_hold_off <= 6;

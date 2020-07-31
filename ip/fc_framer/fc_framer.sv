@@ -26,6 +26,22 @@ module fc_framer (
     output wire         active                    //                 active.active_led
   );
 
+  logic rx_reset_cdc1;
+  logic rx_reset_r;
+
+  always @(posedge rx_clk) begin
+    rx_reset_cdc1 <= reset;
+    rx_reset_r <= rx_reset_cdc1;
+  end
+
+  logic tx_reset_cdc1;
+  logic tx_reset_r;
+
+  always @(posedge tx_clk) begin
+    tx_reset_cdc1 <= reset;
+    tx_reset_r <= tx_reset_cdc1;
+  end
+
   // Driven by fc_state_rx
   fc::state_t state;
 
@@ -39,7 +55,7 @@ module fc_framer (
   assign rx_mm_readdata = rx_reg_readdata;
 
   always @(posedge tx_clk) begin
-    if (reset) begin
+    if (tx_reset_r) begin
       tx_reg_readdata <= 0;
     end else if (tx_mm_read) begin
       case (tx_mm_address)
@@ -51,7 +67,7 @@ module fc_framer (
   end
 
   always @(posedge rx_clk) begin
-    if (reset) begin
+    if (rx_reset_r) begin
       rx_reg_readdata <= 0;
     end else if (rx_mm_read) begin
       case (rx_mm_address)
@@ -72,7 +88,7 @@ module fc_framer (
 
   fc_state_rx state_rx (
     .clk(rx_clk),
-    .reset(reset | ~avrx_valid),
+    .reset(rx_reset_r | ~avrx_valid),
     .data(avrx_data[31:0]),
     .datak(avrx_data[35:32]),
     .state(state),
@@ -121,7 +137,7 @@ module fc_framer (
   logic        urx_endofpacket = 0;
 
   always @(posedge rx_clk) begin
-    if (reset) begin
+    if (rx_reset_r) begin
       urx_data <= 0;
       urx_startofpacket <= 0;
       urx_endofpacket <= 0;

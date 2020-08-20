@@ -2,9 +2,9 @@ QPATH ?= "$(HOME)/intelFPGA/20.1/quartus"
 
 #.DELETE_ON_ERROR:
 
-.PHONY: all syscon program flash editor defconfig menuconfig test
+.PHONY: all syscon program flash editor defconfig menuconfig test report
 
-all: fejkon.sof
+all: fejkon.sof report
 
 clean:
 	rm -f fejkon.sof
@@ -15,10 +15,13 @@ fejkon.sof: ip/altera_fc_phy/fc_phy.qip fejkon.qsys de5net.sdc de5net.tcl $(wild
 	(mkdir -p gen; cd gen; rm -f *.txt *.html; $(QPATH)/bin/quartus_sh -t ../quartus.tcl)
 	cp gen/output_files/fejkon.sof $@
 	touch $@
+
+report:
 	@echo
 	@echo '  ==> Generation report <=='
 	@echo
-	@cat gen/violated_paths.txt
+	@ [ -f gen/violated_paths.txt ] && cat gen/violated_paths.txt \
+		|| echo 'No timing constraints violated! Yeey!'
 	@echo
 	@grep -B1 '; I/O Assignment Warnings' gen/output_files/fejkon.fit.rpt \
 		| grep -- '---'

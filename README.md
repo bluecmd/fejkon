@@ -196,6 +196,7 @@ Accesses need to be 4 byte wide.
 | 0x100 | 4     | Data TX TLP Fill Level            |
 | 0x110 | 4     | Instant TX TLP Fill Level         |
 | 0x120 | 4     | Response TX TLP Fill Level        |
+| 0x180 | 4     | LTSSM and lane active mode        |
 | 0x200 | 4     | C2H DMA buffer start address      |
 | 0x204 | 4     | C2H DMA buffer end address        |
 | 0x208 | 4     | C2H DMA host read pointer         |

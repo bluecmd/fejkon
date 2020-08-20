@@ -92,6 +92,8 @@ set_instance_parameter_value pcie_reconfig {number_of_reconfig_interfaces} {11}
 
 add_instance pcie_reset pcie_reset 1.0
 
+add_instance pcie_status intel_pcie_status 1.0
+
 add_instance phy altera_pcie_sv_hip_ast 20.1
 set_instance_parameter_value phy {advanced_default_hwtcl_atomic_malformed} {true}
 set_instance_parameter_value phy {advanced_default_hwtcl_atomic_op_completer_32bit} {false}
@@ -600,6 +602,11 @@ set_connection_parameter_value csr_bridge.m0/pcie_data.csr arbitrationPriority {
 set_connection_parameter_value csr_bridge.m0/pcie_data.csr baseAddress {0x0000}
 set_connection_parameter_value csr_bridge.m0/pcie_data.csr defaultConnection {0}
 
+add_connection csr_bridge.m0 pcie_status.mm
+set_connection_parameter_value csr_bridge.m0/pcie_status.mm arbitrationPriority {1}
+set_connection_parameter_value csr_bridge.m0/pcie_status.mm baseAddress {0x0180}
+set_connection_parameter_value csr_bridge.m0/pcie_status.mm defaultConnection {0}
+
 add_connection csr_bridge.m0 tlp_data_fifo.csr
 set_connection_parameter_value csr_bridge.m0/tlp_data_fifo.csr arbitrationPriority {1}
 set_connection_parameter_value csr_bridge.m0/tlp_data_fifo.csr baseAddress {0x0100}
@@ -631,6 +638,8 @@ add_connection mgmt_clk.out_clk pcie_reconfig.reconfig_xcvr_clk
 
 add_connection mgmt_clk.out_clk pcie_reset.clk
 
+add_connection mgmt_clk.out_clk pcie_status.clk
+
 add_connection mgmt_clk.out_clk xcvr_reconfig.mgmt_clk_clk
 
 add_connection mgmt_rst.out_reset bar0_cdc.m0_reset
@@ -654,6 +663,8 @@ add_connection mgmt_rst.out_reset pcie_data.reset
 add_connection mgmt_rst.out_reset pcie_reconfig.reconfig_xcvr_rst
 
 add_connection mgmt_rst.out_reset pcie_reset.reset
+
+add_connection mgmt_rst.out_reset pcie_status.reset
 
 add_connection mgmt_rst.out_reset tlp_adapter.reset
 
@@ -689,13 +700,6 @@ add_connection pcie_data.tlp_tx_instant_st tlp_instant_fifo.in
 
 add_connection pcie_data.tlp_tx_response_st tlp_response_fifo.in
 
-add_connection pcie_reconfig.hip_status_drv phy.hip_status
-set_connection_parameter_value pcie_reconfig.hip_status_drv/phy.hip_status endPort {}
-set_connection_parameter_value pcie_reconfig.hip_status_drv/phy.hip_status endPortLSB {0}
-set_connection_parameter_value pcie_reconfig.hip_status_drv/phy.hip_status startPort {}
-set_connection_parameter_value pcie_reconfig.hip_status_drv/phy.hip_status startPortLSB {0}
-set_connection_parameter_value pcie_reconfig.hip_status_drv/phy.hip_status width {0}
-
 add_connection pcie_reconfig.reconfig_busy xcvr_reconfig.reconfig_busy
 set_connection_parameter_value pcie_reconfig.reconfig_busy/xcvr_reconfig.reconfig_busy endPort {}
 set_connection_parameter_value pcie_reconfig.reconfig_busy/xcvr_reconfig.reconfig_busy endPortLSB {0}
@@ -714,6 +718,13 @@ set_connection_parameter_value pcie_reset.npor/phy.npor endPortLSB {0}
 set_connection_parameter_value pcie_reset.npor/phy.npor startPort {}
 set_connection_parameter_value pcie_reset.npor/phy.npor startPortLSB {0}
 set_connection_parameter_value pcie_reset.npor/phy.npor width {0}
+
+add_connection pcie_status.hip_status_out pcie_reconfig.hip_status_drv
+set_connection_parameter_value pcie_status.hip_status_out/pcie_reconfig.hip_status_drv endPort {}
+set_connection_parameter_value pcie_status.hip_status_out/pcie_reconfig.hip_status_drv endPortLSB {0}
+set_connection_parameter_value pcie_status.hip_status_out/pcie_reconfig.hip_status_drv startPort {}
+set_connection_parameter_value pcie_status.hip_status_out/pcie_reconfig.hip_status_drv startPortLSB {0}
+set_connection_parameter_value pcie_status.hip_status_out/pcie_reconfig.hip_status_drv width {0}
 
 add_connection phy.coreclkout_hip bar0_cdc.s0_clk
 
@@ -749,6 +760,13 @@ set_connection_parameter_value phy.hip_currentspeed/pcie_reconfig.hip_currentspe
 set_connection_parameter_value phy.hip_currentspeed/pcie_reconfig.hip_currentspeed startPort {}
 set_connection_parameter_value phy.hip_currentspeed/pcie_reconfig.hip_currentspeed startPortLSB {0}
 set_connection_parameter_value phy.hip_currentspeed/pcie_reconfig.hip_currentspeed width {0}
+
+add_connection phy.hip_status pcie_status.hip_status_drv
+set_connection_parameter_value phy.hip_status/pcie_status.hip_status_drv endPort {}
+set_connection_parameter_value phy.hip_status/pcie_status.hip_status_drv endPortLSB {0}
+set_connection_parameter_value phy.hip_status/pcie_status.hip_status_drv startPort {}
+set_connection_parameter_value phy.hip_status/pcie_status.hip_status_drv startPortLSB {0}
+set_connection_parameter_value phy.hip_status/pcie_status.hip_status_drv width {0}
 
 add_connection phy.int_msi msi_intr.int_msi
 set_connection_parameter_value phy.int_msi/msi_intr.int_msi endPort {}

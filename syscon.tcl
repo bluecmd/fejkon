@@ -42,9 +42,47 @@ proc id {} {
   puts [format " Git rev. : %s" [master_read_32 $m [expr $off + 0x4] 1]]
 }
 
+proc ltssm_str {state} {
+  switch $state {
+    0  { return "Detect.Quiet" }
+    1  { return "Detect.Active" }
+    2  { return "Polling.Active" }
+    3  { return "Polling.Compliance" }
+    4  { return "Polling.Configuration" }
+    5  { return "Polling.Speed" }
+    6  { return "config.Linkwidthstart" }
+    7  { return "Config.Linkaccept" }
+    8  { return "Config.Lanenumaccept" }
+    9  { return "Config.Lanenumwait" }
+    10 { return "Config.Complete" }
+    11 { return "Config.Idle" }
+    12 { return "Recovery.Rcvlock" }
+    13 { return "Recovery.Rcvconfig" }
+    14 { return "Recovery.Idle" }
+    15 { return "L0" }
+    16 { return "Disable" }
+    17 { return "Loopback.Entry" }
+    18 { return "Loopback.Active" }
+    19 { return "Loopback.Exit" }
+    20 { return "Hot.Reset" }
+    21 { return "LOs" }
+    25 { return "L2.transmit.Wake" }
+    26 { return "Recovery.Speed" }
+    27 { return "Recovery.Equalization, Phase 0" }
+    28 { return "Recovery.Equalization, Phase 1" }
+    29 { return "Recovery.Equalization, Phase 2" }
+    30 { return "Recovery.Equalization, Phase 3" }
+    31 { return "Recovery.Equalization, Done" }
+    default { return "<Unknown>" }
+  }
+}
+
 proc pcie {} {
   global m
   set off [expr 0x800]
+  set ltssm [expr [master_read_8 $m [expr $off + 0x180] 1]]
+  puts [format " LTSSM state          : %s (0x%02x)" [ltssm_str $ltssm] $ltssm]
+  puts [format " Lanes active         : %s" [format "x%d" [master_read_8 $m [expr $off + 0x181] 1]]]
   puts [format " My ID                : %s" [master_read_16 $m [expr $off + 0x00] 1]]
   puts [format " TLP RX               : %s" [master_read_32 $m [expr $off + 0x04] 1]]
   puts [format " TLP Unsupported RX   : %s" [master_read_32 $m [expr $off + 0x08] 1]]

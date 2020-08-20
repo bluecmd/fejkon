@@ -77,6 +77,9 @@ set_instance_parameter_value si570_ctrl {RecallFrequency} {100000000}
 set_instance_parameter_value si570_ctrl {TargetFrequency} {106250000}
 
 add_instance temp intel_temp 1.0
+set_instance_parameter_value temp {FanInvOut} {0}
+set_instance_parameter_value temp {FanOut} {1}
+set_instance_parameter_value temp {FanTemp} {60}
 
 add_instance temp_sense altera_temp_sense 20.1
 set_instance_parameter_value temp_sense {CBX_AUTO_BLACKBOX} {ALL}
@@ -93,6 +96,8 @@ set_instance_parameter_value temp_sense {USE_WYS} {on}
 # exported interfaces
 add_interface clk clock sink
 set_interface_property clk EXPORT_OF ext0.clk_in
+add_interface fan conduit end
+set_interface_property fan EXPORT_OF temp.fan
 add_interface fcport0_line_rd conduit end
 set_interface_property fcport0_line_rd EXPORT_OF fc.fcport0_line_rd
 add_interface fcport0_line_td conduit end

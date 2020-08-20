@@ -137,8 +137,8 @@ set_location_assignment PIN_BC37 -to reset_reset_n ; # CPU_RESET_n
 #============================================================
 # Fan
 #============================================================
-# set_instance_assignment -name IO_STANDARD "2.5 V" -to FAN_CTRL
-# set_location_assignment PIN_AR32 -to FAN_CTRL
+set_instance_assignment -name IO_STANDARD "2.5 V" -to fan_fan ; # FAN_CTRL
+set_location_assignment PIN_AR32 -to fan_fan ; # FAN_CTRL
 
 #============================================================
 # RS422

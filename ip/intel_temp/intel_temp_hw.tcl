@@ -51,6 +51,47 @@ add_fileset_file intel_temp.sv SYSTEM_VERILOG PATH intel_temp.sv
 # 
 # parameters
 # 
+add_parameter FanTemp POSITIVE 1 ""
+set_parameter_property FanTemp DEFAULT_VALUE 70
+set_parameter_property FanTemp DISPLAY_NAME "Fan threshold (Celsius)"
+set_parameter_property FanTemp WIDTH ""
+set_parameter_property FanTemp TYPE INTEGER
+set_parameter_property FanTemp UNITS None
+set_parameter_property FanTemp ALLOWED_RANGES -128:127
+set_parameter_property FanTemp DESCRIPTION ""
+set_parameter_property FanTemp AFFECTS_GENERATION false
+set_parameter_property FanTemp HDL_PARAMETER true
+
+add_parameter FanOut POSITIVE 1 ""
+set_parameter_property FanOut DEFAULT_VALUE true
+set_parameter_property FanOut DISPLAY_NAME "Fan control output (active high)"
+set_parameter_property FanOut WIDTH ""
+set_parameter_property FanOut TYPE BOOLEAN
+set_parameter_property FanOut UNITS None
+set_parameter_property FanOut DESCRIPTION ""
+set_parameter_property FanOut AFFECTS_ELABORATION true
+set_parameter_property FanOut HDL_PARAMETER false
+
+add_parameter FanInvOut POSITIVE 1 ""
+set_parameter_property FanInvOut DEFAULT_VALUE false
+set_parameter_property FanInvOut DISPLAY_NAME "Fan control output (active low)"
+set_parameter_property FanInvOut WIDTH ""
+set_parameter_property FanInvOut TYPE BOOLEAN
+set_parameter_property FanInvOut UNITS None
+set_parameter_property FanInvOut DESCRIPTION ""
+set_parameter_property FanInvOut AFFECTS_ELABORATION true
+set_parameter_property FanInvOut HDL_PARAMETER false
+
+proc elaborate {} {
+  if {[get_parameter_value FanOut] == "true"} {
+    set_interface_property fan ENABLED true
+  }
+  if {[get_parameter_value FanInvOut] == "true"} {
+    set_interface_property fan_n ENABLED true
+  }
+}
+
+set_module_property ELABORATION_CALLBACK elaborate
 
 
 # 
@@ -165,4 +206,32 @@ set_interface_property clr CMSIS_SVD_VARIABLES ""
 set_interface_property clr SVD_ADDRESS_GROUP ""
 
 add_interface_port clr clr reset Output 1
+
+# 
+# connection point fan
+# 
+add_interface fan conduit end
+set_interface_property fan associatedClock clk
+set_interface_property fan associatedReset reset
+set_interface_property fan ENABLED false
+set_interface_property fan EXPORT_OF ""
+set_interface_property fan PORT_NAME_MAP ""
+set_interface_property fan CMSIS_SVD_VARIABLES ""
+set_interface_property fan SVD_ADDRESS_GROUP ""
+
+add_interface_port fan fan fan Output 1
+
+# 
+# connection point fan_n
+# 
+add_interface fan_n conduit end
+set_interface_property fan_n associatedClock clk
+set_interface_property fan_n associatedReset reset
+set_interface_property fan_n ENABLED false
+set_interface_property fan_n EXPORT_OF ""
+set_interface_property fan_n PORT_NAME_MAP ""
+set_interface_property fan_n CMSIS_SVD_VARIABLES ""
+set_interface_property fan_n SVD_ADDRESS_GROUP ""
+
+add_interface_port fan_n fan_n fan_n Output 1
 

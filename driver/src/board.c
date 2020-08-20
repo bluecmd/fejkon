@@ -453,7 +453,7 @@ static int setup_buffers(struct fejkon_card *card)
   return 0;
 }
 
-static int tune_pcie_parameters(struct pci_dev *pcidev) {
+static int tune_pcie_parameters(struct pci_dev *pcidev, int ports) {
   enum pci_bus_speed speed = PCI_SPEED_UNKNOWN;
   enum pcie_link_width width = PCIE_LNK_WIDTH_UNKNOWN;
   struct pci_dev *limdev = NULL;
@@ -472,18 +472,20 @@ static int tune_pcie_parameters(struct pci_dev *pcidev) {
       "limited by %s", bandwidth, speed_str, width, pci_name(limdev));
 
   if (speed != PCIE_SPEED_8_0GT || width != PCIE_LNK_X8) {
-    dev_err(&pcidev->dev, "only Gen3 x8 operation is supported");
+    dev_warn(&pcidev->dev, "WARNING: Running at %s x%d while "
+        "Gen 3 (8.0 GT/s) x8 operation is highly recommended",
+        speed_str, width);
     if (limdev != pcidev) {
-      dev_err(&pcidev->dev, "bandwidth is limited upstream @ %s",
+      dev_warn(&pcidev->dev, "bandwidth is limited upstream @ %s",
           pci_name(limdev));
     } else {
-      dev_err(&pcidev->dev, "bandwidth is limited by card");
+      dev_warn(&pcidev->dev, "bandwidth is limited by card");
     }
-    return -EINVAL;
   }
-  if (bandwidth < 10 * 4 * 1000) {
+  if (bandwidth < 10 * ports * 1000) {
     dev_warn(&pcidev->dev, "only %d Mbit/s bandwidth available, "
-        "at least 40000 Mbit/s is recommended for full usage", bandwidth);
+        "at least %d Mbit/s is recommended for full usage", bandwidth,
+        10 * ports * 1000);
   }
   return 0;
 }
@@ -536,13 +538,27 @@ static int probe(struct pci_dev *pcidev, const struct pci_device_id *id)
   card->pci = pcidev;
   card->bar0 = pci_iomap(pcidev, 0 /* bar */, 0);
 
-#if 1
-  /* Temporary performance benchmark */
+  version = ioread32(card->bar0 + 0x0);
+  if ((version & 0xffff) != 0x0de5) {
+    dev_dbg(&pcidev->dev, "ignoring card with unknown magic: %04x", version & 0xffff);
+    ret = -EINVAL;
+    goto error_sanity;
+  }
+
+  /*
+   * Performance benchmark / stress test
+   *
+   * This is to poke a bit on the bus to see that the FPGA and the bus
+   * are feeling peachy. This is not so useful anymore as it was when
+   * TLP processing was being written, but it has been kept around as
+   * it is helps the author to sleep better knowing the PCIe read/write
+   * is being pushed a bit hard during driver loading.
+   */
   {
     ktime_t start = ktime_get();
     ktime_t end;
     int perf;
-    for (ret = 0; ret < 0x80000; ret++) {
+    for (ret = 0; ret < 0x10000; ret++) {
       if (ioread32(card->bar0 + 0x0) == ~0) {
         dev_err(&pcidev->dev, "stress test failed");
         ret = -EIO;
@@ -550,16 +566,8 @@ static int probe(struct pci_dev *pcidev, const struct pci_device_id *id)
       }
     }
     end = ktime_get();
-    perf = (0x80000*4*8)/((end - start) / 1000);
+    perf = (0x10000*4*8)/((end - start) / 1000);
     dev_dbg(&pcidev->dev, "debug performance result: %d Mbit/s", perf);
-  }
-#endif
-
-  version = ioread32(card->bar0 + 0x0);
-  if ((version & 0xffff) != 0x0de5) {
-    dev_dbg(&pcidev->dev, "ignoring card with unknown magic: %04x", version & 0xffff);
-    ret = -EINVAL;
-    goto error_sanity;
   }
 
   ports = (version >> 24) & 0xff;
@@ -577,7 +585,7 @@ static int probe(struct pci_dev *pcidev, const struct pci_device_id *id)
   dev_notice(&pcidev->dev, "PHY clock running at %d.%03d MHz",
       phy_clock / 1000000, (phy_clock / 1000) % 1000);
 
-  if (tune_pcie_parameters(pcidev) < 0) {
+  if (tune_pcie_parameters(pcidev, ports) < 0) {
     goto error_tune_failed;
   }
 

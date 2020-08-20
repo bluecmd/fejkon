@@ -20,11 +20,11 @@ report:
 	@echo
 	@echo '  ==> Generation report <=='
 	@echo
-	@ [ -f gen/violated_paths.txt ] && cat gen/violated_paths.txt \
+	@[ -f gen/violated_paths.txt ] && cat gen/violated_paths.txt \
 		|| echo 'No timing constraints violated! Yeey!'
 	@echo
 	@grep -B1 '; I/O Assignment Warnings' gen/output_files/fejkon.fit.rpt \
-		| grep -- '---'
+		| grep -- '---' || echo 'No I/O assignment warnings! Awesome!\n'
 	@awk '/; I\/O Assignment Warnings/,/^$$/' gen/output_files/fejkon.fit.rpt
 	@cat gen/fmax.txt | grep -v Thi
 	@echo

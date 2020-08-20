@@ -35,6 +35,8 @@ set_location_assignment PIN_AW35 -to clk_clk ; # OSC_50_B3B
 set_instance_assignment -name IO_STANDARD "2.5 V" -to phy_clk_out_clk ; # SMA_CLKOUT
 # set_location_assignment PIN_BB33 -to SMA_CLKIN
 set_location_assignment PIN_AV34 -to phy_clk_out_clk ; # SMA_CLKOUT
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to phy_clk_out_clk
+set_instance_assignment -name SLEW_RATE 1 -to phy_clk_out_clk ; # fast
 
 #============================================================
 # LED x 10
@@ -59,6 +61,26 @@ set_location_assignment PIN_AJ13 -to led_bracket[2]   ; # LED_BRACKET[2]
 set_location_assignment PIN_AJ14 -to led_bracket[3]   ; # LED_BRACKET[3]
 set_location_assignment PIN_AG15 -to led_rj45[0]      ; # LED_RJ45_L
 set_location_assignment PIN_AG16 -to led_rj45[1]      ; # LED_RJ45_R
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to led_board[0]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to led_board[1]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to led_board[2]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to led_board[3]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to led_bracket[0]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to led_bracket[1]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to led_bracket[2]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to led_bracket[3]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to led_rj45[0]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to led_rj45[1]
+set_instance_assignment -name SLEW_RATE 1 -to led_board[0]   ; # fast
+set_instance_assignment -name SLEW_RATE 1 -to led_board[1]   ; # fast
+set_instance_assignment -name SLEW_RATE 1 -to led_board[2]   ; # fast
+set_instance_assignment -name SLEW_RATE 1 -to led_board[3]   ; # fast
+set_instance_assignment -name SLEW_RATE 1 -to led_bracket[0] ; # fast
+set_instance_assignment -name SLEW_RATE 1 -to led_bracket[1] ; # fast
+set_instance_assignment -name SLEW_RATE 1 -to led_bracket[2] ; # fast
+set_instance_assignment -name SLEW_RATE 1 -to led_bracket[3] ; # fast
+set_instance_assignment -name SLEW_RATE 1 -to led_rj45[0]    ; # fast
+set_instance_assignment -name SLEW_RATE 1 -to led_rj45[1]    ; # fast
 
 #============================================================
 # BUTTON x 4 and CPU_RESET_n
@@ -139,6 +161,8 @@ set_location_assignment PIN_BC37 -to reset_reset_n ; # CPU_RESET_n
 #============================================================
 set_instance_assignment -name IO_STANDARD "2.5 V" -to fan_fan ; # FAN_CTRL
 set_location_assignment PIN_AR32 -to fan_fan ; # FAN_CTRL
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to fan_fan
+set_instance_assignment -name SLEW_RATE 1 -to fan_fan ; # fast
 
 #============================================================
 # RS422
@@ -1467,6 +1491,16 @@ set_location_assignment PIN_AK2 -to fcport0_line_rd_lvds                        
 set_location_assignment PIN_B22 -to sfp0_sfp_txdis                                   ; # SFPA_TXDISABLE
 set_location_assignment PIN_A22 -to sfp0_sfp_txfail                                  ; # SFPA_TXFAULT
 set_location_assignment PIN_AG4 -to fcport0_line_td_lvds                             ; # SFPA_TX_p
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to sfp0_sfp_scl
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to sfp0_sfp_sda
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to sfp0_sfp_ratesel[0]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to sfp0_sfp_ratesel[1]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to sfp0_sfp_txdis
+set_instance_assignment -name SLEW_RATE 1 -to sfp0_sfp_scl        ; # fast
+set_instance_assignment -name SLEW_RATE 1 -to sfp0_sfp_sda        ; # fast
+set_instance_assignment -name SLEW_RATE 1 -to sfp0_sfp_ratesel[0] ; # fast
+set_instance_assignment -name SLEW_RATE 1 -to sfp0_sfp_ratesel[1] ; # fast
+set_instance_assignment -name SLEW_RATE 1 -to sfp0_sfp_txdis      ; # fast
 
 #============================================================
 # SFP+ B
@@ -1492,6 +1526,16 @@ set_location_assignment PIN_AP2 -to fcport1_line_rd_lvds                        
 set_location_assignment PIN_H22 -to sfp1_sfp_txdis                                   ; # SFPB_TXDISABLE
 set_location_assignment PIN_H20 -to sfp1_sfp_txfail                                  ; # SFPB_TXFAULT
 set_location_assignment PIN_AL4 -to fcport1_line_td_lvds                             ; # SFPB_TX_p
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to sfp1_sfp_scl
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to sfp1_sfp_sda
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to sfp1_sfp_ratesel[0]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to sfp1_sfp_ratesel[1]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to sfp1_sfp_txdis
+set_instance_assignment -name SLEW_RATE 1 -to sfp1_sfp_scl        ; # fast
+set_instance_assignment -name SLEW_RATE 1 -to sfp1_sfp_sda        ; # fast
+set_instance_assignment -name SLEW_RATE 1 -to sfp1_sfp_ratesel[0] ; # fast
+set_instance_assignment -name SLEW_RATE 1 -to sfp1_sfp_ratesel[1] ; # fast
+set_instance_assignment -name SLEW_RATE 1 -to sfp1_sfp_txdis      ; # fast
 }  ; # if CONFIG_FCPORT1 == y
 
 #============================================================
@@ -1551,6 +1595,10 @@ set_instance_assignment -name IO_STANDARD "HCSL" -to phy_clk_clk ; # SFP_REFCLK_
 set_location_assignment PIN_AE15 -to si570_i2c_scl ; # CLOCK_SCL
 set_location_assignment PIN_AE16 -to si570_i2c_sda ; # CLOCK_SDA
 set_location_assignment PIN_AK7 -to phy_clk_clk ; # SFP_REFCLK_p
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to si570_i2c_sda
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to si570_i2c_scl
+set_instance_assignment -name SLEW_RATE 1 -to si570_i2c_sda ; # fast
+set_instance_assignment -name SLEW_RATE 1 -to si570_i2c_scl ; # fast
 
 #============================================================
 # SFP+ 1G Referece Clock

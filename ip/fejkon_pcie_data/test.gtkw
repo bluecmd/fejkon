@@ -1,12 +1,12 @@
-[timestart] 33410700
-[size] 1920 1016
-[pos] 6 38
-*-16.158356 33739000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[timestart] 33289800
+[size] 3156 1561
+[pos] 234 245
+*-17.047682 33910002 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] test.
 [sst_width] 588
-[signals_width] 350
+[signals_width] 836
 [sst_expanded] 1
-[sst_vpaned_height] 358
+[sst_vpaned_height] 588
 @28
 test.dut.clk
 test.dut.reset
@@ -18,8 +18,8 @@ test.dut.my_id[15:0]
 @28
 test.dut.data_tx_startofpacket
 test.dut.data_tx_endofpacket
+@24
 test.dut.data_tx_channel[1:0]
-@22
 test.dut.data_tx_empty[4:0]
 @28
 test.dut.data_tx_ready
@@ -69,6 +69,45 @@ test.dut.tlp_tx_data_st_endofpacket
 test.dut.tlp_tx_data_st_ready
 test.dut.tlp_tx_data_st_startofpacket
 test.dut.tlp_tx_data_st_valid
+@200
+-
+@28
+test.dut.c2h_staging_start_next
+test.dut.c2h_staging_read_ready
+test.dut.c2h_staging_done
+@420
+test.dut.c2h_staging_enqueued
+@28
+test.dut.c2h_staging_fifo_enqueue
+test.dut.c2h_staging_read_ack
+@420
+test.dut.c2h_staging_offset
+@25
+test.dut.c2h_staging_enq_lens[29:0]
+@200
+-
+@22
+test.dut.c2h_staging_pkt_data[255:0]
+@28
+test.dut.c2h_staging_pkt_valid
+@24
+test.dut.c2h_staging_pkt_empty[2:0]
+test.dut.c2h_staging_pkt_channel[1:0]
+test.dut.c2h_staging_pkt_length[9:0]
+@28
+test.dut.c2h_staging_pkt_eop
+@200
+-
+@28
+test.dut.c2h_tx_running
+@22
+test.dut.c2h_dma_buf_start_addr[31:0]
+test.dut.c2h_dma_buf_end_addr[31:0]
+test.dut.c2h_dma_card_write_ptr[31:0]
+test.dut.c2h_dma_host_read_ptr[31:0]
+@28
+test.dut.c2h_dma_tlp_tx_busy
+test.dut.c2h_dma_tlp_tx_send
 @200
 -
 @22

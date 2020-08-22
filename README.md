@@ -397,29 +397,52 @@ Frequency Range: 10 - 810 MHz
 Operating Temp Range (°C): -40 to +85
 ```
 
-### ModelSim Starter Edition
+### Usage under WSL and ChromeOS Crostini
 
-If you're using Intel's ModelSim Starter Edition you might run into issues like the one below:
+There are some known issues for running under Windows Subsystem for Linux (WSL)
+and ChromeOS Crostini (external reports).
 
-```
-bluecmd]$ make sim
-mkdir -p libraries
-(cd libraries; vlib work)
-vlog -sv *.sv *.v
-Model Technology ModelSim - Intel FPGA Edition vlog 2019.2 Compiler 2019.04 Apr 17 2019
-Start time: 13:09:44 on Oct 24,2019
-vlog -sv i2c_util.sv si570_ctrl.sv top_tb.sv i2c_master.v 
-** Error: (vlog-66) Execution of vlib failed. Please check the error log for more details.
-sh: /home/bluecmd/intelFPGA_pro/19.3/modelsim_ase/linuxpe/vlib: No such file or directory
-End time: 13:09:44 on Oct 24,2019, Elapsed time: 0:00:00
-Errors: 1, Warnings: 0
-```
+For WSL, using Ubuntu 18.04 (LTS) seems to work the best and require no workarounds.
 
-To fix that, run:
+#### realloc(): invalid pointer
+
+This seems to happen on Ubuntu 19.04 and newer, including 20.04 LTS.
+When starting Quartus or some other tools they will crash with the following error message:
 
 ```
-ln -sf ${HOME}/intelFPGA_pro/19.3/modelsim_ase/linuxaloem ${HOME}/intelFPGA_pro/19.3/modelsim_ase/linuxpe 
+$ ~/intelFPGA/20.1/quartus/bin/quartus
+realloc(): invalid pointer
+zsh: abort (core dumped)  ~/intelFPGA/20.1/quartus/bin/quartus
 ```
+
+This can be worked around by pre-loading the system's udev version. Exact reason why
+this workaround works is not known.
+
+```
+$ export LD_PRELOAD=/lib/x86_64-linux-gnu/libudev.so.1
+```
+
+This has been [reported](https://community.intel.com/t5/Intel-FPGA-Software-Installation/Running-Quartus-Prime-Standard-on-WSL-crashes-in-libudev-so/m-p/1189032#M2129) to Intel.
+
+#### Macro \<protected\> is undefined
+
+This is known to happen if you apply the above `LD_PRELOAD` fix and then launch ModelSim compilation.
+The bug can be triggered on normal machines as well if you accidentally applied the `LD_PRELOAD` hack to them.
+
+For some reason ModelSim then fails to decrypt the encrypted device libraries when told to preload the
+system udev library.
+
+```
+# ** Error: ../intelFPGA/20.1/quartus/eda/sim_lib/mentor/stratixv_atoms_ncrypt.v(38): (vlog-2163) Macro `<protected> is undefined.
+# ** Error: ../intelFPGA/20.1/quartus/eda/sim_lib/mentor/stratixv_atoms_ncrypt.v(38): (vlog-2163) Macro `<protected> is undefined.
+# ** Error: (vlog-13069) ../intelFPGA/20.1/quartus/eda/sim_lib/mentor/stratixv_atoms_ncrypt.v(38): syntax error in protected region.
+# 
+# ** Error: ../intelFPGA/20.1/quartus/eda/sim_lib/mentor/stratixv_atoms_ncrypt.v(38): (vlog-13205) Syntax error found in the scope following '<protected>'. Is there a missing '::'?
+# End time: 23:08:09 on Aug 20,2020, Elapsed time: 0:00:00
+# Errors: 5, Warnings: 0
+ ```
+ 
+This can be worked around by making sure you **do not** set `LD_PRELOAD` before running `vsim` (or `unset LD_PRELOAD`).
 
 ## Possible future work
 

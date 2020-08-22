@@ -50,7 +50,6 @@ and are capable of implementing 4x 8 Gbit/s Fibre Channel ports on a PCIe Gen 3 
 There are a few modifications to the board that are recommended.
 
  * Remove DDR3 SODIMMs, they are not needed and contribute to power drain
- * Add a 100 Ohm resistor to the stock cooler for a better noise level, cooling performance is fine anyway
  * Add a [heatsink](https://www.mouser.ch/ProductDetail/532-375424B00034G) onto of the LTM4601V
 
 ![DE5-Net Voltage Regulators](images/de5-net-vrs.jpg)
@@ -68,6 +67,61 @@ $ pip3 install kconfiglib     # Required build dependency
 $ make menuconfig             # Optional: Change configuration
 $ make
 ```
+
+## Usage Notes
+
+Hopefully the card is straight forward to use, but every product needs
+a manual. This is it.
+
+### Port Status
+
+The leds on the front of the card next to the RJ45 port signals when
+the port is considered active. This means for FC that the port state
+machine has entered the ACTIVE state.
+
+The leds next to the four switches on the board indicate if the transmit
+laser is activated.
+
+The leds next to the SFP cages indicate whether or not an SFP module is
+detected in that slot.
+
+### Cooling 
+
+The fan is configured to only turn on when the temperature reaches 60°C.
+If that happens the fan will remain on until the board has been reset.
+
+### MSI Interrupts
+
+Currently fejkon is using multiple MSI interrupts, not MSI-X. MSI-X is a bit
+more complicated to implement, and the benefits of MSI-X over MSI isn't very
+documented when you don't need the thousands interrupts that MSI-X offers.
+
+During development it was discovered that e.g. QEMU does not do multiple MSI
+interrupts by default, and some kernel options are needed as well. The symptom
+of the platform not being setup correctly is that
+`pci_alloc_irq_vectors(pcidev, 1, irqs, PCI_IRQ_ALL_TYPES);` only returns one
+available vector instead of the requested number. There appears to be other
+people that have ran into the
+[same issue](https://stackoverflow.com/questions/34406632/is-multi-message-msi-implemented-on-linux-x86).
+In the kernel this support for multiple MSI interrupts seems to be gated by
+`MSI_FLAG_MULTI_PCI_MSI`.
+
+To enable the kernel support, enable `CONFIG_IRQ_REMAP`. On Intel, you should
+see mentions of `DMAR` in your dmesg. This is usually enabled by enabling VT-d.
+The equivalent on AMD seems to be just IOMMU support, but that has not been verified.
+PCIe hotplug has been known to cause issues, so you might want to disable that.
+
+The configuration for QEMU is something like:
+```
+-machine q35,kernel-irqchip=split \
+-device intel-iommu,intremap=on,device-iotlb=on \
+```
+
+Since the card only uses MSI interrupts, legacy interrupts are disabled.
+
+So if you are designing something from scratch and have the option to use MSI
+or MSI-X, this information above should tell you that maybe using MSI-X will
+be easier. However, it is quite likely MSI-X has its own pitfalls.
 
 ## Developing
 
@@ -297,39 +351,6 @@ States:
 | 8     | OL3  | Wait for OLS           |
 
 Note: Only ACTIVE is guaranted to be stable at numeric 0 over time.
-
-### MSI Interrupts
-
-Currently fejkon is using multiple MSI interrupts, not MSI-X. MSI-X is a bit
-more complicated to implement, and the benefits of MSI-X over MSI isn't very
-documented when you don't need the thousands interrupts that MSI-X offers.
-
-During development it was discovered that e.g. QEMU does not do multiple MSI
-interrupts by default, and some kernel options are needed as well. The symptom
-of the platform not being setup correctly is that
-`pci_alloc_irq_vectors(pcidev, 1, irqs, PCI_IRQ_ALL_TYPES);` only returns one
-available vector instead of the requested number. There appears to be other
-people that have ran into the
-[same issue](https://stackoverflow.com/questions/34406632/is-multi-message-msi-implemented-on-linux-x86).
-In the kernel this support for multiple MSI interrupts seems to be gated by
-`MSI_FLAG_MULTI_PCI_MSI`.
-
-To enable the kernel support, enable `CONFIG_IRQ_REMAP`. On Intel, you should
-see mentions of `DMAR` in your dmesg. This is usually enabled by enabling VT-d.
-The equivalent on AMD seems to be just IOMMU support, but that has not been verified.
-PCIe hotplug has been known to cause issues, so you might want to disable that.
-
-The configuration for QEMU is something like:
-```
--machine q35,kernel-irqchip=split \
--device intel-iommu,intremap=on,device-iotlb=on \
-```
-
-Since the card only uses MSI interrupts, legacy interrupts are disabled.
-
-So if you are designing something from scratch and have the option to use MSI
-or MSI-X, this information above should tell you that maybe using MSI-X will
-be easier. However, it is quite likely MSI-X has its own pitfalls.
 
 #### Interrupts
 

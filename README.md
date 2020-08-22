@@ -429,8 +429,9 @@ This has been [reported](https://community.intel.com/t5/Intel-FPGA-Software-Inst
 This is known to happen if you apply the above `LD_PRELOAD` fix and then launch ModelSim compilation.
 The bug can be triggered on normal machines as well if you accidentally applied the `LD_PRELOAD` hack to them.
 
-For some reason ModelSim then fails to decrypt the encrypted device libraries when told to preload the
-system udev library.
+For some reason ModelSim then fails to decrypt the encrypted device libraries when told to preload
+a library. Note: It does not have to be udev, this has been known to fail for other preloades e.g.
+in /etc/ld.so.preload.
 
 ```
 # ** Error: ../intelFPGA/20.1/quartus/eda/sim_lib/mentor/stratixv_atoms_ncrypt.v(38): (vlog-2163) Macro `<protected> is undefined.
@@ -442,7 +443,8 @@ system udev library.
 # Errors: 5, Warnings: 0
  ```
  
-This can be worked around by making sure you **do not** set `LD_PRELOAD` before running `vsim` (or `unset LD_PRELOAD`).
+This can be worked around by making sure you **do not** set `LD_PRELOAD` before running `vsim` (or `unset LD_PRELOAD`)
+and making sure `/etc/ld.so.preload` does not exist.
 
 ## Possible future work
 

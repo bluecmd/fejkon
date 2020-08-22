@@ -64,8 +64,8 @@ Fejkon uses Kconfig menu configuration for configuring the board features, and
 can be configured and built like this:
 
 ```
-$ pip3 install kconfiglib
-$ make menuconfig
+$ pip3 install kconfiglib     # Required build dependency
+$ make menuconfig             # Optional: Change configuration
 $ make
 ```
 

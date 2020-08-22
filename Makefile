@@ -2,13 +2,15 @@ QPATH ?= "$(HOME)/intelFPGA/20.1/quartus"
 
 #.DELETE_ON_ERROR:
 
-.PHONY: all syscon program flash editor defconfig menuconfig test report
+.PHONY: all syscon program flash editor defconfig menuconfig test report edit edit-clean test
 
 all: fejkon.sof report
 
 clean:
-	rm -f fejkon.sof
-	rm -fr gen
+	\rm -f fejkon.sof
+	\rm -fr gen
+	\rm -f fejkon.qsys fejkon_*.qsys
+	\rm -f config.tcl .config.old .qsys-clean .qsys-configured
 
 fejkon.sof: ip/altera_fc_phy/fc_phy.qip fejkon.qsys de5net.sdc de5net.tcl $(wildcard ip/*/*.sv)
 	echo "\`define FEJKON_GIT_HASH 32'h$(shell git describe --long --always --abbrev=8)" > ip/fejkon_identity/version.sv

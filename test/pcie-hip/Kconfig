@@ -1,0 +1,3 @@
+config AVALON_MONITOR
+  bool "Enable Avalon-MM monitor (requires coverage support in simulator)"
+

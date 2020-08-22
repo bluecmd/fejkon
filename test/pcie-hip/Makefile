@@ -1,6 +1,6 @@
 QPATH ?= "$(HOME)/intelFPGA/20.1/quartus"
 
-.PHONY: test clean lint
+.PHONY: test clean lint defconfig menuconfig edit edit-clean
 
 test: gen gen/altpcied_sv_hwtcl.sv gen/altpcierd_tl_cfg_sample.v gen/altpcierd_hip_rs.v
 	vsim -c -do msim.do
@@ -25,9 +25,36 @@ libraries:
 	@echo "Run 'make test' before 'make lint'"
 	@exit 1
 
-svpcie_sim_tb.qsys: svpcie_sim_tb.tcl
+config.tcl: .config ../../config.py
+	python3 ../../config.py > config.tcl
+
+svpcie_sim_tb.qsys: .qsys-configured
+
+.qsys-clean:
+	rm -f .qsys-configured svpcie_sim_tb.qsys
 	$(QPATH)/sopc_builder/bin/qsys-script --script=svpcie_sim_tb.tcl
 	touch $@
+
+.qsys-configured: svpcie_sim_tb.tcl config.tcl
+	make -C $(PWD) .qsys-clean
+	$(QPATH)/sopc_builder/bin/qsys-script --script=svpcie_apply_config.tcl
+	rm .qsys-clean
+	touch $@
+
+edit-clean: .qsys-clean
+	$(QPATH)/sopc_builder/bin/qsys-edit svpcie_sim_tb.qsys
+
+edit: svpcie_sim_tb.qsys
+	$(QPATH)/sopc_builder/bin/qsys-edit svpcie_sim_tb.qsys
+
+defconfig:
+	cp defconfig .config
+
+.config:
+	cp defconfig .config
+
+menuconfig: .config
+	menuconfig
 
 gen: svpcie_sim_tb.qsys
 	$(QPATH)/sopc_builder/bin/qsys-generate svpcie_sim_tb.qsys \
@@ -44,11 +71,13 @@ gen: svpcie_sim_tb.qsys
 	patch -p0 < patches/01-pcie-monitor.patch
 	rm -fr libraries/
 
-edit: svpcie_sim_tb.qsys
-	$(QPATH)/sopc_builder/bin/qsys-edit $<
-
 clean:
 	\rm -fr libraries/
 	\rm -fr gen/
+	\rm -fr .qsys_edit/
+	\rm -fr svpcie_sim_tb/
 	\rm -f svpcie_sim_tb.qsys transcript vsim.wlf \
-		altpcie_monitor_sv_dlhip_tlp_file_log.log svpcie_sim_tb.sopcinfo
+		altpcie_monitor_sv_dlhip_tlp_file_log.log svpcie_sim_tb.sopcinfo \
+		.qsys-clean .qsys-configured .config.old config.tcl
+
+

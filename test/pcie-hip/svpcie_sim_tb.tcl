@@ -769,6 +769,11 @@ set_connection_parameter_value fejkon_pcie_avalon.mm/mm_pcie_monitor.s0 arbitrat
 set_connection_parameter_value fejkon_pcie_avalon.mm/mm_pcie_monitor.s0 baseAddress {0x0000}
 set_connection_parameter_value fejkon_pcie_avalon.mm/mm_pcie_monitor.s0 defaultConnection {0}
 
+add_connection fejkon_pcie_avalon.mm test_pcie_mem.s1
+set_connection_parameter_value fejkon_pcie_avalon.mm/test_pcie_mem.s1 arbitrationPriority {1}
+set_connection_parameter_value fejkon_pcie_avalon.mm/test_pcie_mem.s1 baseAddress {0x0000}
+set_connection_parameter_value fejkon_pcie_avalon.mm/test_pcie_mem.s1 defaultConnection {0}
+
 add_connection fejkon_pcie_data.config_tl endp0.config_tl
 set_connection_parameter_value fejkon_pcie_data.config_tl/endp0.config_tl endPort {}
 set_connection_parameter_value fejkon_pcie_data.config_tl/endp0.config_tl endPortLSB {0}

@@ -21,7 +21,7 @@ class FejkonEP(pcie.Endpoint, pcie.MSICapability):
 
     # pylint: disable=too-many-instance-attributes
     def __init__(self, clk):
-        super(FejkonEP, self).__init__()
+        super().__init__()
         self.tx_sem = threading.Semaphore(0)
         self.lock = threading.Lock()
         self.clk = clk
@@ -59,7 +59,7 @@ class FejkonEP(pcie.Endpoint, pcie.MSICapability):
         self.tx_st_ready.next = 1
 
     def handle_config_0_tlp(self, tlp):
-        yield from super(FejkonEP, self).handle_config_0_tlp(tlp)
+        yield from super().handle_config_0_tlp(tlp)
         # Send the bus/dev number
         self.tl_cfg_add.next = 0xF
         self.tl_cfg_ctl.next = self.bus_num << 5 | self.device_num

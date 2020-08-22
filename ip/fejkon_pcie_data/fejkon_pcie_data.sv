@@ -65,7 +65,9 @@ module fejkon_pcie_data (
     input  wire         mem_access_req_ready,             //                   .ready
     output wire         mem_access_req_valid,             //                   .valid
     input  wire         csr_read,                         //                csr.read
+    input  wire         csr_write,                        //                   .write
     output wire [31:0]  csr_readdata,                     //                   .readdata
+    input  wire [31:0]  csr_writedata,                    //                   .writedata
     input  wire [5:0]   csr_address,                      //                   .address
     input  wire [3:0]   tl_cfg_add,                       //          config_tl.tl_cfg_add
     input  wire [31:0]  tl_cfg_ctl,                       //                   .tl_cfg_ctl
@@ -452,53 +454,99 @@ module fejkon_pcie_data (
   // input  wire [4:0]   data_tx_empty,                    //                   .empty
   //
 
-  // Staging data array - up to 2176 bytes (max for FC is 2148)
-  logic [255:0] c2h_staging_data  [68];
-  logic [4:0]   c2h_staging_last_empty;
-  int           c2h_staging_offset = 0;
-  logic [1:0]   c2h_staging_channel = 0;
-  logic         c2h_staging_done = 1;
-  logic         c2h_staging_done_r = 1;
-  logic         c2h_prep_ready = 1;
+  logic [271:0] c2h_staging_data;
+  logic         c2h_staging_read_ack = 0;
+  logic         c2h_staging_fifo_enqueue;
 
-  // Signal when the current data in staging has been fully consumed and
-  // processing is ready for the data to flip
-  logic c2h_staging_start_next;
-  // Staging streams in the acquired data at the same time as the previous
-  // packet is being transmitted. This is implemented by c2h_prep_ready
-  // being high when the first packet has been staged, but as long as
-  // the prepping stage is busy processing the packet the staging stage will
-  // only consume the current packet and nothing else.
-  assign c2h_staging_start_next = c2h_staging_done & c2h_prep_ready;
+  logic [255:0] c2h_staging_pkt_data;
+  logic [1:0]   c2h_staging_pkt_channel;
+  logic         c2h_staging_pkt_eop;
+  logic [2:0]   c2h_staging_pkt_empty;
+  logic [9:0]   c2h_staging_pkt_length; // dwords
+  logic         c2h_staging_pkt_valid;
 
+  assign c2h_staging_pkt_data = c2h_staging_data[255:0];
+  assign c2h_staging_pkt_channel = c2h_staging_data[257:256];
+  assign c2h_staging_pkt_eop = c2h_staging_data[258];
+  assign c2h_staging_pkt_empty = c2h_staging_data[261:259];
+
+  pcie_data_fifo staging_data_fifo (
+    .clock(clk),
+    .sclr(reset),
+    .data({10'h0, data_tx_empty[4:2], data_tx_endofpacket, data_tx_channel, data_tx_data}),
+    .rdreq(c2h_staging_read_ack),
+    .wrreq(c2h_staging_fifo_enqueue),
+    .q(c2h_staging_data));
+
+  int   c2h_staging_offset = 0; // Position of packet currently being ingested (dwords)
+  int   c2h_staging_enqueued = 0; // Number of packets in the fifo
+  logic c2h_staging_done = 0; // Set when a packet has passed through ingress
   logic c2h_staging_read_ready = 0;
+
+  logic [2:0] [9:0] c2h_staging_enq_lens = 0;
+
+  assign c2h_staging_pkt_length = c2h_staging_enq_lens[0];
+  assign c2h_staging_pkt_valid = c2h_staging_enqueued > 0;
+
+  assign c2h_staging_fifo_enqueue = ~reset && data_tx_valid && c2h_staging_read_ready;
+
+  logic c2h_dma_tlp_tx_busy;
+  logic c2h_dma_tlp_tx_busy_r = 0;
+
+  // Signal when the staging is ready to accept more data
+  logic c2h_staging_start_next;
+
+  // Staging streams in the acquired data at the same time as the previous
+  // packet is being transmitted. Maximum 1 packet pressure though to keep
+  // logic simple.
+  always @(*) begin
+    c2h_staging_start_next = 0;
+    if (reset) begin
+      c2h_staging_start_next = 1;
+    end else if (c2h_staging_enqueued == 0) begin
+      c2h_staging_start_next = 1;
+    end else if (c2h_dma_tlp_tx_busy && c2h_staging_enqueued == 1) begin
+      // We are sending, so we can ingest another one at the same time
+      // without issue
+      c2h_staging_start_next = 1;
+    end
+  end
 
   // Staging ingest block
   always @(posedge clk) begin: c2h_staging_ingest
     if (reset) begin
-      for (int i = 0; i < 68; i++) begin
-        c2h_staging_data[i] <= 0;
-      end
-      c2h_staging_done <= 1;
-      c2h_staging_done_r <= 1;
+      c2h_staging_offset = 0;
     end else begin
-      c2h_staging_done_r <= c2h_staging_done;
       if (c2h_staging_start_next) begin
         c2h_staging_read_ready <= 1'b1;
-        c2h_staging_done <= 1'b0;
       end
       if (data_tx_valid && c2h_staging_read_ready) begin
         if (data_tx_endofpacket) begin
           c2h_staging_read_ready <= 1'b0;
-          c2h_staging_done <= 1'b1;
-          c2h_staging_last_empty <= data_tx_empty;
         end
         if (data_tx_startofpacket) begin
-          c2h_staging_channel <= data_tx_channel;
           c2h_staging_offset = 0; // NOTE: Blocking write
         end
-        c2h_staging_data[c2h_staging_offset] <= data_tx_data;
-        c2h_staging_offset <= c2h_staging_offset + 1;
+        c2h_staging_offset = c2h_staging_offset + (8 - {27'h0, data_tx_empty});
+      end
+    end
+  end
+
+  always @(posedge clk) begin: c2h_staging_enqueue_cntr
+    if (reset) begin
+      c2h_staging_enqueued <= 0;
+      c2h_staging_done <= 1'b0;
+    end else begin
+      c2h_staging_done <= 1'b0;
+      if (data_tx_valid && data_tx_endofpacket && c2h_staging_read_ready) begin
+        c2h_staging_enqueued <= c2h_staging_enqueued + 1;
+        c2h_staging_done <= 1'b1;
+        c2h_staging_enq_lens[c2h_staging_enqueued] <= c2h_staging_offset[9:0];
+      end
+      if (c2h_staging_read_ack && c2h_staging_pkt_eop) begin
+        c2h_staging_enqueued <= c2h_staging_enqueued - 1;
+        c2h_staging_enq_lens[0] <= c2h_staging_enq_lens[1];
+        c2h_staging_enq_lens[1] <= c2h_staging_enq_lens[2];
       end
     end
   end
@@ -506,75 +554,123 @@ module fejkon_pcie_data (
   assign data_tx_ready = c2h_staging_read_ready;
 
   //
-  // Incoming data (C2H) - TLP MemWrite buffer and preperation
-  //
-  logic [255:0] c2h_prep_data  [69];
-  logic [4:0]   c2h_prep_empty [69];
-  int           c2h_prep_offset = 0;
-  int           c2h_prep_length = 0;
-  logic         c2h_dma_tlp_tx_send = 0;
-  logic         c2h_dma_tlp_tx_busy;
-  logic         c2h_dma_tlp_tx_busy_r = 0;
-
-  always @(posedge clk) begin: c2h_prep
-    if (reset) begin
-      c2h_prep_ready <= 1'b1;
-      c2h_dma_tlp_tx_send <= 1'b0;
-    end else begin
-      c2h_dma_tlp_tx_send <= 1'b0;
-      if (c2h_prep_ready && c2h_staging_done && ~c2h_dma_tlp_tx_busy) begin
-        c2h_dma_tlp_tx_send <= 1'b1;
-        // Format of first 32 bytes:
-        // 11:0  - length of packet (32 byte header + acquired length)
-        // 13:12 - channel
-        // 63:32 - computed CRC (TODO)
-        c2h_prep_length = c2h_staging_offset * 32 - {26'b0, c2h_staging_last_empty} + 32; // NOTE: Blocking write!
-        c2h_prep_data[0][11:0] <= c2h_prep_length[11:0];
-        c2h_prep_data[0][13:12] <= c2h_staging_channel;
-        c2h_prep_data[0][63:32] <= 32'hdeadc0de;
-        // Copy data following header
-        for (int i = 0; i < 68; i++) begin
-          c2h_prep_data[i+1] <= c2h_staging_data[i];
-        end
-        // At this point we signal to the staging stage that we are busy
-        // processing this frame, but we are done with 
-        c2h_prep_ready <= 1'b0;
-      end
-      if (~c2h_dma_tlp_tx_busy && c2h_dma_tlp_tx_busy_r) begin
-        // TLP sent
-        c2h_prep_ready <= 1'b1;
-      end
-    end
-  end
-
-  //
   // Outgoing TLP construction for C2H DMA
   //
 
-  // TODO: This is just to simulate processing delay for now
-  int c2h_dma_tlp_delay_hack = 0;
-  assign c2h_dma_tlp_tx_busy = c2h_dma_tlp_delay_hack > 0;
-
-  always @(posedge clk) begin: c2h_dma_tlp_sender
-    if (reset) begin
-      c2h_dma_tlp_delay_hack <= 0;
-    end else begin
-      c2h_dma_tlp_tx_busy_r <= c2h_dma_tlp_tx_busy;
-      if (c2h_dma_tlp_tx_send) begin
-        c2h_dma_tlp_delay_hack <= 100;
-      end
-      if (c2h_dma_tlp_delay_hack > 0) begin
-        c2h_dma_tlp_delay_hack <= c2h_dma_tlp_delay_hack - 1;
-      end
-    end
-  end
-
+  logic        c2h_dma_buf_reset_write = 0;
+  logic [31:0] c2h_dma_buf_start_addr = 0;
+  logic [31:0] c2h_dma_buf_end_addr = 0;
+  logic [31:0] c2h_dma_host_read_ptr = 0;
+  logic [31:0] c2h_dma_card_write_ptr = 0;
 
   logic              tlp_tx_data_frm_valid = 0;
   logic              tlp_tx_data_frm_startofpacket = 0;
   logic              tlp_tx_data_frm_endofpacket = 0;
   logic        [2:0] tlp_tx_data_frm_empty = 0;
   logic [7:0] [31:0] tlp_tx_data_frm_dword = 0;
+
+  logic c2h_tx_running = 0;
+
+  assign c2h_dma_tlp_tx_busy = c2h_tx_running;
+
+  always @(posedge clk) begin: c2h_dma_tlp_sender
+    if (reset) begin
+      c2h_tx_running <= 0;
+      tlp_tx_data_frm_valid <= 0;
+      tlp_tx_data_frm_startofpacket <= 0;
+      tlp_tx_data_frm_endofpacket <= 0;
+      tlp_tx_data_frm_empty <= 0;
+      tlp_tx_data_frm_dword = 0;
+    end else begin
+      c2h_dma_tlp_tx_busy_r <= c2h_dma_tlp_tx_busy;
+      tlp_tx_data_frm_startofpacket <= 0;
+      tlp_tx_data_frm_endofpacket <= 0;
+      tlp_tx_data_frm_empty <= 0;
+      if (c2h_staging_pkt_valid && ~c2h_tx_running) begin
+        logic [3:0] data_start;
+        logic [3:0] data_header_length;
+
+        // Check "Data Alignment and Timing for 256-Bit
+        // Avalon-ST RX Interface" in the "Stratix V Hard IP for PCI Express
+        // User Guide" for why the following needs to be done.
+        // "Non-qword aligned address occur when address[2] is set"
+        // => use aligned (4) when address[2] is not set.
+        if (~c2h_dma_card_write_ptr[2]) begin
+          data_start = 4'h4;
+        end else begin
+          data_start = 4'h3;
+        end
+        // Align the header so that the payload is clockable at 32 byte beats
+        data_header_length = 4'h8 - data_start;
+
+        // Only send the TLP if the write ptr address is sane
+        tlp_tx_data_frm_valid <= c2h_dma_card_write_ptr > 0;
+        tlp_tx_data_frm_startofpacket <= 1;
+        tlp_tx_data_frm_dword = 0;
+        tlp_tx_data_frm_dword[0][31:29] = 3'b010;        // TLP Fmt
+        tlp_tx_data_frm_dword[0][28:24] = 5'b00000;      // TLP Type (MWr)
+        tlp_tx_data_frm_dword[0][9:0] = c2h_staging_pkt_length[9:0] + {6'h0, data_header_length}; // Length
+        tlp_tx_data_frm_dword[1][31:16] = my_id;         // Completer ID
+        tlp_tx_data_frm_dword[1][15:8] = 0;              // Tag
+        tlp_tx_data_frm_dword[1][7:4] = 0;               // Last BE
+        tlp_tx_data_frm_dword[1][3:0] = 0;               // 1st BE
+        tlp_tx_data_frm_dword[2][31:2] = c2h_dma_card_write_ptr[31:2]; // Address
+        tlp_tx_data_frm_dword[2][1:0] = 0;               // Processing Hints (PH)
+
+        // Format of first header bytes:
+        // 3:0 - length of header in dwords
+        // 13:4  - length of packet in dwords (32 byte header + acquired length)
+        // 15:14 - channel
+
+        for (int i = 3; i < 8; i++) begin
+          tlp_tx_data_frm_dword[i] = 0;
+        end
+
+        if (data_start == 4'h3) begin
+          tlp_tx_data_frm_dword[3][3:0] = data_header_length;
+          tlp_tx_data_frm_dword[3][13:4] = c2h_staging_pkt_length[9:0];
+          tlp_tx_data_frm_dword[3][15:14] = c2h_staging_pkt_channel;
+          tlp_tx_data_frm_dword[3][31:16] = 0;
+        end else if (data_start == 4'h4) begin
+          tlp_tx_data_frm_dword[4][3:0] = data_header_length;
+          tlp_tx_data_frm_dword[4][13:4] = c2h_staging_pkt_length[9:0];
+          tlp_tx_data_frm_dword[4][15:14] = c2h_staging_pkt_channel;
+          tlp_tx_data_frm_dword[4][31:16] = 0;
+        end
+        c2h_tx_running <= 1'b1;
+      end
+      if (c2h_tx_running) begin
+        c2h_staging_read_ack <= 1'b1;
+        tlp_tx_data_frm_dword = c2h_staging_pkt_data;
+        tlp_tx_data_frm_empty <= c2h_staging_pkt_empty;
+        tlp_tx_data_frm_endofpacket <= c2h_staging_pkt_eop;
+        if (c2h_staging_pkt_eop) begin
+          c2h_tx_running <= 0;
+          c2h_staging_read_ack <= 0;
+        end
+      end else begin
+        c2h_staging_read_ack <= 0;
+        tlp_tx_data_frm_valid <= 0;
+      end
+    end
+  end
+
+  always @(posedge clk) begin: c2h_dma_address
+    if (reset) begin
+      c2h_dma_card_write_ptr <= 0;
+    end else begin
+      if (c2h_dma_buf_reset_write) begin
+        c2h_dma_card_write_ptr <= c2h_dma_buf_start_addr;
+      end else if (c2h_staging_pkt_eop) begin
+        // Advance one frame if there is enough space for one more frame
+        if (c2h_dma_card_write_ptr + 4096*2 >= c2h_dma_buf_end_addr) begin
+          c2h_dma_card_write_ptr <= c2h_dma_buf_start_addr;
+        end else begin
+          c2h_dma_card_write_ptr <= c2h_dma_card_write_ptr + 4096;
+        end
+      end
+    end
+  end
 
   //
   // Internal control status
@@ -622,7 +718,7 @@ module fejkon_pcie_data (
       if (tlp_rx_frm_is_end && tlp_rx_frm_unsupported) begin
         csr_rx_unsupported_tlp_counter <= csr_rx_unsupported_tlp_counter + 1;
       end
-      if (c2h_staging_done && ~c2h_staging_done_r) begin
+      if (c2h_staging_done) begin
         csr_c2h_staging_counter <= csr_c2h_staging_counter + 1;
       end
       if (tlp_tx_data_frm_valid && tlp_tx_data_frm_startofpacket) begin
@@ -696,8 +792,30 @@ module fejkon_pcie_data (
         6'b010???: csr_readdata_reg <= csr_tx_data_tlp[csr_address[2:0]];
         6'b011???: csr_readdata_reg <= csr_tx_instant_tlp[csr_address[2:0]];
         6'b100???: csr_readdata_reg <= csr_tx_response_tlp[csr_address[2:0]];
+        6'h28: csr_readdata_reg <= c2h_dma_buf_start_addr;
+        6'h29: csr_readdata_reg <= c2h_dma_buf_end_addr;
+        6'h2a: csr_readdata_reg <= c2h_dma_host_read_ptr;
+        6'h2b: csr_readdata_reg <= c2h_dma_card_write_ptr;
         default: csr_readdata_reg <= 32'hffffffff;
       endcase
+    end
+  end
+
+  always @(posedge clk) begin
+    c2h_dma_buf_reset_write <= 0;
+    if (reset) begin
+      // Nothing
+    end else if (csr_write) begin
+      casez (csr_address)
+        6'h20: c2h_dma_buf_start_addr <= csr_writedata;
+        6'h21: c2h_dma_buf_end_addr <= csr_writedata;
+        6'h22: c2h_dma_host_read_ptr <= csr_writedata;
+        default: ;
+      endcase
+      if (csr_address == 6'h20 || csr_address == 6'h21) begin
+        // Reset the write pointer
+        c2h_dma_buf_reset_write <= 1;
+      end
     end
   end
 

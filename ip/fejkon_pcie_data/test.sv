@@ -410,7 +410,7 @@ module test;
     if (mem_access_req_valid) begin
       if (mem_access_req_data[0]) begin
         // Only support writing to scratch register
-        if (mem_access_req_address == 32'h80) begin
+        if (mem_access_req_address == 32'hF00) begin
           scratch_reg <= mem_access_req_data[32:1];
         end
       end else begin
@@ -422,7 +422,7 @@ module test;
         case (mem_access_req_address)
           32'h0: compl_data <= 32'h02010de5;
           32'h4: compl_data <= 32'hdeadbeef;
-          32'h80: compl_data <= scratch_reg;
+          32'hF00: compl_data <= scratch_reg;
           default: compl_data <= ~32'h0;
         endcase
       end

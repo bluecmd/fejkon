@@ -160,9 +160,9 @@ class Test(unittest.TestCase):
         bar0 = self.ep.bar[0]
         # TODO: PCIe test code requires LE byte arrays for some reason
         data = bytearray(reversed([1, 2, 3, 4]))
-        yield from self.rc.mem_write(bar0 + 128, data)
+        yield from self.rc.mem_write(bar0 + 0xF00, data)
         yield from self.await_tx()
-        readback = yield from self.rc.mem_read(bar0 + 128, 4)
+        readback = yield from self.rc.mem_read(bar0 + 0xF00, 4)
         self.assertEqual(data, readback)
 
     @testcase(clkgen, dutgen)
@@ -170,16 +170,16 @@ class Test(unittest.TestCase):
         """Test writing acquired frames to host memory."""
         yield from self.reset()
         for i in range(68):
-            if not self.data_tx_ready:
-                val = yield self.data_tx_ready.posedge, myhdl.delay(1000)
-                if not val:
-                    raise Exception("Timeout waiting for data_tx_ready")
             self.data_tx_valid.next = 1
             self.data_tx_startofpacket.next = i == 0
             self.data_tx_endofpacket.next = i == 67
             self.data_tx_empty.next = 28 if i == 67 else 0 # 4 byte in last packet makes a 2148 FC frame
             self.data_tx_channel.next = 0
             self.data_tx_data.next = 0xdeadbeefcafef00d1234567890abcdefaaaaaaaaaaaaaaaa5555555555555500 + i
+            if not self.data_tx_ready:
+                val = yield self.data_tx_ready.posedge, myhdl.delay(1000)
+                if not val:
+                    raise Exception("Timeout waiting for data_tx_ready")
             yield self.clk.posedge
         for channel in range(4):
             yield self.clk.negedge
@@ -188,16 +188,16 @@ class Test(unittest.TestCase):
             if self.data_tx_ready == 1:
                 raise Exception("Core is accepting data even though it should not")
             for i in range(4):
-                if not self.data_tx_ready:
-                    yield self.data_tx_ready.posedge, myhdl.delay(1000)
-                    if not self.data_tx_ready:
-                        raise Exception("Timeout waiting for data_tx_ready")
                 self.data_tx_valid.next = 1
                 self.data_tx_startofpacket.next = i == 0
                 self.data_tx_endofpacket.next = i == 3
                 self.data_tx_empty.next = 0
                 self.data_tx_channel.next = channel
                 self.data_tx_data.next = 0xdeadbeefcafef00d1234567890abcdefaaaaaaaaaaaaaaaa5555555555555500 + i
+                if not self.data_tx_ready:
+                    yield self.data_tx_ready.posedge, myhdl.delay(1000)
+                    if not self.data_tx_ready:
+                        raise Exception("Timeout waiting for data_tx_ready")
                 yield self.clk.posedge
         self.data_tx_valid.next = 0
         yield myhdl.delay(1000)

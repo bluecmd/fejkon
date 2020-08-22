@@ -191,7 +191,7 @@ static void fejkon_bar0_write(void *opaque, hwaddr addr, uint64_t val,
     case 0x200:
       card->sfp2_tx_enabled = !(val & 0x8);
       break;
-    case 0x880:
+    case 0x8A0:
       /* DMA RX Start */
       qemu_mutex_lock(&card->rx_buf_mutex);
       card->rx_buf.start = (uint32_t)val;
@@ -200,13 +200,13 @@ static void fejkon_bar0_write(void *opaque, hwaddr addr, uint64_t val,
       card->rx_buf.end = (uint32_t)val;
       qemu_mutex_unlock(&card->rx_buf_mutex);
       break;
-    case 0x884:
+    case 0x8A4:
       /* DMA RX End */
       qemu_mutex_lock(&card->rx_buf_mutex);
       card->rx_buf.end = (uint32_t)val;
       qemu_mutex_unlock(&card->rx_buf_mutex);
       break;
-    case 0x888:
+    case 0x8A8:
       /* DMA RX Read pointer */
       qemu_mutex_lock(&card->rx_buf_mutex);
       card->rx_buf.read = (uint32_t)val;
@@ -214,7 +214,7 @@ static void fejkon_bar0_write(void *opaque, hwaddr addr, uint64_t val,
       card->rx_buf_irq_enabled = 1;
       qemu_mutex_unlock(&card->rx_buf_mutex);
       break;
-    case 0x890:
+    case 0x8C0:
       /* DMA TX Start */
       qemu_mutex_lock(&card->tx_buf_mutex);
       card->tx_buf.start = (uint32_t)val;
@@ -223,13 +223,13 @@ static void fejkon_bar0_write(void *opaque, hwaddr addr, uint64_t val,
       card->tx_buf.end = (uint32_t)val;
       qemu_mutex_unlock(&card->tx_buf_mutex);
       break;
-    case 0x894:
+    case 0x8C4:
       /* DMA TX End */
       qemu_mutex_lock(&card->tx_buf_mutex);
       card->tx_buf.end = (uint32_t)val;
       qemu_mutex_unlock(&card->tx_buf_mutex);
       break;
-    case 0x89C:
+    case 0x8CC:
       /* DMA TX Write pointer */
       qemu_mutex_lock(&card->tx_buf_mutex);
       card->tx_buf.write = (uint32_t)val;

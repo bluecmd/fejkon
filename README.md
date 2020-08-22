@@ -246,15 +246,17 @@ Accesses need to be 4 byte wide.
 | 0x014 | 4     | TX Response TLP counter           |
 | 0x018 | 4     | C2H Staging Packets counter       |
 | 0x020 | 32    | Last RX TLP (8 DWs)               |
-| 0x040 | 32    | Last TX TLP (8 DWs)               |
-| 0x080 | 4     | C2H DMA buffer start address      |
-| 0x084 | 4     | C2H DMA buffer end address        |
-| 0x088 | 4     | C2H DMA host read pointer         |
-| 0x08C | 4     | C2H DMA card write pointer        |
-| 0x090 | 4     | H2C DMA buffer start address      |
-| 0x094 | 4     | H2C DMA buffer end address        |
-| 0x098 | 4     | H2C DMA card read pointer         |
-| 0x09C | 4     | H2C DMA host write pointer        |
+| 0x040 | 32    | Last TX Data TLP (8 DWs)          |
+| 0x060 | 32    | Last TX Instant TLP (8 DWs)       |
+| 0x080 | 32    | Last TX Response TLP (8 DWs)      |
+| 0x0A0 | 4     | C2H DMA buffer start address      |
+| 0x0A4 | 4     | C2H DMA buffer end address        |
+| 0x0A8 | 4     | C2H DMA host read pointer         |
+| 0x0AC | 4     | C2H DMA card write pointer        |
+| 0x0C0 | 4     | H2C DMA buffer start address      |
+| 0x0C4 | 4     | H2C DMA buffer end address        |
+| 0x0C8 | 4     | H2C DMA card read pointer         |
+| 0x0CC | 4     | H2C DMA host write pointer        |
 | 0x100 | 4     | Data TX TLP Fill Level            |
 | 0x110 | 4     | Instant TX TLP Fill Level         |
 | 0x120 | 4     | Response TX TLP Fill Level        |

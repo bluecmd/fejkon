@@ -23,6 +23,10 @@
 
 #define PORT_REFRESH_INTERVAL_MS 100
 
+#ifdef CONFIG_ARCH_DMA_ADDR_T_64BIT
+#error "Usage of 64 bit dma_addr_t is not currently supported"
+#endif
+
 struct packet_meta {
   __be32 ctrl1;
   uint32_t __resv[7];
@@ -134,7 +138,7 @@ static int poll(struct napi_struct *napi, int budget)
     // Update read pointer and re-enable IRQ
     iowrite32(
         card->rx_buf_start_dma + (card->rx_buf_read - card->rx_buf_start),
-        card->bar0 + 0xA08);
+        card->bar0 + 0x888);
   }
   return work_done;
 }
@@ -185,7 +189,7 @@ static netdev_tx_t net_tx(struct sk_buff *skb, struct net_device *net)
 
   if (card->tx_buf_write + 4096 == card->tx_buf_read_cached) {
     // Possibly buffer full, update read pointer from card
-    int read_ptr = ioread32(card->bar0 + 0xB08) - card->tx_buf_start_dma;
+    int read_ptr = ioread32(card->bar0 + 0x898) - card->tx_buf_start_dma;
     void *tx_buf_read = card->tx_buf_start + read_ptr;
     if (tx_buf_read == card->tx_buf_read_cached) {
       // TODO: drop and free
@@ -220,7 +224,7 @@ static netdev_tx_t net_tx(struct sk_buff *skb, struct net_device *net)
   if (!netdev_xmit_more()) {
     iowrite32(
         card->tx_buf_start_dma + (card->tx_buf_write - card->tx_buf_start),
-        card->bar0 + 0xB0C);
+        card->bar0 + 0x89C);
   }
   return NETDEV_TX_OK;
 }
@@ -439,13 +443,13 @@ static int setup_buffers(struct fejkon_card *card)
   card->tx_buf_read_cached = card->tx_buf_start;
   card->tx_buf_end = card->tx_buf_start + 4096 * 128;
   // Set RX buffer start and end
-  iowrite32(rx_dma, card->bar0 + 0xA00);
-  iowrite32(rx_dma + 4096 * 128, card->bar0 + 0xA04);
+  iowrite32(rx_dma, card->bar0 + 0x880);
+  iowrite32(rx_dma + 4096 * 128, card->bar0 + 0x884);
   // Set TX buffer start and end
-  iowrite32(tx_dma, card->bar0 + 0xB00);
-  iowrite32(tx_dma + 4096 * 128, card->bar0 + 0xB04);
+  iowrite32(tx_dma, card->bar0 + 0x890);
+  iowrite32(tx_dma + 4096 * 128, card->bar0 + 0x894);
   // Enable RX by confirming our read pointer at the start
-  iowrite32(rx_dma, card->bar0 + 0xA08);
+  iowrite32(rx_dma, card->bar0 + 0x888);
 
   // Save DMA addresses for later calculations
   card->rx_buf_start_dma = rx_dma;
@@ -693,8 +697,8 @@ static void remove(struct pci_dev *pcidev)
   }
   napi_disable(&card->napi);
   // Disable buffers
-  iowrite32(0, card->bar0 + 0xA00);
-  iowrite32(0, card->bar0 + 0xB00);
+  iowrite32(0, card->bar0 + 0x880);
+  iowrite32(0, card->bar0 + 0x890);
   pci_clear_master(pcidev);
   // TODO: dma_free_coherent
   rtnl_lock();

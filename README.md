@@ -247,18 +247,18 @@ Accesses need to be 4 byte wide.
 | 0x018 | 4     | C2H Staging Packets counter       |
 | 0x020 | 32    | Last RX TLP (8 DWs)               |
 | 0x040 | 32    | Last TX TLP (8 DWs)               |
+| 0x080 | 4     | C2H DMA buffer start address      |
+| 0x084 | 4     | C2H DMA buffer end address        |
+| 0x088 | 4     | C2H DMA host read pointer         |
+| 0x08C | 4     | C2H DMA card write pointer        |
+| 0x090 | 4     | H2C DMA buffer start address      |
+| 0x094 | 4     | H2C DMA buffer end address        |
+| 0x098 | 4     | H2C DMA card read pointer         |
+| 0x09C | 4     | H2C DMA host write pointer        |
 | 0x100 | 4     | Data TX TLP Fill Level            |
 | 0x110 | 4     | Instant TX TLP Fill Level         |
 | 0x120 | 4     | Response TX TLP Fill Level        |
 | 0x180 | 4     | LTSSM and lane active mode        |
-| 0x200 | 4     | C2H DMA buffer start address      |
-| 0x204 | 4     | C2H DMA buffer end address        |
-| 0x208 | 4     | C2H DMA host read pointer         |
-| 0x20C | 4     | C2H DMA card write pointer        |
-| 0x300 | 4     | H2C DMA buffer start address      |
-| 0x304 | 4     | H2C DMA buffer end address        |
-| 0x308 | 4     | H2C DMA card read pointer         |
-| 0x30C | 4     | H2C DMA host write pointer        |
 
 #### Temperature
 

@@ -101,7 +101,7 @@ edit: fejkon.qsys
 	$(QPATH)/sopc_builder/bin/qsys-edit fejkon.qsys
 
 menuconfig: .config
-	menuconfig
+	MENUCONFIG_STYLE=aquatic menuconfig
 
 defconfig:
 	cp defconfig .config

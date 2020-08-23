@@ -22,6 +22,30 @@ report:
 	@echo
 	@echo '  ==> Generation report <=='
 	@echo
+	@grep '^Warning (' gen/output_files/*.rpt | \
+		grep -vE '\((10762|170052|15104|332043|35016|12241|276020|14284|20031|18550|12251)\)' | \
+		grep -vE '(sv_xcvr_emsip_adapter.sv|altera_pcie_sv_hip_ast_rs_serdes.sdc)' | \
+		grep -vF 'ch[4].inst_sv_pcs_ch' | \
+		grep -v alt_sld_fab_alt_sld_fab | \
+		grep -v alt_xcvr_reconfig_cpu | \
+		grep -v Alt_sld_fab | \
+		grep -v altera_pcie_sv_hip_ast_pipen1b.sdc | \
+		grep -v altera_merlin_width_adapter.sv | \
+		grep -v altera_trace_monitor_endpoint | \
+		grep -v sv_xrbasic_l2p_rom | \
+		grep -v sv_xcvr_avmm | \
+		grep -v  altera_avalon_i2c_csr | \
+		grep -vE '(sv_xcvr_plls|sv_xcvr_pipe_native|altpcie_sv_hip_ast_hwtcl|sv_tx_pma_ch|altpcie_hip_256_pipen1b|sv_rx_pma)' | \
+		grep -v 'Mm_interconnect_0' | \
+		grep -v 'data_format_adapter_[0-9]' | \
+		grep -v 'timing_adapter_[0-9]' | \
+		grep -v 'alt_xreconf_analog_datactrl' | \
+		grep -vE '(jtagm_timing_adt|jtagm_b2p_adapter)' |\
+		grep -vE 'Warning \(10036\).*rx_be_runningdisp' |\
+		grep -vE 'Warning \(10036\).*rx_unknown_prim' |\
+		grep -vE 'Warning \(10230\).*i2c_master\.v' |\
+		cat
+	@echo
 	@[ -f gen/violated_paths.txt ] && cat gen/violated_paths.txt \
 		|| echo 'No timing constraints violated! Yeey!'
 	@echo

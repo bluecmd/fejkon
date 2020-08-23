@@ -72,7 +72,7 @@ module fejkon_pcie_data (
     input  wire [3:0]   tl_cfg_add,                       //          config_tl.tl_cfg_add
     input  wire [31:0]  tl_cfg_ctl,                       //                   .tl_cfg_ctl
     input  wire [52:0]  tl_cfg_sts,                       //                   .tl_cfg_sts
-    input  wire [4:0]   hpg_ctrler,                       //                   .hpg_ctrler
+    output wire [4:0]   hpg_ctrler,                       //                   .hpg_ctrler
     output wire [6:0]   cpl_err,                          //                   .cpl_err
     output wire         cpl_pending                       //                   .cpl_pending
   );
@@ -491,7 +491,6 @@ module fejkon_pcie_data (
   assign c2h_staging_fifo_enqueue = ~reset && data_tx_valid && c2h_staging_read_ready;
 
   logic c2h_dma_tlp_tx_busy;
-  logic c2h_dma_tlp_tx_busy_r = 0;
 
   // Signal when the staging is ready to accept more data
   logic c2h_staging_start_next;
@@ -582,7 +581,6 @@ module fejkon_pcie_data (
       tlp_tx_data_frm_empty <= 0;
       tlp_tx_data_frm_dword = 0;
     end else begin
-      c2h_dma_tlp_tx_busy_r <= c2h_dma_tlp_tx_busy;
       tlp_tx_data_frm_startofpacket <= 0;
       tlp_tx_data_frm_endofpacket <= 0;
       tlp_tx_data_frm_empty <= 0;
@@ -860,5 +858,7 @@ module fejkon_pcie_data (
   assign mem_access_req_valid = mem_access_out_valid;
   assign mem_access_req_data = {33'b0, mem_access_out};
   assign mem_access_resp_ready = is_ready;
+
+  assign hpg_ctrler = 5'b0;
 
 endmodule

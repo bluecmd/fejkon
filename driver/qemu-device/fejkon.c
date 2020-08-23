@@ -268,6 +268,7 @@ static void fejkon_rx_pkt(FejkonState *card, uint32_t port_id, void *data,
   dma_addr_t new_write;
   uint32_t metadata;
   qemu_mutex_lock(&card->rx_buf_mutex);
+  // TODO: Update this to the new packet format
   metadata = htobe32(length | (port_id << 12));
   pci_dma_write(&card->pdev, card->rx_buf.write, &metadata, 4);
   pci_dma_write(&card->pdev, card->rx_buf.write + 32, data, length);
@@ -343,6 +344,7 @@ static void *fejkon_tx_thread(void *opaque)
       continue;
     }
     // Read packet metadata
+    // TODO: Update this to the new packet format
     pci_dma_read(&card->pdev, card->tx_buf.read, &length, 4);
     pci_dma_read(&card->pdev, card->tx_buf.read + 4, &port_id, 4);
     port_id = be32toh(port_id);

@@ -89,6 +89,7 @@ static int poll(struct napi_struct *napi, int budget)
       return work_done;
 
     // See explaination in net_tx for what format is used
+    // TODO: Update this to the new packet format
     meta = card->rx_buf_read;
     port_id = (be32_to_cpu(meta->ctrl1) >> 12) & 3;
     len = be32_to_cpu(meta->ctrl1) & 0xfff;
@@ -205,6 +206,7 @@ static netdev_tx_t net_tx(struct sk_buff *skb, struct net_device *net)
   // and RAM is cheap.
   meta = card->tx_buf_write;
   data = card->tx_buf_write + sizeof(*meta);
+  // TODO: Update this to the new packet format
   meta->ctrl1 = cpu_to_be32((port->id & 3) << 12 | (skb->len & 0xfff));
 
   memcpy(data, skb->data, skb->len);

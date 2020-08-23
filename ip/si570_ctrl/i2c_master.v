@@ -282,8 +282,6 @@ assign bus_active = bus_active_reg;
 assign bus_control = bus_control_reg;
 assign missed_ack = missed_ack_reg;
 
-wire scl_posedge = scl_i_reg & ~last_scl_i_reg;
-wire scl_negedge = ~scl_i_reg & last_scl_i_reg;
 wire sda_posedge = sda_i_reg & ~last_sda_i_reg;
 wire sda_negedge = ~sda_i_reg & last_sda_i_reg;
 

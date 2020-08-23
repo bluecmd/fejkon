@@ -68,6 +68,10 @@ $ make menuconfig             # Optional: Change configuration
 $ make
 ```
 
+The configuration interface looks like this:
+
+![Menuconfig interface](images/kconfig.png)
+
 ## Usage Notes
 
 Hopefully the card is straight forward to use, but every product needs

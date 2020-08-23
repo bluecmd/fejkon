@@ -38,7 +38,10 @@ proc id {} {
   set off [expr 0x0]
   master_write_32 $m [expr $off] 0
   puts [format " Version  : %s" [master_read_8 $m [expr $off + 0x2] 1]]
-  puts [format " Ports    : %s" [master_read_8 $m [expr $off + 0x3] 1]]
+  set po [master_read_8 $m [expr $off + 0x3] 1]
+  set fc_ports [expr $po & 0xf]
+  set eth_ports [expr ($po >> 4) & 0xf]
+  puts [format " Ports    : FC %s Ethernet %s" $fc_ports $eth_ports]
   puts [format " Git rev. : %s" [master_read_32 $m [expr $off + 0x4] 1]]
 }
 
@@ -102,9 +105,40 @@ proc clocks {} {
   puts [format " PCIe : %s MHz" [format "%.3f" [expr [master_read_32 $m [expr $off + 0x04] 1] / 1000000.0]]]
 }
 
+proc check_fc_port {id} {
+  global m
+  set po [master_read_8 $m 0x3 1]
+  set fc_ports [expr $po & 0xf]
+  if {$id > $fc_ports} {
+    puts [format " ** WARNING ** Accessing past last FC port (# FC ports = %s)" $fc_ports]
+  }
+  if {$id <= 0} {
+    puts [format "FC Port IDs start at 1"]
+    return false
+  }
+  return true
+}
+
+proc check_eth_port {id} {
+  global m
+  set po [master_read_8 $m 0x3 1]
+  set eth_ports [expr ($po >> 4) & 0xf]
+  if {$id > [expr 2 + $eth_ports]} {
+    puts [format " ** WARNING ** Accessing past last Ethernet port (# Ethernet ports = %s)" $eth_ports]
+  }
+  if {$id <= 2} {
+    puts [format "Ethernet Port IDs start at 3"]
+    return false
+  }
+  return true
+}
+
 proc check_port {id} {
   global m
-  set ports [master_read_8 $m 0x3 1]
+  set po [master_read_8 $m 0x3 1]
+  set fc_ports [expr $po & 0xf]
+  set eth_ports [expr ($po >> 4) & 0xf]
+  set ports [expr $fc_ports + $eth_ports]
   if {$id > $ports} {
     puts [format " ** WARNING ** Accessing past last port (# ports = %s)" $ports]
   }
@@ -116,7 +150,7 @@ proc check_port {id} {
 }
 
 proc enable {id} {
-  if {![check_port $id]} {
+  if {![check_fc_port $id]} {
     return
   }
   global m
@@ -125,7 +159,7 @@ proc enable {id} {
 }
 
 proc fcstat {id} {
-  if {![check_port $id]} {
+  if {![check_fc_port $id]} {
     return
   }
   global m

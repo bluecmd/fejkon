@@ -1477,20 +1477,20 @@ set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp0_sfp_scl              
 set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp0_sfp_sda                   ; # SFPA_MOD2_SDA
 set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp0_sfp_ratesel[0]            ; # SFPA_RATESEL[0]
 set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp0_sfp_ratesel[1]            ; # SFPA_RATESEL[1]
-set_instance_assignment -name IO_STANDARD "1.5-V PCML" -to fcport0_line_rd_lvds      ; # SFPA_RX_p
+set_instance_assignment -name IO_STANDARD "1.5-V PCML" -to port0_line_rd_lvds        ; # SFPA_RX_p
 set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp0_sfp_txdis                 ; # SFPA_TXDISABLE
 set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp0_sfp_txfail                ; # SFPA_TXFAULT
-set_instance_assignment -name IO_STANDARD "1.5-V PCML" -to fcport0_line_td_lvds      ; # SFPA_TX_p
+set_instance_assignment -name IO_STANDARD "1.5-V PCML" -to port0_line_td_lvds        ; # SFPA_TX_p
 set_location_assignment PIN_F22 -to sfp0_sfp_los                                     ; # SFPA_LOS
 set_location_assignment PIN_E21 -to sfp0_sfp_prsnt_n                                 ; # SFPA_MOD0_PRSNT_n
 set_location_assignment PIN_B20 -to sfp0_sfp_scl                                     ; # SFPA_MOD1_SCL
 set_location_assignment PIN_A20 -to sfp0_sfp_sda                                     ; # SFPA_MOD2_SDA
 set_location_assignment PIN_E20 -to sfp0_sfp_ratesel[0]                              ; # SFPA_RATESEL[0]
 set_location_assignment PIN_G22 -to sfp0_sfp_ratesel[1]                              ; # SFPA_RATESEL[1]
-set_location_assignment PIN_AK2 -to fcport0_line_rd_lvds                             ; # SFPA_RX_p
+set_location_assignment PIN_AK2 -to port0_line_rd_lvds                               ; # SFPA_RX_p
 set_location_assignment PIN_B22 -to sfp0_sfp_txdis                                   ; # SFPA_TXDISABLE
 set_location_assignment PIN_A22 -to sfp0_sfp_txfail                                  ; # SFPA_TXFAULT
-set_location_assignment PIN_AG4 -to fcport0_line_td_lvds                             ; # SFPA_TX_p
+set_location_assignment PIN_AG4 -to port0_line_td_lvds                               ; # SFPA_TX_p
 set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to sfp0_sfp_scl
 set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to sfp0_sfp_sda
 set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to sfp0_sfp_ratesel[0]
@@ -1505,27 +1505,27 @@ set_instance_assignment -name SLEW_RATE 1 -to sfp0_sfp_txdis      ; # fast
 #============================================================
 # SFP+ B
 #============================================================
-if {$CONFIG_FCPORT1 == "y"} {
+if {$CONFIG_PORT1_DISABLED == "n"} {
 set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp1_sfp_los                   ; # SFPB_LOS
 set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp1_sfp_prsnt_n               ; # SFPB_MOD0_PRSNT_n
 set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp1_sfp_scl                   ; # SFPB_MOD1_SCL
 set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp1_sfp_sda                   ; # SFPB_MOD2_SDA
 set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp1_sfp_ratesel[0]            ; # SFPB_RATESEL[0]
 set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp1_sfp_ratesel[1]            ; # SFPB_RATESEL[1]
-set_instance_assignment -name IO_STANDARD "1.5-V PCML" -to fcport1_line_rd_lvds      ; # SFPB_RX_p
+set_instance_assignment -name IO_STANDARD "1.5-V PCML" -to port1_line_rd_lvds        ; # SFPB_RX_p
 set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp1_sfp_txdis                 ; # SFPB_TXDISABLE
 set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp1_sfp_txfail                ; # SFPB_TXFAULT
-set_instance_assignment -name IO_STANDARD "1.5-V PCML" -to fcport1_line_td_lvds      ; # SFPB_TX_p
+set_instance_assignment -name IO_STANDARD "1.5-V PCML" -to port1_line_td_lvds        ; # SFPB_TX_p
 set_location_assignment PIN_R22 -to sfp1_sfp_los                                     ; # SFPB_LOS
 set_location_assignment PIN_K22 -to sfp1_sfp_prsnt_n                                 ; # SFPB_MOD0_PRSNT_n
 set_location_assignment PIN_K21 -to sfp1_sfp_scl                                     ; # SFPB_MOD1_SCL
 set_location_assignment PIN_K20 -to sfp1_sfp_sda                                     ; # SFPB_MOD2_SDA
 set_location_assignment PIN_R21 -to sfp1_sfp_ratesel[0]                              ; # SFPB_RATESEL[0]
 set_location_assignment PIN_T22 -to sfp1_sfp_ratesel[1]                              ; # SFPB_RATESEL[1]
-set_location_assignment PIN_AP2 -to fcport1_line_rd_lvds                             ; # SFPB_RX_p
+set_location_assignment PIN_AP2 -to port1_line_rd_lvds                               ; # SFPB_RX_p
 set_location_assignment PIN_H22 -to sfp1_sfp_txdis                                   ; # SFPB_TXDISABLE
 set_location_assignment PIN_H20 -to sfp1_sfp_txfail                                  ; # SFPB_TXFAULT
-set_location_assignment PIN_AL4 -to fcport1_line_td_lvds                             ; # SFPB_TX_p
+set_location_assignment PIN_AL4 -to port1_line_td_lvds                               ; # SFPB_TX_p
 set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to sfp1_sfp_scl
 set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to sfp1_sfp_sda
 set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to sfp1_sfp_ratesel[0]
@@ -1536,55 +1536,79 @@ set_instance_assignment -name SLEW_RATE 1 -to sfp1_sfp_sda        ; # fast
 set_instance_assignment -name SLEW_RATE 1 -to sfp1_sfp_ratesel[0] ; # fast
 set_instance_assignment -name SLEW_RATE 1 -to sfp1_sfp_ratesel[1] ; # fast
 set_instance_assignment -name SLEW_RATE 1 -to sfp1_sfp_txdis      ; # fast
-}  ; # if CONFIG_FCPORT1 == y
+}  ; # if CONFIG_PORT1_FC == y
 
 #============================================================
 # SFP+ C
 #============================================================
-# set_instance_assignment -name IO_STANDARD "2.5 V" -to SFPC_LOS
-# set_instance_assignment -name IO_STANDARD "2.5 V" -to SFPC_MOD0_PRSNT_n
-# set_instance_assignment -name IO_STANDARD "2.5 V" -to SFPC_MOD1_SCL
-# set_instance_assignment -name IO_STANDARD "2.5 V" -to SFPC_MOD2_SDA
-# set_instance_assignment -name IO_STANDARD "2.5 V" -to SFPC_RATESEL[0]
-# set_instance_assignment -name IO_STANDARD "2.5 V" -to SFPC_RATESEL[1]
-# set_instance_assignment -name IO_STANDARD "1.5-V PCML" -to SFPC_RX_p
-# set_instance_assignment -name IO_STANDARD "2.5 V" -to SFPC_TXDISABLE
-# set_instance_assignment -name IO_STANDARD "2.5 V" -to SFPC_TXFAULT
-# set_instance_assignment -name IO_STANDARD "1.5-V PCML" -to SFPC_TX_p
-# set_location_assignment PIN_L21 -to SFPC_LOS
-# set_location_assignment PIN_J21 -to SFPC_MOD0_PRSNT_n
-# set_location_assignment PIN_H21 -to SFPC_MOD1_SCL
-# set_location_assignment PIN_G20 -to SFPC_MOD2_SDA
-# set_location_assignment PIN_J22 -to SFPC_RATESEL[0]
-# set_location_assignment PIN_P21 -to SFPC_RATESEL[1]
-# set_location_assignment PIN_AW4 -to SFPC_RX_p
-# set_location_assignment PIN_F21 -to SFPC_TXDISABLE
-# set_location_assignment PIN_F20 -to SFPC_TXFAULT
-# set_location_assignment PIN_AT6 -to SFPC_TX_p
+if {$CONFIG_PORT2_DISABLED == "n"} {
+set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp2_sfp_los                   ; # SFPC_LOS
+set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp2_sfp_prsnt_n               ; # SFPC_MOD0_PRSNT_n
+set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp2_sfp_scl                   ; # SFPC_MOD1_SCL
+set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp2_sfp_sda                   ; # SFPC_MOD2_SDA
+set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp2_sfp_ratesel[0]            ; # SFPC_RATESEL[0]
+set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp2_sfp_ratesel[1]            ; # SFPC_RATESEL[1]
+set_instance_assignment -name IO_STANDARD "1.5-V PCML" -to port2_line_rd_lvds        ; # SFPC_RX_p
+set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp2_sfp_txdis                 ; # SFPC_TXDISABLE
+set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp2_sfp_txfail                ; # SFPC_TXFAULT
+set_instance_assignment -name IO_STANDARD "1.5-V PCML" -to port2_line_td_lvds        ; # SFPC_TX_p
+set_location_assignment PIN_L21 -to sfp2_sfp_los                                     ; # SFPC_LOS
+set_location_assignment PIN_J21 -to sfp2_sfp_prsnt_n                                 ; # SFPC_MOD0_PRSNT_n
+set_location_assignment PIN_H21 -to sfp2_sfp_scl                                     ; # SFPC_MOD1_SCL
+set_location_assignment PIN_G20 -to sfp2_sfp_sda                                     ; # SFPC_MOD2_SDA
+set_location_assignment PIN_J22 -to sfp2_sfp_ratesel[0]                              ; # SFPC_RATESEL[0]
+set_location_assignment PIN_P21 -to sfp2_sfp_ratesel[1]                              ; # SFPC_RATESEL[1]
+set_location_assignment PIN_AW4 -to port2_line_rd_lvds                               ; # SFPC_RX_p
+set_location_assignment PIN_F21 -to sfp2_sfp_txdis                                   ; # SFPC_TXDISABLE
+set_location_assignment PIN_F20 -to sfp2_sfp_txfail                                  ; # SFPC_TXFAULT
+set_location_assignment PIN_AT6 -to port2_line_td_lvds                               ; # SFPC_TX_p
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to sfp2_sfp_scl
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to sfp2_sfp_sda
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to sfp2_sfp_ratesel[0]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to sfp2_sfp_ratesel[1]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to sfp2_sfp_txdis
+set_instance_assignment -name SLEW_RATE 1 -to sfp2_sfp_scl        ; # fast
+set_instance_assignment -name SLEW_RATE 1 -to sfp2_sfp_sda        ; # fast
+set_instance_assignment -name SLEW_RATE 1 -to sfp2_sfp_ratesel[0] ; # fast
+set_instance_assignment -name SLEW_RATE 1 -to sfp2_sfp_ratesel[1] ; # fast
+set_instance_assignment -name SLEW_RATE 1 -to sfp2_sfp_txdis      ; # fast
+}  ; # if CONFIG_PORT2_FC == y
 
 #============================================================
 # SFP+ D
 #============================================================
-# set_instance_assignment -name IO_STANDARD "2.5 V" -to SFPD_LOS
-# set_instance_assignment -name IO_STANDARD "2.5 V" -to SFPD_MOD0_PRSNT_n
-# set_instance_assignment -name IO_STANDARD "2.5 V" -to SFPD_MOD1_SCL
-# set_instance_assignment -name IO_STANDARD "2.5 V" -to SFPD_MOD2_SDA
-# set_instance_assignment -name IO_STANDARD "2.5 V" -to SFPD_RATESEL[0]
-# set_instance_assignment -name IO_STANDARD "2.5 V" -to SFPD_RATESEL[1]
-# set_instance_assignment -name IO_STANDARD "1.5-V PCML" -to SFPD_RX_p
-# set_instance_assignment -name IO_STANDARD "2.5 V" -to SFPD_TXDISABLE
-# set_instance_assignment -name IO_STANDARD "2.5 V" -to SFPD_TXFAULT
-# set_instance_assignment -name IO_STANDARD "1.5-V PCML" -to SFPD_TX_p
-# set_location_assignment PIN_N22 -to SFPD_LOS
-# set_location_assignment PIN_V20 -to SFPD_MOD0_PRSNT_n
-# set_location_assignment PIN_U21 -to SFPD_MOD1_SCL
-# set_location_assignment PIN_V19 -to SFPD_MOD2_SDA
-# set_location_assignment PIN_V21 -to SFPD_RATESEL[0]
-# set_location_assignment PIN_M22 -to SFPD_RATESEL[1]
-# set_location_assignment PIN_BB2 -to SFPD_RX_p
-# set_location_assignment PIN_U20 -to SFPD_TXDISABLE
-# set_location_assignment PIN_T21 -to SFPD_TXFAULT
-# set_location_assignment PIN_AY6 -to SFPD_TX_p
+if {$CONFIG_PORT3_DISABLED == "n"} {
+set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp3_sfp_los                   ; # SFPD_LOS
+set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp3_sfp_prsnt_n               ; # SFPD_MOD0_PRSNT_n
+set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp3_sfp_scl                   ; # SFPD_MOD1_SCL
+set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp3_sfp_sda                   ; # SFPD_MOD2_SDA
+set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp3_sfp_ratesel[0]            ; # SFPD_RATESEL[0]
+set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp3_sfp_ratesel[1]            ; # SFPD_RATESEL[1]
+set_instance_assignment -name IO_STANDARD "1.5-V PCML" -to port3_line_rd_lvds        ; # SFPD_RX_p
+set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp3_sfp_txdis                 ; # SFPD_TXDISABLE
+set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp3_sfp_txfail                ; # SFPD_TXFAULT
+set_instance_assignment -name IO_STANDARD "1.5-V PCML" -to port3_line_td_lvds        ; # SFPD_TX_p
+set_location_assignment PIN_N22 -to sfp3_sfp_los                                     ; # SFPD_LOS
+set_location_assignment PIN_V20 -to sfp3_sfp_prsnt_n                                 ; # SFPD_MOD0_PRSNT_n
+set_location_assignment PIN_U21 -to sfp3_sfp_scl                                     ; # SFPD_MOD1_SCL
+set_location_assignment PIN_V19 -to sfp3_sfp_sda                                     ; # SFPD_MOD2_SDA
+set_location_assignment PIN_V21 -to sfp3_sfp_ratesel[0]                              ; # SFPD_RATESEL[0]
+set_location_assignment PIN_M22 -to sfp3_sfp_ratesel[1]                              ; # SFPD_RATESEL[1]
+set_location_assignment PIN_BB2 -to port3_line_rd_lvds                               ; # SFPD_RX_p
+set_location_assignment PIN_U20 -to sfp3_sfp_txdis                                   ; # SFPD_TXDISABLE
+set_location_assignment PIN_T21 -to sfp3_sfp_txfail                                  ; # SFPD_TXFAULT
+set_location_assignment PIN_AY6 -to port3_line_td_lvds                               ; # SFPD_TX_p
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to sfp3_sfp_scl
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to sfp3_sfp_sda
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to sfp3_sfp_ratesel[0]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to sfp3_sfp_ratesel[1]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to sfp3_sfp_txdis
+set_instance_assignment -name SLEW_RATE 1 -to sfp3_sfp_scl        ; # fast
+set_instance_assignment -name SLEW_RATE 1 -to sfp3_sfp_sda        ; # fast
+set_instance_assignment -name SLEW_RATE 1 -to sfp3_sfp_ratesel[0] ; # fast
+set_instance_assignment -name SLEW_RATE 1 -to sfp3_sfp_ratesel[1] ; # fast
+set_instance_assignment -name SLEW_RATE 1 -to sfp3_sfp_txdis      ; # fast
+}  ; # if CONFIG_PORT3_FC == y
 
 #============================================================
 # SFP+ 10G Referece Clock and Programmable Oscillator Si570

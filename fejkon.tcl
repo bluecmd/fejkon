@@ -17,7 +17,8 @@ set_instance_parameter_value ext0 {resetSynchronousEdges} {NONE}
 add_instance fc fejkon_fc 1.0
 
 add_instance ident fejkon_identity 1.0
-set_instance_parameter_value ident {Ports} {2}
+set_instance_parameter_value ident {FcPorts} {2}
+set_instance_parameter_value ident {EthPorts} {2}
 
 add_instance jtagm altera_jtag_avalon_master 20.1
 set_instance_parameter_value jtagm {FAST_VER} {0}
@@ -71,6 +72,10 @@ add_instance sfp0 fejkon_sfp 1.0
 
 add_instance sfp1 fejkon_sfp 1.0
 
+add_instance sfp2 fejkon_sfp 1.0
+
+add_instance sfp3 fejkon_sfp 1.0
+
 add_instance si570_ctrl si570_ctrl 1.0
 set_instance_parameter_value si570_ctrl {I2CAddress} {0}
 set_instance_parameter_value si570_ctrl {RecallFrequency} {100000000}
@@ -99,13 +104,13 @@ set_interface_property clk EXPORT_OF ext0.clk_in
 add_interface fan conduit end
 set_interface_property fan EXPORT_OF temp.fan
 add_interface fcport0_line_rd conduit end
-set_interface_property fcport0_line_rd EXPORT_OF fc.fcport0_line_rd
+set_interface_property port0_line_rd EXPORT_OF fc.fcport0_line_rd
 add_interface fcport0_line_td conduit end
-set_interface_property fcport0_line_td EXPORT_OF fc.fcport0_line_td
+set_interface_property port0_line_td EXPORT_OF fc.fcport0_line_td
 add_interface fcport1_line_rd conduit end
-set_interface_property fcport1_line_rd EXPORT_OF fc.fcport1_line_rd
+set_interface_property port1_line_rd EXPORT_OF fc.fcport1_line_rd
 add_interface fcport1_line_td conduit end
-set_interface_property fcport1_line_td EXPORT_OF fc.fcport1_line_td
+set_interface_property port1_line_td EXPORT_OF fc.fcport1_line_td
 add_interface led conduit end
 set_interface_property led EXPORT_OF led.led
 add_interface pcie_refclk clock sink
@@ -124,6 +129,10 @@ add_interface sfp0_sfp conduit end
 set_interface_property sfp0_sfp EXPORT_OF sfp0.sfp
 add_interface sfp1_sfp conduit end
 set_interface_property sfp1_sfp EXPORT_OF sfp1.sfp
+add_interface sfp2_sfp conduit end
+set_interface_property sfp2_sfp EXPORT_OF sfp2.sfp
+add_interface sfp3_sfp conduit end
+set_interface_property sfp3_sfp EXPORT_OF sfp3.sfp
 add_interface si570_i2c conduit end
 set_interface_property si570_i2c EXPORT_OF si570_ctrl.si570_i2c
 
@@ -147,6 +156,10 @@ add_connection ext0.clk reset_ctrl.clk
 add_connection ext0.clk sfp0.clk
 
 add_connection ext0.clk sfp1.clk
+
+add_connection ext0.clk sfp2.clk
+
+add_connection ext0.clk sfp3.clk
 
 add_connection ext0.clk si570_ctrl.clk
 
@@ -225,6 +238,16 @@ set_connection_parameter_value jtagm.master/sfp1.mm arbitrationPriority {1}
 set_connection_parameter_value jtagm.master/sfp1.mm baseAddress {0x0200}
 set_connection_parameter_value jtagm.master/sfp1.mm defaultConnection {0}
 
+add_connection jtagm.master sfp2.mm
+set_connection_parameter_value jtagm.master/sfp2.mm arbitrationPriority {1}
+set_connection_parameter_value jtagm.master/sfp2.mm baseAddress {0x0300}
+set_connection_parameter_value jtagm.master/sfp2.mm defaultConnection {0}
+
+add_connection jtagm.master sfp3.mm
+set_connection_parameter_value jtagm.master/sfp3.mm arbitrationPriority {1}
+set_connection_parameter_value jtagm.master/sfp3.mm baseAddress {0x0400}
+set_connection_parameter_value jtagm.master/sfp3.mm defaultConnection {0}
+
 add_connection jtagm.master temp.temp_mm
 set_connection_parameter_value jtagm.master/temp.temp_mm arbitrationPriority {1}
 set_connection_parameter_value jtagm.master/temp.temp_mm baseAddress {0x0010}
@@ -269,6 +292,16 @@ set_connection_parameter_value pcie.bar0_mm/sfp1.mm arbitrationPriority {1}
 set_connection_parameter_value pcie.bar0_mm/sfp1.mm baseAddress {0x0200}
 set_connection_parameter_value pcie.bar0_mm/sfp1.mm defaultConnection {0}
 
+add_connection pcie.bar0_mm sfp2.mm
+set_connection_parameter_value pcie.bar0_mm/sfp2.mm arbitrationPriority {1}
+set_connection_parameter_value pcie.bar0_mm/sfp2.mm baseAddress {0x0300}
+set_connection_parameter_value pcie.bar0_mm/sfp2.mm defaultConnection {0}
+
+add_connection pcie.bar0_mm sfp3.mm
+set_connection_parameter_value pcie.bar0_mm/sfp3.mm arbitrationPriority {1}
+set_connection_parameter_value pcie.bar0_mm/sfp3.mm baseAddress {0x0400}
+set_connection_parameter_value pcie.bar0_mm/sfp3.mm defaultConnection {0}
+
 add_connection pcie.bar0_mm temp.temp_mm
 set_connection_parameter_value pcie.bar0_mm/temp.temp_mm arbitrationPriority {1}
 set_connection_parameter_value pcie.bar0_mm/temp.temp_mm baseAddress {0x0010}
@@ -283,6 +316,12 @@ set_connection_parameter_value pcie.irq/sfp0.i2c_irq irqNumber {3}
 
 add_connection pcie.irq sfp1.i2c_irq
 set_connection_parameter_value pcie.irq/sfp1.i2c_irq irqNumber {4}
+
+add_connection pcie.irq sfp2.i2c_irq
+set_connection_parameter_value pcie.irq/sfp2.i2c_irq irqNumber {5}
+
+add_connection pcie.irq sfp3.i2c_irq
+set_connection_parameter_value pcie.irq/sfp3.i2c_irq irqNumber {6}
 
 add_connection phy_clk.out_clk fc.phy_clk
 
@@ -303,6 +342,10 @@ add_connection reset_ctrl.reset_out phy_clk_gauge.reset
 add_connection reset_ctrl.reset_out sfp0.reset
 
 add_connection reset_ctrl.reset_out sfp1.reset
+
+add_connection reset_ctrl.reset_out sfp2.reset
+
+add_connection reset_ctrl.reset_out sfp3.reset
 
 add_connection reset_ctrl.reset_out temp.reset
 

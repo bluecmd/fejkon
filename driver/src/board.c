@@ -582,15 +582,15 @@ static int probe(struct pci_dev *pcidev, const struct pci_device_id *id)
     dev_dbg(&pcidev->dev, "debug performance result: %d Mbit/s", perf);
   }
 
-  ports = (version >> 24) & 0xff;
+  ports = (version >> 24) & 0x0f;
   if (ports > MAX_PORTS) {
-    dev_err(&pcidev->dev, "card has too many ports: %d\n", ports);
+    dev_err(&pcidev->dev, "card has too many fc ports: %d\n", ports);
     ret = -EINVAL;
     goto error_sanity;
   }
   version = (version >> 16) & 0xff;
   githash = ioread32(card->bar0 + 0x4);
-  dev_notice(&pcidev->dev, "found card with version %d (%08x), ports = %d\n",
+  dev_notice(&pcidev->dev, "found card with version %d (%08x), fc ports = %d\n",
       version, githash, ports);
 
   phy_clock = ioread32(card->bar0 + 0x20);

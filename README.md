@@ -85,7 +85,7 @@ laser is activated.
 The leds next to the SFP cages indicate whether or not an SFP module is
 detected in that slot.
 
-### Cooling 
+### Cooling
 
 The fan is configured to only turn on when the temperature reaches 60°C.
 If that happens the fan will remain on until the board has been reset.

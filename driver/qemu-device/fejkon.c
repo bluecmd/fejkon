@@ -118,7 +118,7 @@ static uint64_t fejkon_bar0_read(void *opaque, hwaddr addr, unsigned size)
   switch (addr) {
     case 0x00:
       /* Version and card options */
-      val = 0x02010de5u;
+      val = 0x22010de5u;
       break;
     case 0x04:
       /* Git hash */

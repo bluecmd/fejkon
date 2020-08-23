@@ -53,16 +53,27 @@ add_fileset_file version.sv VERILOG PATH version.sv
 # 
 # parameters
 # 
-add_parameter Ports POSITIVE 1 ""
-set_parameter_property Ports DEFAULT_VALUE 1
-set_parameter_property Ports DISPLAY_NAME "Number of FC Ports"
-set_parameter_property Ports WIDTH ""
-set_parameter_property Ports TYPE POSITIVE
-set_parameter_property Ports UNITS None
-set_parameter_property Ports ALLOWED_RANGES 0:4
-set_parameter_property Ports DESCRIPTION ""
-set_parameter_property Ports AFFECTS_GENERATION false
-set_parameter_property Ports HDL_PARAMETER true
+add_parameter FcPorts POSITIVE 1 ""
+set_parameter_property FcPorts DEFAULT_VALUE 1
+set_parameter_property FcPorts DISPLAY_NAME "Number of FC Ports"
+set_parameter_property FcPorts WIDTH ""
+set_parameter_property FcPorts TYPE POSITIVE
+set_parameter_property FcPorts UNITS None
+set_parameter_property FcPorts ALLOWED_RANGES 0:4
+set_parameter_property FcPorts DESCRIPTION ""
+set_parameter_property FcPorts AFFECTS_GENERATION false
+set_parameter_property FcPorts HDL_PARAMETER true
+
+add_parameter EthPorts POSITIVE 1 ""
+set_parameter_property EthPorts DEFAULT_VALUE 1
+set_parameter_property EthPorts DISPLAY_NAME "Number of Ethernet Ports"
+set_parameter_property EthPorts WIDTH ""
+set_parameter_property EthPorts TYPE POSITIVE
+set_parameter_property EthPorts UNITS None
+set_parameter_property EthPorts ALLOWED_RANGES 0:2
+set_parameter_property EthPorts DESCRIPTION ""
+set_parameter_property EthPorts AFFECTS_GENERATION false
+set_parameter_property EthPorts HDL_PARAMETER true
 
 
 # 

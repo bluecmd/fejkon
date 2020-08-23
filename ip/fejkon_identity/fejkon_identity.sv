@@ -2,7 +2,8 @@
 `include "version.sv"
 
 module fejkon_identity #(
-    parameter Ports
+    parameter FcPorts,
+    parameter EthPorts
   ) (
     output wire [31:0] mm_readdata, //    mm.readdata
     input  wire  [0:0] mm_address,  //    mm.address
@@ -10,10 +11,6 @@ module fejkon_identity #(
     input  wire        reset        // reset.reset
   );
 
-  // Format for 0x0:
-  // 0:1  0x0DE5 magic
-  // 2    0x01   version
-  // 3    0x01   ports
-  assign mm_readdata = mm_address[0] ? `FEJKON_GIT_HASH : {Ports[7:0], 24'h010DE5};
+  assign mm_readdata = mm_address[0] ? `FEJKON_GIT_HASH : {EthPorts[3:0], FcPorts[3:0], 24'h010DE5};
 
 endmodule

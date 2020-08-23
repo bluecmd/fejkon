@@ -1,22 +1,80 @@
 config AGGRESSIVE_OPT
   bool "Optimize aggressively for performance when building"
 
+config HAVE_ETHERNET
+  bool
+
 menu "SFP+ Ports"
 
-comment "Port 0 always enabled"
+# Port 0 is always enabled, and FC is the only supported option right now
+choice PORT0
+  bool "Port 0"
+  default PORT0_FC
 
-config FCPORT1
-  bool "Enable Port 1"
+config PORT0_FC
+  bool "Fibre Channel"
+
+endchoice
+
+choice PORT1
+  bool "Port 1"
+  default PORT1_DISABLED
+
+config PORT1_DISABLED
+  bool "Disabled"
+
+config PORT1_FC
+  bool "Fibre Channel"
+
+endchoice
+
+# The two last ports can be configured as FC or Ethernet
+choice PORT2
+  bool "Port 2"
+  default PORT2_DISABLED
+
+config PORT2_DISABLED
+  bool "Disabled"
+
+config PORT2_FC
+  bool "Fibre Channel"
+  depends on PORT1_FC
+
+config PORT2_ETHERNET
+  bool "Ethernet"
+  depends on PORT0_FC
+  select HAVE_ETHERNET
+  help
+    Enable Ethernet TX/RX bridging of Fibre Channel frames.
+    This port will be connected to Port 0.
+
+endchoice
+
+choice PORT3
+  bool "Port 3"
+  default PORT3_DISABLED
+
+config PORT3_DISABLED
+  bool "Disabled"
+
+config PORT3_FC
+  bool "Fibre Channel"
+  depends on PORT2_FC
+
+config PORT3_ETHERNET
+  bool "Ethernet"
+  depends on PORT1_FC
+  select HAVE_ETHERNET
+  help
+    Enable Ethernet TX/RX bridging of Fibre Channel frames.
+    This port will be connected to Port 1.
+
+endchoice
 
 config LOOPBACK_01
   bool "Loopback port 0 and port 1"
-  depends on FCPORT1
-
-config FCPORT2
-  bool "Enable Port 2 (TODO)"
-
-config FCPORT3
-  bool "Enable Port 3 (TODO)"
+  depends on PORT0_FC
+  depends on PORT1_FC
 
 endmenu
 

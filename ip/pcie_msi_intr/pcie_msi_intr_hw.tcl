@@ -121,5 +121,5 @@ set_interface_property irq PORT_NAME_MAP ""
 set_interface_property irq CMSIS_SVD_VARIABLES ""
 set_interface_property irq SVD_ADDRESS_GROUP ""
 
-add_interface_port irq irq irq Input 24
+add_interface_port irq irq irq Input 8
 

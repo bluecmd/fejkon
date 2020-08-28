@@ -8,7 +8,7 @@ module pcie_msi_intr (
     input  wire        app_msi_ack,    //        .app_msi_ack
     input  wire        clk,            //     clk.clk
     input  wire        reset,          //   reset.reset
-    input  wire [23:0] irq             //     irq.irq
+    input  wire [7:0]  irq             //     irq.irq
   );
 
   // Always use traffic class zero for MSI.
@@ -20,11 +20,73 @@ module pcie_msi_intr (
   // so this is always low.
   assign app_int_sts = 1'b0;
 
-  // TODO: Good thing: no TLP magic needed here, it's all generated in the
-  // hard IP core. Just assert app_msi_req with the correct
-  // app_msi_{num,tc} and you're good to go.
 
-  assign app_msi_req = 1'b0;
-  assign app_msi_num = 5'b00000;
+  // Fit all MSI numbers even though we are not using all of them.
+  // This is to make it easier for synth to know we are not overflowing our
+  // array access.
+  logic [31:0] irq_pending = 0;
+  logic [31:0] irq_clear = 0;
+
+  logic [7:0] irq_r = 0;
+
+  // This is not well-documented but the alternative is spamming the host with
+  // MSI MWrs. Doing a one-shot works fine, and we should not be worried about
+  // losing them (they are real transactions after all, losing TLPs would be
+  // catastrophic anyway).
+  //
+  // We just have to be sure that when the driver is loaded, all IRQs are let
+  // down before MSI is re-enabled so the host doesn't get swamped by old
+  // IRQs it cannot yet handle (or that it knows to ignore them).
+  always @(posedge clk) begin: irq_one_shot
+    if (reset) begin
+      irq_r <= 0;
+    end else begin
+      irq_r <= irq;
+    end
+  end
+
+  always @(posedge clk) begin: irq_buffer
+    if (reset) begin
+      irq_pending <= 0;
+    end else begin
+      irq_pending <= (irq_pending | {24'b0, irq & ~irq_r}) & ~irq_clear;
+    end
+  end
+
+  logic       msi_req = 0;
+  logic [4:0] msi_num = 0;
+
+  always @(posedge clk) begin: msi_tx
+    if (reset) begin
+      msi_req = 0;
+      msi_num = 0;
+      irq_clear <= 0;
+    end else begin
+      if (app_msi_ack) begin
+        msi_req = 0;
+        msi_num = 0;
+      end
+      msi_req = 1'b1;
+      casez (irq_pending[7:0])
+        8'b???????1: msi_num = 0;
+        8'b??????10: msi_num = 1;
+        8'b?????100: msi_num = 2;
+        8'b????1000: msi_num = 3;
+        8'b???10000: msi_num = 4;
+        8'b??100000: msi_num = 5;
+        8'b?1000000: msi_num = 6;
+        8'b10000000: msi_num = 7;
+        default: msi_req = 0;
+      endcase
+      if (msi_req) begin
+        irq_clear <= 1'b1 << msi_num;
+      end else begin
+        irq_clear <= 0;
+      end
+    end
+  end
+
+  assign app_msi_req = msi_req;
+  assign app_msi_num = msi_num;
 
 endmodule

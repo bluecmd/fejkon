@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
-"""TODO(bluecmd): String here
+"""Transaction testbench for Fejkon PCIe.
 
-Documentation
+This test bench tests simplified behaviour of the PCIe TLP generation.
+It is not as correct and detailed as a full PCIe endpoint simulation
+(we have that as well in fejkon/test/pcie-hip/) but it is fast and easier
+to debug. It also uses only open-source tools which is cool.
 """
 import logging as log
 import os
@@ -177,8 +180,8 @@ class Test(unittest.TestCase):
             self.data_tx_channel.next = 0
             self.data_tx_data.next = 0xdeadbeefcafef00d1234567890abcdefaaaaaaaaaaaaaaaa5555555555555500 + i
             if not self.data_tx_ready:
-                val = yield self.data_tx_ready.posedge, myhdl.delay(1000)
-                if not val:
+                yield self.data_tx_ready.posedge, myhdl.delay(1000)
+                if not self.data_tx_ready:
                     raise Exception("Timeout waiting for data_tx_ready")
             yield self.clk.posedge
         for channel in range(4):

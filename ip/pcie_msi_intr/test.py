@@ -119,11 +119,12 @@ class Test(unittest.TestCase):
         yield self.clk.posedge
         self.msi_ack.next = 0
         yield self.clk.negedge
-        if not self.msi_req:
-            yield self.msi_req.posedge, myhdl.delay(100)
-            if not self.msi_req:
-                raise Exception("Expected app_msi_req to be re-asserted")
-        self.assertEqual(self.msi_num, 0x5)
+        if self.msi_req:
+            raise Exception("Expected cleared app_msi_req 1 cycle after ack")
+        # Expect no more events
+        yield self.msi_req.posedge, myhdl.delay(100)
+        if self.msi_req:
+            raise Exception("Got unexpected secondary MSI")
         yield myhdl.delay(10)
 
     @testcase(clkgen, dutgen)

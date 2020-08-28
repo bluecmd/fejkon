@@ -27,12 +27,29 @@ module pcie_msi_intr (
   logic [31:0] irq_pending = 0;
   logic [31:0] irq_clear = 0;
 
+  logic [7:0] irq_r = 0;
+
+  // This is not well-documented but the alternative is spamming the host with
+  // MSI MWrs. Doing a one-shot works fine, and we should not be worried about
+  // losing them (they are real transactions after all, losing TLPs would be
+  // catastrophic anyway).
+  //
+  // We just have to be sure that when the driver is loaded, all IRQs are let
+  // down before MSI is re-enabled so the host doesn't get swamped by old
+  // IRQs it cannot yet handle (or that it knows to ignore them).
+  always @(posedge clk) begin: irq_one_shot
+    if (reset) begin
+      irq_r <= 0;
+    end else begin
+      irq_r <= irq;
+    end
+  end
 
   always @(posedge clk) begin: irq_buffer
     if (reset) begin
       irq_pending <= 0;
     end else begin
-      irq_pending <= (irq_pending | {24'b0, irq}) & ~irq_clear;
+      irq_pending <= (irq_pending | {24'b0, irq & ~irq_r}) & ~irq_clear;
     end
   end
 

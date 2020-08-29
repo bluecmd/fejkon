@@ -16,9 +16,11 @@ set_instance_parameter_value ext0 {resetSynchronousEdges} {NONE}
 
 add_instance fc fejkon_fc 1.0
 
+add_instance fc_debug fejkon_fc_debug 1.0
+
 add_instance ident fejkon_identity 1.0
-set_instance_parameter_value ident {FcPorts} {2}
 set_instance_parameter_value ident {EthPorts} {2}
+set_instance_parameter_value ident {FcPorts} {2}
 
 add_instance jtagm altera_jtag_avalon_master 20.1
 set_instance_parameter_value jtagm {FAST_VER} {0}
@@ -103,14 +105,6 @@ add_interface clk clock sink
 set_interface_property clk EXPORT_OF ext0.clk_in
 add_interface fan conduit end
 set_interface_property fan EXPORT_OF temp.fan
-add_interface fcport0_line_rd conduit end
-set_interface_property port0_line_rd EXPORT_OF fc.fcport0_line_rd
-add_interface fcport0_line_td conduit end
-set_interface_property port0_line_td EXPORT_OF fc.fcport0_line_td
-add_interface fcport1_line_rd conduit end
-set_interface_property port1_line_rd EXPORT_OF fc.fcport1_line_rd
-add_interface fcport1_line_td conduit end
-set_interface_property port1_line_td EXPORT_OF fc.fcport1_line_td
 add_interface led conduit end
 set_interface_property led EXPORT_OF led.led
 add_interface pcie_refclk clock sink
@@ -123,6 +117,14 @@ add_interface phy_clk clock sink
 set_interface_property phy_clk EXPORT_OF phy_clk.in_clk
 add_interface phy_clk_out clock source
 set_interface_property phy_clk_out EXPORT_OF phy_clk_out.out_clk
+add_interface port0_line_rd conduit end
+set_interface_property port0_line_rd EXPORT_OF fc.fcport0_line_rd
+add_interface port0_line_td conduit end
+set_interface_property port0_line_td EXPORT_OF fc.fcport0_line_td
+add_interface port1_line_rd conduit end
+set_interface_property port1_line_rd EXPORT_OF fc.fcport1_line_rd
+add_interface port1_line_td conduit end
+set_interface_property port1_line_td EXPORT_OF fc.fcport1_line_td
 add_interface reset reset sink
 set_interface_property reset EXPORT_OF ext0.clk_in_reset
 add_interface sfp0_sfp conduit end
@@ -187,7 +189,7 @@ set_connection_parameter_value fc.fc1_active/led.fcport1_active startPort {}
 set_connection_parameter_value fc.fc1_active/led.fcport1_active startPortLSB {0}
 set_connection_parameter_value fc.fc1_active/led.fcport1_active width {0}
 
-add_connection fc.rx_mux pcie.data_tx
+add_connection fc.rx_mux fc_debug.st_in
 
 add_connection fc.xcvr0_aligned led.fcport0_aligned
 set_connection_parameter_value fc.xcvr0_aligned/led.fcport0_aligned endPort {}
@@ -203,10 +205,17 @@ set_connection_parameter_value fc.xcvr1_aligned/led.fcport1_aligned startPort {}
 set_connection_parameter_value fc.xcvr1_aligned/led.fcport1_aligned startPortLSB {0}
 set_connection_parameter_value fc.xcvr1_aligned/led.fcport1_aligned width {0}
 
+add_connection fc_debug.st_out pcie.data_tx
+
 add_connection jtagm.master fc.mgmt_mm
 set_connection_parameter_value jtagm.master/fc.mgmt_mm arbitrationPriority {1}
 set_connection_parameter_value jtagm.master/fc.mgmt_mm baseAddress {0x8000}
 set_connection_parameter_value jtagm.master/fc.mgmt_mm defaultConnection {0}
+
+add_connection jtagm.master fc_debug.csr
+set_connection_parameter_value jtagm.master/fc_debug.csr arbitrationPriority {1}
+set_connection_parameter_value jtagm.master/fc_debug.csr baseAddress {0x0040}
+set_connection_parameter_value jtagm.master/fc_debug.csr defaultConnection {0}
 
 add_connection jtagm.master ident.mm
 set_connection_parameter_value jtagm.master/ident.mm arbitrationPriority {1}
@@ -267,6 +276,11 @@ set_connection_parameter_value pcie.bar0_mm/fc.mgmt_mm arbitrationPriority {1}
 set_connection_parameter_value pcie.bar0_mm/fc.mgmt_mm baseAddress {0x8000}
 set_connection_parameter_value pcie.bar0_mm/fc.mgmt_mm defaultConnection {0}
 
+add_connection pcie.bar0_mm fc_debug.csr
+set_connection_parameter_value pcie.bar0_mm/fc_debug.csr arbitrationPriority {1}
+set_connection_parameter_value pcie.bar0_mm/fc_debug.csr baseAddress {0x0040}
+set_connection_parameter_value pcie.bar0_mm/fc_debug.csr defaultConnection {0}
+
 add_connection pcie.bar0_mm ident.mm
 set_connection_parameter_value pcie.bar0_mm/ident.mm arbitrationPriority {1}
 set_connection_parameter_value pcie.bar0_mm/ident.mm baseAddress {0x0000}
@@ -276,6 +290,11 @@ add_connection pcie.bar0_mm pcie.csr_mm
 set_connection_parameter_value pcie.bar0_mm/pcie.csr_mm arbitrationPriority {1}
 set_connection_parameter_value pcie.bar0_mm/pcie.csr_mm baseAddress {0x0800}
 set_connection_parameter_value pcie.bar0_mm/pcie.csr_mm defaultConnection {0}
+
+add_connection pcie.bar0_mm pcie_clk_gauge.mm
+set_connection_parameter_value pcie.bar0_mm/pcie_clk_gauge.mm arbitrationPriority {1}
+set_connection_parameter_value pcie.bar0_mm/pcie_clk_gauge.mm baseAddress {0x0024}
+set_connection_parameter_value pcie.bar0_mm/pcie_clk_gauge.mm defaultConnection {0}
 
 add_connection pcie.bar0_mm phy_clk_gauge.mm
 set_connection_parameter_value pcie.bar0_mm/phy_clk_gauge.mm arbitrationPriority {1}
@@ -309,6 +328,8 @@ set_connection_parameter_value pcie.bar0_mm/temp.temp_mm defaultConnection {0}
 
 add_connection pcie.data_clk fc.rx_mux_clk
 
+add_connection pcie.data_clk fc_debug.clk
+
 add_connection pcie.data_clk pcie_clk_gauge.probe_clk
 
 add_connection pcie.irq sfp0.i2c_irq
@@ -330,6 +351,8 @@ add_connection phy_clk.out_clk phy_clk_gauge.probe_clk
 add_connection phy_clk.out_clk phy_clk_out.in_clk
 
 add_connection reset_ctrl.reset_out fc.reset
+
+add_connection reset_ctrl.reset_out fc_debug.reset
 
 add_connection reset_ctrl.reset_out ident.reset
 

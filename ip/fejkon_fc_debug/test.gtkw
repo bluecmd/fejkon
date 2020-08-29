@@ -1,0 +1,47 @@
+[timestart] 0
+[size] 2216 1234
+[pos] -1 -1
+*-4.883255 52 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[sst_width] 287
+[signals_width] 397
+[sst_expanded] 1
+[sst_vpaned_height] 374
+@28
+fejkon_fc_debug.clk
+fejkon_fc_debug.reset
+@200
+-
+@22
+fejkon_fc_debug.csr_address[7:0]
+@28
+fejkon_fc_debug.csr_read
+fejkon_fc_debug.csr_write
+@22
+fejkon_fc_debug.csr_readdata[31:0]
+fejkon_fc_debug.csr_writedata[31:0]
+@200
+-
+@22
+fejkon_fc_debug.st_in_channel[3:0]
+fejkon_fc_debug.st_in_data[255:0]
+fejkon_fc_debug.st_in_empty[4:0]
+@28
+fejkon_fc_debug.st_in_endofpacket
+fejkon_fc_debug.st_in_ready
+fejkon_fc_debug.st_in_startofpacket
+fejkon_fc_debug.st_in_valid
+@200
+-
+@22
+fejkon_fc_debug.st_out_channel[3:0]
+@23
+fejkon_fc_debug.st_out_data[255:0]
+@22
+fejkon_fc_debug.st_out_empty[4:0]
+@28
+fejkon_fc_debug.st_out_endofpacket
+fejkon_fc_debug.st_out_ready
+fejkon_fc_debug.st_out_startofpacket
+fejkon_fc_debug.st_out_valid
+[pattern_trace] 1
+[pattern_trace] 0

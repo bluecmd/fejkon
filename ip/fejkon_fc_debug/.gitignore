@@ -1,0 +1,4 @@
+__pycache__/
+fejkon_fc_debug.vcd
+results.xml
+sim_build/

@@ -1,3 +1,4 @@
+import binascii
 import random
 import cocotb
 from cocotb.clock import Clock, Timer
@@ -35,12 +36,39 @@ class Thing:
 
 @cocotb.test()
 async def test_passthrough(dut):
-    """Test traffic generation."""
+    """Test traffic passthrough."""
     clock = Clock(dut.clk, 10, units='us')
     cocotb.fork(clock.start())
     tb = Thing(dut)
     await tb.reset()
-    payload = bytes([0,1,2,3,4,5,6])
+    payload = bytes([0,1,2,3,4,5,6,7])
     await with_timeout(tb.st_in.send(payload), 100, 'us')
-    await Timer(50, units='us')
+    payload = bytes([8,8,8,8,8,8,8,8])
+    await with_timeout(tb.st_in.send(payload, sync=False), 100, 'us')
+    payload = bytes([9,9,9,9,9,9,9,9])
+    await Timer(100, 'us')
+    raise tb.scoreboard.result
+
+@cocotb.test()
+async def test_mixing(dut):
+    """Test traffic mixing."""
+    clock = Clock(dut.clk, 10, units='us')
+    cocotb.fork(clock.start())
+    tb = Thing(dut)
+    await tb.reset()
+    await tb.csr.write(0, 1)
+    payload = bytes([0,1,2,3,4,5,6,7])
+    await with_timeout(tb.st_in.send(payload), 100, 'us')
+    payload = bytes([8,8,8,8,8,8,8,8])
+    await with_timeout(tb.st_in.send(payload, sync=False), 100, 'us')
+    payload = bytes([9,9,9,9,9,9,9,9])
+    await with_timeout(tb.st_in.send(payload, sync=False), 100, 'us')
+    # Leave one slot for a generator package set
+    tb.expected_output.append(
+            binascii.unhexlify('deadbeef')*8 +
+            binascii.unhexlify('baadc0de')*8)
+    await tb.csr.write(0, 0)
+    payload = bytes([1,1,1,1,1,1,1,1])
+    await with_timeout(tb.st_in.send(payload), 100, 'us')
+    await FallingEdge(dut.clk)
     raise tb.scoreboard.result

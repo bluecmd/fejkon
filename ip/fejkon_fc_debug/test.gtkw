@@ -1,11 +1,11 @@
 [timestart] 0
-[size] 2216 1234
-[pos] -1 -1
-*-4.883255 52 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[size] 3840 2081
+[pos] -490 -490
+*-4.998140 277 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [sst_width] 287
 [signals_width] 397
 [sst_expanded] 1
-[sst_vpaned_height] 374
+[sst_vpaned_height] 672
 @28
 fejkon_fc_debug.clk
 fejkon_fc_debug.reset
@@ -32,16 +32,33 @@ fejkon_fc_debug.st_in_startofpacket
 fejkon_fc_debug.st_in_valid
 @200
 -
+@29
+fejkon_fc_debug.next_source_generator
+@28
+fejkon_fc_debug.source_generator
+fejkon_fc_debug.enable_generator
+@200
+-
+@420
+fejkon_fc_debug.gen_idx
+@22
+fejkon_fc_debug.gen_channel[3:0]
+fejkon_fc_debug.gen_data[255:0]
+fejkon_fc_debug.gen_empty[4:0]
+@28
+fejkon_fc_debug.gen_startofpacket
+fejkon_fc_debug.gen_endofpacket
+fejkon_fc_debug.gen_valid
+@200
+-
 @22
 fejkon_fc_debug.st_out_channel[3:0]
-@23
 fejkon_fc_debug.st_out_data[255:0]
-@22
 fejkon_fc_debug.st_out_empty[4:0]
 @28
+fejkon_fc_debug.st_out_startofpacket
 fejkon_fc_debug.st_out_endofpacket
 fejkon_fc_debug.st_out_ready
-fejkon_fc_debug.st_out_startofpacket
 fejkon_fc_debug.st_out_valid
 [pattern_trace] 1
 [pattern_trace] 0

@@ -104,7 +104,6 @@ module fejkon_fc_debug (
 
   always @(posedge clk) begin: gen_driver
     if (reset) begin
-      out_valid <= 0;
       gen_idx = 0;
     end else begin
       if (source_generator & st_out_ready) begin

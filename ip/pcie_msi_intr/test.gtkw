@@ -1,34 +1,34 @@
 [timestart] 0
 [size] 2201 1199
 [pos] -1 -1
-*-13.840914 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
-[treeopen] tb.
+*-6.294786 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] pcie_msi_intr.
 [sst_width] 213
 [signals_width] 219
 [sst_expanded] 1
 [sst_vpaned_height] 362
 @28
-tb.dut.clk
-tb.dut.reset
+pcie_msi_intr.clk
+pcie_msi_intr.reset
 @22
-tb.dut.irq[7:0]
+pcie_msi_intr.irq[7:0]
 @200
 -
 @22
-tb.dut.irq_pending[31:0]
-tb.dut.irq_clear[31:0]
+pcie_msi_intr.irq_pending[31:0]
+pcie_msi_intr.irq_clear[31:0]
 @200
 -
 @28
-tb.dut.app_msi_req
-tb.dut.app_msi_ack
+pcie_msi_intr.app_msi_req
+pcie_msi_intr.app_msi_ack
 @23
-tb.dut.app_msi_num[4:0]
+pcie_msi_intr.app_msi_num[4:0]
 @200
 -
 @28
-tb.dut.app_msi_tc[2:0]
-tb.dut.app_int_ack
-tb.dut.app_int_sts
+pcie_msi_intr.app_msi_tc[2:0]
+pcie_msi_intr.app_int_ack
+pcie_msi_intr.app_int_sts
 [pattern_trace] 1
 [pattern_trace] 0

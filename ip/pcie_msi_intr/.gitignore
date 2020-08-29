@@ -1,2 +1,4 @@
-test.vvp
-test_*/
+__pycache__/
+pcie_msi_intr.vcd
+results.xml
+sim_build/

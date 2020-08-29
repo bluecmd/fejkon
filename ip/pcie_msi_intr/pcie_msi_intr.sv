@@ -1,4 +1,4 @@
-`timescale 1 ps / 1 ps
+`timescale 1 us / 1 us
 module pcie_msi_intr (
     output wire        app_int_sts,    // int_msi.app_int_sts
     output wire [4:0]  app_msi_num,    //        .app_msi_num
@@ -88,5 +88,13 @@ module pcie_msi_intr (
 
   assign app_msi_req = msi_req;
   assign app_msi_num = msi_num;
+
+`ifdef COCOTB_SIM
+  initial begin
+    $dumpfile("pcie_msi_intr.vcd");
+    $dumpvars(0, pcie_msi_intr);
+    #1;
+  end
+`endif
 
 endmodule

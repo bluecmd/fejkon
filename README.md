@@ -127,6 +127,19 @@ So if you are designing something from scratch and have the option to use MSI
 or MSI-X, this information above should tell you that maybe using MSI-X will
 be easier. However, it is quite likely MSI-X has its own pitfalls.
 
+### SFP Diagnostics Data
+
+Fejkon exposes the I2C interfaces through the Linux kernel's
+[native I2C interface](https://www.kernel.org/doc/Documentation/i2c/dev-interface).
+This means that accessing the SFP diagnostics data is possible using any standard
+I2C library.
+
+The recommended way to browse SFP data is using
+[Safaripark](https://github.com/bluecmd/safaripark), but there is also a
+simple CLI tool located in `driver/cmd/fejkon-sfp`.
+
+![Safaripark screenshot](images/safaripark.png)
+
 ## Developing
 
 The recommended flow is using Quartus Platform Designer to make changes.

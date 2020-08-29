@@ -526,7 +526,7 @@ module fejkon_pcie_data (
         if (data_tx_startofpacket) begin
           c2h_staging_offset = 0; // NOTE: Blocking write
         end
-        c2h_staging_offset = c2h_staging_offset + (8 - {27'h0, data_tx_empty});
+        c2h_staging_offset = c2h_staging_offset + (8 - {29'h0, data_tx_empty[4:2]});
       end
     end
   end
@@ -786,6 +786,8 @@ module fejkon_pcie_data (
         6'h3: csr_readdata_reg <= csr_tx_data_tlp_counter;
         6'h4: csr_readdata_reg <= csr_tx_instant_tlp_counter;
         6'h5: csr_readdata_reg <= csr_tx_response_tlp_counter;
+        6'h6: csr_readdata_reg <= csr_c2h_staging_counter;
+        // Reserved for 6'h7: csr_readdata_reg <= h2c_pkt_counter;
         6'b001???: csr_readdata_reg <= csr_rx_tlp[csr_address[2:0]];
         6'b010???: csr_readdata_reg <= csr_tx_data_tlp[csr_address[2:0]];
         6'b011???: csr_readdata_reg <= csr_tx_instant_tlp[csr_address[2:0]];
@@ -802,12 +804,15 @@ module fejkon_pcie_data (
   always @(posedge clk) begin
     c2h_dma_buf_reset_write <= 0;
     if (reset) begin
-      // Nothing
+      c2h_dma_buf_start_addr <= 0;
+      c2h_dma_buf_end_addr <= 0;
+      c2h_dma_host_read_ptr <= 0;
+      c2h_dma_buf_reset_write <= 0;
     end else if (csr_write) begin
       casez (csr_address)
-        6'h20: c2h_dma_buf_start_addr <= csr_writedata;
-        6'h21: c2h_dma_buf_end_addr <= csr_writedata;
-        6'h22: c2h_dma_host_read_ptr <= csr_writedata;
+        6'h28: c2h_dma_buf_start_addr <= csr_writedata;
+        6'h29: c2h_dma_buf_end_addr <= csr_writedata;
+        6'h2a: c2h_dma_host_read_ptr <= csr_writedata;
         default: ;
       endcase
       if (csr_address == 6'h20 || csr_address == 6'h21) begin

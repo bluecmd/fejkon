@@ -87,15 +87,23 @@ proc pcie {} {
   puts [format " LTSSM state          : %s (0x%02x)" [ltssm_str $ltssm] $ltssm]
   puts [format " Lanes active         : %s" [format "x%d" [master_read_8 $m [expr $off + 0x181] 1]]]
   puts [format " My ID                : %s" [master_read_16 $m [expr $off + 0x00] 1]]
+  puts ""
   puts [format " TLP RX               : %s" [master_read_32 $m [expr $off + 0x04] 1]]
   puts [format " TLP Unsupported RX   : %s" [master_read_32 $m [expr $off + 0x08] 1]]
   puts [format " TLP TX Data          : %s" [master_read_32 $m [expr $off + 0x0c] 1]]
   puts [format " TLP TX Instant       : %s" [master_read_32 $m [expr $off + 0x10] 1]]
   puts [format " TLP TX Response      : %s" [master_read_32 $m [expr $off + 0x14] 1]]
+  puts ""
   puts [format " Last TLP RX          : %s" [master_read_32 $m [expr $off + 0x20] 8]]
   puts [format " Last TLP TX Data     : %s" [master_read_32 $m [expr $off + 0x40] 8]]
   puts [format " Last TLP TX Instant  : %s" [master_read_32 $m [expr $off + 0x60] 8]]
   puts [format " Last TLP TX Response : %s" [master_read_32 $m [expr $off + 0x80] 8]]
+  puts ""
+  puts [format " C2H Packet counter   : %s" [master_read_32 $m [expr $off + 0x18] 1]]
+  puts [format " C2H Start address    : %s" [master_read_32 $m [expr $off + 0xA0] 1]]
+  puts [format " C2H End address      : %s" [master_read_32 $m [expr $off + 0xA4] 1]]
+  puts [format " C2H Host read ptr    : %s" [master_read_32 $m [expr $off + 0xA8] 1]]
+  puts [format " C2H Card write ptr   : %s" [master_read_32 $m [expr $off + 0xAC] 1]]
 }
 
 proc clocks {} {

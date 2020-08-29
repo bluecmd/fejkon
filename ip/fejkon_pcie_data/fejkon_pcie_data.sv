@@ -533,17 +533,17 @@ module fejkon_pcie_data (
 
   always @(posedge clk) begin: c2h_staging_enqueue_cntr
     if (reset) begin
-      c2h_staging_enqueued <= 0;
+      c2h_staging_enqueued = 0;
       c2h_staging_done <= 1'b0;
     end else begin
       c2h_staging_done <= 1'b0;
       if (data_tx_valid && data_tx_endofpacket && c2h_staging_read_ready) begin
-        c2h_staging_enqueued <= c2h_staging_enqueued + 1;
+        c2h_staging_enqueued = c2h_staging_enqueued + 1;
         c2h_staging_done <= 1'b1;
         c2h_staging_enq_lens[c2h_staging_enqueued] <= c2h_staging_offset[9:0];
       end
       if (c2h_staging_read_ack && c2h_staging_pkt_eop) begin
-        c2h_staging_enqueued <= c2h_staging_enqueued - 1;
+        c2h_staging_enqueued = c2h_staging_enqueued - 1;
         c2h_staging_enq_lens[0] <= c2h_staging_enq_lens[1];
         c2h_staging_enq_lens[1] <= c2h_staging_enq_lens[2];
       end

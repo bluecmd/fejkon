@@ -50,13 +50,47 @@ async def test_passthrough(dut):
     raise tb.scoreboard.result
 
 @cocotb.test()
+async def test_generator(dut):
+    """Test traffic generator."""
+    clock = Clock(dut.clk, 10, units='us')
+    cocotb.fork(clock.start())
+    tb = Thing(dut)
+    await tb.reset()
+    await tb.csr.write(0, 10)
+    for i in range(10):
+        tb.expected_output.append(
+                binascii.unhexlify('deadbeef')*8 +
+                binascii.unhexlify('baadc0de')*8)
+    await Timer(250, units='us')
+    cntr = await tb.csr.read(0)
+    assert cntr == 0, 'generator should have been zero'
+    raise tb.scoreboard.result
+
+@cocotb.test()
+async def test_inf_generator(dut):
+    """Test infinite traffic generator."""
+    clock = Clock(dut.clk, 10, units='us')
+    cocotb.fork(clock.start())
+    tb = Thing(dut)
+    await tb.reset()
+    await tb.csr.write(0, 2**32 - 1)
+    for i in range(10):
+        tb.expected_output.append(
+                binascii.unhexlify('deadbeef')*8 +
+                binascii.unhexlify('baadc0de')*8)
+    await Timer(210, units='us')
+    cntr = await tb.csr.read(0)
+    assert cntr == 2**32-1, 'generator should have been 2**32 - 1'
+    raise tb.scoreboard.result
+
+@cocotb.test()
 async def test_mixing(dut):
     """Test traffic mixing."""
     clock = Clock(dut.clk, 10, units='us')
     cocotb.fork(clock.start())
     tb = Thing(dut)
     await tb.reset()
-    await tb.csr.write(0, 1)
+    await tb.csr.write(0, 100)
     payload = bytes([0,1,2,3,4,5,6,7])
     await with_timeout(tb.st_in.send(payload), 100, 'us')
     payload = bytes([8,8,8,8,8,8,8,8])
@@ -70,5 +104,6 @@ async def test_mixing(dut):
     await tb.csr.write(0, 0)
     payload = bytes([1,1,1,1,1,1,1,1])
     await with_timeout(tb.st_in.send(payload), 100, 'us')
+    await RisingEdge(dut.clk)
     await FallingEdge(dut.clk)
     raise tb.scoreboard.result

@@ -1,7 +1,7 @@
 [timestart] 0
 [size] 3840 2081
-[pos] -490 -490
-*-4.998140 277 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[pos] -457 -290
+*-5.363616 121 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [sst_width] 287
 [signals_width] 397
 [sst_expanded] 1
@@ -32,10 +32,9 @@ fejkon_fc_debug.st_in_startofpacket
 fejkon_fc_debug.st_in_valid
 @200
 -
-@29
-fejkon_fc_debug.next_source_generator
 @28
 fejkon_fc_debug.source_generator
+@25
 fejkon_fc_debug.enable_generator
 @200
 -

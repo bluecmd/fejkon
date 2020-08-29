@@ -47,7 +47,8 @@ module fejkon_fc_debug (
   logic [31:0] readdata = 0;
 
   logic source_generator = 0;
-  logic enable_generator = 0;
+  int   enable_generator = 0;
+  logic decr_generator = 0;
 
   assign csr_readdata = readdata;
 
@@ -55,9 +56,12 @@ module fejkon_fc_debug (
     if (reset) begin
       enable_generator <= 0;
     end else begin
+      if (decr_generator && (enable_generator != ~0)) begin
+          enable_generator <= enable_generator - 1;
+      end
       if (csr_write) begin
         if (csr_address == 0) begin
-          enable_generator <= csr_writedata[0];
+          enable_generator <= csr_writedata;
         end
       end
     end
@@ -69,7 +73,7 @@ module fejkon_fc_debug (
     end else begin
       if (csr_read) begin
         casez (csr_address)
-          8'h0: readdata <= {31'h0, enable_generator};
+          8'h0: readdata <= enable_generator;
           default: readdata <= ~0;
         endcase
       end
@@ -77,17 +81,20 @@ module fejkon_fc_debug (
   end
 
   always @(posedge clk) begin: arbiter
+    decr_generator <= 0;
     if (reset) begin
       source_generator <= 0;
     end else begin
       // Only consider switching source on EOP or no activity
       if ((gen_endofpacket & gen_valid & source_generator) ||
-          (in_endofpacket_r & in_valid_r)) begin
+          (in_endofpacket_r & in_valid_r) || (~in_valid_r & ~source_generator)) begin
         // Give priorty to the input stream
+        source_generator <= 0;
         if (st_in_valid) begin
           source_generator <= 0;
-        end else if (gen_valid & enable_generator) begin
+        end else if (gen_valid && (enable_generator != 0)) begin
           source_generator <= 1;
+          decr_generator <= 1;
         end
       end
     end
@@ -106,7 +113,7 @@ module fejkon_fc_debug (
           gen_idx = 0;
         end
       end
-      gen_valid <= enable_generator;
+      gen_valid <= (enable_generator != 0);
       gen_channel <= 4'h0;
       gen_empty <= 5'd0;
       gen_startofpacket <= 1'b0;

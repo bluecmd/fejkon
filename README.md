@@ -227,6 +227,7 @@ Accesses need to be 4 byte wide.
 | 0x0010 | 1     | Card   | Temprature    | FPGA Core Temperature (1)    |
 | 0x0020 | 4     | Card   | Freq. Gauge   | PHY effective clock gauge    |
 | 0x0024 | 4     | Card   | Freq. Gauge   | PCIe effective clock gauge   |
+| 0x0040 | 64    | Card   | FC Dbg & Gen  | Inspect / Inject point       |
 | 0x0100 | 1     | Port 0 | SFP Status    | SFP Status Word (3)          |
 | 0x0140 | 64    | Port 0 | SFP Port I2C  | SFP I2C core (4)             |
 | 0x02x0 | ...   | Port 1 | SFP Port      |                              |
@@ -370,6 +371,16 @@ States:
 | 8     | OL3  | Wait for OLS           |
 
 Note: Only ACTIVE is guaranted to be stable at numeric 0 over time.
+
+#### FC Debug & Generator
+
+This component is used to generate traffic for debug and development. It
+generates traffic interleaved with the output of the FC subsystem, and its
+output is read by both the PCIe and the future Ethernet module.
+
+| Addr  | Width | Name                          |
+|-------|-------|-------------------------------|
+| 0x000 | 4     | Packet inject counter         |
 
 #### Interrupts
 

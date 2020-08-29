@@ -184,7 +184,7 @@ class Test(unittest.TestCase):
                 if not self.data_tx_ready:
                     raise Exception("Timeout waiting for data_tx_ready")
             yield self.clk.posedge
-        for channel in range(4):
+        for j in range(10):
             yield self.clk.negedge
             # The core should not accept any more reads until it has been copied,
             # which takes one clock cycle at least
@@ -195,7 +195,7 @@ class Test(unittest.TestCase):
                 self.data_tx_startofpacket.next = i == 0
                 self.data_tx_endofpacket.next = i == 3
                 self.data_tx_empty.next = 0
-                self.data_tx_channel.next = channel
+                self.data_tx_channel.next = j % 4
                 self.data_tx_data.next = 0xdeadbeefcafef00d1234567890abcdefaaaaaaaaaaaaaaaa5555555555555500 + i
                 if not self.data_tx_ready:
                     yield self.data_tx_ready.posedge, myhdl.delay(1000)

@@ -1,7 +1,7 @@
-[timestart] 33289800
+[timestart] 33807000
 [size] 3156 1561
 [pos] 234 245
-*-17.047682 33910002 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-16.709177 34179800 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] test.
 [sst_width] 588
 [signals_width] 836
@@ -14,6 +14,22 @@ test.dut.reset
 test.dut.my_id[15:0]
 @200
 -
+@22
+test.dut.csr_address[5:0]
+@28
+test.dut.csr_write
+@22
+test.dut.csr_writedata[31:0]
+@28
+test.dut.csr_read
+@22
+test.dut.csr_readdata[31:0]
+@200
+-
+@420
+test.dut.csr_tx_data_tlp_counter
+test.dut.csr_c2h_staging_counter
+@200
 -
 @28
 test.dut.data_tx_startofpacket
@@ -68,6 +84,7 @@ test.dut.tlp_tx_data_st_empty[2:0]
 test.dut.tlp_tx_data_st_endofpacket
 test.dut.tlp_tx_data_st_ready
 test.dut.tlp_tx_data_st_startofpacket
+@29
 test.dut.tlp_tx_data_st_valid
 @200
 -
@@ -82,7 +99,7 @@ test.dut.c2h_staging_fifo_enqueue
 test.dut.c2h_staging_read_ack
 @420
 test.dut.c2h_staging_offset
-@25
+@24
 test.dut.c2h_staging_enq_lens[29:0]
 @200
 -
@@ -107,7 +124,6 @@ test.dut.c2h_dma_card_write_ptr[31:0]
 test.dut.c2h_dma_host_read_ptr[31:0]
 @28
 test.dut.c2h_dma_tlp_tx_busy
-test.dut.c2h_dma_tlp_tx_send
 @200
 -
 @22

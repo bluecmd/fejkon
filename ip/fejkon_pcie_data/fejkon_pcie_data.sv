@@ -602,7 +602,7 @@ module fejkon_pcie_data (
         data_header_length = 4'h8 - data_start;
 
         // Only send the TLP if the write ptr address is sane
-        tlp_tx_data_frm_valid <= c2h_dma_card_write_ptr > 0;
+        tlp_tx_data_frm_valid <= c2h_dma_card_write_ptr != 0;
         tlp_tx_data_frm_startofpacket <= 1;
         tlp_tx_data_frm_dword = 0;
         tlp_tx_data_frm_dword[0][31:29] = 3'b010;        // TLP Fmt
@@ -636,8 +636,7 @@ module fejkon_pcie_data (
           tlp_tx_data_frm_dword[4][31:16] = 0;
         end
         c2h_tx_running <= 1'b1;
-      end
-      if (c2h_tx_running) begin
+      end else if (c2h_tx_running) begin
         c2h_staging_read_ack <= 1'b1;
         tlp_tx_data_frm_dword = c2h_staging_pkt_data;
         tlp_tx_data_frm_empty <= c2h_staging_pkt_empty;
@@ -659,7 +658,7 @@ module fejkon_pcie_data (
     end else begin
       if (c2h_dma_buf_reset_write) begin
         c2h_dma_card_write_ptr <= c2h_dma_buf_start_addr;
-      end else if (c2h_staging_pkt_eop) begin
+      end else if (c2h_staging_read_ack && c2h_staging_pkt_eop) begin
         // Advance one frame if there is enough space for one more frame
         if (c2h_dma_card_write_ptr + 4096*2 >= c2h_dma_buf_end_addr) begin
           c2h_dma_card_write_ptr <= c2h_dma_buf_start_addr;
@@ -815,7 +814,7 @@ module fejkon_pcie_data (
         6'h2a: c2h_dma_host_read_ptr <= csr_writedata;
         default: ;
       endcase
-      if (csr_address == 6'h20 || csr_address == 6'h21) begin
+      if (csr_address == 6'h28 || csr_address == 6'h29) begin
         // Reset the write pointer
         c2h_dma_buf_reset_write <= 1;
       end

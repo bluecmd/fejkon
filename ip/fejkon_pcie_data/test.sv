@@ -159,9 +159,17 @@ module test;
     );
   end
 
+  logic [5:0]  csr_address = 0;
+  logic [31:0] csr_writedata = 0;
+  logic        csr_write = 0;
+
   fejkon_pcie_data dut(
     .clk(clk),
     .reset(reset),
+    .csr_address(csr_address),
+    .csr_read(1'b0),
+    .csr_write(csr_write),
+    .csr_writedata(csr_writedata),
     .tlp_rx_st_data(tlp_rx_st_data),
     .tlp_rx_st_empty(tlp_rx_st_empty),
     .tlp_rx_st_error(tlp_rx_st_error),
@@ -425,6 +433,22 @@ module test;
           32'hF00: compl_data <= scratch_reg;
           default: compl_data <= ~32'h0;
         endcase
+      end
+    end
+  end
+
+  int setup = 0;
+  always @(posedge clk) begin
+    if (reset) begin
+      setup <= 0;
+    end else begin
+      csr_write <= 0;
+      csr_writedata <= 0;
+      if (setup == 0) begin
+        csr_address <= 6'h28;
+        csr_write <= 1;
+        csr_writedata <= 32'h1000;
+        setup <= 1;
       end
     end
   end

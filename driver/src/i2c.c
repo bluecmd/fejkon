@@ -413,7 +413,7 @@ struct i2c_dev * fejkon_i2c_probe(struct device *dev, void __iomem *base, int ir
   altr_i2c_init(idev);
 
   i2c_set_adapdata(&idev->adapter, idev);
-  strlcpy(idev->adapter.name, KBUILD_MODNAME, sizeof(idev->adapter.name));
+  snprintf(idev->adapter.name, sizeof(idev->adapter.name), KBUILD_MODNAME " %s", dev_name(dev));
   idev->adapter.owner = THIS_MODULE;
   idev->adapter.algo = &altr_i2c_algo;
   idev->adapter.dev.parent = dev;

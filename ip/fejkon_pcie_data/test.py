@@ -40,6 +40,15 @@ class BaseTest:
         self.dut.rx_st_bar <= 1
         self.dut.reset._log.debug('Reset complete')
 
+    def expect_memwrite(self, address, data):
+        exp = pcie.TLP()
+        exp.completer_id = pcie.PcieId(bus=0xb3, device=0)
+        exp.set_be(address, len(data))
+        exp.fmt_type = pcie.TLP_MEM_WRITE
+        exp.set_data(data)
+        exp.byte_count = len(data)
+        self.expected_output.append(exp.intel_pack())
+
     def expect_cmpld(self, address, data):
         exp = pcie.TLP()
         exp.completer_id = pcie.PcieId(bus=0xb3, device=0)
@@ -132,17 +141,22 @@ async def test_read_write(dut):
     raise tb.scoreboard.result
 
 
-#@cocotb.test()
-#async def test_c2h_dma(dut):
-#    """Test C2H DMA."""
-#    clock = Clock(dut.clk, 10, units='ns')
-#    cocotb.fork(clock.start())
-#    tb = TestC2H(dut)
-#    await tb.reset()
-#    payload = bytes([0,1,2,3,4,5,6,7])
-#    await with_timeout(tb.data_tx.send(payload), 100, 'ns')
-#    await RisingEdge(dut.clk)
-#    cntr = await tb.csr.read(0x6) # csr_c2h_staging_counter
-#    assert cntr == 1, 'expected csr_c2h_staging_counter to be incremented to 1'
-#    await Timer(100, 'ns')
-#    raise tb.scoreboard.result
+@cocotb.test()
+async def test_c2h_dma(dut):
+    """Test C2H DMA."""
+    clock = Clock(dut.clk, 10, units='ns')
+    cocotb.fork(clock.start())
+    tb = TestC2H(dut)
+    await tb.reset()
+    payload = bytes([0, 1, 2, 3]*16)
+    header = int.to_bytes(0x104, length=4, byteorder='big')
+    header = header + bytes(12)
+    tb.expect_memwrite(0x1000, header + payload)
+    await with_timeout(tb.data_tx.send(payload), 100, 'ns')
+    await RisingEdge(dut.clk)
+    cntr = await tb.csr.read(0x6) # csr_c2h_staging_counter
+    assert cntr == 1, 'expected csr_c2h_staging_counter to be incremented to 1'
+    await Timer(100, 'ns')
+    raise tb.scoreboard.result
+
+

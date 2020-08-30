@@ -1,7 +1,7 @@
 [timestart] 0
 [size] 3156 1561
 [pos] 234 245
-*-17.411097 271800 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-16.802298 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] test.
 [sst_width] 588
 [signals_width] 836
@@ -44,7 +44,7 @@ test.dut.data_tx_valid
 test.dut.data_tx_data[255:0]
 @200
 -
-@23
+@22
 test.dut.tlp_rx_st_data[255:0]
 @28
 test.dut.tlp_rx_st_endofpacket
@@ -103,11 +103,12 @@ test.dut.c2h_staging_done
 test.dut.c2h_staging_enqueued
 @28
 test.dut.c2h_staging_fifo_enqueue
-test.dut.c2h_staging_read_ack
 @420
 test.dut.c2h_staging_offset
 @24
 test.dut.c2h_staging_enq_lens[29:0]
+@29
+test.dut.c2h_staging_read_req
 @200
 -
 @22

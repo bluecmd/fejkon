@@ -459,11 +459,12 @@ module fejkon_pcie_data (
   //
 
   logic [271:0] c2h_staging_data;
-  logic         c2h_staging_read_ack = 0;
+  logic         c2h_staging_read_req = 0;
   logic         c2h_staging_fifo_enqueue;
 
   logic [255:0] c2h_staging_pkt_data;
   logic [1:0]   c2h_staging_pkt_channel;
+  logic         c2h_staging_pkt_sop;
   logic         c2h_staging_pkt_eop;
   logic [2:0]   c2h_staging_pkt_empty;
   logic [9:0]   c2h_staging_pkt_length; // dwords
@@ -471,14 +472,15 @@ module fejkon_pcie_data (
 
   assign c2h_staging_pkt_data = c2h_staging_data[255:0];
   assign c2h_staging_pkt_channel = c2h_staging_data[257:256];
-  assign c2h_staging_pkt_eop = c2h_staging_data[258];
-  assign c2h_staging_pkt_empty = c2h_staging_data[261:259];
+  assign c2h_staging_pkt_eop = c2h_staging_data[259];
+  assign c2h_staging_pkt_sop = c2h_staging_data[258];
+  assign c2h_staging_pkt_empty = c2h_staging_data[262:260];
 
   pcie_data_fifo staging_data_fifo (
     .clock(clk),
     .sclr(reset),
-    .data({10'h0, data_tx_empty[4:2], data_tx_endofpacket, data_tx_channel, data_tx_data}),
-    .rdreq(c2h_staging_read_ack),
+    .data({1'b1, 8'h0, data_tx_empty[4:2], data_tx_endofpacket, data_tx_startofpacket, data_tx_channel, data_tx_data}),
+    .rdreq(c2h_staging_read_req),
     .wrreq(c2h_staging_fifo_enqueue),
     .q(c2h_staging_data));
 
@@ -490,7 +492,7 @@ module fejkon_pcie_data (
   logic [2:0] [9:0] c2h_staging_enq_lens = 0;
 
   assign c2h_staging_pkt_length = c2h_staging_enq_lens[0];
-  assign c2h_staging_pkt_valid = c2h_staging_enqueued > 0;
+  assign c2h_staging_pkt_valid = c2h_staging_enqueued != 0 && c2h_staging_pkt_length != 0;
 
   assign c2h_staging_fifo_enqueue = ~reset && data_tx_valid && c2h_staging_read_ready;
 
@@ -542,11 +544,11 @@ module fejkon_pcie_data (
     end else begin
       c2h_staging_done <= 1'b0;
       if (data_tx_valid && data_tx_endofpacket && c2h_staging_read_ready) begin
-        c2h_staging_enqueued = c2h_staging_enqueued + 1;
         c2h_staging_done <= 1'b1;
         c2h_staging_enq_lens[c2h_staging_enqueued] <= c2h_staging_offset[9:0];
+        c2h_staging_enqueued = c2h_staging_enqueued + 1;
       end
-      if (c2h_staging_read_ack && c2h_staging_pkt_eop) begin
+      if (c2h_staging_read_req && c2h_staging_pkt_eop) begin
         c2h_staging_enqueued = c2h_staging_enqueued - 1;
         c2h_staging_enq_lens[0] <= c2h_staging_enq_lens[1];
         c2h_staging_enq_lens[1] <= c2h_staging_enq_lens[2];
@@ -614,8 +616,8 @@ module fejkon_pcie_data (
         tlp_tx_data_frm_dword[0][9:0] = c2h_staging_pkt_length[9:0] + {6'h0, data_header_length}; // Length
         tlp_tx_data_frm_dword[1][31:16] = my_id;         // Completer ID
         tlp_tx_data_frm_dword[1][15:8] = 0;              // Tag
-        tlp_tx_data_frm_dword[1][7:4] = 0;               // Last BE
-        tlp_tx_data_frm_dword[1][3:0] = 0;               // 1st BE
+        tlp_tx_data_frm_dword[1][7:4] = 4'hf;            // Last BE
+        tlp_tx_data_frm_dword[1][3:0] = 4'hf;            // 1st BE
         tlp_tx_data_frm_dword[2][31:2] = c2h_dma_card_write_ptr[31:2]; // Address
         tlp_tx_data_frm_dword[2][1:0] = 0;               // Processing Hints (PH)
 
@@ -640,17 +642,16 @@ module fejkon_pcie_data (
           tlp_tx_data_frm_dword[4][31:16] = 0;
         end
         c2h_tx_running <= 1'b1;
+        c2h_staging_read_req <= 1'b1;
       end else if (c2h_tx_running) begin
-        c2h_staging_read_ack <= 1'b1;
         tlp_tx_data_frm_dword = c2h_staging_pkt_data;
         tlp_tx_data_frm_empty <= {c2h_staging_pkt_empty, 2'h0};
         tlp_tx_data_frm_endofpacket <= c2h_staging_pkt_eop;
         if (c2h_staging_pkt_eop) begin
           c2h_tx_running <= 0;
-          c2h_staging_read_ack <= 0;
         end
       end else begin
-        c2h_staging_read_ack <= 0;
+        c2h_staging_read_req <= 0;
         tlp_tx_data_frm_valid <= 0;
       end
     end
@@ -662,7 +663,7 @@ module fejkon_pcie_data (
     end else begin
       if (c2h_dma_buf_reset_write) begin
         c2h_dma_card_write_ptr <= c2h_dma_buf_start_addr;
-      end else if (c2h_staging_read_ack && c2h_staging_pkt_eop) begin
+      end else if (c2h_staging_read_req && c2h_staging_pkt_eop) begin
         // Advance one frame if there is enough space for one more frame
         if (c2h_dma_card_write_ptr + 4096*2 >= c2h_dma_buf_end_addr) begin
           c2h_dma_card_write_ptr <= c2h_dma_buf_start_addr;

@@ -14,12 +14,13 @@ from cocotb.drivers.avalon import AvalonMaster
 from cocotb.monitors.avalon import AvalonSTPkts as AvalonSTMonitor
 from cocotb.scoreboard import Scoreboard
 from cocotb.triggers import RisingEdge, with_timeout
-from cocotb.utils import hexdump
 
 import pcie
 
 
 class BaseTest:
+    """Common test logic and resource for all tests."""
+
     def __init__(self, dut):
         self.dut = dut
         self.tlp_tx_st = AvalonSTMonitor(dut, 'tlp_tx_multiplexer_out', dut.clk)
@@ -52,15 +53,15 @@ class BaseTest:
         """Log TLPs received from DUT."""
         tlp = pcie.TLP()
         tlp.intel_unpack(transaction)
-        self.tlp_rx_recovered.log.info("TLP from DUT: " + repr(tlp))
+        self.tlp_tx_recovered.log.info("TLP from DUT: " + repr(tlp))
 
 
 class TestReadWrite(BaseTest):
+    """Base class to test response to TLPs initiated by host."""
 
     def __init__(self, dut):
         super().__init__(dut)
         self.tlp_rx_st = AvalonSTDriver(dut, 'tlp_rx_st', dut.clk)
-        self.data_tx = AvalonSTDriver(dut, 'data_tx', dut.clk)
         self.tlp_rx_recovered = AvalonSTMonitor(dut, 'tlp_rx_st', dut.clk,
                 callback=self.rx_model)
 
@@ -69,6 +70,14 @@ class TestReadWrite(BaseTest):
         tlp = pcie.TLP()
         tlp.intel_unpack(transaction)
         self.tlp_rx_recovered.log.info("TLP to DUT: " + repr(tlp))
+
+
+class TestC2H(BaseTest):
+    """Base class to test TLPs emitted by C2H DMA."""
+
+    def __init__(self, dut):
+        super().__init__(dut)
+        self.data_tx = AvalonSTDriver(dut, 'data_tx', dut.clk)
 
 
 @cocotb.test()
@@ -128,15 +137,12 @@ async def test_read_write(dut):
 #    """Test C2H DMA."""
 #    clock = Clock(dut.clk, 10, units='ns')
 #    cocotb.fork(clock.start())
-#    tb = Thing(dut)
+#    tb = TestC2H(dut)
 #    await tb.reset()
-#    payload = bytes([0,1,2,3,4,5,6,7])
-#    await with_timeout(tb.tlp_rx_st.send(payload), 100, 'ns')
 #    payload = bytes([0,1,2,3,4,5,6,7])
 #    await with_timeout(tb.data_tx.send(payload), 100, 'ns')
 #    await RisingEdge(dut.clk)
 #    cntr = await tb.csr.read(0x6) # csr_c2h_staging_counter
 #    assert cntr == 1, 'expected csr_c2h_staging_counter to be incremented to 1'
 #    await Timer(100, 'ns')
-#    #raise tb.scoreboard.result
-
+#    raise tb.scoreboard.result

@@ -610,13 +610,13 @@ module fejkon_pcie_data (
         data_header_length = 4'h8 - data_start;
 
         // Only send the TLP if the write ptr address is sane
-        tlp_tx_data_frm_valid <= c2h_dma_card_write_ptr != 0;
+        tlp_tx_data_frm_valid <= (c2h_dma_card_write_ptr != 0) && my_id_valid;
         tlp_tx_data_frm_startofpacket <= 1;
         tlp_tx_data_frm_dword = 0;
         tlp_tx_data_frm_dword[0][31:29] = 3'b010;        // TLP Fmt
         tlp_tx_data_frm_dword[0][28:24] = 5'b00000;      // TLP Type (MWr)
         tlp_tx_data_frm_dword[0][9:0] = c2h_staging_pkt_length[9:0] + {6'h0, data_header_length}; // Length
-        tlp_tx_data_frm_dword[1][31:16] = my_id;         // Completer ID
+        tlp_tx_data_frm_dword[1][31:16] = my_id;         // Requester ID
         tlp_tx_data_frm_dword[1][15:8] = 0;              // Tag
         tlp_tx_data_frm_dword[1][7:4] = 4'hf;            // Last BE
         tlp_tx_data_frm_dword[1][3:0] = 4'hf;            // 1st BE

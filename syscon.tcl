@@ -305,3 +305,8 @@ proc sfp {id} {
 
   puts [format " SFP vendor SN: '%s'" [binary format c* $vendor]]
 }
+
+proc generate {pkts} {
+  global m
+  master_write_32 $m 0x40 $pkts
+}

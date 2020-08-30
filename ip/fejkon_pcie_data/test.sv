@@ -396,6 +396,11 @@ module test;
         csr_write <= 1;
         csr_writedata <= 32'h1000;
         setup <= 1;
+      end else if (setup == 1) begin
+        csr_address <= 6'h29;
+        csr_write <= 1;
+        csr_writedata <= 32'h6000;
+        setup <= 2;
       end
     end
   end

@@ -18,6 +18,10 @@ from cocotb.triggers import RisingEdge, with_timeout
 
 import pcie
 
+DMA_WND_START = 0x1000
+DMA_WND_END   = 0x5000
+DMA_WND_SIZE  = 4
+
 
 class BaseTest:
     """Common test logic and resource for all tests."""
@@ -43,7 +47,7 @@ class BaseTest:
 
     def expect_memwrite(self, address, data):
         exp = pcie.TLP()
-        exp.completer_id = pcie.PcieId(bus=0xb3, device=0)
+        exp.requester_id = pcie.PcieId(bus=0xb3, device=0)
         exp.set_be(address, len(data))
         exp.fmt_type = pcie.TLP_MEM_WRITE
         exp.set_data(data)
@@ -151,20 +155,47 @@ async def run_c2h_dma_test(dut, dwords, channel):
     await tb.reset()
     payload = bytearray()
     for i in range(dwords * 4):
-        payload.append(i)
+        payload.append(i % 256)
     payload = bytes(payload)
     header = int.to_bytes(0x4 + ((len(payload) // 4) << 4) + (channel << 14), length=4, byteorder='big')
     header = header + bytes(12)
-    tb.expect_memwrite(0x1000, header + payload)
-    await with_timeout(tb.data_tx.send(payload, channel=channel), 100, 'ns')
+    tb.expect_memwrite(DMA_WND_START, header + payload)
+    await with_timeout(tb.data_tx.send(payload, channel=channel), 1000, 'ns')
     await RisingEdge(dut.clk)
     cntr = await tb.csr.read(0x6) # csr_c2h_staging_counter
     assert cntr == 1, 'expected csr_c2h_staging_counter to be incremented to 1'
-    await Timer(100, 'ns')
+    await Timer(1000, 'ns')
     raise tb.scoreboard.result
 
 
 c2h_factory = TestFactory(run_c2h_dma_test)
-c2h_factory.add_option('dwords', [15, 16])
+# TODO:
+# - < 9 DWs seems broken
+# - Add packet fragmentation
+c2h_factory.add_option('dwords', [15, 16, 100])
 c2h_factory.add_option('channel', [0, 3])
 c2h_factory.generate_tests()
+
+
+@cocotb.test()
+async def test_c2h_dma_pressure(dut):
+    """Test C2H DMA pressure."""
+    clock = Clock(dut.clk, 10, units='ns')
+    cocotb.fork(clock.start())
+    tb = TestC2H(dut)
+    channel = 2
+    await tb.reset()
+    for i in range(30):
+        payload = bytearray()
+        for j in range(10 * 4):
+            payload.append(j % 256)
+        payload = bytes(payload)
+        header = int.to_bytes(0x4 + ((len(payload) // 4) << 4) + (channel << 14), length=4, byteorder='big')
+        header = header + bytes(12)
+        tb.expect_memwrite(DMA_WND_START + 4096 * (i % DMA_WND_SIZE), header + payload)
+        await with_timeout(tb.data_tx.send(payload, channel=channel), 1000, 'ns')
+    await RisingEdge(dut.clk)
+    cntr = await tb.csr.read(0x6) # csr_c2h_staging_counter
+    assert cntr == i + 1, 'expected csr_c2h_staging_counter to be incremented to %s' % (i + 1, )
+    await Timer(1000, 'ns')
+    raise tb.scoreboard.result

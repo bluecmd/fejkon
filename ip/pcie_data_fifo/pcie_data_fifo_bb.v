@@ -38,6 +38,7 @@ module pcie_data_fifo (
 	rdreq,
 	sclr,
 	wrreq,
+	empty,
 	q);
 
 	input	  clock;
@@ -45,6 +46,7 @@ module pcie_data_fifo (
 	input	  rdreq;
 	input	  sclr;
 	input	  wrreq;
+	output	  empty;
 	output	[271:0]  q;
 
 endmodule
@@ -59,7 +61,7 @@ endmodule
 // Retrieval info: PRIVATE: CLOCKS_ARE_SYNCHRONIZED NUMERIC "1"
 // Retrieval info: PRIVATE: Clock NUMERIC "0"
 // Retrieval info: PRIVATE: Depth NUMERIC "128"
-// Retrieval info: PRIVATE: Empty NUMERIC "0"
+// Retrieval info: PRIVATE: Empty NUMERIC "1"
 // Retrieval info: PRIVATE: Full NUMERIC "0"
 // Retrieval info: PRIVATE: INTENDED_DEVICE_FAMILY STRING "Stratix V"
 // Retrieval info: PRIVATE: LE_BasedFIFO NUMERIC "0"
@@ -97,6 +99,7 @@ endmodule
 // Retrieval info: CONSTANT: USE_EAB STRING "ON"
 // Retrieval info: USED_PORT: clock 0 0 0 0 INPUT NODEFVAL "clock"
 // Retrieval info: USED_PORT: data 0 0 272 0 INPUT NODEFVAL "data[271..0]"
+// Retrieval info: USED_PORT: empty 0 0 0 0 OUTPUT NODEFVAL "empty"
 // Retrieval info: USED_PORT: q 0 0 272 0 OUTPUT NODEFVAL "q[271..0]"
 // Retrieval info: USED_PORT: rdreq 0 0 0 0 INPUT NODEFVAL "rdreq"
 // Retrieval info: USED_PORT: sclr 0 0 0 0 INPUT NODEFVAL "sclr"
@@ -106,6 +109,7 @@ endmodule
 // Retrieval info: CONNECT: @rdreq 0 0 0 0 rdreq 0 0 0 0
 // Retrieval info: CONNECT: @sclr 0 0 0 0 sclr 0 0 0 0
 // Retrieval info: CONNECT: @wrreq 0 0 0 0 wrreq 0 0 0 0
+// Retrieval info: CONNECT: empty 0 0 0 0 @empty 0 0 0 0
 // Retrieval info: CONNECT: q 0 0 272 0 @q 0 0 272 0
 // Retrieval info: GEN_FILE: TYPE_NORMAL pcie_data_fifo.v TRUE
 // Retrieval info: GEN_FILE: TYPE_NORMAL pcie_data_fifo.inc FALSE

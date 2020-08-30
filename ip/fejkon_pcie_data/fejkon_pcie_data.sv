@@ -461,6 +461,7 @@ module fejkon_pcie_data (
   logic [271:0] c2h_staging_data;
   logic         c2h_staging_read_req = 0;
   logic         c2h_staging_fifo_enqueue;
+  logic         c2h_staging_fifo_empty;
 
   logic [255:0] c2h_staging_pkt_data;
   logic [1:0]   c2h_staging_pkt_channel;
@@ -481,6 +482,7 @@ module fejkon_pcie_data (
     .data({1'b1, 8'h0, data_tx_empty[4:2], data_tx_endofpacket, data_tx_startofpacket, 2'h0, data_tx_data}),
     .rdreq(c2h_staging_read_req),
     .wrreq(c2h_staging_fifo_enqueue),
+    .empty(c2h_staging_fifo_empty),
     .q(c2h_staging_data));
 
   int   c2h_staging_offset = 0; // Position of packet currently being ingested (dwords)
@@ -492,9 +494,9 @@ module fejkon_pcie_data (
 
   assign c2h_staging_pkt_length = c2h_staging_enq_data[0][9:0];
   assign c2h_staging_pkt_channel = c2h_staging_enq_data[0][11:10];
-  assign c2h_staging_pkt_valid = c2h_staging_enqueued != 0 && c2h_staging_pkt_length != 0;
+  assign c2h_staging_pkt_valid = c2h_staging_enqueued != 0 && c2h_staging_pkt_length != 0 && ~c2h_staging_fifo_empty;
 
-  assign c2h_staging_fifo_enqueue = ~reset && data_tx_valid && c2h_staging_read_ready;
+  assign c2h_staging_fifo_enqueue = data_tx_valid && data_tx_ready;
 
   logic c2h_dma_tlp_tx_busy;
 
@@ -556,7 +558,7 @@ module fejkon_pcie_data (
     end
   end
 
-  assign data_tx_ready = c2h_staging_read_ready;
+  assign data_tx_ready = c2h_staging_read_ready && ~reset && my_id_valid;
 
   //
   // Outgoing TLP construction for C2H DMA
@@ -651,6 +653,7 @@ module fejkon_pcie_data (
         tlp_tx_data_frm_empty <= {c2h_staging_pkt_empty, 2'h0};
         tlp_tx_data_frm_endofpacket <= c2h_staging_pkt_eop;
         if (c2h_staging_pkt_eop) begin
+          c2h_staging_read_req <= 0;
           c2h_tx_running <= 0;
         end
       end else begin

@@ -109,7 +109,7 @@ defconfig:
 .config:
 	cp defconfig .config
 
-test: test-fc_xcvr test-fejkon_led test-fejkon_pcie_avalon test-fejkon_pcie_data test-freq_gauge test-si570_ctrl test-pcie-hip test-pcie_msi_intr
+test: test-fc_xcvr test-fejkon_led test-fejkon_pcie_avalon test-fejkon_pcie_data test-freq_gauge test-si570_ctrl test-pcie-hip test-pcie_msi_intr test-fejkon_fc_debug
 
 test-%: ip/%
 	make QPATH=${QPATH} -C "$<" test

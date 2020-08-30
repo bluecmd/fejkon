@@ -15,7 +15,7 @@
 // +----------------------+        |     |         +--+--+-+--+--+-+--+--+
 // |                      |        |  A  |         |     | |     | |     |
 // |                      +------->+     |         |  F  | |  F  | |  F  |
-// |    MyHDL Testbench   |        |  P  |         |  I  | |  I  | |  I  |
+// |   Cocotb Testbench   |        |  P  |         |  I  | |  I  | |  I  |
 // |                      +<-------+     |         |  F  | |  F  | |  F  |
 // |                      |        |  T  |         |  O  | |  O  | |  O  |
 // +----------------------+        |     |         |     | |     | |     |
@@ -51,7 +51,7 @@ module test;
   logic [127:0] mem_access_resp_data;
   logic         mem_access_resp_ready;
   logic         mem_access_resp_valid;
-  logic [3:0]   tl_cfg_add;
+  logic [3:0]   tl_cfg_add = 0;
   logic [31:0]  tl_cfg_ctl;
   logic [52:0]  tl_cfg_sts;
 
@@ -124,52 +124,20 @@ module test;
   logic    [0:0] rx_st_error;
   logic    [1:0] rx_st_empty;
 
-  initial begin
-    $from_myhdl(
-      clk,
-      reset,
-      rx_st_data,
-      rx_st_empty,
-      rx_st_error,
-      rx_st_startofpacket,
-      rx_st_endofpacket,
-      rx_st_valid,
-      tx_st_ready,
-      rx_st_bar,
-      tl_cfg_add,
-      tl_cfg_ctl,
-      tl_cfg_sts,
-      data_tx_data,
-      data_tx_valid,
-      data_tx_channel,
-      data_tx_endofpacket,
-      data_tx_startofpacket,
-      data_tx_empty
-    );
-    $to_myhdl(
-      rx_st_ready,
-      tx_st_data,
-      tx_st_startofpacket,
-      tx_st_endofpacket,
-      tx_st_error,
-      tx_st_empty,
-      tx_st_valid,
-      rx_st_mask,
-      data_tx_ready
-    );
-  end
-
   logic [5:0]  csr_address = 0;
   logic [31:0] csr_writedata = 0;
+  logic [31:0] csr_readdata;
   logic        csr_write = 0;
+  logic        csr_read = 0;
 
   fejkon_pcie_data dut(
     .clk(clk),
     .reset(reset),
     .csr_address(csr_address),
-    .csr_read(1'b0),
+    .csr_read(csr_read),
     .csr_write(csr_write),
     .csr_writedata(csr_writedata),
+    .csr_readdata(csr_readdata),
     .tlp_rx_st_data(tlp_rx_st_data),
     .tlp_rx_st_empty(tlp_rx_st_empty),
     .tlp_rx_st_error(tlp_rx_st_error),
@@ -214,6 +182,17 @@ module test;
     .tl_cfg_ctl(tl_cfg_ctl),
     .tl_cfg_sts(tl_cfg_sts)
   );
+
+  always @(posedge clk) begin
+    if (reset) begin
+      tl_cfg_add <= 0;
+    end else begin
+      tl_cfg_add <= tl_cfg_add + 1;
+      if (tl_cfg_add == 4'hE) begin
+        tl_cfg_ctl[12:0] <= {8'hb3, 5'h0, 3'h0};
+      end
+    end
+  end
 
   altera_avalon_sc_fifo #(
     .SYMBOLS_PER_BEAT    (8),
@@ -454,7 +433,7 @@ module test;
   end
 
   initial begin
-    $dumpfile("wave.fst");
+    $dumpfile("fejkon_pcie_data.vcd");
     $dumpvars(0, test);
   end
 endmodule

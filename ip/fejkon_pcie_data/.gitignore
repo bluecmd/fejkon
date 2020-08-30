@@ -1,4 +1,4 @@
-test.vvp
-test.fst
-**/__pycache__
-test_*/
+__pycache__
+fejkon_pcie_data.vcd
+results.xml
+sim_build/

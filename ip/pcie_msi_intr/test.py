@@ -1,11 +1,9 @@
 #/usr/bin/env/python3
 """Testbench for PCIe MSI generation."""
 
-import random
 import cocotb
 from cocotb.clock import Clock, Timer
-from cocotb.result import SimTimeoutError
-from cocotb.triggers import FallingEdge, RisingEdge, with_timeout, ReadOnly
+from cocotb.triggers import RisingEdge
 
 async def setup(dut):
     clock = Clock(dut.clk, 10, 'us')

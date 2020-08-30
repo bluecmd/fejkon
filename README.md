@@ -94,6 +94,16 @@ detected in that slot.
 The fan is configured to only turn on when the temperature reaches 60°C.
 If that happens the fan will remain on until the board has been reset.
 
+### Wireshark / tcpdump
+
+libpcap defaults to DLT_FC2 which does not account for SOF/EOF which are
+included in fejkon - so you need to tell it that those are included.
+
+Example:
+```
+tshark -i fc0 -y FC_2_WITH_FRAME_DELIMS
+```
+
 ### MSI Interrupts
 
 Currently fejkon is using multiple MSI interrupts, not MSI-X. MSI-X is a bit

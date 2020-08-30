@@ -1,4 +1,5 @@
-.PHONY: lint test wave clean
+.PHONY: lint test wave
+PYLINT ?= pylint3
 
 TOPLEVEL_LANG = verilog
 VERILOG_SOURCES = $(shell pwd)/fejkon_fc_debug.sv
@@ -8,8 +9,12 @@ MODULE = test
 include $(shell cocotb-config --makefiles)/Makefile.sim
 
 lint:
+	$(PYLINT) --rcfile=pylintrc test.py --exit-zero
 	verilator --lint-only fejkon_fc_debug.sv
 	iverilog -g2012 -t null fejkon_fc_debug.sv
+
+test:
+	$(MAKE) sim
 
 wave: fejkon_fc_debug.vcd test.gtkw
 	gtkwave --save test.gtkw --dump=$<

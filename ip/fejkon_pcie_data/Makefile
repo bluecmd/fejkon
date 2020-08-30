@@ -4,7 +4,6 @@ PYLINT ?= pylint3
 .PHONY: lint test wave
 
 SRCS := fejkon_pcie_data.sv tl_cfg_module.sv test.sv \
-	../intel_pcie_tlp_adapter/intel_pcie_tlp_adapter.sv \
 	../pcie_data_fifo/pcie_data_fifo.v \
 	$(QPATH)/eda/sim_lib/altera_mf.v
 

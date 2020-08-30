@@ -1,4 +1,4 @@
-// (C) 2001-2019 Intel Corporation. All rights reserved.
+// (C) 2001-2020 Intel Corporation. All rights reserved.
 // Your use of Intel Corporation's design tools, logic functions and other 
 // software and tools, and its AMPP partner logic functions, and any output 
 // files from any of the foregoing (including device programming or simulation 
@@ -42,7 +42,7 @@
 //   output_name:        fejkon_pcie_tlp_tx_multiplexer
 //   use_packets:        true
 //   use_empty:          1
-//   empty_width:        3
+//   empty_width:        5
 //   data_width:         256
 //   channel_width:      2
 //   error_width:        0
@@ -53,7 +53,7 @@
 //   channelSelectBits:  2-1:0
 //   inPayloadMap:       in0_data,in0_startofpacket,in0_endofpacket,in0_empty in1_data,in1_startofpacket,in1_endofpacket,in1_empty in2_data,in2_startofpacket,in2_endofpacket,in2_empty
 //   outPayloadMap:      out_data,out_startofpacket,out_endofpacket,out_empty
-//   inPayloadWidth:     261
+//   inPayloadWidth:     263
 //   use_packet_scheduling: true
 //   schedulingSize:        2
 //   schedulingSizeInBits:     1   
@@ -69,7 +69,7 @@ module fejkon_pcie_tlp_tx_multiplexer (
  output reg    [256-1: 0] out_data,
  output reg              out_startofpacket,
  output reg              out_endofpacket,
- output reg    [3-1 : 0] out_empty,
+ output reg    [5-1 : 0] out_empty,
 
 // Interface: in0
  input           in0_valid,
@@ -78,7 +78,7 @@ module fejkon_pcie_tlp_tx_multiplexer (
            
  input           in0_startofpacket,
  input           in0_endofpacket, 
- input [3-1: 0]  in0_empty,
+ input [5-1: 0]  in0_empty,
 // Interface: in1
  input           in1_valid,
  output reg      in1_ready,
@@ -86,7 +86,7 @@ module fejkon_pcie_tlp_tx_multiplexer (
            
  input           in1_startofpacket,
  input           in1_endofpacket, 
- input [3-1: 0]  in1_empty,
+ input [5-1: 0]  in1_empty,
 // Interface: in2
  input           in2_valid,
  output reg      in2_ready,
@@ -94,7 +94,7 @@ module fejkon_pcie_tlp_tx_multiplexer (
            
  input           in2_startofpacket,
  input           in2_endofpacket, 
- input [3-1: 0]  in2_empty,
+ input [5-1: 0]  in2_empty,
   // Interface: clk
  input              clk,
  // Interface: reset
@@ -105,9 +105,9 @@ module fejkon_pcie_tlp_tx_multiplexer (
    // ---------------------------------------------------------------------
    //| Signal Declarations
    // ---------------------------------------------------------------------
-   reg [261 -1:0]      in0_payload;
-   reg [261 -1:0]      in1_payload;
-   reg [261 -1:0]      in2_payload;
+   reg [263 -1:0]      in0_payload;
+   reg [263 -1:0]      in1_payload;
+   reg [263 -1:0]      in2_payload;
  
    reg [2-1:0]        decision = 0;
    reg [2-1:0]        select = 0;   
@@ -115,10 +115,10 @@ module fejkon_pcie_tlp_tx_multiplexer (
    reg                selected_valid;
    wire               out_valid_wire;
    wire               selected_ready;
-   reg   [261 -1 :0]   selected_payload;  
+   reg   [263 -1 :0]   selected_payload;  
    reg                packet_in_progress;
    wire [2-1:0]       out_select;   
-   wire [261 - 1:0]    out_payload;
+   wire [263 - 1:0]    out_payload;
 
    // ---------------------------------------------------------------------
    //| Input Mapping
@@ -229,7 +229,7 @@ end // always @ *
    // ---------------------------------------------------------------------
    //| output Pipeline
    // ---------------------------------------------------------------------
-   fejkon_pcie_tlp_tx_multiplexer_1stage_pipeline  #( .PAYLOAD_WIDTH( 261 + 2 ) ) outpipe
+   fejkon_pcie_tlp_tx_multiplexer_1stage_pipeline  #( .PAYLOAD_WIDTH( 263 + 2 ) ) outpipe
               ( .clk      (clk ),
                 .reset_n  (reset_n  ),
                 .in_ready ( selected_ready ),

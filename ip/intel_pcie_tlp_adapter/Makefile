@@ -4,3 +4,5 @@
 
 lint:
 	verilator --lint-only *.sv
+	iverilog -g2012 -t null *.sv
+

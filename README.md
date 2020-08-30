@@ -211,8 +211,11 @@ The PCIe endpoint has one Base Address Register (BAR).
 The design uses components from Quartus Platform Design to minimize development
 and debug time. All FPGA platforms offer some sort of FIFOs and streaming
 interface that allows merging, so there is little value re-inventing those.
+
 The PCIe adapter is a bug-fix for the V-Series Intel PCIe core where the
-streaming interface is not correctly defined to be Avalon-ST compliant.
+streaming interface is not correctly defined to be Avalon-ST compliant. See
+the section about Intel PCIe TLP adapter below for details.
+
 
 ### BAR 0
 
@@ -488,14 +491,29 @@ in /etc/ld.so.preload.
 # ** Error: ../intelFPGA/20.1/quartus/eda/sim_lib/mentor/stratixv_atoms_ncrypt.v(38): (vlog-2163) Macro `<protected> is undefined.
 # ** Error: ../intelFPGA/20.1/quartus/eda/sim_lib/mentor/stratixv_atoms_ncrypt.v(38): (vlog-2163) Macro `<protected> is undefined.
 # ** Error: (vlog-13069) ../intelFPGA/20.1/quartus/eda/sim_lib/mentor/stratixv_atoms_ncrypt.v(38): syntax error in protected region.
-# 
+#
 # ** Error: ../intelFPGA/20.1/quartus/eda/sim_lib/mentor/stratixv_atoms_ncrypt.v(38): (vlog-13205) Syntax error found in the scope following '<protected>'. Is there a missing '::'?
 # End time: 23:08:09 on Aug 20,2020, Elapsed time: 0:00:00
 # Errors: 5, Warnings: 0
  ```
- 
+
 This can be worked around by making sure you **do not** set `LD_PRELOAD` before running `vsim` (or `unset LD_PRELOAD`)
 and making sure `/etc/ld.so.preload` does not exist.
+
+### Intel PCIe TLP adapter
+
+The Avalon-ST interface from the PCIe IP is not standard compliant.
+
+Avalon-ST has a property called `firstSymbolInHighOrderBits` which is supposed
+to be set to `true` when the first symbol is present in e.g. `data[255:224]`.
+
+The PCIe IP for Qsys uses the lower bits for first symbol, but unfortunately
+chose to set `firstSymbolInHighOrderBits` to `true`.
+
+Furthermore, the `empty` signal is not compliant either.
+
+These issues are managed by the `intel_pcie_tlp_adapter` to make the design and
+testbenches being able to use Avalon-ST correctly.
 
 ## Possible future work
 

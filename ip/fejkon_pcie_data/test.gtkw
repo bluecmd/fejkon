@@ -1,7 +1,7 @@
-[timestart] 33392000
+[timestart] 0
 [size] 3156 1561
 [pos] 234 245
-*-17.411097 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-17.411097 221300 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] test.
 [sst_width] 588
 [signals_width] 836
@@ -51,16 +51,26 @@ test.dut.tlp_rx_st_endofpacket
 test.dut.tlp_rx_st_startofpacket
 test.dut.tlp_rx_st_ready
 test.dut.tlp_rx_st_valid
-test.dut.tlp_rx_st_empty[2:0]
 test.dut.rx_st_mask
 @22
 test.dut.rx_st_bar[7:0]
 @200
 -
+@29
+test.dut.tlp_rx_frm_unsupported
+@420
+test.dut.tlp_rx_frm_type
+@22
+test.dut.tlp_rx_frm_masked_address[63:0]
+test.dut.tlp_rx_frm_data[31:0]
+@24
+test.dut.tlp_rx_frm_len[9:0]
+test.dut.tlp_rx_frm_total_byte_count[11:0]
+@200
+-
 @22
 test.dut.tlp_tx_instant_st_data[255:0]
 @28
-test.dut.tlp_tx_instant_st_empty[2:0]
 test.dut.tlp_tx_instant_st_endofpacket
 test.dut.tlp_tx_instant_st_ready
 test.dut.tlp_tx_instant_st_startofpacket
@@ -70,7 +80,6 @@ test.dut.tlp_tx_instant_st_valid
 @22
 test.dut.tlp_tx_response_st_data[255:0]
 @28
-test.dut.tlp_tx_response_st_empty[2:0]
 test.dut.tlp_tx_response_st_endofpacket
 test.dut.tlp_tx_response_st_ready
 test.dut.tlp_tx_response_st_startofpacket
@@ -80,11 +89,9 @@ test.dut.tlp_tx_response_st_valid
 @22
 test.dut.tlp_tx_data_st_data[255:0]
 @28
-test.dut.tlp_tx_data_st_empty[2:0]
 test.dut.tlp_tx_data_st_endofpacket
 test.dut.tlp_tx_data_st_ready
 test.dut.tlp_tx_data_st_startofpacket
-@29
 test.dut.tlp_tx_data_st_valid
 @200
 -
@@ -148,22 +155,6 @@ test.compl_valid
 test.compl_tag[7:0]
 @200
 -
-@28
-test.tlp_tx_multiplexer.out_channel[1:0]
-@22
-test.tlp_tx_multiplexer.out_data[255:0]
-@28
-test.tlp_tx_multiplexer.out_empty[2:0]
-test.tlp_tx_multiplexer.out_endofpacket
-@22
-test.tlp_tx_multiplexer.out_payload[260:0]
-@28
-test.tlp_tx_multiplexer.out_ready
-test.tlp_tx_multiplexer.out_select[1:0]
-test.tlp_tx_multiplexer.out_startofpacket
-test.tlp_tx_multiplexer.out_valid
-test.tlp_tx_multiplexer.out_valid_wire
-@200
 -
 [pattern_trace] 1
 [pattern_trace] 0

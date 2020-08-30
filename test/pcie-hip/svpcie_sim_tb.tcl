@@ -628,14 +628,14 @@ set_instance_parameter_value test_pcie_mem {useShallowMemBlocks} {0}
 set_instance_parameter_value test_pcie_mem {writable} {1}
 
 add_instance tlp_data_fifo altera_avalon_sc_fifo 20.1
-set_instance_parameter_value tlp_data_fifo {BITS_PER_SYMBOL} {32}
+set_instance_parameter_value tlp_data_fifo {BITS_PER_SYMBOL} {8}
 set_instance_parameter_value tlp_data_fifo {CHANNEL_WIDTH} {0}
 set_instance_parameter_value tlp_data_fifo {EMPTY_LATENCY} {3}
 set_instance_parameter_value tlp_data_fifo {ENABLE_EXPLICIT_MAXCHANNEL} {0}
 set_instance_parameter_value tlp_data_fifo {ERROR_WIDTH} {0}
 set_instance_parameter_value tlp_data_fifo {EXPLICIT_MAXCHANNEL} {0}
 set_instance_parameter_value tlp_data_fifo {FIFO_DEPTH} {16}
-set_instance_parameter_value tlp_data_fifo {SYMBOLS_PER_BEAT} {8}
+set_instance_parameter_value tlp_data_fifo {SYMBOLS_PER_BEAT} {32}
 set_instance_parameter_value tlp_data_fifo {USE_ALMOST_EMPTY_IF} {0}
 set_instance_parameter_value tlp_data_fifo {USE_ALMOST_FULL_IF} {0}
 set_instance_parameter_value tlp_data_fifo {USE_FILL_LEVEL} {0}
@@ -644,14 +644,14 @@ set_instance_parameter_value tlp_data_fifo {USE_PACKETS} {1}
 set_instance_parameter_value tlp_data_fifo {USE_STORE_FORWARD} {0}
 
 add_instance tlp_instant_fifo altera_avalon_sc_fifo 20.1
-set_instance_parameter_value tlp_instant_fifo {BITS_PER_SYMBOL} {32}
+set_instance_parameter_value tlp_instant_fifo {BITS_PER_SYMBOL} {8}
 set_instance_parameter_value tlp_instant_fifo {CHANNEL_WIDTH} {0}
 set_instance_parameter_value tlp_instant_fifo {EMPTY_LATENCY} {3}
 set_instance_parameter_value tlp_instant_fifo {ENABLE_EXPLICIT_MAXCHANNEL} {0}
 set_instance_parameter_value tlp_instant_fifo {ERROR_WIDTH} {0}
 set_instance_parameter_value tlp_instant_fifo {EXPLICIT_MAXCHANNEL} {0}
 set_instance_parameter_value tlp_instant_fifo {FIFO_DEPTH} {16}
-set_instance_parameter_value tlp_instant_fifo {SYMBOLS_PER_BEAT} {8}
+set_instance_parameter_value tlp_instant_fifo {SYMBOLS_PER_BEAT} {32}
 set_instance_parameter_value tlp_instant_fifo {USE_ALMOST_EMPTY_IF} {0}
 set_instance_parameter_value tlp_instant_fifo {USE_ALMOST_FULL_IF} {0}
 set_instance_parameter_value tlp_instant_fifo {USE_FILL_LEVEL} {0}
@@ -660,25 +660,25 @@ set_instance_parameter_value tlp_instant_fifo {USE_PACKETS} {1}
 set_instance_parameter_value tlp_instant_fifo {USE_STORE_FORWARD} {0}
 
 add_instance tlp_mux multiplexer 20.1
-set_instance_parameter_value tlp_mux {bitsPerSymbol} {32}
+set_instance_parameter_value tlp_mux {bitsPerSymbol} {8}
 set_instance_parameter_value tlp_mux {errorWidth} {0}
 set_instance_parameter_value tlp_mux {numInputInterfaces} {3}
 set_instance_parameter_value tlp_mux {outChannelWidth} {2}
 set_instance_parameter_value tlp_mux {packetScheduling} {1}
 set_instance_parameter_value tlp_mux {schedulingSize} {2}
-set_instance_parameter_value tlp_mux {symbolsPerBeat} {8}
+set_instance_parameter_value tlp_mux {symbolsPerBeat} {32}
 set_instance_parameter_value tlp_mux {useHighBitsOfChannel} {1}
 set_instance_parameter_value tlp_mux {usePackets} {1}
 
 add_instance tlp_response_fifo altera_avalon_sc_fifo 20.1
-set_instance_parameter_value tlp_response_fifo {BITS_PER_SYMBOL} {32}
+set_instance_parameter_value tlp_response_fifo {BITS_PER_SYMBOL} {8}
 set_instance_parameter_value tlp_response_fifo {CHANNEL_WIDTH} {0}
 set_instance_parameter_value tlp_response_fifo {EMPTY_LATENCY} {3}
 set_instance_parameter_value tlp_response_fifo {ENABLE_EXPLICIT_MAXCHANNEL} {0}
 set_instance_parameter_value tlp_response_fifo {ERROR_WIDTH} {0}
 set_instance_parameter_value tlp_response_fifo {EXPLICIT_MAXCHANNEL} {0}
 set_instance_parameter_value tlp_response_fifo {FIFO_DEPTH} {16}
-set_instance_parameter_value tlp_response_fifo {SYMBOLS_PER_BEAT} {8}
+set_instance_parameter_value tlp_response_fifo {SYMBOLS_PER_BEAT} {32}
 set_instance_parameter_value tlp_response_fifo {USE_ALMOST_EMPTY_IF} {0}
 set_instance_parameter_value tlp_response_fifo {USE_ALMOST_FULL_IF} {0}
 set_instance_parameter_value tlp_response_fifo {USE_FILL_LEVEL} {0}

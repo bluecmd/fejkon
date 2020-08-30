@@ -1,7 +1,7 @@
 [timestart] 0
 [size] 3156 1561
 [pos] 234 245
-*-17.411097 221300 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-17.411097 271800 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] test.
 [sst_width] 588
 [signals_width] 836
@@ -44,7 +44,7 @@ test.dut.data_tx_valid
 test.dut.data_tx_data[255:0]
 @200
 -
-@22
+@23
 test.dut.tlp_rx_st_data[255:0]
 @28
 test.dut.tlp_rx_st_endofpacket
@@ -56,7 +56,7 @@ test.dut.rx_st_mask
 test.dut.rx_st_bar[7:0]
 @200
 -
-@29
+@28
 test.dut.tlp_rx_frm_unsupported
 @420
 test.dut.tlp_rx_frm_type
@@ -134,6 +134,7 @@ test.dut.c2h_dma_tlp_tx_busy
 @200
 -
 @22
+test.mem_access_req_address[31:0]
 test.mem_access_req_data[127:0]
 @28
 test.mem_access_req_ready
@@ -155,6 +156,9 @@ test.compl_valid
 test.compl_tag[7:0]
 @200
 -
+@22
+test.scratch_reg[31:0]
+@200
 -
 [pattern_trace] 1
 [pattern_trace] 0

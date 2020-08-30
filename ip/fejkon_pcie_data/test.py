@@ -23,6 +23,8 @@ class BaseTest:
     def __init__(self, dut):
         self.dut = dut
         self.tlp_tx_st = AvalonSTMonitor(dut, 'tlp_tx_multiplexer_out', dut.clk)
+        self.tlp_tx_recovered = AvalonSTMonitor(dut, 'tlp_tx_multiplexer_out', dut.clk,
+                callback=self.tx_model)
         self.csr = AvalonMaster(dut, 'csr', dut.clk)
         self.expected_output = []
         self.scoreboard = Scoreboard(dut)
@@ -37,6 +39,21 @@ class BaseTest:
         self.dut.rx_st_bar <= 1
         self.dut.reset._log.debug('Reset complete')
 
+    def expect_cmpld(self, address, data):
+        exp = pcie.TLP()
+        exp.completer_id = pcie.PcieId(bus=0xb3, device=0)
+        exp.set_be(address, len(data))
+        exp.fmt_type = pcie.TLP_CPL_DATA
+        exp.set_data(data)
+        exp.byte_count = len(data)
+        self.expected_output.append(exp.intel_pack())
+
+    def tx_model(self, transaction):
+        """Log TLPs received from DUT."""
+        tlp = pcie.TLP()
+        tlp.intel_unpack(transaction)
+        self.tlp_rx_recovered.log.info("TLP from DUT: " + repr(tlp))
+
 
 class TestReadWrite(BaseTest):
 
@@ -45,29 +62,18 @@ class TestReadWrite(BaseTest):
         self.tlp_rx_st = AvalonSTDriver(dut, 'tlp_rx_st', dut.clk)
         self.data_tx = AvalonSTDriver(dut, 'data_tx', dut.clk)
         self.tlp_rx_recovered = AvalonSTMonitor(dut, 'tlp_rx_st', dut.clk,
-                callback=self.model)
+                callback=self.rx_model)
 
-    def model(self, transaction):
-        """Model the DUT based on the input transaction."""
-        tlp = pcie.TLP(transaction)
-        exp = pcie.TLP()
-        exp.completer_id = pcie.PcieId(bus=0xb3, device=0)
-        exp.address = tlp.address
-        exp.lower_address = tlp.lower_address
-        if tlp.fmt_type == pcie.TLP_MEM_READ:
-            if tlp.address == 0x4:
-                exp.fmt_type = pcie.TLP_CPL_DATA
-                exp.set_data(binascii.unhexlify('deadbeef'))
-                exp.byte_count = 4
-        self.expected_output.append(exp.pack())
-        self.tlp_rx_recovered.log.info(hexdump(transaction))
-        self.tlp_rx_recovered.log.info("Sent TLP: " + repr(tlp))
-        self.tlp_rx_recovered.log.info("Expecting TLP: " + repr(exp))
+    def rx_model(self, transaction):
+        """Log TLPs being set to DUT."""
+        tlp = pcie.TLP()
+        tlp.intel_unpack(transaction)
+        self.tlp_rx_recovered.log.info("TLP to DUT: " + repr(tlp))
 
 
 @cocotb.test()
-async def test_read_write(dut):
-    """Test simple MemWrite / MemRead."""
+async def test_unaligned_read(dut):
+    """Test MemRead on a non-QWORD aligned address."""
     clock = Clock(dut.clk, 10, units='ns')
     cocotb.fork(clock.start())
     tb = TestReadWrite(dut)
@@ -75,7 +81,44 @@ async def test_read_write(dut):
     tlp = pcie.TLP()
     tlp.fmt_type = pcie.TLP_MEM_READ
     tlp.set_be(addr=0x4, length=4)
-    await with_timeout(tb.tlp_rx_st.send(tlp.pack()), 100, 'ns')
+    tb.expect_cmpld(0x4, binascii.unhexlify('deadbeef'))
+    await with_timeout(tb.tlp_rx_st.send(tlp.intel_pack()), 100, 'ns')
+    await Timer(100, 'ns')
+    raise tb.scoreboard.result
+
+
+@cocotb.test()
+async def test_aligned_read(dut):
+    """Test MemRead on a QWORD aligned address."""
+    clock = Clock(dut.clk, 10, units='ns')
+    cocotb.fork(clock.start())
+    tb = TestReadWrite(dut)
+    await tb.reset()
+    tlp = pcie.TLP()
+    tlp.fmt_type = pcie.TLP_MEM_READ
+    tlp.set_be(addr=0x0, length=4)
+    tb.expect_cmpld(0x0, binascii.unhexlify('02010de5'))
+    await with_timeout(tb.tlp_rx_st.send(tlp.intel_pack()), 100, 'ns')
+    await Timer(100, 'ns')
+    raise tb.scoreboard.result
+
+
+@cocotb.test()
+async def test_read_write(dut):
+    """Test scratch reg MemWrite / MemRead."""
+    clock = Clock(dut.clk, 10, units='ns')
+    cocotb.fork(clock.start())
+    tb = TestReadWrite(dut)
+    await tb.reset()
+    tlp = pcie.TLP()
+    tlp.fmt_type = pcie.TLP_MEM_WRITE
+    tlp.set_be(addr=0xf00, length=4)
+    tlp.set_data(binascii.unhexlify('f00fcafe'))
+    await with_timeout(tb.tlp_rx_st.send(tlp.intel_pack()), 100, 'ns')
+    tlp.fmt_type = pcie.TLP_MEM_READ
+    tlp.set_be(addr=0xf00, length=4)
+    tb.expect_cmpld(0xf00, binascii.unhexlify('f00fcafe'))
+    await with_timeout(tb.tlp_rx_st.send(tlp.intel_pack()), 100, 'ns')
     await Timer(100, 'ns')
     raise tb.scoreboard.result
 

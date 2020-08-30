@@ -397,7 +397,16 @@ class TLP(object):
             res.extend(struct.pack('>L', w))
         return bytes(res)
 
-    def unpack(self, data):
+    def intel_pack(self):
+        """Pack TLP using Intel QWORD alignment."""
+        b = self.pack()
+        if self.address & 0x4 != 0:
+            return b
+        if self.fmt == FMT_4DW or self.fmt == FMT_4DW_DATA:
+            return b[:4*4] + bytes(4) + b[4*4:]
+        return b[:4*3] + bytes(4) + b[4*3:]
+
+    def unpack(self, data, check=True):
         """Unpack TLP from byte array"""
         pkt = []
         for k in range(0, len(data), 4):
@@ -459,8 +468,20 @@ class TLP(object):
             self.data = pkt[4:]
 
         self.lower_address = self.get_lower_address()
-        self.check()
+        if check:
+            self.check()
         return self
+
+    def intel_unpack(self, b):
+        """Unpack TLP using Intel QWORD alignment."""
+        self.unpack(b[:32*4], check=False)
+        if self.address & 0x4 != 0:
+            self.unpack(b)
+            return
+        if self.fmt == FMT_4DW or self.fmt == FMT_4DW_DATA:
+            self.unpack(b[:4*4] + b[4*5:])
+        else:
+            self.unpack(b[:4*3] + b[4*4:])
 
     def __eq__(self, other):
         if isinstance(other, TLP):

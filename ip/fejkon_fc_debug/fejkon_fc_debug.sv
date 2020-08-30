@@ -23,7 +23,13 @@ module fejkon_fc_debug (
     output wire [31:0]  csr_readdata          //       .readdata
   );
 
-  logic         in_ready = 0;
+  logic [3:0]   in_channel_r = 0;
+  logic [255:0] in_data_r = 0;
+  logic         in_startofpacket_r = 0;
+  logic         in_endofpacket_r = 0;
+  logic [4:0]   in_empty_r = 0;
+  logic         in_valid_r = 0;
+
   logic [3:0]   out_channel = 0;
   logic [255:0] out_data = 0;
   logic         out_endofpacket = 0;
@@ -31,26 +37,134 @@ module fejkon_fc_debug (
   logic         out_valid = 0;
   logic [4:0]   out_empty = 0;
 
-  assign csr_readdata = 0;
+  logic [3:0]   gen_channel = 0;
+  logic [255:0] gen_data = 0;
+  logic         gen_endofpacket = 0;
+  logic         gen_startofpacket = 0;
+  logic         gen_valid = 0;
+  logic [4:0]   gen_empty = 0;
+
+  logic [31:0] readdata = 0;
+
+  logic source_generator = 0;
+  int   enable_generator = 0;
+  logic decr_generator = 0;
+
+  assign csr_readdata = readdata;
+
+  always @(posedge clk) begin: csr_wr
+    if (reset) begin
+      enable_generator <= 0;
+    end else begin
+      if (decr_generator && (enable_generator != ~0)) begin
+          enable_generator <= enable_generator - 1;
+      end
+      if (csr_write) begin
+        if (csr_address == 0) begin
+          enable_generator <= csr_writedata;
+        end
+      end
+    end
+  end
+
+  always @(posedge clk) begin: csr_rd
+    if (reset) begin
+      readdata <= 0;
+    end else begin
+      if (csr_read) begin
+        casez (csr_address)
+          8'h0: readdata <= enable_generator;
+          default: readdata <= ~0;
+        endcase
+      end
+    end
+  end
+
+  always @(posedge clk) begin: arbiter
+    decr_generator <= 0;
+    if (reset) begin
+      source_generator <= 0;
+    end else begin
+      // Only consider switching source on EOP or no activity
+      if ((gen_endofpacket & gen_valid & source_generator) ||
+          (in_endofpacket_r & in_valid_r) || (~in_valid_r & ~source_generator)) begin
+        // Give priorty to the input stream
+        source_generator <= 0;
+        if (st_in_valid) begin
+          source_generator <= 0;
+        end else if (gen_valid && (enable_generator != 0)) begin
+          source_generator <= 1;
+          decr_generator <= 1;
+        end
+      end
+    end
+  end
+
+  int gen_idx = 0;
+
+  always @(posedge clk) begin: gen_driver
+    if (reset) begin
+      gen_idx = 0;
+    end else begin
+      if (source_generator & st_out_ready) begin
+        gen_idx = gen_idx + 1;
+        if (gen_idx == 2) begin
+          gen_idx = 0;
+        end
+      end
+      gen_valid <= (enable_generator != 0);
+      gen_channel <= 4'h0;
+      gen_empty <= 5'd0;
+      gen_startofpacket <= 1'b0;
+      gen_endofpacket <= 1'b0;
+      if (gen_idx == 0) begin
+        gen_data <= 256'hdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef;
+        gen_startofpacket <= 1'b1;
+      end else if (gen_idx == 1) begin
+        gen_data <= 256'hbaadc0debaadc0debaadc0debaadc0debaadc0debaadc0debaadc0debaadc0de;
+        gen_endofpacket <= 1'b1;
+      end
+    end
+  end
+
+  always @(posedge clk) begin
+    in_valid_r <= st_in_valid;
+    in_data_r <= st_in_data;
+    in_channel_r <= st_in_channel;
+    in_startofpacket_r <= st_in_startofpacket;
+    in_endofpacket_r <= st_in_endofpacket;
+    in_empty_r <= st_in_empty;
+  end
 
   always @(posedge clk) begin: out_driver
     if (reset) begin
       out_valid <= 0;
     end else begin
-      out_valid <= st_in_valid;
-      out_data <= st_in_data;
-      out_channel <= st_in_channel;
-      out_startofpacket <= st_in_startofpacket;
-      out_endofpacket <= st_in_endofpacket;
-      out_empty <= st_in_empty;
+      if (source_generator) begin
+        out_valid <= gen_valid;
+        out_data <= gen_data;
+        out_channel <= gen_channel;
+        out_startofpacket <= gen_startofpacket;
+        out_endofpacket <= gen_endofpacket;
+        out_empty <= gen_empty;
+      end else begin
+        out_valid <= in_valid_r;
+        out_data <= in_data_r;
+        out_channel <= in_channel_r;
+        out_startofpacket <= in_startofpacket_r;
+        out_endofpacket <= in_endofpacket_r;
+        out_empty <= in_empty_r;
+      end
     end
   end
 
-  always @(posedge clk) begin: ready_driver
+  logic in_ready = 0;
+
+  always @(*) begin: ready_driver
     if (reset) begin
-      in_ready <= 0;
+      in_ready = 0;
     end else begin
-      in_ready <= st_out_ready;
+      in_ready = ~source_generator;
     end
   end
 

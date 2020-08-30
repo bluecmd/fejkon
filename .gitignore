@@ -2,6 +2,7 @@
 **/*~
 *.qsys
 **/.*.swp
+**/.*.swo
 .qsys_edit
 
 # User configuration

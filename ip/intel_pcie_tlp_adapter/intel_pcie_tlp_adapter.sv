@@ -17,14 +17,14 @@ module intel_pcie_tlp_adapter (
     output wire         phy_rx_st_ready,         //          .ready
     input  wire         phy_rx_st_valid,         //          .valid
     output wire [255:0] tlp_rx_st_data,          // tlp_rx_st.data
-    output wire [2:0]   tlp_rx_st_empty,         //          .empty
+    output wire [4:0]   tlp_rx_st_empty,         //          .empty
     output wire         tlp_rx_st_endofpacket,   //          .endofpacket
     output wire         tlp_rx_st_error,         //          .error
     output wire         tlp_rx_st_startofpacket, //          .startofpacket
     output wire         tlp_rx_st_valid,         //          .valid
     input  wire         tlp_rx_st_ready,         //          .ready
     input  wire [255:0] tlp_tx_st_data,          // tlp_tx_st.data
-    input  wire [2:0]   tlp_tx_st_empty,         //          .empty
+    input  wire [4:0]   tlp_tx_st_empty,         //          .empty
     // NOTE: If we do not define channel here the standard way for Qsys
     // to convert a bus with channel to one without is to drop any data
     // not belonging to channel 0. Since we want all data, but don't care
@@ -43,7 +43,7 @@ module intel_pcie_tlp_adapter (
   // Map Intel PCIe custom "empty" signal to Avalon-ST standard for 32-bit
   // words
   always @(*) begin
-    case (tlp_tx_st_empty)
+    case (tlp_tx_st_empty[4:2])
       3'h0: phy_tx_st_empty_out = 2'h0;
       3'h1: phy_tx_st_empty_out = 2'h0;
       3'h2: phy_tx_st_empty_out = 2'h1;
@@ -64,8 +64,27 @@ module intel_pcie_tlp_adapter (
     endcase
   end
 
+  // Even though Avalon-ST has the property to describe where the first symbol
+  // is, Intel chose to ignore that and make it all wrong. So we turn the
+  // symbols around.
+  assign phy_tx_st_data[31:0]    = tlp_tx_st_data[255:224];
+  assign phy_tx_st_data[63:32]   = tlp_tx_st_data[223:192];
+  assign phy_tx_st_data[95:64]   = tlp_tx_st_data[191:160];
+  assign phy_tx_st_data[127:96]  = tlp_tx_st_data[159:128];
+  assign phy_tx_st_data[159:128] = tlp_tx_st_data[127:96];
+  assign phy_tx_st_data[191:160] = tlp_tx_st_data[95:64];
+  assign phy_tx_st_data[223:192] = tlp_tx_st_data[63:32];
+  assign phy_tx_st_data[255:224] = tlp_tx_st_data[31:0];
+  assign tlp_rx_st_data[255:224] = phy_rx_st_data[31:0];
+  assign tlp_rx_st_data[223:192] = phy_rx_st_data[63:32];
+  assign tlp_rx_st_data[191:160] = phy_rx_st_data[95:64];
+  assign tlp_rx_st_data[159:128] = phy_rx_st_data[127:96];
+  assign tlp_rx_st_data[127:96]  = phy_rx_st_data[159:128];
+  assign tlp_rx_st_data[95:64]   = phy_rx_st_data[191:160];
+  assign tlp_rx_st_data[63:32]   = phy_rx_st_data[223:192];
+  assign tlp_rx_st_data[31:0]    = phy_rx_st_data[255:224];
+
   assign phy_tx_st_valid = tlp_tx_st_valid;
-  assign phy_tx_st_data = tlp_tx_st_data;
   assign phy_tx_st_startofpacket = tlp_tx_st_startofpacket;
   assign phy_tx_st_endofpacket = tlp_tx_st_endofpacket;
   assign phy_tx_st_error = 1'b0;
@@ -75,10 +94,9 @@ module intel_pcie_tlp_adapter (
 
   assign tlp_rx_st_valid = phy_rx_st_valid;
   assign tlp_rx_st_error = phy_rx_st_error;
-  assign tlp_rx_st_data = phy_rx_st_data;
   assign tlp_rx_st_startofpacket = phy_rx_st_startofpacket;
   assign tlp_rx_st_endofpacket = phy_rx_st_endofpacket;
-  assign tlp_rx_st_empty = tlp_rx_st_empty_out;
+  assign tlp_rx_st_empty = {tlp_rx_st_empty_out, 2'h0};
 
   assign tlp_tx_st_ready = phy_tx_st_ready;
 

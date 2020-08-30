@@ -1,7 +1,7 @@
-[timestart] 33289800
+[timestart] 0
 [size] 3156 1561
 [pos] 234 245
-*-17.047682 33910002 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-16.802298 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] test.
 [sst_width] 588
 [signals_width] 836
@@ -14,6 +14,22 @@ test.dut.reset
 test.dut.my_id[15:0]
 @200
 -
+@22
+test.dut.csr_address[5:0]
+@28
+test.dut.csr_write
+@22
+test.dut.csr_writedata[31:0]
+@28
+test.dut.csr_read
+@22
+test.dut.csr_readdata[31:0]
+@200
+-
+@420
+test.dut.csr_tx_data_tlp_counter
+test.dut.csr_c2h_staging_counter
+@200
 -
 @28
 test.dut.data_tx_startofpacket
@@ -35,16 +51,26 @@ test.dut.tlp_rx_st_endofpacket
 test.dut.tlp_rx_st_startofpacket
 test.dut.tlp_rx_st_ready
 test.dut.tlp_rx_st_valid
-test.dut.tlp_rx_st_empty[2:0]
 test.dut.rx_st_mask
 @22
 test.dut.rx_st_bar[7:0]
 @200
 -
+@28
+test.dut.tlp_rx_frm_unsupported
+@420
+test.dut.tlp_rx_frm_type
+@22
+test.dut.tlp_rx_frm_masked_address[63:0]
+test.dut.tlp_rx_frm_data[31:0]
+@24
+test.dut.tlp_rx_frm_len[9:0]
+test.dut.tlp_rx_frm_total_byte_count[11:0]
+@200
+-
 @22
 test.dut.tlp_tx_instant_st_data[255:0]
 @28
-test.dut.tlp_tx_instant_st_empty[2:0]
 test.dut.tlp_tx_instant_st_endofpacket
 test.dut.tlp_tx_instant_st_ready
 test.dut.tlp_tx_instant_st_startofpacket
@@ -54,7 +80,6 @@ test.dut.tlp_tx_instant_st_valid
 @22
 test.dut.tlp_tx_response_st_data[255:0]
 @28
-test.dut.tlp_tx_response_st_empty[2:0]
 test.dut.tlp_tx_response_st_endofpacket
 test.dut.tlp_tx_response_st_ready
 test.dut.tlp_tx_response_st_startofpacket
@@ -64,7 +89,6 @@ test.dut.tlp_tx_response_st_valid
 @22
 test.dut.tlp_tx_data_st_data[255:0]
 @28
-test.dut.tlp_tx_data_st_empty[2:0]
 test.dut.tlp_tx_data_st_endofpacket
 test.dut.tlp_tx_data_st_ready
 test.dut.tlp_tx_data_st_startofpacket
@@ -79,11 +103,12 @@ test.dut.c2h_staging_done
 test.dut.c2h_staging_enqueued
 @28
 test.dut.c2h_staging_fifo_enqueue
-test.dut.c2h_staging_read_ack
 @420
 test.dut.c2h_staging_offset
-@25
+@24
 test.dut.c2h_staging_enq_lens[29:0]
+@29
+test.dut.c2h_staging_read_req
 @200
 -
 @22
@@ -107,10 +132,10 @@ test.dut.c2h_dma_card_write_ptr[31:0]
 test.dut.c2h_dma_host_read_ptr[31:0]
 @28
 test.dut.c2h_dma_tlp_tx_busy
-test.dut.c2h_dma_tlp_tx_send
 @200
 -
 @22
+test.mem_access_req_address[31:0]
 test.mem_access_req_data[127:0]
 @28
 test.mem_access_req_ready
@@ -132,21 +157,8 @@ test.compl_valid
 test.compl_tag[7:0]
 @200
 -
-@28
-test.tlp_tx_multiplexer.out_channel[1:0]
 @22
-test.tlp_tx_multiplexer.out_data[255:0]
-@28
-test.tlp_tx_multiplexer.out_empty[2:0]
-test.tlp_tx_multiplexer.out_endofpacket
-@22
-test.tlp_tx_multiplexer.out_payload[260:0]
-@28
-test.tlp_tx_multiplexer.out_ready
-test.tlp_tx_multiplexer.out_select[1:0]
-test.tlp_tx_multiplexer.out_startofpacket
-test.tlp_tx_multiplexer.out_valid
-test.tlp_tx_multiplexer.out_valid_wire
+test.scratch_reg[31:0]
 @200
 -
 [pattern_trace] 1

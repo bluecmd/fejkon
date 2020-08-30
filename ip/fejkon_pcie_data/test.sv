@@ -15,7 +15,7 @@
 // +----------------------+        |     |         +--+--+-+--+--+-+--+--+
 // |                      |        |  A  |         |     | |     | |     |
 // |                      +------->+     |         |  F  | |  F  | |  F  |
-// |    MyHDL Testbench   |        |  P  |         |  I  | |  I  | |  I  |
+// |   Cocotb Testbench   |        |  P  |         |  I  | |  I  | |  I  |
 // |                      +<-------+     |         |  F  | |  F  | |  F  |
 // |                      |        |  T  |         |  O  | |  O  | |  O  |
 // +----------------------+        |     |         |     | |     | |     |
@@ -51,7 +51,7 @@ module test;
   logic [127:0] mem_access_resp_data;
   logic         mem_access_resp_ready;
   logic         mem_access_resp_valid;
-  logic [3:0]   tl_cfg_add;
+  logic [3:0]   tl_cfg_add = 0;
   logic [31:0]  tl_cfg_ctl;
   logic [52:0]  tl_cfg_sts;
 
@@ -61,45 +61,45 @@ module test;
   logic          tlp_rx_st_startofpacket;
   logic          tlp_rx_st_endofpacket;
   logic          tlp_rx_st_error;
-  logic    [2:0] tlp_rx_st_empty;
+  logic    [4:0] tlp_rx_st_empty;
 
   logic          tlp_tx_data_st_valid;
   logic  [255:0] tlp_tx_data_st_data;
   logic          tlp_tx_data_st_ready;
   logic          tlp_tx_data_st_startofpacket;
   logic          tlp_tx_data_st_endofpacket;
-  logic    [2:0] tlp_tx_data_st_empty;
+  logic    [4:0] tlp_tx_data_st_empty;
   logic          tlp_tx_instant_st_valid;
   logic  [255:0] tlp_tx_instant_st_data;
   logic          tlp_tx_instant_st_ready;
   logic          tlp_tx_instant_st_startofpacket;
   logic          tlp_tx_instant_st_endofpacket;
-  logic    [2:0] tlp_tx_instant_st_empty;
+  logic    [4:0] tlp_tx_instant_st_empty;
   logic          tlp_tx_response_st_valid;
   logic  [255:0] tlp_tx_response_st_data;
   logic          tlp_tx_response_st_ready;
   logic          tlp_tx_response_st_startofpacket;
   logic          tlp_tx_response_st_endofpacket;
-  logic    [2:0] tlp_tx_response_st_empty;
+  logic    [4:0] tlp_tx_response_st_empty;
 
   logic          tlp_data_fifo_out_valid;
   logic  [255:0] tlp_data_fifo_out_data;
   logic          tlp_data_fifo_out_ready;
   logic          tlp_data_fifo_out_startofpacket;
   logic          tlp_data_fifo_out_endofpacket;
-  logic    [2:0] tlp_data_fifo_out_empty;
+  logic    [4:0] tlp_data_fifo_out_empty;
   logic          tlp_response_fifo_out_valid;
   logic  [255:0] tlp_response_fifo_out_data;
   logic          tlp_response_fifo_out_ready;
   logic          tlp_response_fifo_out_startofpacket;
   logic          tlp_response_fifo_out_endofpacket;
-  logic    [2:0] tlp_response_fifo_out_empty;
+  logic    [4:0] tlp_response_fifo_out_empty;
   logic          tlp_instant_fifo_out_valid;
   logic  [255:0] tlp_instant_fifo_out_data;
   logic          tlp_instant_fifo_out_ready;
   logic          tlp_instant_fifo_out_startofpacket;
   logic          tlp_instant_fifo_out_endofpacket;
-  logic    [2:0] tlp_instant_fifo_out_empty;
+  logic    [4:0] tlp_instant_fifo_out_empty;
 
   logic          tlp_tx_multiplexer_out_valid;
   logic  [255:0] tlp_tx_multiplexer_out_data;
@@ -107,7 +107,7 @@ module test;
   logic    [1:0] tlp_tx_multiplexer_out_channel;
   logic          tlp_tx_multiplexer_out_startofpacket;
   logic          tlp_tx_multiplexer_out_endofpacket;
-  logic    [2:0] tlp_tx_multiplexer_out_empty;
+  logic    [4:0] tlp_tx_multiplexer_out_empty;
 
   logic          tx_st_valid;
   logic  [255:0] tx_st_data;
@@ -124,44 +124,20 @@ module test;
   logic    [0:0] rx_st_error;
   logic    [1:0] rx_st_empty;
 
-  initial begin
-    $from_myhdl(
-      clk,
-      reset,
-      rx_st_data,
-      rx_st_empty,
-      rx_st_error,
-      rx_st_startofpacket,
-      rx_st_endofpacket,
-      rx_st_valid,
-      tx_st_ready,
-      rx_st_bar,
-      tl_cfg_add,
-      tl_cfg_ctl,
-      tl_cfg_sts,
-      data_tx_data,
-      data_tx_valid,
-      data_tx_channel,
-      data_tx_endofpacket,
-      data_tx_startofpacket,
-      data_tx_empty
-    );
-    $to_myhdl(
-      rx_st_ready,
-      tx_st_data,
-      tx_st_startofpacket,
-      tx_st_endofpacket,
-      tx_st_error,
-      tx_st_empty,
-      tx_st_valid,
-      rx_st_mask,
-      data_tx_ready
-    );
-  end
+  logic [5:0]  csr_address = 0;
+  logic [31:0] csr_writedata = 0;
+  logic [31:0] csr_readdata;
+  logic        csr_write = 0;
+  logic        csr_read = 0;
 
   fejkon_pcie_data dut(
     .clk(clk),
     .reset(reset),
+    .csr_address(csr_address),
+    .csr_read(csr_read),
+    .csr_write(csr_write),
+    .csr_writedata(csr_writedata),
+    .csr_readdata(csr_readdata),
     .tlp_rx_st_data(tlp_rx_st_data),
     .tlp_rx_st_empty(tlp_rx_st_empty),
     .tlp_rx_st_error(tlp_rx_st_error),
@@ -207,9 +183,20 @@ module test;
     .tl_cfg_sts(tl_cfg_sts)
   );
 
+  always @(posedge clk) begin
+    if (reset) begin
+      tl_cfg_add <= 0;
+    end else begin
+      tl_cfg_add <= tl_cfg_add + 1;
+      if (tl_cfg_add == 4'hE) begin
+        tl_cfg_ctl[12:0] <= {8'hb3, 5'h0};
+      end
+    end
+  end
+
   altera_avalon_sc_fifo #(
-    .SYMBOLS_PER_BEAT    (8),
-    .BITS_PER_SYMBOL     (32),
+    .SYMBOLS_PER_BEAT    (32),
+    .BITS_PER_SYMBOL     (8),
     .FIFO_DEPTH          (1024),
     .CHANNEL_WIDTH       (0),
     .ERROR_WIDTH         (0),
@@ -249,8 +236,8 @@ module test;
   );
 
   altera_avalon_sc_fifo #(
-    .SYMBOLS_PER_BEAT    (8),
-    .BITS_PER_SYMBOL     (32),
+    .SYMBOLS_PER_BEAT    (32),
+    .BITS_PER_SYMBOL     (8),
     .FIFO_DEPTH          (1024),
     .CHANNEL_WIDTH       (0),
     .ERROR_WIDTH         (0),
@@ -290,8 +277,8 @@ module test;
   );
 
   altera_avalon_sc_fifo #(
-    .SYMBOLS_PER_BEAT    (8),
-    .BITS_PER_SYMBOL     (32),
+    .SYMBOLS_PER_BEAT    (32),
+    .BITS_PER_SYMBOL     (8),
     .FIFO_DEPTH          (1024),
     .CHANNEL_WIDTH       (0),
     .ERROR_WIDTH         (0),
@@ -360,38 +347,6 @@ module test;
     .in2_empty(tlp_instant_fifo_out_empty)
   );
 
-  intel_pcie_tlp_adapter tlp_adapter (
-    .clk                     (clk),
-    .reset                   (reset),
-    .phy_tx_st_data          (tx_st_data),
-    .phy_tx_st_startofpacket (tx_st_startofpacket),
-    .phy_tx_st_endofpacket   (tx_st_endofpacket),
-    .phy_tx_st_error         (tx_st_error),
-    .phy_tx_st_empty         (tx_st_empty),
-    .phy_tx_st_valid         (tx_st_valid),
-    .phy_tx_st_ready         (tx_st_ready),
-    .phy_rx_st_data          (rx_st_data),
-    .phy_rx_st_empty         (rx_st_empty),
-    .phy_rx_st_error         (rx_st_error),
-    .phy_rx_st_startofpacket (rx_st_startofpacket),
-    .phy_rx_st_endofpacket   (rx_st_endofpacket),
-    .phy_rx_st_ready         (rx_st_ready),
-    .phy_rx_st_valid         (rx_st_valid),
-    .tlp_rx_st_data          (tlp_rx_st_data),
-    .tlp_rx_st_empty         (tlp_rx_st_empty),
-    .tlp_rx_st_endofpacket   (tlp_rx_st_endofpacket),
-    .tlp_rx_st_error         (tlp_rx_st_error),
-    .tlp_rx_st_startofpacket (tlp_rx_st_startofpacket),
-    .tlp_rx_st_valid         (tlp_rx_st_valid),
-    .tlp_rx_st_ready         (tlp_rx_st_ready),
-    .tlp_tx_st_data          (tlp_tx_multiplexer_out_data),
-    .tlp_tx_st_empty         (tlp_tx_multiplexer_out_empty),
-    .tlp_tx_st_endofpacket   (tlp_tx_multiplexer_out_endofpacket),
-    .tlp_tx_st_startofpacket (tlp_tx_multiplexer_out_startofpacket),
-    .tlp_tx_st_ready         (tlp_tx_multiplexer_out_ready),
-    .tlp_tx_st_valid         (tlp_tx_multiplexer_out_valid)
-  );
-
   logic [31:0] scratch_reg = ~32'h0;
 
   logic        compl_valid = 0;
@@ -429,8 +384,29 @@ module test;
     end
   end
 
+  int setup = 0;
+  always @(posedge clk) begin
+    if (reset) begin
+      setup <= 0;
+    end else begin
+      csr_write <= 0;
+      csr_writedata <= 0;
+      if (setup == 0) begin
+        csr_address <= 6'h28;
+        csr_write <= 1;
+        csr_writedata <= 32'h1000;
+        setup <= 1;
+      end else if (setup == 1) begin
+        csr_address <= 6'h29;
+        csr_write <= 1;
+        csr_writedata <= 32'h6000;
+        setup <= 2;
+      end
+    end
+  end
+
   initial begin
-    $dumpfile("wave.fst");
+    $dumpfile("fejkon_pcie_data.vcd");
     $dumpvars(0, test);
   end
 endmodule

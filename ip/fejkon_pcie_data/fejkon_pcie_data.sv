@@ -19,7 +19,7 @@ module fejkon_pcie_data (
     input  wire         reset,                            //              reset.reset
     // PCIe TLP TX/RX
     input  wire [255:0] tlp_rx_st_data,                   //          tlp_rx_st.data
-    input  wire [2:0]   tlp_rx_st_empty,                  //                   .empty
+    input  wire [4:0]   tlp_rx_st_empty,                  //                   .empty
     input  wire         tlp_rx_st_error,                  //                   .error
     input  wire         tlp_rx_st_startofpacket,          //                   .startofpacket
     input  wire         tlp_rx_st_endofpacket,            //                   .endofpacket
@@ -33,21 +33,21 @@ module fejkon_pcie_data (
     output wire [255:0] tlp_tx_data_st_data,              //     tlp_tx_data_st.data
     output wire         tlp_tx_data_st_startofpacket,     //                   .startofpacket
     output wire         tlp_tx_data_st_endofpacket,       //                   .endofpacket
-    output wire [2:0]   tlp_tx_data_st_empty,             //                   .empty
+    output wire [4:0]   tlp_tx_data_st_empty,             //                   .empty
     input  wire         tlp_tx_data_st_ready,             //                   .ready
     output wire         tlp_tx_data_st_valid,             //                   .valid
     // Used for unsuccessful completion generation
     output wire [255:0] tlp_tx_instant_st_data,           //  tlp_tx_instant_st.data
     output wire         tlp_tx_instant_st_startofpacket,  //                   .startofpacket
     output wire         tlp_tx_instant_st_endofpacket,    //                   .endofpacket
-    output wire [2:0]   tlp_tx_instant_st_empty,          //                   .empty
+    output wire [4:0]   tlp_tx_instant_st_empty,          //                   .empty
     input  wire         tlp_tx_instant_st_ready,          //                   .ready
     output wire         tlp_tx_instant_st_valid,          //                   .valid
     // Used for successful BAR memory read completions
     output wire [255:0] tlp_tx_response_st_data,          // tlp_tx_response_st.data
     output wire         tlp_tx_response_st_startofpacket, //                   .startofpacket
     output wire         tlp_tx_response_st_endofpacket,   //                   .endofpacket
-    output wire [2:0]   tlp_tx_response_st_empty,         //                   .empty
+    output wire [4:0]   tlp_tx_response_st_empty,         //                   .empty
     input  wire         tlp_tx_response_st_ready,         //                   .ready
     output wire         tlp_tx_response_st_valid,         //                   .valid
     // Incoming packet data to transmit to host memory
@@ -78,12 +78,12 @@ module fejkon_pcie_data (
   );
 
   typedef enum integer {
+    TLP_UNKNOWN = 0,
     TLP_MRD,
     TLP_MRDLK,
     TLP_MWR,
     TLP_CPL,
-    TLP_CPLD,
-    TLP_UNKNOWN
+    TLP_CPLD
   } tlp_t;
 
   // From Intel example design, altpcied_ep_256bit_downstream.v
@@ -139,7 +139,11 @@ module fejkon_pcie_data (
   logic [9:0]        tlp_rx_st_len;
   logic              tlp_rx_st_is_4dw;
 
-  assign tlp_rx_st_dword    = tlp_rx_st_data;
+  assign {
+    tlp_rx_st_dword[0], tlp_rx_st_dword[1], tlp_rx_st_dword[2], tlp_rx_st_dword[3],
+    tlp_rx_st_dword[4], tlp_rx_st_dword[5], tlp_rx_st_dword[6], tlp_rx_st_dword[7]
+  } = tlp_rx_st_data;
+
   assign tlp_rx_st_fmt      = tlp_rx_st_dword[0][31:29];
   assign tlp_rx_st_raw_type = tlp_rx_st_dword[0][28:24];
   assign tlp_rx_st_len      = tlp_rx_st_dword[0][9:0];
@@ -347,13 +351,13 @@ module fejkon_pcie_data (
   logic              tlp_tx_instant_frm_valid = 0;
   logic              tlp_tx_instant_frm_startofpacket = 0;
   logic              tlp_tx_instant_frm_endofpacket = 0;
-  logic        [2:0] tlp_tx_instant_frm_empty = 0;
+  logic        [4:0] tlp_tx_instant_frm_empty = 0;
   logic [7:0] [31:0] tlp_tx_instant_frm_dword = 0;
 
   logic              tlp_tx_response_frm_valid = 0;
   logic              tlp_tx_response_frm_startofpacket = 0;
   logic              tlp_tx_response_frm_endofpacket = 0;
-  logic        [2:0] tlp_tx_response_frm_empty = 0;
+  logic        [4:0] tlp_tx_response_frm_empty = 0;
   logic [7:0] [31:0] tlp_tx_response_frm_dword = 0;
 
   // Instant sender (UR and zero-length reads)
@@ -361,7 +365,7 @@ module fejkon_pcie_data (
     tlp_tx_instant_frm_valid <= 1'b0;
     tlp_tx_instant_frm_startofpacket <= 1'b0;
     tlp_tx_instant_frm_endofpacket <= 1'b0;
-    tlp_tx_instant_frm_empty <= 3'h0;
+    tlp_tx_instant_frm_empty <= 5'h0;
     // Ready latency is zero, so we don't care about ready
     if (is_ready && tlp_rx_frm_is_end && tlp_rx_frm_is_npr) begin
       if (tlp_rx_frm_unsupported) begin
@@ -376,7 +380,7 @@ module fejkon_pcie_data (
         tlp_tx_instant_frm_dword[2][31:16] <= tlp_rx_frm_requester_id;
         tlp_tx_instant_frm_dword[2][15:8] <= tlp_rx_frm_tag;
         tlp_tx_instant_frm_dword[2][6:0] <= tlp_rx_frm_address[6:0]; // Lower address
-        tlp_tx_instant_frm_empty <= 3'h5;
+        tlp_tx_instant_frm_empty <= 5'h14;
         tlp_tx_instant_frm_valid <= 1'b1;
         tlp_tx_instant_frm_startofpacket <= 1'b1;
         tlp_tx_instant_frm_endofpacket <= 1'b1;
@@ -392,7 +396,7 @@ module fejkon_pcie_data (
         tlp_tx_instant_frm_dword[2][31:16] <= tlp_rx_frm_requester_id;
         tlp_tx_instant_frm_dword[2][15:8] <= tlp_rx_frm_tag;
         tlp_tx_instant_frm_dword[2][6:0] <= tlp_rx_frm_address[6:0]; // Lower address
-        tlp_tx_instant_frm_empty <= 3'h5;
+        tlp_tx_instant_frm_empty <= 5'h14;
         tlp_tx_instant_frm_valid <= 1'b1;
         tlp_tx_instant_frm_startofpacket <= 1'b1;
         tlp_tx_instant_frm_endofpacket <= 1'b1;
@@ -405,7 +409,7 @@ module fejkon_pcie_data (
     tlp_tx_response_frm_valid <= 1'b0;
     tlp_tx_response_frm_startofpacket <= 1'b0;
     tlp_tx_response_frm_endofpacket <= 1'b0;
-    tlp_tx_response_frm_empty <= 3'h0;
+    tlp_tx_response_frm_empty <= 5'h0;
     // Ready latency is zero, so we don't care about ready
     if (is_ready && mem_access_resp_valid) begin
       tlp_tx_response_frm_valid <= 1'b1;
@@ -427,10 +431,10 @@ module fejkon_pcie_data (
       // (We do the same for RX)
       if (mem_access_resp_lower_address[2] == 0) begin
         // Align header to 8-bytes, start data at 5th DW
-        tlp_tx_response_frm_empty <= 3'h3;
+        tlp_tx_response_frm_empty <= 5'hC;
         tlp_tx_response_frm_dword[4] <= mem_access_resp_rddata;
       end else begin
-        tlp_tx_response_frm_empty <= 3'h4;
+        tlp_tx_response_frm_empty <= 5'h10;
         tlp_tx_response_frm_dword[3] <= mem_access_resp_rddata;
       end
     end
@@ -455,27 +459,30 @@ module fejkon_pcie_data (
   //
 
   logic [271:0] c2h_staging_data;
-  logic         c2h_staging_read_ack = 0;
+  logic         c2h_staging_read_req = 0;
   logic         c2h_staging_fifo_enqueue;
+  logic         c2h_staging_fifo_empty;
 
   logic [255:0] c2h_staging_pkt_data;
   logic [1:0]   c2h_staging_pkt_channel;
+  logic         c2h_staging_pkt_sop;
   logic         c2h_staging_pkt_eop;
   logic [2:0]   c2h_staging_pkt_empty;
   logic [9:0]   c2h_staging_pkt_length; // dwords
   logic         c2h_staging_pkt_valid;
 
   assign c2h_staging_pkt_data = c2h_staging_data[255:0];
-  assign c2h_staging_pkt_channel = c2h_staging_data[257:256];
-  assign c2h_staging_pkt_eop = c2h_staging_data[258];
-  assign c2h_staging_pkt_empty = c2h_staging_data[261:259];
+  assign c2h_staging_pkt_eop = c2h_staging_data[259];
+  assign c2h_staging_pkt_sop = c2h_staging_data[258];
+  assign c2h_staging_pkt_empty = c2h_staging_data[262:260];
 
   pcie_data_fifo staging_data_fifo (
     .clock(clk),
     .sclr(reset),
-    .data({10'h0, data_tx_empty[4:2], data_tx_endofpacket, data_tx_channel, data_tx_data}),
-    .rdreq(c2h_staging_read_ack),
+    .data({1'b1, 8'h0, data_tx_empty[4:2], data_tx_endofpacket, data_tx_startofpacket, 2'h0, data_tx_data}),
+    .rdreq(c2h_staging_read_req),
     .wrreq(c2h_staging_fifo_enqueue),
+    .empty(c2h_staging_fifo_empty),
     .q(c2h_staging_data));
 
   int   c2h_staging_offset = 0; // Position of packet currently being ingested (dwords)
@@ -483,12 +490,13 @@ module fejkon_pcie_data (
   logic c2h_staging_done = 0; // Set when a packet has passed through ingress
   logic c2h_staging_read_ready = 0;
 
-  logic [2:0] [9:0] c2h_staging_enq_lens = 0;
+  logic [2:0] [11:0] c2h_staging_enq_data = 0;
 
-  assign c2h_staging_pkt_length = c2h_staging_enq_lens[0];
-  assign c2h_staging_pkt_valid = c2h_staging_enqueued > 0;
+  assign c2h_staging_pkt_length = c2h_staging_enq_data[0][9:0];
+  assign c2h_staging_pkt_channel = c2h_staging_enq_data[0][11:10];
+  assign c2h_staging_pkt_valid = c2h_staging_enqueued != 0 && c2h_staging_pkt_length != 0 && ~c2h_staging_fifo_empty;
 
-  assign c2h_staging_fifo_enqueue = ~reset && data_tx_valid && c2h_staging_read_ready;
+  assign c2h_staging_fifo_enqueue = data_tx_valid && data_tx_ready;
 
   logic c2h_dma_tlp_tx_busy;
 
@@ -533,24 +541,24 @@ module fejkon_pcie_data (
 
   always @(posedge clk) begin: c2h_staging_enqueue_cntr
     if (reset) begin
-      c2h_staging_enqueued <= 0;
+      c2h_staging_enqueued = 0;
       c2h_staging_done <= 1'b0;
     end else begin
       c2h_staging_done <= 1'b0;
       if (data_tx_valid && data_tx_endofpacket && c2h_staging_read_ready) begin
-        c2h_staging_enqueued <= c2h_staging_enqueued + 1;
         c2h_staging_done <= 1'b1;
-        c2h_staging_enq_lens[c2h_staging_enqueued] <= c2h_staging_offset[9:0];
+        c2h_staging_enq_data[c2h_staging_enqueued] <= {data_tx_channel, c2h_staging_offset[9:0]};
+        c2h_staging_enqueued = c2h_staging_enqueued + 1;
       end
-      if (c2h_staging_read_ack && c2h_staging_pkt_eop) begin
-        c2h_staging_enqueued <= c2h_staging_enqueued - 1;
-        c2h_staging_enq_lens[0] <= c2h_staging_enq_lens[1];
-        c2h_staging_enq_lens[1] <= c2h_staging_enq_lens[2];
+      if (c2h_staging_read_req && c2h_staging_pkt_eop) begin
+        c2h_staging_enqueued = c2h_staging_enqueued - 1;
+        c2h_staging_enq_data[0] <= c2h_staging_enq_data[1];
+        c2h_staging_enq_data[1] <= c2h_staging_enq_data[2];
       end
     end
   end
 
-  assign data_tx_ready = c2h_staging_read_ready;
+  assign data_tx_ready = c2h_staging_read_ready && ~reset && my_id_valid;
 
   //
   // Outgoing TLP construction for C2H DMA
@@ -565,7 +573,7 @@ module fejkon_pcie_data (
   logic              tlp_tx_data_frm_valid = 0;
   logic              tlp_tx_data_frm_startofpacket = 0;
   logic              tlp_tx_data_frm_endofpacket = 0;
-  logic        [2:0] tlp_tx_data_frm_empty = 0;
+  logic        [4:0] tlp_tx_data_frm_empty = 0;
   logic [7:0] [31:0] tlp_tx_data_frm_dword = 0;
 
   logic c2h_tx_running = 0;
@@ -602,16 +610,16 @@ module fejkon_pcie_data (
         data_header_length = 4'h8 - data_start;
 
         // Only send the TLP if the write ptr address is sane
-        tlp_tx_data_frm_valid <= c2h_dma_card_write_ptr > 0;
+        tlp_tx_data_frm_valid <= (c2h_dma_card_write_ptr != 0) && my_id_valid;
         tlp_tx_data_frm_startofpacket <= 1;
         tlp_tx_data_frm_dword = 0;
         tlp_tx_data_frm_dword[0][31:29] = 3'b010;        // TLP Fmt
         tlp_tx_data_frm_dword[0][28:24] = 5'b00000;      // TLP Type (MWr)
         tlp_tx_data_frm_dword[0][9:0] = c2h_staging_pkt_length[9:0] + {6'h0, data_header_length}; // Length
-        tlp_tx_data_frm_dword[1][31:16] = my_id;         // Completer ID
+        tlp_tx_data_frm_dword[1][31:16] = my_id;         // Requester ID
         tlp_tx_data_frm_dword[1][15:8] = 0;              // Tag
-        tlp_tx_data_frm_dword[1][7:4] = 0;               // Last BE
-        tlp_tx_data_frm_dword[1][3:0] = 0;               // 1st BE
+        tlp_tx_data_frm_dword[1][7:4] = 4'hf;            // Last BE
+        tlp_tx_data_frm_dword[1][3:0] = 4'hf;            // 1st BE
         tlp_tx_data_frm_dword[2][31:2] = c2h_dma_card_write_ptr[31:2]; // Address
         tlp_tx_data_frm_dword[2][1:0] = 0;               // Processing Hints (PH)
 
@@ -636,18 +644,20 @@ module fejkon_pcie_data (
           tlp_tx_data_frm_dword[4][31:16] = 0;
         end
         c2h_tx_running <= 1'b1;
-      end
-      if (c2h_tx_running) begin
-        c2h_staging_read_ack <= 1'b1;
-        tlp_tx_data_frm_dword = c2h_staging_pkt_data;
-        tlp_tx_data_frm_empty <= c2h_staging_pkt_empty;
+        c2h_staging_read_req <= 1'b1;
+      end else if (c2h_tx_running) begin
+        {tlp_tx_data_frm_dword[0], tlp_tx_data_frm_dword[1],
+         tlp_tx_data_frm_dword[2], tlp_tx_data_frm_dword[3],
+         tlp_tx_data_frm_dword[4], tlp_tx_data_frm_dword[5],
+         tlp_tx_data_frm_dword[6], tlp_tx_data_frm_dword[7]} = c2h_staging_pkt_data;
+        tlp_tx_data_frm_empty <= {c2h_staging_pkt_empty, 2'h0};
         tlp_tx_data_frm_endofpacket <= c2h_staging_pkt_eop;
         if (c2h_staging_pkt_eop) begin
+          c2h_staging_read_req <= 0;
           c2h_tx_running <= 0;
-          c2h_staging_read_ack <= 0;
         end
       end else begin
-        c2h_staging_read_ack <= 0;
+        c2h_staging_read_req <= 0;
         tlp_tx_data_frm_valid <= 0;
       end
     end
@@ -659,7 +669,7 @@ module fejkon_pcie_data (
     end else begin
       if (c2h_dma_buf_reset_write) begin
         c2h_dma_card_write_ptr <= c2h_dma_buf_start_addr;
-      end else if (c2h_staging_pkt_eop) begin
+      end else if (c2h_staging_read_req && c2h_staging_pkt_eop) begin
         // Advance one frame if there is enough space for one more frame
         if (c2h_dma_card_write_ptr + 4096*2 >= c2h_dma_buf_end_addr) begin
           c2h_dma_card_write_ptr <= c2h_dma_buf_start_addr;
@@ -705,7 +715,7 @@ module fejkon_pcie_data (
         csr_rx_tlp <= tlp_rx_st_dword;
         // Mask out the parts we're supposed to only care about
         if (tlp_rx_st_endofpacket) begin
-          case (tlp_rx_st_empty)
+          case (tlp_rx_st_empty[4:2])
             3'h2: csr_rx_tlp[7:6] <= ~0;
             3'h4: csr_rx_tlp[7:4] <= ~0;
             3'h6: csr_rx_tlp[7:2] <= ~0;
@@ -724,7 +734,7 @@ module fejkon_pcie_data (
         csr_tx_data_tlp <= tlp_tx_data_frm_dword;
         // Mask out the parts we're supposed to only care about
         if (tlp_tx_data_frm_endofpacket) begin
-          case (tlp_tx_data_frm_empty)
+          case (tlp_tx_data_frm_empty[4:2])
             3'h1: csr_tx_data_tlp[7:7] <= ~0;
             3'h2: csr_tx_data_tlp[7:6] <= ~0;
             3'h3: csr_tx_data_tlp[7:5] <= ~0;
@@ -741,7 +751,7 @@ module fejkon_pcie_data (
         csr_tx_instant_tlp <= tlp_tx_instant_frm_dword;
         // Mask out the parts we're supposed to only care about
         if (tlp_tx_instant_frm_endofpacket) begin
-          case (tlp_tx_instant_frm_empty)
+          case (tlp_tx_instant_frm_empty[4:2])
             3'h1: csr_tx_instant_tlp[7:7] <= ~0;
             3'h2: csr_tx_instant_tlp[7:6] <= ~0;
             3'h3: csr_tx_instant_tlp[7:5] <= ~0;
@@ -758,7 +768,7 @@ module fejkon_pcie_data (
         csr_tx_response_tlp <= tlp_tx_response_frm_dword;
         // Mask out the parts we're supposed to only care about
         if (tlp_tx_response_frm_endofpacket) begin
-          case (tlp_tx_response_frm_empty)
+          case (tlp_tx_response_frm_empty[4:2])
             3'h1: csr_tx_response_tlp[7:7] <= ~0;
             3'h2: csr_tx_response_tlp[7:6] <= ~0;
             3'h3: csr_tx_response_tlp[7:5] <= ~0;
@@ -815,7 +825,7 @@ module fejkon_pcie_data (
         6'h2a: c2h_dma_host_read_ptr <= csr_writedata;
         default: ;
       endcase
-      if (csr_address == 6'h20 || csr_address == 6'h21) begin
+      if (csr_address == 6'h28 || csr_address == 6'h29) begin
         // Reset the write pointer
         c2h_dma_buf_reset_write <= 1;
       end
@@ -828,17 +838,28 @@ module fejkon_pcie_data (
 
   assign csr_readdata = csr_readdata_reg;
   assign tlp_rx_st_ready = is_ready;
-  assign tlp_tx_data_st_data = tlp_tx_data_frm_dword;
+  assign tlp_tx_data_st_data = {
+    tlp_tx_data_frm_dword[0], tlp_tx_data_frm_dword[1], tlp_tx_data_frm_dword[2], tlp_tx_data_frm_dword[3],
+    tlp_tx_data_frm_dword[4], tlp_tx_data_frm_dword[5], tlp_tx_data_frm_dword[6], tlp_tx_data_frm_dword[7]
+  };
   assign tlp_tx_data_st_valid = tlp_tx_data_frm_valid;
   assign tlp_tx_data_st_startofpacket = tlp_tx_data_frm_startofpacket;
   assign tlp_tx_data_st_endofpacket = tlp_tx_data_frm_endofpacket;
   assign tlp_tx_data_st_empty = tlp_tx_data_frm_empty;
-  assign tlp_tx_instant_st_data = tlp_tx_instant_frm_dword;
+
+  assign tlp_tx_instant_st_data = {
+    tlp_tx_instant_frm_dword[0], tlp_tx_instant_frm_dword[1], tlp_tx_instant_frm_dword[2], tlp_tx_instant_frm_dword[3],
+    tlp_tx_instant_frm_dword[4], tlp_tx_instant_frm_dword[5], tlp_tx_instant_frm_dword[6], tlp_tx_instant_frm_dword[7]
+  };
   assign tlp_tx_instant_st_valid = tlp_tx_instant_frm_valid;
   assign tlp_tx_instant_st_startofpacket = tlp_tx_instant_frm_startofpacket;
   assign tlp_tx_instant_st_endofpacket = tlp_tx_instant_frm_endofpacket;
   assign tlp_tx_instant_st_empty = tlp_tx_instant_frm_empty;
-  assign tlp_tx_response_st_data = tlp_tx_response_frm_dword;
+
+  assign tlp_tx_response_st_data = {
+    tlp_tx_response_frm_dword[0], tlp_tx_response_frm_dword[1], tlp_tx_response_frm_dword[2], tlp_tx_response_frm_dword[3],
+    tlp_tx_response_frm_dword[4], tlp_tx_response_frm_dword[5], tlp_tx_response_frm_dword[6], tlp_tx_response_frm_dword[7]
+  };
   assign tlp_tx_response_st_valid = tlp_tx_response_frm_valid;
   assign tlp_tx_response_st_startofpacket = tlp_tx_response_frm_startofpacket;
   assign tlp_tx_response_st_endofpacket = tlp_tx_response_frm_endofpacket;

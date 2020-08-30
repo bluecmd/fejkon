@@ -6,209 +6,196 @@ It is not as correct and detailed as a full PCIe endpoint simulation
 (we have that as well in fejkon/test/pcie-hip/) but it is fast and easier
 to debug. It also uses only open-source tools which is cool.
 """
-import logging as log
-import os
-import unittest
+import binascii
+import cocotb
+from cocotb.clock import Clock, Timer
+from cocotb.drivers.avalon import AvalonSTPkts as AvalonSTDriver
+from cocotb.drivers.avalon import AvalonMaster
+from cocotb.monitors.avalon import AvalonSTPkts as AvalonSTMonitor
+from cocotb.regression import TestFactory
+from cocotb.scoreboard import Scoreboard
+from cocotb.triggers import RisingEdge, with_timeout
 
-import myhdl
-from pcietb import pcie
-import test_ep
+import pcie
 
-def testcase(*blocks):
-    """Runs a decorated function as a block in MyHDL.
-
-    Arguments:
-      *blocks: Any argument given is a function to create other blocks
-    """
-    def inner(func):
-        def block(self):
-            def run_and_stop():
-                yield from func(self)
-                raise myhdl.StopSimulation
-            insts = [x(self, func) for x in blocks] + [run_and_stop()]
-            sim = myhdl.Simulation(insts)
-            sim.run(quiet=1)
-        return block
-    return inner
-
-class Test(unittest.TestCase):
-    """Collection of PCIe test cases"""
-
-    # pylint: disable=too-many-instance-attributes
-    def setUp(self):
-        self.clk = myhdl.Signal(bool(0))
-        self.rst = myhdl.Signal(bool(0))
-        self.data_tx_data = myhdl.Signal(myhdl.intbv()[256:])
-        self.data_tx_empty = myhdl.Signal(myhdl.intbv()[5:])
-        self.data_tx_channel = myhdl.Signal(myhdl.intbv()[2:])
-        self.data_tx_valid = myhdl.Signal(bool(0))
-        self.data_tx_startofpacket = myhdl.Signal(bool(0))
-        self.data_tx_endofpacket = myhdl.Signal(bool(0))
-        self.data_tx_ready = myhdl.Signal(bool(0))
-        # PCIe devices
-        rc = pcie.RootComplex()
-        ep = test_ep.FejkonEP(self.clk)
-        dev = pcie.Device(ep)
-        rc.make_port().connect(dev)
-        sw = pcie.Switch()
-        rc.make_port().connect(sw)
-        self.rc = rc
-        self.ep = ep
-        self.sw = sw
-
-    # === MyHDL instances ===
-    # MyHDL instances that can be enable to co-execute alongside the test case
-    # These are processes that may or may not be included depending on if that
-    # signal is required for a particular test case.
-    # dutgen and clkgen is probably always required.
-
-    def clkgen(self, unused_test):
-        @myhdl.always(myhdl.delay(2))
-        def block():
-            # pylint: disable=multiple-statements
-            self.clk.next = not self.clk
-        return block
-
-    def dutgen(self, test):
-        """Cosimulation of actual Verilog code"""
-        # This is because icarus does not allow changing the dumpfile in
-        # a nice way
-        oldpath = os.getcwd()
-        newpath = os.path.join(oldpath, test.__name__)
-        os.makedirs(newpath, exist_ok=True)
-        os.chdir(newpath)
-        ret = myhdl.Cosimulation(
-            "vvp -m myhdl ../test.vvp -fst",
-            clk=self.clk,
-            reset=self.rst,
-            rx_st_data=self.ep.rx_st_data,
-            rx_st_empty=self.ep.rx_st_empty,
-            rx_st_error=self.ep.rx_st_error,
-            rx_st_startofpacket=self.ep.rx_st_startofpacket,
-            rx_st_endofpacket=self.ep.rx_st_endofpacket,
-            rx_st_ready=self.ep.rx_st_ready,
-            rx_st_valid=self.ep.rx_st_valid,
-            rx_st_bar=self.ep.rx_st_bar,
-            rx_st_mask=self.ep.rx_st_mask,
-            tx_st_data=self.ep.tx_st_data,
-            tx_st_startofpacket=self.ep.tx_st_startofpacket,
-            tx_st_endofpacket=self.ep.tx_st_endofpacket,
-            tx_st_error=self.ep.tx_st_error,
-            tx_st_empty=self.ep.tx_st_empty,
-            tx_st_ready=self.ep.tx_st_ready,
-            tx_st_valid=self.ep.tx_st_valid,
-            data_tx_data=self.data_tx_data,
-            data_tx_valid=self.data_tx_valid,
-            data_tx_ready=self.data_tx_ready,
-            data_tx_channel=self.data_tx_channel,
-            data_tx_endofpacket=self.data_tx_endofpacket,
-            data_tx_startofpacket=self.data_tx_startofpacket,
-            data_tx_empty=self.data_tx_empty,
-            tl_cfg_add=self.ep.tl_cfg_add,
-            tl_cfg_ctl=self.ep.tl_cfg_ctl,
-            tl_cfg_sts=self.ep.tl_cfg_sts)
-        os.chdir(oldpath)
-        return ret
-
-    # === End of MyHDL instances ===
-
-    def reset(self):
-        yield myhdl.delay(10)
-        self.ep.reset()
-        self.rst.next = 1
-        yield myhdl.delay(10)
-        self.rst.next = 0
-        yield myhdl.delay(10)
-        yield from self.rc.enumerate(enable_bus_mastering=True, configure_msi=True)
-
-    def await_tx(self):
-        """Called to prevent multiple TX to be called at the same time."""
-        # Bug workaround for MyHDL
-        while not self.ep.tx_sem.acquire(blocking=False):
-            yield myhdl.delay(100)
-
-    # TODO(bluecmd): we don't test 64 bit operations currently
-    @testcase(clkgen, dutgen)
-    def test_read(self):
-        """Test reading standard 4 byte reads."""
-        yield from self.reset()
-        bar0 = self.ep.bar[0]
-        ident_raw = yield from self.rc.mem_read(bar0, 4)
-        ident = int.from_bytes(ident_raw, byteorder='little', signed=False)
-        githash_raw = yield from self.rc.mem_read(bar0 + 4, 4)
-        githash = int.from_bytes(githash_raw, byteorder='little', signed=False)
-        self.assertEqual(ident, 0x02010de5)
-        self.assertEqual(githash, 0xdeadbeef)
-
-    @testcase(clkgen, dutgen)
-    def test_too_small_read(self):
-        """Test reading 3 bytes, should fail."""
-        yield from self.reset()
-        bar0 = self.ep.bar[0]
-        with self.assertRaises(pcie.UnsuccessfulCompletionError):
-            _ = yield from self.rc.mem_read(bar0, 3)
-
-    @testcase(clkgen, dutgen)
-    def test_too_large_read(self):
-        """Test reading 1024 bytes, should fail."""
-        yield from self.reset()
-        bar0 = self.ep.bar[0]
-        with self.assertRaises(pcie.UnsuccessfulCompletionError):
-            _ = yield from self.rc.mem_read(bar0, 1024)
-
-    @testcase(clkgen, dutgen)
-    def test_write_read(self):
-        """Test writing and then reading 4 bytes."""
-        yield from self.reset()
-        bar0 = self.ep.bar[0]
-        # TODO: PCIe test code requires LE byte arrays for some reason
-        data = bytearray(reversed([1, 2, 3, 4]))
-        yield from self.rc.mem_write(bar0 + 0xF00, data)
-        yield from self.await_tx()
-        readback = yield from self.rc.mem_read(bar0 + 0xF00, 4)
-        self.assertEqual(data, readback)
-
-    @testcase(clkgen, dutgen)
-    def test_dma_c2h(self):
-        """Test writing acquired frames to host memory."""
-        yield from self.reset()
-        for i in range(68):
-            self.data_tx_valid.next = 1
-            self.data_tx_startofpacket.next = i == 0
-            self.data_tx_endofpacket.next = i == 67
-            self.data_tx_empty.next = 28 if i == 67 else 0 # 4 byte in last packet makes a 2148 FC frame
-            self.data_tx_channel.next = 0
-            self.data_tx_data.next = 0xdeadbeefcafef00d1234567890abcdefaaaaaaaaaaaaaaaa5555555555555500 + i
-            if not self.data_tx_ready:
-                yield self.data_tx_ready.posedge, myhdl.delay(1000)
-                if not self.data_tx_ready:
-                    raise Exception("Timeout waiting for data_tx_ready")
-            yield self.clk.posedge
-        for channel in range(4):
-            yield self.clk.negedge
-            # The core should not accept any more reads until it has been copied,
-            # which takes one clock cycle at least
-            if self.data_tx_ready == 1:
-                raise Exception("Core is accepting data even though it should not")
-            for i in range(4):
-                self.data_tx_valid.next = 1
-                self.data_tx_startofpacket.next = i == 0
-                self.data_tx_endofpacket.next = i == 3
-                self.data_tx_empty.next = 0
-                self.data_tx_channel.next = channel
-                self.data_tx_data.next = 0xdeadbeefcafef00d1234567890abcdefaaaaaaaaaaaaaaaa5555555555555500 + i
-                if not self.data_tx_ready:
-                    yield self.data_tx_ready.posedge, myhdl.delay(1000)
-                    if not self.data_tx_ready:
-                        raise Exception("Timeout waiting for data_tx_ready")
-                yield self.clk.posedge
-        self.data_tx_valid.next = 0
-        yield myhdl.delay(1000)
+DMA_WND_START = 0x1000
+DMA_WND_END   = 0x5000
+DMA_WND_SIZE  = 4
 
 
-if __name__ == '__main__':
-    os.chdir(os.path.dirname(os.path.abspath(__file__)))
-    log.basicConfig(
-        level=log.DEBUG,
-        format='[%(asctime)-15s] %(funcName)-15s %(levelname)-8s %(message)s')
-    unittest.main()
+class BaseTest:
+    """Common test logic and resource for all tests."""
+
+    def __init__(self, dut):
+        self.dut = dut
+        self.tlp_tx_st = AvalonSTMonitor(dut, 'tlp_tx_multiplexer_out', dut.clk)
+        self.tlp_tx_recovered = AvalonSTMonitor(dut, 'tlp_tx_multiplexer_out', dut.clk,
+                callback=self.tx_model)
+        self.csr = AvalonMaster(dut, 'csr', dut.clk)
+        self.expected_output = []
+        self.scoreboard = Scoreboard(dut)
+        self.scoreboard.add_interface(self.tlp_tx_st, self.expected_output)
+
+    async def reset(self):
+        self.dut.reset <= 1
+        await Timer(50, units='ns')
+        self.dut.reset <= 0
+        await Timer(100, units='ns')
+        self.dut.tlp_tx_multiplexer_out_ready <= 1
+        self.dut.rx_st_bar <= 1
+        self.dut.reset._log.debug('Reset complete')
+
+    def expect_memwrite(self, address, data):
+        exp = pcie.TLP()
+        exp.requester_id = pcie.PcieId(bus=0xb3, device=0)
+        exp.set_be(address, len(data))
+        exp.fmt_type = pcie.TLP_MEM_WRITE
+        exp.set_data(data)
+        exp.byte_count = len(data)
+        self.expected_output.append(exp.intel_pack())
+
+    def expect_cmpld(self, address, data):
+        exp = pcie.TLP()
+        exp.completer_id = pcie.PcieId(bus=0xb3, device=0)
+        exp.set_be(address, len(data))
+        exp.fmt_type = pcie.TLP_CPL_DATA
+        exp.set_data(data)
+        exp.byte_count = len(data)
+        self.expected_output.append(exp.intel_pack())
+
+    def tx_model(self, transaction):
+        """Log TLPs received from DUT."""
+        tlp = pcie.TLP()
+        tlp.intel_unpack(transaction)
+        self.tlp_tx_recovered.log.info("TLP from DUT: " + repr(tlp))
+
+
+class TestReadWrite(BaseTest):
+    """Base class to test response to TLPs initiated by host."""
+
+    def __init__(self, dut):
+        super().__init__(dut)
+        self.tlp_rx_st = AvalonSTDriver(dut, 'tlp_rx_st', dut.clk)
+        self.tlp_rx_recovered = AvalonSTMonitor(dut, 'tlp_rx_st', dut.clk,
+                callback=self.rx_model)
+
+    def rx_model(self, transaction):
+        """Log TLPs being set to DUT."""
+        tlp = pcie.TLP()
+        tlp.intel_unpack(transaction)
+        self.tlp_rx_recovered.log.info("TLP to DUT: " + repr(tlp))
+
+
+class TestC2H(BaseTest):
+    """Base class to test TLPs emitted by C2H DMA."""
+
+    def __init__(self, dut):
+        super().__init__(dut)
+        self.data_tx = AvalonSTDriver(dut, 'data_tx', dut.clk)
+
+
+@cocotb.test()
+async def test_unaligned_read(dut):
+    """Test MemRead on a non-QWORD aligned address."""
+    clock = Clock(dut.clk, 10, units='ns')
+    cocotb.fork(clock.start())
+    tb = TestReadWrite(dut)
+    await tb.reset()
+    tlp = pcie.TLP()
+    tlp.fmt_type = pcie.TLP_MEM_READ
+    tlp.set_be(addr=0x4, length=4)
+    tb.expect_cmpld(0x4, binascii.unhexlify('deadbeef'))
+    await with_timeout(tb.tlp_rx_st.send(tlp.intel_pack()), 100, 'ns')
+    await Timer(100, 'ns')
+    raise tb.scoreboard.result
+
+
+@cocotb.test()
+async def test_aligned_read(dut):
+    """Test MemRead on a QWORD aligned address."""
+    clock = Clock(dut.clk, 10, units='ns')
+    cocotb.fork(clock.start())
+    tb = TestReadWrite(dut)
+    await tb.reset()
+    tlp = pcie.TLP()
+    tlp.fmt_type = pcie.TLP_MEM_READ
+    tlp.set_be(addr=0x0, length=4)
+    tb.expect_cmpld(0x0, binascii.unhexlify('02010de5'))
+    await with_timeout(tb.tlp_rx_st.send(tlp.intel_pack()), 100, 'ns')
+    await Timer(100, 'ns')
+    raise tb.scoreboard.result
+
+
+@cocotb.test()
+async def test_read_write(dut):
+    """Test scratch reg MemWrite / MemRead."""
+    clock = Clock(dut.clk, 10, units='ns')
+    cocotb.fork(clock.start())
+    tb = TestReadWrite(dut)
+    await tb.reset()
+    tlp = pcie.TLP()
+    tlp.fmt_type = pcie.TLP_MEM_WRITE
+    tlp.set_be(addr=0xf00, length=4)
+    tlp.set_data(binascii.unhexlify('f00fcafe'))
+    await with_timeout(tb.tlp_rx_st.send(tlp.intel_pack()), 100, 'ns')
+    tlp.fmt_type = pcie.TLP_MEM_READ
+    tlp.set_be(addr=0xf00, length=4)
+    tb.expect_cmpld(0xf00, binascii.unhexlify('f00fcafe'))
+    await with_timeout(tb.tlp_rx_st.send(tlp.intel_pack()), 100, 'ns')
+    await Timer(100, 'ns')
+    raise tb.scoreboard.result
+
+
+@cocotb.coroutine
+async def run_c2h_dma_test(dut, dwords, channel):
+    """Test C2H DMA."""
+    clock = Clock(dut.clk, 10, units='ns')
+    cocotb.fork(clock.start())
+    tb = TestC2H(dut)
+    await tb.reset()
+    payload = bytearray()
+    for i in range(dwords * 4):
+        payload.append(i % 256)
+    payload = bytes(payload)
+    header = int.to_bytes(0x4 + ((len(payload) // 4) << 4) + (channel << 14), length=4, byteorder='big')
+    header = header + bytes(12)
+    tb.expect_memwrite(DMA_WND_START, header + payload)
+    await with_timeout(tb.data_tx.send(payload, channel=channel), 1000, 'ns')
+    await RisingEdge(dut.clk)
+    cntr = await tb.csr.read(0x6) # csr_c2h_staging_counter
+    assert cntr == 1, 'expected csr_c2h_staging_counter to be incremented to 1'
+    await Timer(1000, 'ns')
+    raise tb.scoreboard.result
+
+
+c2h_factory = TestFactory(run_c2h_dma_test)
+# TODO:
+# - < 9 DWs seems broken
+# - Add packet fragmentation
+c2h_factory.add_option('dwords', [15, 16, 100])
+c2h_factory.add_option('channel', [0, 3])
+c2h_factory.generate_tests()
+
+
+@cocotb.test()
+async def test_c2h_dma_pressure(dut):
+    """Test C2H DMA pressure."""
+    clock = Clock(dut.clk, 10, units='ns')
+    cocotb.fork(clock.start())
+    tb = TestC2H(dut)
+    channel = 2
+    await tb.reset()
+    for i in range(30):
+        payload = bytearray()
+        for j in range(10 * 4):
+            payload.append(j % 256)
+        payload = bytes(payload)
+        header = int.to_bytes(0x4 + ((len(payload) // 4) << 4) + (channel << 14), length=4, byteorder='big')
+        header = header + bytes(12)
+        tb.expect_memwrite(DMA_WND_START + 4096 * (i % DMA_WND_SIZE), header + payload)
+        await with_timeout(tb.data_tx.send(payload, channel=channel), 1000, 'ns')
+    await RisingEdge(dut.clk)
+    cntr = await tb.csr.read(0x6) # csr_c2h_staging_counter
+    assert cntr == i + 1, 'expected csr_c2h_staging_counter to be incremented to %s' % (i + 1, )
+    await Timer(1000, 'ns')
+    raise tb.scoreboard.result

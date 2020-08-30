@@ -141,9 +141,7 @@ disable=print-statement,
         comprehension-escape,
         line-too-long,
         pointless-statement,
-        invalid-name,
-        protected-access,
-        no-value-for-parameter
+        protected-access
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option

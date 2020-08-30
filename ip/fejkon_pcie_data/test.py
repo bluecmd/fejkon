@@ -12,6 +12,7 @@ from cocotb.clock import Clock, Timer
 from cocotb.drivers.avalon import AvalonSTPkts as AvalonSTDriver
 from cocotb.drivers.avalon import AvalonMaster
 from cocotb.monitors.avalon import AvalonSTPkts as AvalonSTMonitor
+from cocotb.regression import TestFactory
 from cocotb.scoreboard import Scoreboard
 from cocotb.triggers import RisingEdge, with_timeout
 
@@ -141,18 +142,21 @@ async def test_read_write(dut):
     raise tb.scoreboard.result
 
 
-@cocotb.test()
-async def test_c2h_dma(dut):
+@cocotb.coroutine
+async def run_c2h_dma_test(dut, dwords, channel):
     """Test C2H DMA."""
     clock = Clock(dut.clk, 10, units='ns')
     cocotb.fork(clock.start())
     tb = TestC2H(dut)
     await tb.reset()
-    payload = bytes([0, 1, 2, 3]*16)
-    header = int.to_bytes(0x104, length=4, byteorder='big')
+    payload = bytearray()
+    for i in range(dwords * 4):
+        payload.append(i)
+    payload = bytes(payload)
+    header = int.to_bytes(0x4 + ((len(payload) // 4) << 4) + (channel << 14), length=4, byteorder='big')
     header = header + bytes(12)
     tb.expect_memwrite(0x1000, header + payload)
-    await with_timeout(tb.data_tx.send(payload), 100, 'ns')
+    await with_timeout(tb.data_tx.send(payload, channel=channel), 100, 'ns')
     await RisingEdge(dut.clk)
     cntr = await tb.csr.read(0x6) # csr_c2h_staging_counter
     assert cntr == 1, 'expected csr_c2h_staging_counter to be incremented to 1'
@@ -160,3 +164,7 @@ async def test_c2h_dma(dut):
     raise tb.scoreboard.result
 
 
+c2h_factory = TestFactory(run_c2h_dma_test)
+c2h_factory.add_option('dwords', [15, 16])
+c2h_factory.add_option('channel', [0, 3])
+c2h_factory.generate_tests()

@@ -471,7 +471,6 @@ module fejkon_pcie_data (
   logic         c2h_staging_pkt_valid;
 
   assign c2h_staging_pkt_data = c2h_staging_data[255:0];
-  assign c2h_staging_pkt_channel = c2h_staging_data[257:256];
   assign c2h_staging_pkt_eop = c2h_staging_data[259];
   assign c2h_staging_pkt_sop = c2h_staging_data[258];
   assign c2h_staging_pkt_empty = c2h_staging_data[262:260];
@@ -479,7 +478,7 @@ module fejkon_pcie_data (
   pcie_data_fifo staging_data_fifo (
     .clock(clk),
     .sclr(reset),
-    .data({1'b1, 8'h0, data_tx_empty[4:2], data_tx_endofpacket, data_tx_startofpacket, data_tx_channel, data_tx_data}),
+    .data({1'b1, 8'h0, data_tx_empty[4:2], data_tx_endofpacket, data_tx_startofpacket, 2'h0, data_tx_data}),
     .rdreq(c2h_staging_read_req),
     .wrreq(c2h_staging_fifo_enqueue),
     .q(c2h_staging_data));
@@ -489,9 +488,10 @@ module fejkon_pcie_data (
   logic c2h_staging_done = 0; // Set when a packet has passed through ingress
   logic c2h_staging_read_ready = 0;
 
-  logic [2:0] [9:0] c2h_staging_enq_lens = 0;
+  logic [2:0] [11:0] c2h_staging_enq_data = 0;
 
-  assign c2h_staging_pkt_length = c2h_staging_enq_lens[0];
+  assign c2h_staging_pkt_length = c2h_staging_enq_data[0][9:0];
+  assign c2h_staging_pkt_channel = c2h_staging_enq_data[0][11:10];
   assign c2h_staging_pkt_valid = c2h_staging_enqueued != 0 && c2h_staging_pkt_length != 0;
 
   assign c2h_staging_fifo_enqueue = ~reset && data_tx_valid && c2h_staging_read_ready;
@@ -545,13 +545,13 @@ module fejkon_pcie_data (
       c2h_staging_done <= 1'b0;
       if (data_tx_valid && data_tx_endofpacket && c2h_staging_read_ready) begin
         c2h_staging_done <= 1'b1;
-        c2h_staging_enq_lens[c2h_staging_enqueued] <= c2h_staging_offset[9:0];
+        c2h_staging_enq_data[c2h_staging_enqueued] <= {data_tx_channel, c2h_staging_offset[9:0]};
         c2h_staging_enqueued = c2h_staging_enqueued + 1;
       end
       if (c2h_staging_read_req && c2h_staging_pkt_eop) begin
         c2h_staging_enqueued = c2h_staging_enqueued - 1;
-        c2h_staging_enq_lens[0] <= c2h_staging_enq_lens[1];
-        c2h_staging_enq_lens[1] <= c2h_staging_enq_lens[2];
+        c2h_staging_enq_data[0] <= c2h_staging_enq_data[1];
+        c2h_staging_enq_data[1] <= c2h_staging_enq_data[2];
       end
     end
   end
@@ -644,7 +644,10 @@ module fejkon_pcie_data (
         c2h_tx_running <= 1'b1;
         c2h_staging_read_req <= 1'b1;
       end else if (c2h_tx_running) begin
-        tlp_tx_data_frm_dword = c2h_staging_pkt_data;
+        {tlp_tx_data_frm_dword[0], tlp_tx_data_frm_dword[1],
+         tlp_tx_data_frm_dword[2], tlp_tx_data_frm_dword[3],
+         tlp_tx_data_frm_dword[4], tlp_tx_data_frm_dword[5],
+         tlp_tx_data_frm_dword[6], tlp_tx_data_frm_dword[7]} = c2h_staging_pkt_data;
         tlp_tx_data_frm_empty <= {c2h_staging_pkt_empty, 2'h0};
         tlp_tx_data_frm_endofpacket <= c2h_staging_pkt_eop;
         if (c2h_staging_pkt_eop) begin

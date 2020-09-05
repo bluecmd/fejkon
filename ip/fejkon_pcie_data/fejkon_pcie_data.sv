@@ -106,7 +106,7 @@ module fejkon_pcie_data (
   // rx_h2 ||     Requester ID               |     Tag           |LastBE  |FirstBE||
   //
 
-  logic [15:0] my_id;
+  (* keep *) wire [15:0] my_id;
 
   logic my_id_valid;
 
@@ -461,16 +461,12 @@ module fejkon_pcie_data (
   logic         c2h_staging_fifo_enqueue;
   logic         c2h_staging_fifo_empty;
 
-  logic [255:0] c2h_staging_pkt_data;
-  logic [1:0]   c2h_staging_pkt_channel;
-  logic         c2h_staging_pkt_eop;
-  logic [2:0]   c2h_staging_pkt_empty;
-  logic [9:0]   c2h_staging_pkt_length; // dwords
-  logic         c2h_staging_pkt_valid;
-
-  assign c2h_staging_pkt_data = c2h_staging_data[255:0];
-  assign c2h_staging_pkt_eop = c2h_staging_data[259];
-  assign c2h_staging_pkt_empty = c2h_staging_data[262:260];
+  (* keep *) wire [255:0] c2h_staging_pkt_data;
+  (* keep *) wire [1:0]   c2h_staging_pkt_channel;
+  (* keep *) wire         c2h_staging_pkt_eop;
+  (* keep *) wire [2:0]   c2h_staging_pkt_empty;
+  (* keep *) wire [9:0]   c2h_staging_pkt_length; // dwords
+  (* keep *) wire         c2h_staging_pkt_valid;
 
   pcie_data_fifo staging_data_fifo (
     .clock(clk),
@@ -488,6 +484,9 @@ module fejkon_pcie_data (
 
   logic [2:0] [11:0] c2h_staging_enq_data = 0;
 
+  assign c2h_staging_pkt_data = c2h_staging_data[255:0];
+  assign c2h_staging_pkt_eop = c2h_staging_data[259];
+  assign c2h_staging_pkt_empty = c2h_staging_data[262:260];
   assign c2h_staging_pkt_length = c2h_staging_enq_data[0][9:0];
   assign c2h_staging_pkt_channel = c2h_staging_enq_data[0][11:10];
   assign c2h_staging_pkt_valid = c2h_staging_enqueued != 0 && c2h_staging_pkt_length != 0 && ~c2h_staging_fifo_empty;

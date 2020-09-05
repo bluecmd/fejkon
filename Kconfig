@@ -93,11 +93,18 @@ config AGGRESSIVE_OPT
 config STP
   bool "Enable SignalTap analyzer"
 
-config STP_PCIE_TLP
+config STP_PCIE_TLP_TX
   depends on STP
-  bool "Enable PCIe TLP instance"
+  bool "Enable PCIe TLP TX instance"
+
+config STP_PCIE_TLP_RX
+  depends on STP
+  bool "Enable PCIe TLP RX instance"
+
+config STP_PCIE_C2H
+  depends on STP
+  bool "Enable PCIe C2H DMA instance"
 
 config STP_FC_STREAM
   depends on STP
   bool "Enable FC stream instance"
-

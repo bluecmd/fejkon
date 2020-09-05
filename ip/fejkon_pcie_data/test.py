@@ -153,6 +153,8 @@ async def run_c2h_dma_test(dut, dwords, channel):
     cocotb.fork(clock.start())
     tb = TestC2H(dut)
     await tb.reset()
+    # Wait for my_id_valid
+    await Timer(100, 'ns')
     payload = bytearray()
     for i in range(dwords * 4):
         payload.append(i % 256)
@@ -170,9 +172,8 @@ async def run_c2h_dma_test(dut, dwords, channel):
 
 c2h_factory = TestFactory(run_c2h_dma_test)
 # TODO:
-# - < 9 DWs seems broken
 # - Add packet fragmentation
-c2h_factory.add_option('dwords', [15, 16, 100])
+c2h_factory.add_option('dwords', [3, 8, 15, 16, 100])
 c2h_factory.add_option('channel', [0, 3])
 c2h_factory.generate_tests()
 
@@ -185,6 +186,9 @@ async def test_c2h_dma_pressure(dut):
     tb = TestC2H(dut)
     channel = 2
     await tb.reset()
+    # my_id_valid is not high yet so the first packet will be missed, which
+    # is an accident in this testbench, but a behavior we want to test so
+    # it has been incorporated for now. See if i > 1 down below.
     for i in range(30):
         payload = bytearray()
         for j in range(10 * 4):
@@ -192,7 +196,9 @@ async def test_c2h_dma_pressure(dut):
         payload = bytes(payload)
         header = int.to_bytes(0x4 + ((len(payload) // 4) << 4) + (channel << 14), length=4, byteorder='big')
         header = header + bytes(12)
-        tb.expect_memwrite(DMA_WND_START + 4096 * (i % DMA_WND_SIZE), header + payload)
+        if i > 0:
+            # See comment above for explaination
+            tb.expect_memwrite(DMA_WND_START + 4096 * ((i-1) % DMA_WND_SIZE), header + payload)
         await with_timeout(tb.data_tx.send(payload, channel=channel), 1000, 'ns')
     await RisingEdge(dut.clk)
     cntr = await tb.csr.read(0x6) # csr_c2h_staging_counter

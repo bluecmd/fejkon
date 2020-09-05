@@ -517,7 +517,7 @@ module fejkon_pcie_data (
   // Staging ingest block
   always @(posedge clk) begin: c2h_staging_ingest
     if (reset) begin
-      c2h_staging_offset = 0;
+      c2h_staging_offset <= 0;
     end else begin
       if (c2h_staging_start_next) begin
         c2h_staging_read_ready <= 1'b1;
@@ -527,9 +527,10 @@ module fejkon_pcie_data (
           c2h_staging_read_ready <= 1'b0;
         end
         if (data_tx_startofpacket) begin
-          c2h_staging_offset = 0; // NOTE: Blocking write
+          c2h_staging_offset <= (8 - {29'h0, data_tx_empty[4:2]});
+        end else begin
+          c2h_staging_offset <= c2h_staging_offset + (8 - {29'h0, data_tx_empty[4:2]});
         end
-        c2h_staging_offset = c2h_staging_offset + (8 - {29'h0, data_tx_empty[4:2]});
       end
     end
   end
@@ -542,7 +543,7 @@ module fejkon_pcie_data (
       c2h_staging_done <= 1'b0;
       if (data_tx_valid && data_tx_endofpacket && c2h_staging_read_ready) begin
         c2h_staging_done <= 1'b1;
-        c2h_staging_enq_data[c2h_staging_enqueued] <= {data_tx_channel, c2h_staging_offset[9:0]};
+        c2h_staging_enq_data[c2h_staging_enqueued] <= {data_tx_channel, c2h_staging_offset[9:0] + (10'd8 - {7'h0, data_tx_empty[4:2]})};
         c2h_staging_enqueued = c2h_staging_enqueued + 1;
       end
       if (c2h_staging_read_req && c2h_staging_pkt_eop) begin
@@ -553,7 +554,7 @@ module fejkon_pcie_data (
     end
   end
 
-  assign data_tx_ready = c2h_staging_read_ready && ~reset && my_id_valid;
+  assign data_tx_ready = c2h_staging_read_ready && ~reset;
 
   //
   // Outgoing TLP construction for C2H DMA
@@ -664,7 +665,7 @@ module fejkon_pcie_data (
     end else begin
       if (c2h_dma_buf_reset_write) begin
         c2h_dma_card_write_ptr <= c2h_dma_buf_start_addr;
-      end else if (c2h_staging_read_req && c2h_staging_pkt_eop) begin
+      end else if (c2h_staging_read_req && c2h_staging_pkt_eop && tlp_tx_data_frm_valid) begin
         // Advance one frame if there is enough space for one more frame
         if (c2h_dma_card_write_ptr + 4096*2 >= c2h_dma_buf_end_addr) begin
           c2h_dma_card_write_ptr <= c2h_dma_buf_start_addr;

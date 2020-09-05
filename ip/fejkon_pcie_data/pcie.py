@@ -1,6 +1,8 @@
+#!/usr/bin/env python3
 """
 
 Copyright (c) 2018 Alex Forencich
+Copyright (c) 2020 Christian Svensson
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -202,7 +204,7 @@ class TLP(object):
         ret = True
         if self.fmt == FMT_3DW_DATA or self.fmt == FMT_4DW_DATA:
             if self.length != len(self.data):
-                raise AssertionError("length field does not match data: %s" % repr(self))
+                raise AssertionError("length field does not match data (actual %d != expected %d): %s" % (self.length, len(self.data), repr(self)))
             if 0 > self.length > 1024:
                 raise AssertionError("length out of range: %s" % repr(self))
         if (self.fmt_type == TLP_MEM_READ or self.fmt_type == TLP_MEM_READ_64 or
@@ -537,3 +539,11 @@ class TLP(object):
                 ('register_number=0x%x)' % self.register_number)
             )
 
+if __name__ == '__main__':
+    import binascii
+    import sys
+    # Read TLP from command line and print it decoded
+    if sys.argv[1] == 'intel':
+        t = TLP()
+        t.intel_unpack(binascii.unhexlify(''.join(sys.argv[2:])))
+        print(t)

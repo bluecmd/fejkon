@@ -60,7 +60,6 @@ module fc_state_rx (
 
   // On entry to the Active State, an FC_Port shall
   // transmit a minimum of 6 IDLES before transmitting other Transmission Words
-  logic online = 0;
   int idle_hold_off = 6;
 
   always @(posedge clk) begin

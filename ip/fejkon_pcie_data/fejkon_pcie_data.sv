@@ -173,7 +173,6 @@ module fejkon_pcie_data (
   logic        tlp_rx_frm_is_end = 0;
   logic [63:0] tlp_rx_frm_address = 0;
   logic [63:0] tlp_rx_frm_masked_address = 0;       // Address within region
-  logic [3:0]  tlp_rx_frm_1st_be = 0;
   logic        tlp_rx_frm_is_npr = 0;               // Non-Posted Request
   logic        tlp_rx_frm_is_pr = 0;                // Posted Request
   logic        tlp_rx_frm_unsupported = 0;
@@ -194,7 +193,6 @@ module fejkon_pcie_data (
         tlp_rx_frm_tag <= tlp_rx_st_dword[2][15:8];
         tlp_rx_frm_requester_id <= tlp_rx_st_dword[2][31:16];
       end else if (tlp_rx_st_type == TLP_MRD || tlp_rx_st_type == TLP_MWR) begin
-        tlp_rx_frm_1st_be <= tlp_rx_st_dword[1][3:0];
         tlp_rx_frm_tag <= tlp_rx_st_dword[1][15:8];
         tlp_rx_frm_requester_id <= tlp_rx_st_dword[1][31:16];
         if (tlp_rx_st_is_4dw) begin
@@ -251,33 +249,33 @@ module fejkon_pcie_data (
       casez ({tlp_rx_st_dword[1][3:0], tlp_rx_st_dword[1][7:4]})
         // Source:
         // "Table 2-32:  Calculating Byte Count from Length and Byte Enables"
-        8'b1??10000: tlp_rx_frm_total_byte_count <= 4;
-        8'b01?10000: tlp_rx_frm_total_byte_count <= 3;
-        8'b1?100000: tlp_rx_frm_total_byte_count <= 3;
-        8'b00110000: tlp_rx_frm_total_byte_count <= 2;
-        8'b01100000: tlp_rx_frm_total_byte_count <= 2;
-        8'b11000000: tlp_rx_frm_total_byte_count <= 2;
-        8'b00010000: tlp_rx_frm_total_byte_count <= 1;
-        8'b00100000: tlp_rx_frm_total_byte_count <= 1;
-        8'b01000000: tlp_rx_frm_total_byte_count <= 1;
-        8'b10000000: tlp_rx_frm_total_byte_count <= 1;
-        8'b00000000: tlp_rx_frm_total_byte_count <= 1;
+        8'b1??10000: tlp_rx_frm_total_byte_count <= 12'd4;
+        8'b01?10000: tlp_rx_frm_total_byte_count <= 12'd3;
+        8'b1?100000: tlp_rx_frm_total_byte_count <= 12'd3;
+        8'b00110000: tlp_rx_frm_total_byte_count <= 12'd2;
+        8'b01100000: tlp_rx_frm_total_byte_count <= 12'd2;
+        8'b11000000: tlp_rx_frm_total_byte_count <= 12'd2;
+        8'b00010000: tlp_rx_frm_total_byte_count <= 12'd1;
+        8'b00100000: tlp_rx_frm_total_byte_count <= 12'd1;
+        8'b01000000: tlp_rx_frm_total_byte_count <= 12'd1;
+        8'b10000000: tlp_rx_frm_total_byte_count <= 12'd1;
+        8'b00000000: tlp_rx_frm_total_byte_count <= 12'd1;
         8'b???11???: tlp_rx_frm_total_byte_count <= {tlp_rx_st_len, 2'b0};
-        8'b???101??: tlp_rx_frm_total_byte_count <= {tlp_rx_st_len, 2'b0} - 1;
-        8'b???1001?: tlp_rx_frm_total_byte_count <= {tlp_rx_st_len, 2'b0} - 2;
-        8'b???10001: tlp_rx_frm_total_byte_count <= {tlp_rx_st_len, 2'b0} - 3;
-        8'b??101???: tlp_rx_frm_total_byte_count <= {tlp_rx_st_len, 2'b0} - 1;
-        8'b??1001??: tlp_rx_frm_total_byte_count <= {tlp_rx_st_len, 2'b0} - 2;
-        8'b??10001?: tlp_rx_frm_total_byte_count <= {tlp_rx_st_len, 2'b0} - 3;
-        8'b??100001: tlp_rx_frm_total_byte_count <= {tlp_rx_st_len, 2'b0} - 4;
-        8'b?1001???: tlp_rx_frm_total_byte_count <= {tlp_rx_st_len, 2'b0} - 2;
-        8'b?10001??: tlp_rx_frm_total_byte_count <= {tlp_rx_st_len, 2'b0} - 3;
-        8'b?100001?: tlp_rx_frm_total_byte_count <= {tlp_rx_st_len, 2'b0} - 4;
-        8'b?1000001: tlp_rx_frm_total_byte_count <= {tlp_rx_st_len, 2'b0} - 5;
-        8'b10001???: tlp_rx_frm_total_byte_count <= {tlp_rx_st_len, 2'b0} - 3;
-        8'b100001??: tlp_rx_frm_total_byte_count <= {tlp_rx_st_len, 2'b0} - 4;
-        8'b1000001?: tlp_rx_frm_total_byte_count <= {tlp_rx_st_len, 2'b0} - 5;
-        8'b10000001: tlp_rx_frm_total_byte_count <= {tlp_rx_st_len, 2'b0} - 6;
+        8'b???101??: tlp_rx_frm_total_byte_count <= {tlp_rx_st_len, 2'b0} - 12'd1;
+        8'b???1001?: tlp_rx_frm_total_byte_count <= {tlp_rx_st_len, 2'b0} - 12'd2;
+        8'b???10001: tlp_rx_frm_total_byte_count <= {tlp_rx_st_len, 2'b0} - 12'd3;
+        8'b??101???: tlp_rx_frm_total_byte_count <= {tlp_rx_st_len, 2'b0} - 12'd1;
+        8'b??1001??: tlp_rx_frm_total_byte_count <= {tlp_rx_st_len, 2'b0} - 12'd2;
+        8'b??10001?: tlp_rx_frm_total_byte_count <= {tlp_rx_st_len, 2'b0} - 12'd3;
+        8'b??100001: tlp_rx_frm_total_byte_count <= {tlp_rx_st_len, 2'b0} - 12'd4;
+        8'b?1001???: tlp_rx_frm_total_byte_count <= {tlp_rx_st_len, 2'b0} - 12'd2;
+        8'b?10001??: tlp_rx_frm_total_byte_count <= {tlp_rx_st_len, 2'b0} - 12'd3;
+        8'b?100001?: tlp_rx_frm_total_byte_count <= {tlp_rx_st_len, 2'b0} - 12'd4;
+        8'b?1000001: tlp_rx_frm_total_byte_count <= {tlp_rx_st_len, 2'b0} - 12'd5;
+        8'b10001???: tlp_rx_frm_total_byte_count <= {tlp_rx_st_len, 2'b0} - 12'd3;
+        8'b100001??: tlp_rx_frm_total_byte_count <= {tlp_rx_st_len, 2'b0} - 12'd4;
+        8'b1000001?: tlp_rx_frm_total_byte_count <= {tlp_rx_st_len, 2'b0} - 12'd5;
+        8'b10000001: tlp_rx_frm_total_byte_count <= {tlp_rx_st_len, 2'b0} - 12'd6;
         default: tlp_rx_frm_total_byte_count <= 0; // Invalid
       endcase
     end
@@ -465,7 +463,6 @@ module fejkon_pcie_data (
 
   logic [255:0] c2h_staging_pkt_data;
   logic [1:0]   c2h_staging_pkt_channel;
-  logic         c2h_staging_pkt_sop;
   logic         c2h_staging_pkt_eop;
   logic [2:0]   c2h_staging_pkt_empty;
   logic [9:0]   c2h_staging_pkt_length; // dwords
@@ -473,13 +470,12 @@ module fejkon_pcie_data (
 
   assign c2h_staging_pkt_data = c2h_staging_data[255:0];
   assign c2h_staging_pkt_eop = c2h_staging_data[259];
-  assign c2h_staging_pkt_sop = c2h_staging_data[258];
   assign c2h_staging_pkt_empty = c2h_staging_data[262:260];
 
   pcie_data_fifo staging_data_fifo (
     .clock(clk),
     .sclr(reset),
-    .data({1'b1, 8'h0, data_tx_empty[4:2], data_tx_endofpacket, data_tx_startofpacket, 2'h0, data_tx_data}),
+    .data({1'b1, 8'h0, data_tx_empty[4:2], data_tx_endofpacket, 3'h0, data_tx_data}),
     .rdreq(c2h_staging_read_req),
     .wrreq(c2h_staging_fifo_enqueue),
     .empty(c2h_staging_fifo_empty),

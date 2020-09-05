@@ -80,7 +80,7 @@ module si570_ctrl #(
       default: orig_hs_div = 0; // Invalid
     endcase
     // According to datasheet, round upwards to nearest even number
-    orig_n1 = raw_n1[0] ? raw_n1 + 1 : raw_n1;
+    orig_n1 = raw_n1[0] ? raw_n1 + 7'd1 : raw_n1;
     // No conversion on this one
     orig_rfreq = raw_rfreq;
   end
@@ -110,7 +110,7 @@ module si570_ctrl #(
       11: out_hs_div = 7;
       default: out_hs_div = 0; // Invalid
     endcase
-    out_n1 = new_n1 - 1;
+    out_n1 = new_n1 - 7'd1;
     out_rfreq = new_rfreq[37:0];
   end
 
@@ -136,7 +136,7 @@ module si570_ctrl #(
       new_n1 <= 0;
     end else if (fxtal_valid && ~config_valid) begin
       // Scan through possible configurations until a good one is found
-      new_n1 <= new_n1 + 1;
+      new_n1 <= new_n1 + 7'd1;
       if (new_n1 == 7'd127 || fdco_too_high) begin
         new_n1 <= 0;
         case (new_hs_div)

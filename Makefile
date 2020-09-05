@@ -40,6 +40,7 @@ report:
 		grep -vE '(sv_xcvr_plls|sv_xcvr_pipe_native|altpcie_sv_hip_ast_hwtcl|sv_tx_pma_ch|altpcie_hip_256_pipen1b|sv_rx_pma)' | \
 		grep -v 'Mm_interconnect_0' | \
 		grep -v 'data_format_adapter_[0-9]' | \
+		grep -v 'fejkon_pcie_tlp_inject_fmt' | \
 		grep -v 'timing_adapter_[0-9]' | \
 		grep -v 'alt_xreconf_analog_datactrl' | \
 		grep -vE '(jtagm_timing_adt|jtagm_b2p_adapter)' |\

@@ -620,6 +620,10 @@ add_interface data_tx avalon_streaming sink
 set_interface_property data_tx EXPORT_OF pcie_data.data_tx
 add_interface irq interrupt receiver
 set_interface_property irq EXPORT_OF msi_intr.irq
+add_interface irq_c2h_avail interrupt sender
+set_interface_property irq_c2h_avail EXPORT_OF pcie_data.irq_c2h_avail
+add_interface irq_c2h_drop interrupt sender
+set_interface_property irq_c2h_drop EXPORT_OF pcie_data.irq_c2h_drop
 add_interface mgmt_clk clock sink
 set_interface_property mgmt_clk EXPORT_OF mgmt_clk.in_clk
 add_interface mgmt_rst reset sink

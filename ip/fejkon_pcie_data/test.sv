@@ -130,6 +130,9 @@ module test;
   logic        csr_write = 0;
   logic        csr_read = 0;
 
+  logic irq_c2h_avail;
+  logic irq_c2h_drop;
+
   fejkon_pcie_data dut(
     .clk(clk),
     .reset(reset),
@@ -180,7 +183,9 @@ module test;
     .mem_access_req_valid(mem_access_req_valid),
     .tl_cfg_add(tl_cfg_add),
     .tl_cfg_ctl(tl_cfg_ctl),
-    .tl_cfg_sts(tl_cfg_sts)
+    .tl_cfg_sts(tl_cfg_sts),
+    .irq_c2h_avail(irq_c2h_avail),
+    .irq_c2h_drop(irq_c2h_drop)
   );
 
   always @(posedge clk) begin

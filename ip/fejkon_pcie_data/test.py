@@ -167,6 +167,11 @@ async def run_c2h_dma_test(dut, dwords, channel):
     cntr = await tb.csr.read(0x6) # csr_c2h_staging_counter
     assert cntr == 1, 'expected csr_c2h_staging_counter to be incremented to 1'
     await Timer(1000, 'ns')
+    assert tb.dut.irq_c2h_avail == 1, 'expected irq_c2h_avail to be high'
+    wptr = await tb.csr.read(0x2b) # c2h_dma_card_write_ptr
+    await tb.csr.write(0x2a, wptr) # c2h_dma_host_read_ptr
+    await Timer(100, 'ns')
+    assert tb.dut.irq_c2h_avail == 0, 'expected irq_c2h_avail to be reset'
     raise tb.scoreboard.result
 
 

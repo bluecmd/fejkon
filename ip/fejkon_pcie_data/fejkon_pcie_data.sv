@@ -74,7 +74,9 @@ module fejkon_pcie_data (
     input  wire [52:0]  tl_cfg_sts,                       //                   .tl_cfg_sts
     output wire [4:0]   hpg_ctrler,                       //                   .hpg_ctrler
     output wire [6:0]   cpl_err,                          //                   .cpl_err
-    output wire         cpl_pending                       //                   .cpl_pending
+    output wire         cpl_pending,                      //                   .cpl_pending
+    output wire         irq_c2h_avail,                    //      irq_c2h_avail.irq_c2h_avail
+    output wire         irq_c2h_drop                      //       irq_c2h_drop.irq_c2h_drop
   );
 
   typedef enum integer {
@@ -659,10 +661,16 @@ module fejkon_pcie_data (
     end
   end
 
+  logic c2h_dma_pkt_available = 0;
+
   always @(posedge clk) begin: c2h_dma_address
     if (reset) begin
       c2h_dma_card_write_ptr <= 0;
+      c2h_dma_pkt_available <= 0;
     end else begin
+      if (c2h_dma_card_write_ptr == c2h_dma_host_read_ptr) begin
+        c2h_dma_pkt_available <= 1'b0;
+      end
       if (c2h_dma_buf_reset_write) begin
         c2h_dma_card_write_ptr <= c2h_dma_buf_start_addr;
       end else if (c2h_staging_read_req && c2h_staging_pkt_eop && tlp_tx_data_frm_valid) begin
@@ -672,6 +680,7 @@ module fejkon_pcie_data (
         end else begin
           c2h_dma_card_write_ptr <= c2h_dma_card_write_ptr + 4096;
         end
+        c2h_dma_pkt_available <= 1'b1;
       end
     end
   end
@@ -882,5 +891,8 @@ module fejkon_pcie_data (
   assign mem_access_resp_ready = is_ready;
 
   assign hpg_ctrler = 5'b0;
+
+  assign irq_c2h_drop = 1'b0;
+  assign irq_c2h_avail = c2h_dma_pkt_available;
 
 endmodule

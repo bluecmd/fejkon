@@ -332,6 +332,12 @@ add_connection pcie.data_clk fc_debug.clk
 
 add_connection pcie.data_clk pcie_clk_gauge.probe_clk
 
+add_connection pcie.irq pcie.irq_c2h_avail
+set_connection_parameter_value pcie.irq/pcie.irq_c2h_avail irqNumber {1}
+
+add_connection pcie.irq pcie.irq_c2h_drop
+set_connection_parameter_value pcie.irq/pcie.irq_c2h_drop irqNumber {2}
+
 add_connection pcie.irq sfp0.i2c_irq
 set_connection_parameter_value pcie.irq/sfp0.i2c_irq irqNumber {3}
 

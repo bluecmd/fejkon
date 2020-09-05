@@ -139,12 +139,12 @@ static uint64_t fejkon_bar0_read(void *opaque, hwaddr addr, unsigned size)
     case 0x200:
       val = card->sfp2_tx_enabled ? 0x1 : 0xb;
       break;
-    case 0xA0C:
+    case 0x8AC:
       qemu_mutex_lock(&card->rx_buf_mutex);
       val = card->rx_buf.write;
       qemu_mutex_unlock(&card->rx_buf_mutex);
       break;
-    case 0xB08:
+    case 0x8CC:
       qemu_mutex_lock(&card->tx_buf_mutex);
       val = card->tx_buf.read;
       qemu_mutex_unlock(&card->tx_buf_mutex);
@@ -268,7 +268,7 @@ static void fejkon_rx_pkt(FejkonState *card, uint32_t port_id, void *data,
   dma_addr_t new_write;
   uint32_t metadata;
   qemu_mutex_lock(&card->rx_buf_mutex);
-  metadata = htobe32(4 | (length / 4) << 4 | (port_id << 14));
+  metadata = 4 | (length / 4) << 4 | (port_id << 14);
   pci_dma_write(&card->pdev, card->rx_buf.write, &metadata, 4);
   pci_dma_write(&card->pdev, card->rx_buf.write + 4, data, length);
   new_write = dma_incr(&card->rx_buf, &card->rx_buf.write, FRAME_SIZE);
@@ -346,7 +346,6 @@ static void *fejkon_tx_thread(void *opaque)
     }
     // Read packet metadata
     pci_dma_read(&card->pdev, card->tx_buf.read, &metadata, 4);
-    metadata = be32toh(metadata);
     port_id = (metadata >> 14) & 0x3;
     length = ((metadata >> 4) & 0x3ff) * 4;
     offset = (metadata & 0xf);

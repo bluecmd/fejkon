@@ -91,9 +91,9 @@ static int poll(struct napi_struct *napi, int budget)
 
     // See explaination in net_tx for what format is used
     meta = card->rx_buf_read;
-    port_id = (be32_to_cpu(meta->ctrl1) >> 14) & 3;
-    len = ((be32_to_cpu(meta->ctrl1) >> 4) & 0x3ff) * 4;
-    offset = be32_to_cpu(meta->ctrl1) & 0xf;
+    port_id = (meta->ctrl1 >> 14) & 3;
+    len = ((meta->ctrl1 >> 4) & 0x3ff) * 4;
+    offset = (meta->ctrl1 & 0xf) * 4;
     port = card->port[port_id];
     if (!netif_oper_up(port->net)) {
       port->net->stats.rx_dropped++;
@@ -211,8 +211,8 @@ static netdev_tx_t net_tx(struct sk_buff *skb, struct net_device *net)
   // This is always on an offset of 4 it seems.
   offset = 4;
   meta = card->tx_buf_write;
-  data = card->tx_buf_write + offset;
-  meta->ctrl1 = cpu_to_be32((port->id & 3) << 14 | ((skb->len / 4) & 0x3ff) << 4 | offset);
+  data = card->tx_buf_write + offset * 4;
+  meta->ctrl1 = (port->id & 3) << 14 | ((skb->len / 4) & 0x3ff) << 4 | offset;
 
   memcpy(data, skb->data, skb->len);
 

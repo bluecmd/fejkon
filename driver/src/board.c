@@ -77,7 +77,7 @@ static int poll(struct napi_struct *napi, int budget)
   // TODO: TX
   int work_done = 0;
 
-  int write_ptr = ioread32(card->bar0 + 0xA0C) - card->rx_buf_start_dma;
+  int write_ptr = ioread32(card->bar0 + 0x8AC) - card->rx_buf_start_dma;
   void *rx_buf_write = card->rx_buf_start + write_ptr;
   while(rx_buf_write != card->rx_buf_read) {
     int offset;

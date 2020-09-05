@@ -268,10 +268,9 @@ static void fejkon_rx_pkt(FejkonState *card, uint32_t port_id, void *data,
   dma_addr_t new_write;
   uint32_t metadata;
   qemu_mutex_lock(&card->rx_buf_mutex);
-  // TODO: Update this to the new packet format
-  metadata = htobe32(length | (port_id << 12));
+  metadata = htobe32(4 | (length / 4) << 4 | (port_id << 14));
   pci_dma_write(&card->pdev, card->rx_buf.write, &metadata, 4);
-  pci_dma_write(&card->pdev, card->rx_buf.write + 32, data, length);
+  pci_dma_write(&card->pdev, card->rx_buf.write + 4, data, length);
   new_write = dma_incr(&card->rx_buf, &card->rx_buf.write, FRAME_SIZE);
   if (new_write == card->rx_buf.read) {
     // Signal buffer overflow and drop packet
@@ -337,19 +336,21 @@ static void *fejkon_tx_thread(void *opaque)
   FejkonState *card = opaque;
   memset(pkt, 0, sizeof(pkt));
   while (!card->stopping) {
-    uint32_t port_id = 0;
-    uint32_t length = 0;
+    int port_id;
+    int length;
+    int offset;
+    uint32_t metadata = 0;
     usleep(1000);
     if (card->tx_buf.read == card->tx_buf.write) {
       continue;
     }
     // Read packet metadata
-    // TODO: Update this to the new packet format
-    pci_dma_read(&card->pdev, card->tx_buf.read, &length, 4);
-    pci_dma_read(&card->pdev, card->tx_buf.read + 4, &port_id, 4);
-    port_id = be32toh(port_id);
-    length = be32toh(length);
-    pci_dma_read(&card->pdev, card->tx_buf.read + 8, pkt, length);
+    pci_dma_read(&card->pdev, card->tx_buf.read, &metadata, 4);
+    metadata = be32toh(metadata);
+    port_id = (metadata >> 14) & 0x3;
+    length = ((metadata >> 4) & 0x3ff) * 4;
+    offset = (metadata & 0xf);
+    pci_dma_read(&card->pdev, card->tx_buf.read + offset, pkt, length);
     fejkon_rx_pkt(card, port_id, pkt, length);
     qemu_mutex_lock(&card->tx_buf_mutex);
     card->tx_buf.read = dma_incr(

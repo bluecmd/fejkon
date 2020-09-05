@@ -218,7 +218,7 @@ func TestDumpI2C(t *testing.T) {
 	fi2c := []string{}
 	for _, f := range m {
 		b, _ := ioutil.ReadFile(f)
-		if string(b) == "fejkon\n" {
+		if strings.Contains(string(b), "fejkon") {
 			fi2c = append(fi2c, f)
 		}
 	}

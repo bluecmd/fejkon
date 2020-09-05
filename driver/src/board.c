@@ -80,6 +80,7 @@ static int poll(struct napi_struct *napi, int budget)
   int write_ptr = ioread32(card->bar0 + 0xA0C) - card->rx_buf_start_dma;
   void *rx_buf_write = card->rx_buf_start + write_ptr;
   while(rx_buf_write != card->rx_buf_read) {
+    int offset;
     uint8_t port_id;
     uint16_t len;
     struct sk_buff *skb;
@@ -89,10 +90,10 @@ static int poll(struct napi_struct *napi, int budget)
       return work_done;
 
     // See explaination in net_tx for what format is used
-    // TODO: Update this to the new packet format
     meta = card->rx_buf_read;
-    port_id = (be32_to_cpu(meta->ctrl1) >> 12) & 3;
-    len = be32_to_cpu(meta->ctrl1) & 0xfff;
+    port_id = (be32_to_cpu(meta->ctrl1) >> 14) & 3;
+    len = ((be32_to_cpu(meta->ctrl1) >> 4) & 0x3ff) * 4;
+    offset = be32_to_cpu(meta->ctrl1) & 0xf;
     port = card->port[port_id];
     if (!netif_oper_up(port->net)) {
       port->net->stats.rx_dropped++;
@@ -112,7 +113,7 @@ static int poll(struct napi_struct *napi, int budget)
       port->net->stats.rx_bytes += len;
       port->net->stats.rx_packets++;
       dev_dbg(port->dev, "received frame len = %d", len);
-      skb_put_data(skb, card->rx_buf_read + sizeof(*meta), len);
+      skb_put_data(skb, card->rx_buf_read + offset, len);
       // Since we're not doing Ethernet we have to set these manually or
       // the kernel will try to guess them (incorrectly)
       skb_set_mac_header(skb, 0);
@@ -179,6 +180,7 @@ static netdev_tx_t net_tx(struct sk_buff *skb, struct net_device *net)
   struct fejkon_card *card = port->card;
   struct packet_meta *meta;
   void *data;
+  int offset;
 
   // Fibre Channel fragmentation, does it even exist?
   BUG_ON(skb_is_gso(skb));
@@ -204,10 +206,13 @@ static netdev_tx_t net_tx(struct sk_buff *skb, struct net_device *net)
   // The frames are always stored at 4KiB boundaries, wasting memory but
   // ensuring alignment with the PCIe 4KiB requirement => easier hardware
   // and RAM is cheap.
+  // The offset is used to align the TLPs on the FPGA side so that packet data
+  // is neatly aligned on 256 bit boundaries inside the TLP.
+  // This is always on an offset of 4 it seems.
+  offset = 4;
   meta = card->tx_buf_write;
-  data = card->tx_buf_write + sizeof(*meta);
-  // TODO: Update this to the new packet format
-  meta->ctrl1 = cpu_to_be32((port->id & 3) << 12 | (skb->len & 0xfff));
+  data = card->tx_buf_write + offset;
+  meta->ctrl1 = cpu_to_be32((port->id & 3) << 14 | ((skb->len / 4) & 0x3ff) << 4 | offset);
 
   memcpy(data, skb->data, skb->len);
 
@@ -219,6 +224,7 @@ static netdev_tx_t net_tx(struct sk_buff *skb, struct net_device *net)
     card->tx_buf_write = card->tx_buf_start;
   }
 
+  dev_dbg(port->dev, "xmit frame len = %d", skb->len);
   if (!netdev_xmit_more()) {
     iowrite32(
         card->tx_buf_start_dma + (card->tx_buf_write - card->tx_buf_start),

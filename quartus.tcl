@@ -40,17 +40,17 @@ set_instance_assignment -name PARTITION_HIERARCHY fejkon_pcie -to "fejkon_pcie:p
 
 source ../de5net.tcl
 
-if {$CONFIG_STP_FILE != ""} {
+if {$CONFIG_STP == "y"} {
   set_global_assignment -name ENABLE_SIGNALTAP ON
-  set_global_assignment -name USE_SIGNALTAP_FILE ../$CONFIG_STP_FILE
-  set_global_assignment -name SIGNALTAP_FILE ../$CONFIG_STP_FILE
+  set_global_assignment -name USE_SIGNALTAP_FILE fejkon.configured.stp
+  set_global_assignment -name SIGNALTAP_FILE fejkon.configured.stp
 }
 
 # Commit assignments
 export_assignments
 
-if {$CONFIG_STP_FILE != ""} {
-  qexec "quartus_stp fejkon --stp_file ../$CONFIG_STP_FILE --enable"
+if {$CONFIG_STP == "y"} {
+  qexec "quartus_stp fejkon --stp_file fejkon.configured.stp --enable"
 }
 
 execute_flow -compile

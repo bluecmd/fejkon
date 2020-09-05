@@ -1,15 +1,22 @@
-config AGGRESSIVE_OPT
-  bool "Optimize aggressively for performance when building"
+mainmenu "Fejkon bitstream configuration"
+
+config FEJKON
+  bool
+  # Always enabled features
+  select SFP_PORTS
+  default y
 
 config HAVE_ETHERNET
   bool
 
-menu "SFP+ Ports"
+config SFP_PORTS
+  bool "SFP+ Ports"
 
 # Port 0 is always enabled, and FC is the only supported option right now
 choice PORT0
   bool "Port 0"
   default PORT0_FC
+  depends on SFP_PORTS
 
 config PORT0_FC
   bool "Fibre Channel"
@@ -19,6 +26,7 @@ endchoice
 choice PORT1
   bool "Port 1"
   default PORT1_DISABLED
+  depends on SFP_PORTS
 
 config PORT1_DISABLED
   bool "Disabled"
@@ -32,6 +40,7 @@ endchoice
 choice PORT2
   bool "Port 2"
   default PORT2_DISABLED
+  depends on SFP_PORTS
 
 config PORT2_DISABLED
   bool "Disabled"
@@ -53,6 +62,7 @@ endchoice
 choice PORT3
   bool "Port 3"
   default PORT3_DISABLED
+  depends on SFP_PORTS
 
 config PORT3_DISABLED
   bool "Disabled"
@@ -73,11 +83,21 @@ endchoice
 
 config LOOPBACK_01
   bool "Loopback port 0 and port 1"
+  depends on SFP_PORTS
   depends on PORT0_FC
   depends on PORT1_FC
 
-endmenu
+config AGGRESSIVE_OPT
+  bool "Optimize aggressively for performance when building"
 
-config STP_FILE
-  string "SignalTap file to enable"
+config STP
+  bool "Enable SignalTap analyzer"
+
+config STP_PCIE_TLP
+  depends on STP
+  bool "Enable PCIe TLP instance"
+
+config STP_FC_STREAM
+  depends on STP
+  bool "Enable FC stream instance"
 

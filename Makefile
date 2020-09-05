@@ -12,9 +12,11 @@ clean:
 	\rm -f fejkon.qsys fejkon_*.qsys
 	\rm -f config.tcl .config.old .qsys-clean .qsys-configured
 
-fejkon.sof: ip/altera_fc_phy/fc_phy.qip fejkon.qsys de5net.sdc de5net.tcl $(wildcard ip/*/*.sv)
+fejkon.sof: ip/altera_fc_phy/fc_phy.qip fejkon.qsys de5net.sdc de5net.tcl $(wildcard ip/*/*.sv) fejkon.stp config.tcl
 	echo "\`define FEJKON_GIT_HASH 32'h$(shell git describe --long --always --abbrev=8)" > ip/fejkon_identity/version.sv
-	(mkdir -p gen; cd gen; rm -f *.txt *.html; $(QPATH)/bin/quartus_sh -t ../quartus.tcl)
+	mkdir -p gen
+	utils/apply-stp-config.py fejkon.stp > gen/fejkon.configured.stp
+	(cd gen; rm -f *.txt *.html; $(QPATH)/bin/quartus_sh -t ../quartus.tcl)
 	cp gen/output_files/fejkon.sof $@
 	touch $@
 
@@ -74,7 +76,7 @@ ip/fejkon_identity/version.sv:
 	touch ip/fejkon_identity/version.sv
 
 config.tcl: .config config.py
-	python3 config.py > config.tcl
+	./config.py > config.tcl
 
 fejkon.qsys: .qsys-configured
 
@@ -99,6 +101,9 @@ edit-clean: .qsys-clean
 
 edit: fejkon.qsys
 	$(QPATH)/sopc_builder/bin/qsys-edit fejkon.qsys
+
+edit-stp: fejkon.stp
+	$(QPATH)/bin/quartus_stpw fejkon.stp
 
 menuconfig: .config
 	MENUCONFIG_STYLE=aquatic menuconfig

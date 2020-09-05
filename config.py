@@ -1,7 +1,4 @@
-import argparse
-import os
-import sys
-
+#!/usr/bin/env python3
 import kconfiglib
 
 def main():

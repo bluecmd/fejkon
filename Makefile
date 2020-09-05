@@ -106,6 +106,9 @@ edit: fejkon.qsys
 edit-stp: fejkon.stp
 	$(QPATH)/bin/quartus_stpw fejkon.stp
 
+stp: gen/fejkon.configured.stp
+	$(QPATH)/bin/quartus_stpw gen/fejkon.configured.stp
+
 menuconfig: .config
 	MENUCONFIG_STYLE=aquatic menuconfig
 

@@ -516,6 +516,41 @@ set_instance_parameter_value tlp_data_fifo {USE_MEMORY_BLOCKS} {1}
 set_instance_parameter_value tlp_data_fifo {USE_PACKETS} {1}
 set_instance_parameter_value tlp_data_fifo {USE_STORE_FORWARD} {0}
 
+add_instance tlp_inject altera_avalon_fifo 20.1
+set_instance_parameter_value tlp_inject {avalonMMAvalonMMDataWidth} {32}
+set_instance_parameter_value tlp_inject {avalonMMAvalonSTDataWidth} {32}
+set_instance_parameter_value tlp_inject {bitsPerSymbol} {8}
+set_instance_parameter_value tlp_inject {channelWidth} {0}
+set_instance_parameter_value tlp_inject {errorWidth} {0}
+set_instance_parameter_value tlp_inject {fifoDepth} {512}
+set_instance_parameter_value tlp_inject {fifoInputInterfaceOptions} {AVALONMM_WRITE}
+set_instance_parameter_value tlp_inject {fifoOutputInterfaceOptions} {AVALONST_SOURCE}
+set_instance_parameter_value tlp_inject {showHiddenFeatures} {0}
+set_instance_parameter_value tlp_inject {singleClockMode} {1}
+set_instance_parameter_value tlp_inject {singleResetMode} {0}
+set_instance_parameter_value tlp_inject {symbolsPerBeat} {4}
+set_instance_parameter_value tlp_inject {useBackpressure} {1}
+set_instance_parameter_value tlp_inject {useIRQ} {0}
+set_instance_parameter_value tlp_inject {usePacket} {1}
+set_instance_parameter_value tlp_inject {useReadControl} {0}
+set_instance_parameter_value tlp_inject {useRegister} {0}
+set_instance_parameter_value tlp_inject {useWriteControl} {1}
+
+add_instance tlp_inject_fmt data_format_adapter 20.1
+set_instance_parameter_value tlp_inject_fmt {inBitsPerSymbol} {8}
+set_instance_parameter_value tlp_inject_fmt {inChannelWidth} {0}
+set_instance_parameter_value tlp_inject_fmt {inErrorDescriptor} {}
+set_instance_parameter_value tlp_inject_fmt {inErrorWidth} {0}
+set_instance_parameter_value tlp_inject_fmt {inMaxChannel} {0}
+set_instance_parameter_value tlp_inject_fmt {inReadyLatency} {0}
+set_instance_parameter_value tlp_inject_fmt {inSymbolsPerBeat} {4}
+set_instance_parameter_value tlp_inject_fmt {inUseEmpty} {0}
+set_instance_parameter_value tlp_inject_fmt {inUseEmptyPort} {YES}
+set_instance_parameter_value tlp_inject_fmt {inUsePackets} {1}
+set_instance_parameter_value tlp_inject_fmt {outSymbolsPerBeat} {32}
+set_instance_parameter_value tlp_inject_fmt {outUseEmpty} {0}
+set_instance_parameter_value tlp_inject_fmt {outUseEmptyPort} {YES}
+
 add_instance tlp_instant_fifo altera_avalon_sc_fifo 20.1
 set_instance_parameter_value tlp_instant_fifo {BITS_PER_SYMBOL} {8}
 set_instance_parameter_value tlp_instant_fifo {CHANNEL_WIDTH} {0}
@@ -551,7 +586,7 @@ set_instance_parameter_value tlp_response_fifo {USE_STORE_FORWARD} {0}
 add_instance tlp_tx_multiplexer multiplexer 20.1
 set_instance_parameter_value tlp_tx_multiplexer {bitsPerSymbol} {8}
 set_instance_parameter_value tlp_tx_multiplexer {errorWidth} {0}
-set_instance_parameter_value tlp_tx_multiplexer {numInputInterfaces} {3}
+set_instance_parameter_value tlp_tx_multiplexer {numInputInterfaces} {4}
 set_instance_parameter_value tlp_tx_multiplexer {outChannelWidth} {2}
 set_instance_parameter_value tlp_tx_multiplexer {packetScheduling} {1}
 set_instance_parameter_value tlp_tx_multiplexer {schedulingSize} {2}
@@ -612,6 +647,16 @@ set_connection_parameter_value csr_bridge.m0/tlp_data_fifo.csr arbitrationPriori
 set_connection_parameter_value csr_bridge.m0/tlp_data_fifo.csr baseAddress {0x0100}
 set_connection_parameter_value csr_bridge.m0/tlp_data_fifo.csr defaultConnection {0}
 
+add_connection csr_bridge.m0 tlp_inject.in
+set_connection_parameter_value csr_bridge.m0/tlp_inject.in arbitrationPriority {1}
+set_connection_parameter_value csr_bridge.m0/tlp_inject.in baseAddress {0x0130}
+set_connection_parameter_value csr_bridge.m0/tlp_inject.in defaultConnection {0}
+
+add_connection csr_bridge.m0 tlp_inject.in_csr
+set_connection_parameter_value csr_bridge.m0/tlp_inject.in_csr arbitrationPriority {1}
+set_connection_parameter_value csr_bridge.m0/tlp_inject.in_csr baseAddress {0x0140}
+set_connection_parameter_value csr_bridge.m0/tlp_inject.in_csr defaultConnection {0}
+
 add_connection csr_bridge.m0 tlp_instant_fifo.csr
 set_connection_parameter_value csr_bridge.m0/tlp_instant_fifo.csr arbitrationPriority {1}
 set_connection_parameter_value csr_bridge.m0/tlp_instant_fifo.csr baseAddress {0x0110}
@@ -669,6 +714,10 @@ add_connection mgmt_rst.out_reset pcie_status.reset
 add_connection mgmt_rst.out_reset tlp_adapter.reset
 
 add_connection mgmt_rst.out_reset tlp_data_fifo.clk_reset
+
+add_connection mgmt_rst.out_reset tlp_inject.reset_in
+
+add_connection mgmt_rst.out_reset tlp_inject_fmt.reset
 
 add_connection mgmt_rst.out_reset tlp_instant_fifo.clk_reset
 
@@ -748,6 +797,10 @@ add_connection phy.coreclkout_hip tlp_adapter.clk
 
 add_connection phy.coreclkout_hip tlp_data_fifo.clk
 
+add_connection phy.coreclkout_hip tlp_inject.clk_in
+
+add_connection phy.coreclkout_hip tlp_inject_fmt.clk
+
 add_connection phy.coreclkout_hip tlp_instant_fifo.clk
 
 add_connection phy.coreclkout_hip tlp_response_fifo.clk
@@ -789,6 +842,10 @@ add_connection tlp_adapter.phy_tx_st phy.tx_st
 add_connection tlp_adapter.tlp_rx_st pcie_data.tlp_rx_st
 
 add_connection tlp_data_fifo.out tlp_tx_multiplexer.in0
+
+add_connection tlp_inject.out tlp_inject_fmt.in
+
+add_connection tlp_inject_fmt.out tlp_tx_multiplexer.in3
 
 add_connection tlp_instant_fifo.out tlp_tx_multiplexer.in2
 

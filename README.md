@@ -291,7 +291,11 @@ Accesses need to be 4 byte wide.
 | 0x100 | 4     | Data TX TLP Fill Level            |
 | 0x110 | 4     | Instant TX TLP Fill Level         |
 | 0x120 | 4     | Response TX TLP Fill Level        |
+| 0x130 | 8     | TLP Injection FIFO (1)            |
+| 0x140 | 32    | TLP Injection FIFO Status (1)     |
 | 0x180 | 4     | LTSSM and lane active mode        |
+
+1) TLP injection is done by using an "Avalon-MM Write Slave to Avalon-ST Source", see [Embedded Peripherals IP User Guide](https://www.intel.com/content/dam/www/programmable/us/en/pdfs/literature/ug/ug_embedded_ip.pdf).
 
 #### Temperature
 

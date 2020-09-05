@@ -256,7 +256,6 @@ reg sda_i_reg = 1'b1;
 reg scl_o_reg = 1'b1, scl_o_next;
 reg sda_o_reg = 1'b1, sda_o_next;
 
-reg last_scl_i_reg = 1'b1;
 reg last_sda_i_reg = 1'b1;
 
 reg busy_reg = 1'b0;
@@ -892,7 +891,6 @@ always @(posedge clk) begin
 
     scl_i_reg <= scl_i;
     sda_i_reg <= sda_i;
-    last_scl_i_reg <= scl_i_reg;
     last_sda_i_reg <= sda_i_reg;
 end
 

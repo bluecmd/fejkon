@@ -1,7 +1,7 @@
 [timestart] 0
 [size] 3156 1561
 [pos] 234 245
-*-20.380974 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-21.039896 826000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] test.
 [sst_width] 588
 [signals_width] 836
@@ -10,7 +10,7 @@
 @28
 test.dut.clk
 test.dut.reset
-@23
+@22
 test.dut.my_id[15:0]
 @800200
 -counters
@@ -177,7 +177,7 @@ test.dut.c2h_staging_pkt_eop
 -stage
 @800200
 -transmit
-@28
+@29
 test.dut.c2h_tx_running
 @22
 test.dut.c2h_dma_buf_start_addr[31:0]
@@ -189,6 +189,13 @@ test.dut.c2h_dma_tlp_tx_busy
 @1000200
 -transmit
 -c2h
+@800200
+-irq
+@28
+test.dut.irq_c2h_avail
+test.dut.irq_c2h_drop
+@1000200
+-irq
 @c00200
 -mem_access
 @22

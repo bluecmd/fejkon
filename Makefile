@@ -24,10 +24,14 @@ report:
 	@echo
 	@echo '  ==> Generation report <=='
 	@echo
+	@# 222013 removed because the ch[4] pcie Intel IP bug
+	@# 215044 removed because we have no board thermal model
 	@grep '^Warning (' gen/output_files/*.rpt | \
 		grep -vE '\((10762|170052|15104|332043|35016|12241|276020|14284|20031|18550|12251)\)' | \
 		grep -vE '(sv_xcvr_emsip_adapter.sv|altera_pcie_sv_hip_ast_rs_serdes.sdc)' | \
 		grep -vF 'ch[4].inst_sv_pcs_ch' | \
+		grep -vF '(222013)' | \
+		grep -vF '(215044)' | \
 		grep -v alt_sld_fab_alt_sld_fab | \
 		grep -v alt_xcvr_reconfig_cpu | \
 		grep -v Alt_sld_fab | \
@@ -46,15 +50,18 @@ report:
 		grep -vE '(jtagm_timing_adt|jtagm_b2p_adapter)' |\
 		grep -vE 'Warning \(10036\).*rx_be_runningdisp' |\
 		grep -vE 'Warning \(10036\).*rx_unknown_prim' |\
-		grep -vE 'Warning \(10230\).*i2c_master\.v' |\
-		cat
+		grep -vE 'Warning \(10230\).*i2c_master\.v' || \
+		echo ' [-] \e[32mNo synthesis warnings! Unbelievable!\e[0m'
 	@echo
 	@[ -f gen/violated_paths.txt ] && cat gen/violated_paths.txt \
-		|| echo 'No timing constraints violated! Yeey!'
+		|| echo ' [-] \e[32mNo timing constraints violated! Yeey!\e[0m'
 	@echo
 	@grep -B1 '; I/O Assignment Warnings' gen/output_files/fejkon.fit.rpt \
-		| grep -- '---' || echo 'No I/O assignment warnings! Awesome!\n'
+		| grep -- '---' || echo ' [-] \e[32mNo I/O assignment warnings! Awesome!\e[0m\n'
 	@awk '/; I\/O Assignment Warnings/,/^$$/' gen/output_files/fejkon.fit.rpt
+	@echo -n ' [-] '
+	@cat gen/output_files/fejkon.pow.summary | grep 'Total Thermal Power Dissipation'
+	@echo
 	@cat gen/fmax.txt | grep -v Thi
 	@echo
 

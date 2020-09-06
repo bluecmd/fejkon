@@ -40,12 +40,14 @@ set_fileset_property QUARTUS_SYNTH TOP_LEVEL fejkon_fc_debug
 set_fileset_property QUARTUS_SYNTH ENABLE_RELATIVE_INCLUDE_PATHS false
 set_fileset_property QUARTUS_SYNTH ENABLE_FILE_OVERWRITE_MODE true
 add_fileset_file fejkon_fc_debug.sv SYSTEM_VERILOG PATH fejkon_fc_debug.sv TOP_LEVEL_FILE
+add_fileset_file generator.sv SYSTEM_VERILOG PATH generator.sv
 
 add_fileset SIM_VERILOG SIM_VERILOG "" ""
 set_fileset_property SIM_VERILOG TOP_LEVEL fejkon_fc_debug
 set_fileset_property SIM_VERILOG ENABLE_RELATIVE_INCLUDE_PATHS false
 set_fileset_property SIM_VERILOG ENABLE_FILE_OVERWRITE_MODE true
 add_fileset_file fejkon_fc_debug.sv SYSTEM_VERILOG PATH fejkon_fc_debug.sv
+add_fileset_file generator.sv SYSTEM_VERILOG PATH generator.sv
 
 
 # 

@@ -70,6 +70,18 @@ set_instance_parameter_value reset_ctrl {USE_RESET_REQUEST_IN8} {0}
 set_instance_parameter_value reset_ctrl {USE_RESET_REQUEST_IN9} {0}
 set_instance_parameter_value reset_ctrl {USE_RESET_REQUEST_INPUT} {0}
 
+add_instance reset_seqencer altera_reset_sequencer 20.1
+set_instance_parameter_value reset_seqencer {ENABLE_CSR} {0}
+set_instance_parameter_value reset_seqencer {ENABLE_RESET_REQUEST_INPUT} {0}
+set_instance_parameter_value reset_seqencer {LIST_ASRT_DELAY} {0 0 0 0 0 0 0 0 0 0}
+set_instance_parameter_value reset_seqencer {LIST_ASRT_SEQ} {0 1 2 3 4 5 6 7 8 9}
+set_instance_parameter_value reset_seqencer {LIST_DSRT_DELAY} {0 0 0 0 0 0 0 0 0 0}
+set_instance_parameter_value reset_seqencer {LIST_DSRT_SEQ} {0 1 2 3 4 5 6 7 8 9}
+set_instance_parameter_value reset_seqencer {MIN_ASRT_TIME} {0}
+set_instance_parameter_value reset_seqencer {NUM_INPUTS} {1}
+set_instance_parameter_value reset_seqencer {NUM_OUTPUTS} {4}
+set_instance_parameter_value reset_seqencer {USE_DSRT_QUAL} {0 0 0 0 0 0 0 0 0 0}
+
 add_instance sfp0 fejkon_sfp 1.0
 
 add_instance sfp1 fejkon_sfp 1.0
@@ -154,6 +166,8 @@ add_connection ext0.clk pcie_clk_gauge.ref_clk
 add_connection ext0.clk phy_clk_gauge.ref_clk
 
 add_connection ext0.clk reset_ctrl.clk
+
+add_connection ext0.clk reset_seqencer.clk
 
 add_connection ext0.clk sfp0.clk
 
@@ -356,27 +370,29 @@ add_connection phy_clk.out_clk phy_clk_gauge.probe_clk
 
 add_connection phy_clk.out_clk phy_clk_out.in_clk
 
-add_connection reset_ctrl.reset_out fc.reset
+add_connection reset_ctrl.reset_out reset_seqencer.reset_in0
 
-add_connection reset_ctrl.reset_out fc_debug.reset
+add_connection reset_seqencer.reset_out0 ident.reset
 
-add_connection reset_ctrl.reset_out ident.reset
+add_connection reset_seqencer.reset_out0 pcie_clk_gauge.reset
 
-add_connection reset_ctrl.reset_out pcie.mgmt_rst
+add_connection reset_seqencer.reset_out0 phy_clk_gauge.reset
 
-add_connection reset_ctrl.reset_out pcie_clk_gauge.reset
+add_connection reset_seqencer.reset_out0 sfp0.reset
 
-add_connection reset_ctrl.reset_out phy_clk_gauge.reset
+add_connection reset_seqencer.reset_out0 sfp1.reset
 
-add_connection reset_ctrl.reset_out sfp0.reset
+add_connection reset_seqencer.reset_out0 sfp2.reset
 
-add_connection reset_ctrl.reset_out sfp1.reset
+add_connection reset_seqencer.reset_out0 sfp3.reset
 
-add_connection reset_ctrl.reset_out sfp2.reset
+add_connection reset_seqencer.reset_out0 temp.reset
 
-add_connection reset_ctrl.reset_out sfp3.reset
+add_connection reset_seqencer.reset_out1 pcie.mgmt_rst
 
-add_connection reset_ctrl.reset_out temp.reset
+add_connection reset_seqencer.reset_out2 fc_debug.reset
+
+add_connection reset_seqencer.reset_out3 fc.reset
 
 add_connection si570_ctrl.reset_out reset_ctrl.reset_in2
 

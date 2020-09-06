@@ -37,16 +37,29 @@ module fejkon_fc_debug (
   logic         out_valid = 0;
   logic [4:0]   out_empty = 0;
 
-  logic [3:0]   gen_channel = 0;
-  logic [255:0] gen_data = 0;
-  logic         gen_endofpacket = 0;
-  logic         gen_startofpacket = 0;
-  logic         gen_valid = 0;
-  logic [4:0]   gen_empty = 0;
+  logic [3:0]   gen_channel;
+  logic [255:0] gen_data;
+  logic         gen_endofpacket;
+  logic         gen_startofpacket;
+  logic         gen_valid;
+  logic [4:0]   gen_empty;
+
+  logic source_generator = 0;
+
+  generator generator(
+    .clk(clk),
+    .reset(reset),
+    .st_out_channel(gen_channel),
+    .st_out_data(gen_data),
+    .st_out_endofpacket(gen_endofpacket),
+    .st_out_startofpacket(gen_startofpacket),
+    .st_out_valid(gen_valid),
+    .st_out_ready(source_generator & st_out_ready),
+    .st_out_empty(gen_empty)
+  );
 
   logic [31:0] readdata = 0;
 
-  logic source_generator = 0;
   int   enable_generator = 0;
   logic decr_generator = 0;
 
@@ -56,7 +69,7 @@ module fejkon_fc_debug (
     if (reset) begin
       enable_generator <= 0;
     end else begin
-      if (decr_generator && (enable_generator != ~0)) begin
+      if (decr_generator && (enable_generator != ~0 && enable_generator != 0)) begin
           enable_generator <= enable_generator - 1;
       end
       if (csr_write) begin
@@ -81,80 +94,65 @@ module fejkon_fc_debug (
   end
 
   always @(posedge clk) begin: arbiter
-    decr_generator <= 0;
     if (reset) begin
       source_generator <= 0;
     end else begin
       // Only consider switching source on EOP or no activity
-      if ((gen_endofpacket & gen_valid & source_generator) ||
-          (in_endofpacket_r & in_valid_r) || (~in_valid_r & ~source_generator)) begin
+      if ((gen_endofpacket & st_out_ready & gen_valid & source_generator) ||
+          (in_endofpacket_r & st_out_ready & in_valid_r & ~source_generator) ||
+          (~in_valid_r & ~source_generator)) begin
         // Give priorty to the input stream
         source_generator <= 0;
-        if (st_in_valid) begin
+        if (st_in_valid || (enable_generator == 0)) begin
           source_generator <= 0;
-        end else if (gen_valid && (enable_generator != 0)) begin
+        end else if (gen_valid && (enable_generator != 1)) begin
           source_generator <= 1;
-          decr_generator <= 1;
         end
       end
     end
   end
 
-  int gen_idx = 0;
-
-  always @(posedge clk) begin: gen_driver
+  always @(posedge clk) begin: decr_gen
     if (reset) begin
-      gen_idx = 0;
+      decr_generator <= 0;
     end else begin
-      if (source_generator & st_out_ready) begin
-        gen_idx = gen_idx + 1;
-        if (gen_idx == 2) begin
-          gen_idx = 0;
-        end
-      end
-      gen_valid <= (enable_generator != 0);
-      gen_channel <= 4'h0;
-      gen_empty <= 5'd0;
-      gen_startofpacket <= 1'b0;
-      gen_endofpacket <= 1'b0;
-      if (gen_idx == 0) begin
-        gen_data <= 256'hdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef;
-        gen_startofpacket <= 1'b1;
-      end else if (gen_idx == 1) begin
-        gen_data <= 256'hbaadc0debaadc0debaadc0debaadc0debaadc0debaadc0debaadc0debaadc0de;
-        gen_endofpacket <= 1'b1;
+      decr_generator <= 0;
+      if (source_generator & st_out_startofpacket & st_out_valid & st_out_ready) begin
+        decr_generator <= 1;
       end
     end
   end
 
   always @(posedge clk) begin
-    in_valid_r <= st_in_valid;
-    in_data_r <= st_in_data;
-    in_channel_r <= st_in_channel;
-    in_startofpacket_r <= st_in_startofpacket;
-    in_endofpacket_r <= st_in_endofpacket;
-    in_empty_r <= st_in_empty;
+    if (reset) begin
+      in_valid_r <= 0;
+    end else begin
+      if (in_ready) begin
+        in_valid_r <= st_in_valid;
+        in_data_r <= st_in_data;
+        in_channel_r <= st_in_channel;
+        in_startofpacket_r <= st_in_startofpacket;
+        in_endofpacket_r <= st_in_endofpacket;
+        in_empty_r <= st_in_empty;
+      end
+    end
   end
 
-  always @(posedge clk) begin: out_driver
-    if (reset) begin
-      out_valid <= 0;
+  always @(*) begin: out_driver
+    if (source_generator) begin
+      out_valid = gen_valid;
+      out_data = gen_data;
+      out_channel = gen_channel;
+      out_startofpacket = gen_startofpacket;
+      out_endofpacket = gen_endofpacket;
+      out_empty = gen_empty;
     end else begin
-      if (source_generator) begin
-        out_valid <= gen_valid;
-        out_data <= gen_data;
-        out_channel <= gen_channel;
-        out_startofpacket <= gen_startofpacket;
-        out_endofpacket <= gen_endofpacket;
-        out_empty <= gen_empty;
-      end else begin
-        out_valid <= in_valid_r;
-        out_data <= in_data_r;
-        out_channel <= in_channel_r;
-        out_startofpacket <= in_startofpacket_r;
-        out_endofpacket <= in_endofpacket_r;
-        out_empty <= in_empty_r;
-      end
+      out_valid = in_valid_r;
+      out_data = in_data_r;
+      out_channel = in_channel_r;
+      out_startofpacket = in_startofpacket_r;
+      out_endofpacket = in_endofpacket_r;
+      out_empty = in_empty_r;
     end
   end
 
@@ -164,7 +162,7 @@ module fejkon_fc_debug (
     if (reset) begin
       in_ready = 0;
     end else begin
-      in_ready = ~source_generator;
+      in_ready = ~source_generator & (~in_valid_r | st_out_ready);
     end
   end
 

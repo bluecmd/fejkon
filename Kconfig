@@ -108,3 +108,11 @@ config STP_PCIE_C2H
 config STP_FC_STREAM
   depends on STP
   bool "Enable FC stream instance"
+
+config STP_FC0_RX
+  depends on STP
+  bool "Enable FC port 0 RX instance"
+
+config STP_FC1_RX
+  depends on STP
+  bool "Enable FC port 1 RX instance"

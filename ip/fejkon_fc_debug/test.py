@@ -79,6 +79,20 @@ async def test_passthrough(dut):
     raise tb.scoreboard.result
 
 @cocotb.test()
+async def test_single_generator(dut):
+    """Test traffic generator for exactly one packet."""
+    clock = Clock(dut.clk, 10, units='us')
+    cocotb.fork(clock.start())
+    tb = await Thing.new(dut)
+    await tb.csr.write(0, 1)
+    cocotb.fork(flaky_ready(dut))
+    tb.expected_output.append(PAYLOAD)
+    await Timer(100, units='us')
+    cntr = await tb.csr.read(0)
+    assert cntr == 0, 'generator should have been zero'
+    raise tb.scoreboard.result
+
+@cocotb.test()
 async def test_generator(dut):
     """Test traffic generator."""
     clock = Clock(dut.clk, 10, units='us')

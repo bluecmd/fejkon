@@ -161,7 +161,8 @@ async def run_c2h_dma_test(dut, dwords, channel):
     payload = bytes(payload)
     header = int.to_bytes(0x4 + ((len(payload) // 4) << 4) + (channel << 14), length=4, byteorder='big')
     header = header + bytes(12)
-    tb.expect_memwrite(DMA_WND_START, header + payload)
+    # TODO: Fragmentation is not implemented, so expect truncated packets
+    tb.expect_memwrite(DMA_WND_START, header + payload[:224])
     await with_timeout(tb.data_tx.send(payload, channel=channel), 1000, 'ns')
     await RisingEdge(dut.clk)
     cntr = await tb.csr.read(0x6) # csr_c2h_staging_counter
@@ -178,7 +179,7 @@ async def run_c2h_dma_test(dut, dwords, channel):
 c2h_factory = TestFactory(run_c2h_dma_test)
 # TODO:
 # - Add packet fragmentation
-c2h_factory.add_option('dwords', [3, 8, 15, 16, 100])
+c2h_factory.add_option('dwords', [3, 8, 15, 16, 100, 512])
 c2h_factory.add_option('channel', [0, 3])
 c2h_factory.generate_tests()
 

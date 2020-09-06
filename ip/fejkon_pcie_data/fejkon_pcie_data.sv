@@ -575,12 +575,14 @@ module fejkon_pcie_data (
   logic [7:0] [31:0] tlp_tx_data_frm_dword = 0;
 
   logic c2h_tx_running = 0;
+  int   c2h_tx_fragment_left = 0;
 
   assign c2h_dma_tlp_tx_busy = c2h_tx_running;
 
   always @(posedge clk) begin: c2h_dma_tlp_sender
     if (reset) begin
       c2h_tx_running <= 0;
+      c2h_tx_fragment_left <= 0;
       tlp_tx_data_frm_valid <= 0;
       tlp_tx_data_frm_startofpacket <= 0;
       tlp_tx_data_frm_endofpacket <= 0;
@@ -613,7 +615,12 @@ module fejkon_pcie_data (
         tlp_tx_data_frm_dword = 0;
         tlp_tx_data_frm_dword[0][31:29] = 3'b010;        // TLP Fmt
         tlp_tx_data_frm_dword[0][28:24] = 5'b00000;      // TLP Type (MWr)
-        tlp_tx_data_frm_dword[0][9:0] = c2h_staging_pkt_length[9:0] + {6'h0, data_header_length}; // Length
+        // TODO: Implement proper fragmentation
+        if (c2h_staging_pkt_length[9:0] > 10'd56) begin
+          tlp_tx_data_frm_dword[0][9:0] = 10'd56 + {6'h0, data_header_length}; // Length
+        end else begin
+          tlp_tx_data_frm_dword[0][9:0] = c2h_staging_pkt_length[9:0] + {6'h0, data_header_length}; // Length
+        end
         tlp_tx_data_frm_dword[1][31:16] = my_id;         // Requester ID
         tlp_tx_data_frm_dword[1][15:8] = 0;              // Tag
         tlp_tx_data_frm_dword[1][7:4] = 4'hf;            // Last BE
@@ -643,6 +650,13 @@ module fejkon_pcie_data (
         end
         c2h_tx_running <= 1'b1;
         c2h_staging_read_req <= 1'b1;
+        // MaxPayload is assumed to be 256B (-32B for header) = 224B payload
+        // 224B / 4 => 56 DWs
+        if (c2h_staging_pkt_length[9:0] > 10'd56) begin
+          c2h_tx_fragment_left <= 56;
+        end else begin
+          c2h_tx_fragment_left <= {22'h0, c2h_staging_pkt_length};
+        end
       end else if (c2h_tx_running) begin
         {tlp_tx_data_frm_dword[0], tlp_tx_data_frm_dword[1],
          tlp_tx_data_frm_dword[2], tlp_tx_data_frm_dword[3],
@@ -650,6 +664,15 @@ module fejkon_pcie_data (
          tlp_tx_data_frm_dword[6], tlp_tx_data_frm_dword[7]} = c2h_staging_pkt_data;
         tlp_tx_data_frm_empty <= {c2h_staging_pkt_empty, 2'h0};
         tlp_tx_data_frm_endofpacket <= c2h_staging_pkt_eop;
+        // TODO: Implement fragmentation. Right now only truncate
+        if (c2h_tx_fragment_left == 0) begin
+          tlp_tx_data_frm_valid <= 0;
+        end else if (c2h_tx_fragment_left <= 8) begin
+          tlp_tx_data_frm_endofpacket <= 1'b1;
+          c2h_tx_fragment_left <= 0;
+        end else begin
+          c2h_tx_fragment_left <= c2h_tx_fragment_left - 8;
+        end
         if (c2h_staging_pkt_eop) begin
           c2h_staging_read_req <= 0;
           c2h_tx_running <= 0;
@@ -673,7 +696,10 @@ module fejkon_pcie_data (
       end
       if (c2h_dma_buf_reset_write) begin
         c2h_dma_card_write_ptr <= c2h_dma_buf_start_addr;
-      end else if (c2h_staging_read_req && c2h_staging_pkt_eop && tlp_tx_data_frm_valid) begin
+      end else if (c2h_staging_read_req && (c2h_tx_fragment_left <= 8) && tlp_tx_data_frm_valid) begin
+        // TODO: Change to c2h_staging_pkt_eop ^^^^^^^^^^^^^^^^^^^^
+        // This was changed to allow for truncated packets.
+        // --
         // Advance one frame if there is enough space for one more frame
         if (c2h_dma_card_write_ptr + 4096*2 >= c2h_dma_buf_end_addr) begin
           c2h_dma_card_write_ptr <= c2h_dma_buf_start_addr;

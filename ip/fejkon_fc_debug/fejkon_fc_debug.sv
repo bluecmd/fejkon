@@ -105,7 +105,7 @@ module fejkon_fc_debug (
         source_generator <= 0;
         if (st_in_valid || (enable_generator == 0)) begin
           source_generator <= 0;
-        end else if (gen_valid && (enable_generator != 1)) begin
+        end else if (gen_valid && (~source_generator || enable_generator != 1)) begin
           source_generator <= 1;
         end
       end

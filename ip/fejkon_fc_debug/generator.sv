@@ -17,12 +17,6 @@ module generator (
   logic         gen_valid = 0;
   logic [4:0]   gen_empty = 0;
 
-  logic [31:0] readdata = 0;
-
-  logic source_generator = 0;
-  int   enable_generator = 0;
-  logic decr_generator = 0;
-
   int gen_idx = 0;
 
   always @(posedge clk) begin: gen_driver

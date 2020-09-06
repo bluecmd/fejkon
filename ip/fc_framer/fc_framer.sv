@@ -43,7 +43,7 @@ module fc_framer (
   end
 
   // Driven by fc_state_rx
-  fc::state_t state;
+  (* keep *) fc::state_t state;
   fc::state_t state_r;
 
   fc::state_t state_tx_cdc1 = fc::STATE_LF2;
@@ -143,8 +143,8 @@ module fc_framer (
   logic [31:0] rx_data;
   logic [3:0]  rx_datak;
 
-  assign rx_data = avrx_data[31:0];
-  assign rx_datak = avrx_data[35:32];
+  (* keep *) assign rx_data = avrx_data[31:0];
+  (* keep *) assign rx_datak = avrx_data[35:32];
 
   logic [31:0] urx_data = 0;
   logic        urx_valid = 0;

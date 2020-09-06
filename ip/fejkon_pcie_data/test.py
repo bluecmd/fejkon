@@ -94,6 +94,16 @@ class TestC2H(BaseTest):
         self.data_tx = AvalonSTDriver(dut, 'data_tx', dut.clk)
 
 
+def endian_swap(b):
+    bo = bytearray()
+    for i in range(len(b)//4):
+        bo.append(b[i*4 + 3])
+        bo.append(b[i*4 + 2])
+        bo.append(b[i*4 + 1])
+        bo.append(b[i*4 + 0])
+    return bytes(bo)
+
+
 @cocotb.test()
 async def test_unaligned_read(dut):
     """Test MemRead on a non-QWORD aligned address."""
@@ -162,7 +172,7 @@ async def run_c2h_dma_test(dut, dwords, channel):
     header = int.to_bytes(0x4 + ((len(payload) // 4) << 4) + (channel << 14), length=4, byteorder='big')
     header = header + bytes(12)
     # TODO: Fragmentation is not implemented, so expect truncated packets
-    tb.expect_memwrite(DMA_WND_START, header + payload[:224])
+    tb.expect_memwrite(DMA_WND_START, header + endian_swap(payload[:224]))
     await with_timeout(tb.data_tx.send(payload, channel=channel), 1000, 'ns')
     await RisingEdge(dut.clk)
     cntr = await tb.csr.read(0x6) # csr_c2h_staging_counter
@@ -204,7 +214,7 @@ async def test_c2h_dma_pressure(dut):
         header = header + bytes(12)
         if i > 0:
             # See comment above for explaination
-            tb.expect_memwrite(DMA_WND_START + 4096 * ((i-1) % DMA_WND_SIZE), header + payload)
+            tb.expect_memwrite(DMA_WND_START + 4096 * ((i-1) % DMA_WND_SIZE), header + endian_swap(payload))
         await with_timeout(tb.data_tx.send(payload, channel=channel), 1000, 'ns')
     await RisingEdge(dut.clk)
     cntr = await tb.csr.read(0x6) # csr_c2h_staging_counter

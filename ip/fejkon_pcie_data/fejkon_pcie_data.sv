@@ -658,10 +658,42 @@ module fejkon_pcie_data (
           c2h_tx_fragment_left <= {22'h0, c2h_staging_pkt_length};
         end
       end else if (c2h_tx_running) begin
-        {tlp_tx_data_frm_dword[0], tlp_tx_data_frm_dword[1],
-         tlp_tx_data_frm_dword[2], tlp_tx_data_frm_dword[3],
-         tlp_tx_data_frm_dword[4], tlp_tx_data_frm_dword[5],
-         tlp_tx_data_frm_dword[6], tlp_tx_data_frm_dword[7]} = c2h_staging_pkt_data;
+        // Correct endianness on the data. I am not 100% sure why this is
+        // needed but even so I'd rather do this in hardware than in the CPU.
+        {
+          tlp_tx_data_frm_dword[0][7:0],
+          tlp_tx_data_frm_dword[0][15:8],
+          tlp_tx_data_frm_dword[0][23:16],
+          tlp_tx_data_frm_dword[0][31:24],
+          tlp_tx_data_frm_dword[1][7:0],
+          tlp_tx_data_frm_dword[1][15:8],
+          tlp_tx_data_frm_dword[1][23:16],
+          tlp_tx_data_frm_dword[1][31:24],
+          tlp_tx_data_frm_dword[2][7:0],
+          tlp_tx_data_frm_dword[2][15:8],
+          tlp_tx_data_frm_dword[2][23:16],
+          tlp_tx_data_frm_dword[2][31:24],
+          tlp_tx_data_frm_dword[3][7:0],
+          tlp_tx_data_frm_dword[3][15:8],
+          tlp_tx_data_frm_dword[3][23:16],
+          tlp_tx_data_frm_dword[3][31:24],
+          tlp_tx_data_frm_dword[4][7:0],
+          tlp_tx_data_frm_dword[4][15:8],
+          tlp_tx_data_frm_dword[4][23:16],
+          tlp_tx_data_frm_dword[4][31:24],
+          tlp_tx_data_frm_dword[5][7:0],
+          tlp_tx_data_frm_dword[5][15:8],
+          tlp_tx_data_frm_dword[5][23:16],
+          tlp_tx_data_frm_dword[5][31:24],
+          tlp_tx_data_frm_dword[6][7:0],
+          tlp_tx_data_frm_dword[6][15:8],
+          tlp_tx_data_frm_dword[6][23:16],
+          tlp_tx_data_frm_dword[6][31:24],
+          tlp_tx_data_frm_dword[7][7:0],
+          tlp_tx_data_frm_dword[7][15:8],
+          tlp_tx_data_frm_dword[7][23:16],
+          tlp_tx_data_frm_dword[7][31:24]
+        } = c2h_staging_pkt_data;
         tlp_tx_data_frm_empty <= {c2h_staging_pkt_empty, 2'h0};
         tlp_tx_data_frm_endofpacket <= c2h_staging_pkt_eop;
         // TODO: Implement fragmentation. Right now only truncate

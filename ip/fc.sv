@@ -36,6 +36,7 @@ package fc;
   typedef enum integer {
     PRIM_IDLE = 0,
     PRIM_R_RDY,
+    PRIM_VC_RDY,
     PRIM_BB_SCS,
     PRIM_BB_SCR,
     PRIM_SOFI2,
@@ -69,6 +70,9 @@ package fc;
   } state_t;
 
   function primitives_t map_primitive(input logic [31:0] data);
+    if (data[31:16] == {D(28,5), D(21,7)}) begin
+      return PRIM_VC_RDY;
+    end
     case(data)
       IDLE:    return PRIM_IDLE;
       R_RDY:   return PRIM_R_RDY;

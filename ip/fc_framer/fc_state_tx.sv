@@ -1,4 +1,4 @@
-`timescale 1 ps / 1 ps
+`timescale 1 us / 1 us
 module fc_state_tx (
     input  logic        clk,
     output logic [31:0] data,

@@ -1,4 +1,4 @@
-`timescale 1 ps / 1 ps
+`timescale 1 us / 1 us
 module fc_state_rx (
     input logic        clk,
     input logic        reset,

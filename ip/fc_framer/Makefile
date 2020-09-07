@@ -1,8 +1,40 @@
-.DELETE_ON_ERROR:
+PYLINT ?= pylint3
 
-.PHONY: lint
+.PHONY: lint test wave
 
-lint:
-	verilator --lint-only ../fc.sv *.sv
-	vlog -work .linttmp -lint -sv ../fc.sv *.sv
+TOPLEVEL_LANG = verilog
+VERILOG_SOURCES = \
+	$(shell pwd)/../fc.sv \
+	$(shell pwd)/fc_state_rx.sv \
+	$(shell pwd)/fc_state_tx.sv \
+	$(shell pwd)/fc_framer.sv
+TOPLEVEL = fc_framer
+MODULE = test
+
+# Using features like "const logic" that are not supported by Icarus right now
+SIM ?= verilator
+ifeq (verilator,$(SIM))
+EXTRA_ARGS += --trace --trace-structs
+endif
+
+include $(shell cocotb-config --makefiles)/Makefile.sim
+
+lint: ../fc.sv fc_framer.sv fc_state_rx.sv fc_state_tx.sv
+	$(PYLINT) --rcfile=pylintrc test.py --exit-zero
+	verilator --lint-only $^
+ifneq (,$(shell which vsim))
+	vlog -work .linttmp -lint -sv $^
 	rm -fr .linttmp
+endif
+
+test:
+	$(MAKE) sim
+
+dump.vcd:
+	$(MAKE) sim
+
+wave: dump.vcd test.gtkw
+	gtkwave --save test.gtkw --dump=$<
+	sed -i '/^\[dumpfile/d' test.gtkw
+	sed -i '/^\[savefile/d' test.gtkw
+	sed -i '/^\[\*]/d' test.gtkw

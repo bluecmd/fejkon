@@ -1,0 +1,75 @@
+[timestart] 0
+[size] 3000 1840
+[pos] -560 -1
+*-4.449936 84 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] top.
+[sst_width] 418
+[signals_width] 691
+[sst_expanded] 1
+[sst_vpaned_height] 543
+@28
+top.reset
+top.rx_clk
+top.tx_clk
+top.active
+@23
+top.fc_framer.state[31:0]
+@800200
+-avrx
+@22
+top.avrx_data[35:0]
+@28
+top.avrx_valid
+@1000200
+-avrx
+@800200
+-avtx
+@22
+top.avtx_data[35:0]
+@28
+top.avtx_ready
+top.avtx_valid
+@1000200
+-avtx
+@800200
+-rx_mm
+@28
+top.rx_mm_address[2:0]
+top.rx_mm_read
+@22
+top.rx_mm_readdata[31:0]
+@1000200
+-rx_mm
+@800200
+-tx_mm
+@28
+top.tx_mm_address[2:0]
+top.tx_mm_read
+@22
+top.tx_mm_readdata[31:0]
+@1000200
+-tx_mm
+@800200
+-userrx
+@22
+top.userrx_data[31:0]
+top.userrx_empty[3:0]
+@28
+top.userrx_endofpacket
+top.userrx_startofpacket
+top.userrx_valid
+@1000200
+-userrx
+@800200
+-usertx
+@22
+top.usertx_data[31:0]
+@28
+top.usertx_endofpacket
+top.usertx_ready
+top.usertx_startofpacket
+top.usertx_valid
+@1000200
+-usertx
+[pattern_trace] 1
+[pattern_trace] 0

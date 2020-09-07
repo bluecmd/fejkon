@@ -196,6 +196,7 @@ set_interface_property userrx CMSIS_SVD_VARIABLES ""
 set_interface_property userrx SVD_ADDRESS_GROUP ""
 
 add_interface_port userrx userrx_data data Output 32
+add_interface_port userrx userrx_empty empty Output 1
 add_interface_port userrx userrx_valid valid Output 1
 add_interface_port userrx userrx_endofpacket endofpacket Output 1
 add_interface_port userrx userrx_startofpacket startofpacket Output 1

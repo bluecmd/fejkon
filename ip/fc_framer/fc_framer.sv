@@ -1,4 +1,4 @@
-`timescale 1 ps / 1 ps
+`timescale 1 us / 1 us
 module fc_framer (
     output wire [35:0]  avtx_data,                //                   avtx.data
     output wire         avtx_valid,               //                       .valid
@@ -14,6 +14,7 @@ module fc_framer (
     output wire         userrx_valid,             //                       .valid
     output wire         userrx_startofpacket,     //                       .startofpacket
     output wire         userrx_endofpacket,       //                       .endofpacket
+    output wire [3:0]   userrx_empty,             //                       .empty
     input  wire         reset,                    //                  reset.reset
     input  wire [2:0]   tx_mm_address,            //             tx_mgmt_mm.address
     input  wire         tx_mm_read,               //                       .read
@@ -185,5 +186,6 @@ module fc_framer (
   assign userrx_valid = urx_valid;
   assign userrx_startofpacket = urx_startofpacket;
   assign userrx_endofpacket = urx_endofpacket;
+  assign userrx_empty = 4'b0;
 
 endmodule

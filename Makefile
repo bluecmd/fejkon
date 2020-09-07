@@ -50,6 +50,7 @@ report:
 		grep -vE '(jtagm_timing_adt|jtagm_b2p_adapter)' |\
 		grep -vE 'Warning \(10036\).*rx_be_runningdisp' |\
 		grep -vE 'Warning \(10036\).*rx_unknown_prim' |\
+		grep -vE 'Warning \(10036\).*altera_reset_sequencer' |\
 		grep -vE 'Warning \(10230\).*i2c_master\.v' || \
 		echo ' [-] \e[32mNo synthesis warnings! Unbelievable!\e[0m'
 	@echo

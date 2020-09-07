@@ -14,7 +14,7 @@ module fc_framer (
     output wire         userrx_valid,             //                       .valid
     output wire         userrx_startofpacket,     //                       .startofpacket
     output wire         userrx_endofpacket,       //                       .endofpacket
-    output wire [3:0]   userrx_empty,             //                       .empty
+    output wire [1:0]   userrx_empty,             //                       .empty
     input  wire         reset,                    //                  reset.reset
     input  wire [2:0]   tx_mm_address,            //             tx_mgmt_mm.address
     input  wire         tx_mm_read,               //                       .read
@@ -161,10 +161,10 @@ module fc_framer (
       urx_packet_counter <= 0;
     end else if (avrx_valid) begin
       urx_data <= rx_data;
-      urx_valid <= avrx_valid;
+      urx_valid <= avrx_valid && is_active;
       urx_startofpacket <= 0;
       urx_endofpacket <= 0;
-      if (rx_datak == 4'b1000) begin
+      if (rx_datak == 4'b1000 && is_active) begin
         case (fc::map_primitive(rx_data))
           fc::PRIM_SOFI2, fc::PRIM_SOFN2, fc::PRIM_SOFI3, fc::PRIM_SOFN3, fc::PRIM_SOFF: begin
             urx_startofpacket <= 1;
@@ -173,9 +173,13 @@ module fc_framer (
             urx_endofpacket <= 1;
             urx_packet_counter <= urx_packet_counter + 1;
           end
-          default: begin
-            // A primitive that is not part of the user-layer packet
+          fc::PRIM_IDLE, fc::PRIM_ARBFF: begin
             urx_valid <= 0;
+          end
+          default: begin
+            urx_startofpacket <= 1;
+            urx_endofpacket <= 1;
+            urx_packet_counter <= urx_packet_counter + 1;
           end
         endcase
       end
@@ -186,6 +190,6 @@ module fc_framer (
   assign userrx_valid = urx_valid;
   assign userrx_startofpacket = urx_startofpacket;
   assign userrx_endofpacket = urx_endofpacket;
-  assign userrx_empty = 4'b0;
+  assign userrx_empty = 2'b0;
 
 endmodule

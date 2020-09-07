@@ -4,6 +4,10 @@ def D(x, y):
     return x & 31 | (y & 7) << 5
 
 
+def OrderdSet(b):
+    return "D%s.%s" % (b & 31, (b >> 5) & 7)
+
+
 SOFI2   = bytes([D(28,5), D(21,5), D(21,2), D(21,2)]);
 SOFN2   = bytes([D(28,5), D(21,5), D(21,1), D(21,1)]);
 SOFI3   = bytes([D(28,5), D(21,5), D(22,2), D(22,2)]);
@@ -26,6 +30,10 @@ NOS     = bytes([D(28,5), D(21,2), D(31,5), D(5,2)]);
 OLS     = bytes([D(28,5), D(21,1), D(10,4), D(21,2)]);
 LR      = bytes([D(28,5), D(9,2),  D(31,5), D(9,2)]);
 LRR     = bytes([D(28,5), D(21,1), D(31,5), D(9,2)]);
+
+
+def VC_RDY(vc_id):
+    return bytes([D(28,5), D(21,7)]) + bytes([vc_id]*2)
 
 
 STATE_AC = 0

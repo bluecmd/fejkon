@@ -28,6 +28,17 @@ LR      = bytes([D(28,5), D(9,2),  D(31,5), D(9,2)]);
 LRR     = bytes([D(28,5), D(21,1), D(31,5), D(9,2)]);
 
 
+STATE_AC = 0
+STATE_LR1 = 1
+STATE_LR2 = 2
+STATE_LR3 = 3
+STATE_LF1 = 4
+STATE_LF2 = 5
+STATE_OL1 = 6
+STATE_OL2 = 7
+STATE_OL3 = 8
+
+
 def decode(b):
     if b == SOFI3:
         return 'SOFi3'

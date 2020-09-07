@@ -1,19 +1,19 @@
 [timestart] 0
-[size] 1882 1840
-[pos] -429 -621
-*-4.449936 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[size] 3000 1840
+[pos] -560 -1
+*-4.449936 84 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] top.
 [sst_width] 418
-[signals_width] 350
+[signals_width] 691
 [sst_expanded] 1
 [sst_vpaned_height] 543
 @28
 top.reset
 top.rx_clk
-@29
 top.tx_clk
-@28
 top.active
+@23
+top.fc_framer.state[31:0]
 @800200
 -avrx
 @22

@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Transaction testbench for Fejkon PCIe.
 
 This test bench tests simplified behaviour of the PCIe TLP generation.

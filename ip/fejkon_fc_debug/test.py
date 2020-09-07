@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Transaction testbench for Fejkon FC Debug.
 
 This testbench ensures that the FC debug component can both pass traffic

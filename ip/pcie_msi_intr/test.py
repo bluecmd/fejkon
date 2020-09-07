@@ -1,6 +1,4 @@
-#/usr/bin/env/python3
 """Testbench for PCIe MSI generation."""
-
 import cocotb
 from cocotb.clock import Clock, Timer
 from cocotb.triggers import RisingEdge

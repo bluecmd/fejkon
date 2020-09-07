@@ -12,7 +12,8 @@ TOPLEVEL = fc_framer
 MODULE = test
 
 # Using features like "const logic" that are not supported by Icarus right now
-SIM ?= verilator
+# TODO: See https://github.com/cocotb/cocotb/issues/2051 for Verilator freeze bug
+SIM ?= modelsim
 ifeq (verilator,$(SIM))
 EXTRA_ARGS += --trace --trace-structs
 endif

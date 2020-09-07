@@ -174,3 +174,21 @@ async def test_simple_frame(dut):
     await RisingEdge(dut.rx_clk)
     await Timer(50, 'us')
     raise tb.scoreboard.result
+
+
+@cocotb.test()
+async def test_prim_frame(dut):
+    """Test the FC framing of selected primitives."""
+    tb = await Thing.new(dut)
+    await handshake(dut)
+    tb.expected_output.append(fc.R_RDY)
+    tb.expected_output.append(fc.VC_RDY(0xaa))
+    dut.avrx_data <= with_control(fc.R_RDY)
+    await RisingEdge(dut.tx_clk)
+    dut.avrx_data <= with_control(fc.ARBFF)
+    await RisingEdge(dut.rx_clk)
+    dut.avrx_data <= with_control(fc.VC_RDY(0xaa))
+    await RisingEdge(dut.tx_clk)
+    dut.avrx_data <= with_control(fc.ARBFF)
+    await Timer(50, 'us')
+    raise tb.scoreboard.result

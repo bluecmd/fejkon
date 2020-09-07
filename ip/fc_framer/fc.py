@@ -28,6 +28,10 @@ LR      = bytes([D(28,5), D(9,2),  D(31,5), D(9,2)]);
 LRR     = bytes([D(28,5), D(21,1), D(31,5), D(9,2)]);
 
 
+def VC_RDY(vc_id):
+    return bytes([D(28,5), D(21,7)]) + bytes([vc_id]*2)
+
+
 STATE_AC = 0
 STATE_LR1 = 1
 STATE_LR2 = 2

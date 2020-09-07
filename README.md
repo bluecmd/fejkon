@@ -330,6 +330,7 @@ The primitive counters logged are in order:
 
  *  IDLE
  *  R\_RDY
+ *  VC\_RDY
  *  BB\_SCS
  *  BB\_SCR
  *  SOFi2

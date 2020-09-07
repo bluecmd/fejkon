@@ -6,6 +6,7 @@ from cocotb.clock import Clock, Timer
 from cocotb.drivers.avalon import AvalonMaster
 from cocotb.handle import ModifiableObject
 from cocotb.monitors.avalon import AvalonSTPkts as AvalonSTMonitor
+from cocotb.scoreboard import Scoreboard
 from cocotb.triggers import RisingEdge
 
 import fc
@@ -16,10 +17,13 @@ class Thing:
 
     def __init__(self, dut):
         self.dut = dut
-        # TODO: See https://github.com/cocotb/cocotb/issues/2051
-        # self.userrx = AvalonSTMonitor(dut, 'userrx', dut.rx_clk)
+        # TODO: See https://github.com/cocotb/cocotb/issues/2051 for Verilator freeze bug
+        self.userrx = AvalonSTMonitor(dut, 'userrx', dut.rx_clk)
         self.tx_csr = AvalonMaster(dut, 'tx_mm', dut.tx_clk)
         self.rx_csr = AvalonMaster(dut, 'rx_mm', dut.rx_clk)
+        self.expected_output = []
+        self.scoreboard = Scoreboard(dut)
+        self.scoreboard.add_interface(self.userrx, self.expected_output)
 
     @staticmethod
     async def new(dut):
@@ -41,17 +45,25 @@ class Thing:
 
 
 def with_control(b):
-    """Append control for K,D,D,D format."""
+    """Construct control for K,D,D,D format."""
     v = BinaryValue(n_bits=40, bigEndian=True)
     v.buff = bytes([0x8]) + b
+    return v[4:39]
+
+
+def with_data(b):
+    """Construct data for D,D,D,D format."""
+    v = BinaryValue(n_bits=40, bigEndian=True)
+    v.buff = bytes([0x0]) + b
     return v[4:39]
 
 
 def decode_symbol(b):
     if b[0] == 0x8:
         return fc.decode(b[1:])
-    elif b[0] == 0x0:
+    if b[0] == 0x0:
         return '<DATA %s>' % (binascii.hexlify(b[1:]), )
+    raise Exception('symbol had unsupported control bits')
 
 
 def assert_symbol(value, symbol):
@@ -65,7 +77,7 @@ def assert_symbol(value, symbol):
 @cocotb.test()
 async def test_reset_tx(dut):
     """Test the primitives sent after reset."""
-    tb = await Thing.new(dut)
+    await Thing.new(dut)
     await RisingEdge(dut.tx_clk)
     assert dut.avtx_valid == 1, 'avtx expected to be valid'
     assert dut.state == fc.STATE_LF2, 'state expected to be LF2'
@@ -75,7 +87,7 @@ async def test_reset_tx(dut):
 @cocotb.test()
 async def test_handshake(dut):
     """Test the FC link-up handshake."""
-    tb = await Thing.new(dut)
+    await Thing.new(dut)
     await RisingEdge(dut.tx_clk)
     assert dut.avtx_valid == 1, 'avtx expected to be valid'
     # LF2 -> LF1
@@ -117,3 +129,48 @@ async def test_handshake(dut):
         await RisingEdge(dut.tx_clk)
     assert_symbol(dut.avtx_data, with_control(fc.ARBFF))
     assert dut.active == 1, 'state expected to be active'
+
+
+async def handshake(dut):
+    """Quietly do the FC handshake."""
+    dut.avrx_valid <= 1
+    dut.avrx_data <= with_control(fc.NOS)
+    await RisingEdge(dut.tx_clk)
+    await RisingEdge(dut.tx_clk)
+    dut.avrx_data <= with_control(fc.OLS)
+    await RisingEdge(dut.tx_clk)
+    dut.avrx_data <= with_control(fc.LR)
+    await RisingEdge(dut.tx_clk)
+    dut.avrx_data <= with_control(fc.LRR)
+    await RisingEdge(dut.tx_clk)
+    dut.avrx_data <= with_control(fc.IDLE)
+    for _ in range(8):
+        if dut.state == fc.STATE_AC:
+            break
+        await RisingEdge(dut.tx_clk)
+    for _ in range(6):
+        await RisingEdge(dut.tx_clk)
+    dut.avrx_data <= with_control(fc.ARBFF)
+    assert dut.active == 1, 'state expected to be active'
+
+
+@cocotb.test()
+async def test_simple_frame(dut):
+    """Test the FC simple framing."""
+    tb = await Thing.new(dut)
+    await handshake(dut)
+    tb.expected_output.append(binascii.unhexlify('bcb556560102030405060708090a0b0cbc95d5d5'))
+    dut.avrx_data <= with_control(fc.SOFI3)
+    await RisingEdge(dut.tx_clk)
+    dut.avrx_data <= with_data(binascii.unhexlify('01020304'))
+    await RisingEdge(dut.tx_clk)
+    dut.avrx_data <= with_data(binascii.unhexlify('05060708'))
+    await RisingEdge(dut.tx_clk)
+    dut.avrx_data <= with_data(binascii.unhexlify('090A0B0C'))
+    await RisingEdge(dut.tx_clk)
+    dut.avrx_data <= with_control(fc.EOFN_P)
+    await RisingEdge(dut.rx_clk)
+    dut.avrx_data <= with_control(fc.ARBFF)
+    await RisingEdge(dut.rx_clk)
+    await Timer(50, 'us')
+    raise tb.scoreboard.result

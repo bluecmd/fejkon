@@ -1,3 +1,4 @@
+`timescale 1 us / 1 us
 package fc;
 
   function bit [7:0] D(input int X, input int Y);

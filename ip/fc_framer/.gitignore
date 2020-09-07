@@ -1,0 +1,6 @@
+.*.sw*
+__pycache__/
+dump.vcd
+modelsim.ini
+results.xml
+sim_build/

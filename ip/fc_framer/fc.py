@@ -4,6 +4,10 @@ def D(x, y):
     return x & 31 | (y & 7) << 5
 
 
+def OrderdSet(b):
+    return "D%s.%s" % (b & 31, (b >> 5) & 7)
+
+
 SOFI2   = bytes([D(28,5), D(21,5), D(21,2), D(21,2)]);
 SOFN2   = bytes([D(28,5), D(21,5), D(21,1), D(21,1)]);
 SOFI3   = bytes([D(28,5), D(21,5), D(22,2), D(22,2)]);

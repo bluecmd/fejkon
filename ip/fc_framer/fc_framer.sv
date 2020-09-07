@@ -161,10 +161,10 @@ module fc_framer (
       urx_packet_counter <= 0;
     end else if (avrx_valid) begin
       urx_data <= rx_data;
-      urx_valid <= avrx_valid;
+      urx_valid <= avrx_valid && is_active;
       urx_startofpacket <= 0;
       urx_endofpacket <= 0;
-      if (rx_datak == 4'b1000) begin
+      if (rx_datak == 4'b1000 && is_active) begin
         case (fc::map_primitive(rx_data))
           fc::PRIM_SOFI2, fc::PRIM_SOFN2, fc::PRIM_SOFI3, fc::PRIM_SOFN3, fc::PRIM_SOFF: begin
             urx_startofpacket <= 1;
@@ -173,14 +173,13 @@ module fc_framer (
             urx_endofpacket <= 1;
             urx_packet_counter <= urx_packet_counter + 1;
           end
-          fc::PRIM_R_RDY, fc::PRIM_BB_SCS, fc::PRIM_BB_SCR, fc::PRIM_VC_RDY: begin
+          fc::PRIM_IDLE, fc::PRIM_ARBFF: begin
+            urx_valid <= 0;
+          end
+          default: begin
             urx_startofpacket <= 1;
             urx_endofpacket <= 1;
             urx_packet_counter <= urx_packet_counter + 1;
-          end
-          default: begin
-            // A primitive that is not part of the user-layer packet
-            urx_valid <= 0;
           end
         endcase
       end

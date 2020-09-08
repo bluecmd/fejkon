@@ -117,6 +117,10 @@ config STP_FC0_RX
   depends on STP
   bool "Enable FC port 0 RX instance"
 
+config STP_FC0_XCVR_RX
+  depends on STP
+  bool "Enable FC port 0 transceiver RX instance"
+
 config STP_FC1_TX
   depends on STP
   bool "Enable FC port 1 TX instance"
@@ -124,3 +128,7 @@ config STP_FC1_TX
 config STP_FC1_RX
   depends on STP
   bool "Enable FC port 1 RX instance"
+
+config STP_FC1_XCVR_RX
+  depends on STP
+  bool "Enable FC port 1 transceiver RX instance"

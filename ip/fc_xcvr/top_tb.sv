@@ -11,6 +11,8 @@
 `define PMA0_CLK tb.tb_inst.xcvr0.phy.fc_phy_inst.genblk1.S5.transceiver_core.pll_out_clk
 `define FRAMER0 tb.tb_inst.framer0
 `define FRAMER1 tb.tb_inst.framer1
+`define FRAMERA tb.tb_inst.framera
+`define FRAMERB tb.tb_inst.framerb
 
 `timescale 1ps / 1fs
 
@@ -24,6 +26,8 @@ module top_tb;
     set_verbosity(VERBOSITY_INFO);
     wait(`FRAMER0.state == fc::STATE_AC);
     wait(`FRAMER1.state == fc::STATE_AC);
+    wait(`FRAMERA.state == fc::STATE_AC);
+    wait(`FRAMERB.state == fc::STATE_AC);
     $sformat(message, "%m: Test passed");
     print(VERBOSITY_INFO, message);
     // Run one 10 us more for more wave data

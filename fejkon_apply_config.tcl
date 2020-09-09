@@ -10,34 +10,36 @@ load_system {fejkon_fc.qsys}
 set fc_ports 1
 set eth_ports 0
 
-if {$CONFIG_PORT1_FC != "y"} {
+if {$CONFIG_PORT1_FC == "y"} {
+  set fc_ports [expr $fc_ports + 1]
+} else {
   set_instance_property fc1 ENABLED false
   set_instance_property xcvr1 ENABLED false
   set_instance_property fc1_rx_split ENABLED false
   set_instance_property fc1_256_rx ENABLED false
   set_instance_property fc1_rx_cdc ENABLED false
-} else {
-  set fc_ports [expr $fc_ports + 1]
 }
 
-if {$CONFIG_PORT2_FC != "y"} {
+if {$CONFIG_PORT2_FC == "y"} {
+  set fc_ports [expr $fc_ports + 1]
+} else {
   # TODO
-} else {
-  set fc_ports [expr $fc_ports + 1]
 }
 
-if {$CONFIG_PORT3_FC != "y"} {
+if {$CONFIG_PORT3_FC == "y"} {
+  set fc_ports [expr $fc_ports + 1]
+} else {
   # TODO
-} else {
-  set fc_ports [expr $fc_ports + 1]
 }
 
-if {$CONFIG_LOOPBACK_01 != "y"} {
+if {$CONFIG_LOOPBACK_01 == "y"} {
+  remove_connection fc0.avtx/xcvr0.avtx
+  remove_connection fc1.avtx/xcvr1.avtx
+  add_connection fifo_0to1.out xcvr1.avtx
+  add_connection fifo_1to0.out xcvr0.avtx
+} else {
   set_instance_property fifo_0to1 ENABLED false
   set_instance_property fifo_1to0 ENABLED false
-} else {
-  set_instance_parameter_value fc0 {WAIT_FOR_PEER} 0
-  set_instance_parameter_value fc1 {WAIT_FOR_PEER} 0
 }
 
 if {$fc_ports < 2} {
@@ -51,16 +53,16 @@ save_system {fejkon_fc.qsys}
 
 load_system {fejkon.qsys}
 
-if {$CONFIG_PORT2_ETHERNET != "y"} {
-  # TODO
-} else {
+if {$CONFIG_PORT2_ETHERNET == "y"} {
   set eth_ports [expr $eth_ports + 1]
+} else {
+  # TODO
 }
 
-if {$CONFIG_PORT3_ETHERNET != "y"} {
-  # TODO
-} else {
+if {$CONFIG_PORT3_ETHERNET == "y"} {
   set eth_ports [expr $eth_ports + 1]
+} else {
+  # TODO
 }
 
 if {$CONFIG_PORT1_DISABLED != "n"} {

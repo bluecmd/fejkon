@@ -10,6 +10,7 @@ set_project_property HIDE_FROM_IP_CATALOG {false}
 # Instances and instance parameters
 # (disabled instances are intentionally culled)
 add_instance fc0 fc_framer 1.0
+set_instance_parameter_value fc0 {MTU} {3072}
 
 add_instance fc0_256_rx altera_avalon_st_adapter 20.1
 set_instance_parameter_value fc0_256_rx {inBitsPerSymbol} {8}
@@ -47,24 +48,8 @@ set_instance_parameter_value fc0_rx_cdc {USE_OUT_FILL_LEVEL} {0}
 set_instance_parameter_value fc0_rx_cdc {USE_PACKETS} {1}
 set_instance_parameter_value fc0_rx_cdc {WR_SYNC_DEPTH} {3}
 
-add_instance fc0_rx_split altera_avalon_st_splitter 20.1
-set_instance_parameter_value fc0_rx_split {BITS_PER_SYMBOL} {8}
-set_instance_parameter_value fc0_rx_split {CHANNEL_WIDTH} {1}
-set_instance_parameter_value fc0_rx_split {DATA_WIDTH} {32}
-set_instance_parameter_value fc0_rx_split {ERROR_DESCRIPTOR} {}
-set_instance_parameter_value fc0_rx_split {ERROR_WIDTH} {1}
-set_instance_parameter_value fc0_rx_split {MAX_CHANNELS} {1}
-set_instance_parameter_value fc0_rx_split {NUMBER_OF_OUTPUTS} {2}
-set_instance_parameter_value fc0_rx_split {QUALIFY_VALID_OUT} {1}
-set_instance_parameter_value fc0_rx_split {READY_LATENCY} {0}
-set_instance_parameter_value fc0_rx_split {USE_CHANNEL} {0}
-set_instance_parameter_value fc0_rx_split {USE_DATA} {1}
-set_instance_parameter_value fc0_rx_split {USE_ERROR} {0}
-set_instance_parameter_value fc0_rx_split {USE_PACKETS} {1}
-set_instance_parameter_value fc0_rx_split {USE_READY} {1}
-set_instance_parameter_value fc0_rx_split {USE_VALID} {1}
-
 add_instance fc1 fc_framer 1.0
+set_instance_parameter_value fc1 {MTU} {3072}
 
 add_instance fc1_256_rx altera_avalon_st_adapter 20.1
 set_instance_parameter_value fc1_256_rx {inBitsPerSymbol} {8}
@@ -102,25 +87,8 @@ set_instance_parameter_value fc1_rx_cdc {USE_OUT_FILL_LEVEL} {0}
 set_instance_parameter_value fc1_rx_cdc {USE_PACKETS} {1}
 set_instance_parameter_value fc1_rx_cdc {WR_SYNC_DEPTH} {3}
 
-add_instance fc1_rx_split altera_avalon_st_splitter 20.1
-set_instance_parameter_value fc1_rx_split {BITS_PER_SYMBOL} {8}
-set_instance_parameter_value fc1_rx_split {CHANNEL_WIDTH} {1}
-set_instance_parameter_value fc1_rx_split {DATA_WIDTH} {32}
-set_instance_parameter_value fc1_rx_split {ERROR_DESCRIPTOR} {}
-set_instance_parameter_value fc1_rx_split {ERROR_WIDTH} {1}
-set_instance_parameter_value fc1_rx_split {MAX_CHANNELS} {1}
-set_instance_parameter_value fc1_rx_split {NUMBER_OF_OUTPUTS} {2}
-set_instance_parameter_value fc1_rx_split {QUALIFY_VALID_OUT} {1}
-set_instance_parameter_value fc1_rx_split {READY_LATENCY} {0}
-set_instance_parameter_value fc1_rx_split {USE_CHANNEL} {0}
-set_instance_parameter_value fc1_rx_split {USE_DATA} {1}
-set_instance_parameter_value fc1_rx_split {USE_ERROR} {0}
-set_instance_parameter_value fc1_rx_split {USE_PACKETS} {1}
-set_instance_parameter_value fc1_rx_split {USE_READY} {1}
-set_instance_parameter_value fc1_rx_split {USE_VALID} {1}
-
 add_instance fifo_0to1 altera_avalon_dc_fifo 20.1
-set_instance_parameter_value fifo_0to1 {BITS_PER_SYMBOL} {8}
+set_instance_parameter_value fifo_0to1 {BITS_PER_SYMBOL} {9}
 set_instance_parameter_value fifo_0to1 {CHANNEL_WIDTH} {0}
 set_instance_parameter_value fifo_0to1 {ENABLE_EXPLICIT_MAXCHANNEL} {0}
 set_instance_parameter_value fifo_0to1 {ERROR_WIDTH} {0}
@@ -130,11 +98,11 @@ set_instance_parameter_value fifo_0to1 {RD_SYNC_DEPTH} {3}
 set_instance_parameter_value fifo_0to1 {SYMBOLS_PER_BEAT} {4}
 set_instance_parameter_value fifo_0to1 {USE_IN_FILL_LEVEL} {0}
 set_instance_parameter_value fifo_0to1 {USE_OUT_FILL_LEVEL} {0}
-set_instance_parameter_value fifo_0to1 {USE_PACKETS} {1}
+set_instance_parameter_value fifo_0to1 {USE_PACKETS} {0}
 set_instance_parameter_value fifo_0to1 {WR_SYNC_DEPTH} {3}
 
 add_instance fifo_1to0 altera_avalon_dc_fifo 20.1
-set_instance_parameter_value fifo_1to0 {BITS_PER_SYMBOL} {8}
+set_instance_parameter_value fifo_1to0 {BITS_PER_SYMBOL} {9}
 set_instance_parameter_value fifo_1to0 {CHANNEL_WIDTH} {0}
 set_instance_parameter_value fifo_1to0 {ENABLE_EXPLICIT_MAXCHANNEL} {0}
 set_instance_parameter_value fifo_1to0 {ERROR_WIDTH} {0}
@@ -144,7 +112,7 @@ set_instance_parameter_value fifo_1to0 {RD_SYNC_DEPTH} {3}
 set_instance_parameter_value fifo_1to0 {SYMBOLS_PER_BEAT} {4}
 set_instance_parameter_value fifo_1to0 {USE_IN_FILL_LEVEL} {0}
 set_instance_parameter_value fifo_1to0 {USE_OUT_FILL_LEVEL} {0}
-set_instance_parameter_value fifo_1to0 {USE_PACKETS} {1}
+set_instance_parameter_value fifo_1to0 {USE_PACKETS} {0}
 set_instance_parameter_value fifo_1to0 {WR_SYNC_DEPTH} {3}
 
 add_instance mgmt_clk altera_clock_bridge 20.1
@@ -191,7 +159,41 @@ set_instance_parameter_value rx_mux_clk {NUM_CLOCK_OUTPUTS} {1}
 
 add_instance xcvr0 fc_8g_xcvr 1.0
 
+add_instance xcvr0_rx_split altera_avalon_st_splitter 20.1
+set_instance_parameter_value xcvr0_rx_split {BITS_PER_SYMBOL} {9}
+set_instance_parameter_value xcvr0_rx_split {CHANNEL_WIDTH} {1}
+set_instance_parameter_value xcvr0_rx_split {DATA_WIDTH} {36}
+set_instance_parameter_value xcvr0_rx_split {ERROR_DESCRIPTOR} {}
+set_instance_parameter_value xcvr0_rx_split {ERROR_WIDTH} {1}
+set_instance_parameter_value xcvr0_rx_split {MAX_CHANNELS} {1}
+set_instance_parameter_value xcvr0_rx_split {NUMBER_OF_OUTPUTS} {2}
+set_instance_parameter_value xcvr0_rx_split {QUALIFY_VALID_OUT} {1}
+set_instance_parameter_value xcvr0_rx_split {READY_LATENCY} {0}
+set_instance_parameter_value xcvr0_rx_split {USE_CHANNEL} {0}
+set_instance_parameter_value xcvr0_rx_split {USE_DATA} {1}
+set_instance_parameter_value xcvr0_rx_split {USE_ERROR} {0}
+set_instance_parameter_value xcvr0_rx_split {USE_PACKETS} {0}
+set_instance_parameter_value xcvr0_rx_split {USE_READY} {0}
+set_instance_parameter_value xcvr0_rx_split {USE_VALID} {1}
+
 add_instance xcvr1 fc_8g_xcvr 1.0
+
+add_instance xcvr1_rx_split altera_avalon_st_splitter 20.1
+set_instance_parameter_value xcvr1_rx_split {BITS_PER_SYMBOL} {9}
+set_instance_parameter_value xcvr1_rx_split {CHANNEL_WIDTH} {1}
+set_instance_parameter_value xcvr1_rx_split {DATA_WIDTH} {36}
+set_instance_parameter_value xcvr1_rx_split {ERROR_DESCRIPTOR} {}
+set_instance_parameter_value xcvr1_rx_split {ERROR_WIDTH} {1}
+set_instance_parameter_value xcvr1_rx_split {MAX_CHANNELS} {1}
+set_instance_parameter_value xcvr1_rx_split {NUMBER_OF_OUTPUTS} {2}
+set_instance_parameter_value xcvr1_rx_split {QUALIFY_VALID_OUT} {1}
+set_instance_parameter_value xcvr1_rx_split {READY_LATENCY} {0}
+set_instance_parameter_value xcvr1_rx_split {USE_CHANNEL} {0}
+set_instance_parameter_value xcvr1_rx_split {USE_DATA} {1}
+set_instance_parameter_value xcvr1_rx_split {USE_ERROR} {0}
+set_instance_parameter_value xcvr1_rx_split {USE_PACKETS} {0}
+set_instance_parameter_value xcvr1_rx_split {USE_READY} {0}
+set_instance_parameter_value xcvr1_rx_split {USE_VALID} {1}
 
 add_instance xcvr_reconfig alt_xcvr_reconfig 19.1
 set_instance_parameter_value xcvr_reconfig {ber_en} {0}
@@ -243,31 +245,19 @@ set_interface_property xcvr1_aligned EXPORT_OF xcvr1.aligned
 # connections and connection parameters
 add_connection fc0.avtx xcvr0.avtx
 
-add_connection fc0.userrx fc0_rx_split.in
+add_connection fc0.userrx fc0_256_rx.in_0
 
 add_connection fc0_256_rx.out_0 fc0_rx_cdc.in
 
 add_connection fc0_rx_cdc.out rx_mux.in0
 
-add_connection fc0_rx_split.out0 fifo_0to1.in
-
-add_connection fc0_rx_split.out1 fc0_256_rx.in_0
-
 add_connection fc1.avtx xcvr1.avtx
 
-add_connection fc1.userrx fc1_rx_split.in
+add_connection fc1.userrx fc1_256_rx.in_0
 
 add_connection fc1_256_rx.out_0 fc1_rx_cdc.in
 
 add_connection fc1_rx_cdc.out rx_mux.in1
-
-add_connection fc1_rx_split.out0 fifo_1to0.in
-
-add_connection fc1_rx_split.out1 fc1_256_rx.in_0
-
-add_connection fifo_0to1.out fc1.usertx
-
-add_connection fifo_1to0.out fc0.usertx
 
 add_connection mgmt_clk.out_clk mm.clk
 
@@ -279,30 +269,30 @@ add_connection mgmt_clk.out_clk xcvr1.mgmt_clk
 
 add_connection mgmt_clk.out_clk xcvr_reconfig.mgmt_clk_clk
 
-add_connection mm.m0 fc0.tx_mgmt_mm
-set_connection_parameter_value mm.m0/fc0.tx_mgmt_mm arbitrationPriority {1}
-set_connection_parameter_value mm.m0/fc0.tx_mgmt_mm baseAddress {0x1020}
-set_connection_parameter_value mm.m0/fc0.tx_mgmt_mm defaultConnection {0}
-
 add_connection mm.m0 fc0.rx_mgmt_mm
 set_connection_parameter_value mm.m0/fc0.rx_mgmt_mm arbitrationPriority {1}
 set_connection_parameter_value mm.m0/fc0.rx_mgmt_mm baseAddress {0x1000}
 set_connection_parameter_value mm.m0/fc0.rx_mgmt_mm defaultConnection {0}
+
+add_connection mm.m0 fc0.tx_mgmt_mm
+set_connection_parameter_value mm.m0/fc0.tx_mgmt_mm arbitrationPriority {1}
+set_connection_parameter_value mm.m0/fc0.tx_mgmt_mm baseAddress {0x1020}
+set_connection_parameter_value mm.m0/fc0.tx_mgmt_mm defaultConnection {0}
 
 add_connection mm.m0 fc0_rx_cdc.in_csr
 set_connection_parameter_value mm.m0/fc0_rx_cdc.in_csr arbitrationPriority {1}
 set_connection_parameter_value mm.m0/fc0_rx_cdc.in_csr baseAddress {0x1100}
 set_connection_parameter_value mm.m0/fc0_rx_cdc.in_csr defaultConnection {0}
 
-add_connection mm.m0 fc1.tx_mgmt_mm
-set_connection_parameter_value mm.m0/fc1.tx_mgmt_mm arbitrationPriority {1}
-set_connection_parameter_value mm.m0/fc1.tx_mgmt_mm baseAddress {0x3020}
-set_connection_parameter_value mm.m0/fc1.tx_mgmt_mm defaultConnection {0}
-
 add_connection mm.m0 fc1.rx_mgmt_mm
 set_connection_parameter_value mm.m0/fc1.rx_mgmt_mm arbitrationPriority {1}
 set_connection_parameter_value mm.m0/fc1.rx_mgmt_mm baseAddress {0x3000}
 set_connection_parameter_value mm.m0/fc1.rx_mgmt_mm defaultConnection {0}
+
+add_connection mm.m0 fc1.tx_mgmt_mm
+set_connection_parameter_value mm.m0/fc1.tx_mgmt_mm arbitrationPriority {1}
+set_connection_parameter_value mm.m0/fc1.tx_mgmt_mm baseAddress {0x3020}
+set_connection_parameter_value mm.m0/fc1.tx_mgmt_mm defaultConnection {0}
 
 add_connection mm.m0 fc1_rx_cdc.in_csr
 set_connection_parameter_value mm.m0/fc1_rx_cdc.in_csr arbitrationPriority {1}
@@ -336,8 +326,6 @@ add_connection reset.out_reset fc0_rx_cdc.in_clk_reset
 
 add_connection reset.out_reset fc0_rx_cdc.out_clk_reset
 
-add_connection reset.out_reset fc0_rx_split.reset
-
 add_connection reset.out_reset fc1.reset
 
 add_connection reset.out_reset fc1_256_rx.in_rst_0
@@ -345,8 +333,6 @@ add_connection reset.out_reset fc1_256_rx.in_rst_0
 add_connection reset.out_reset fc1_rx_cdc.in_clk_reset
 
 add_connection reset.out_reset fc1_rx_cdc.out_clk_reset
-
-add_connection reset.out_reset fc1_rx_split.reset
 
 add_connection reset.out_reset fifo_0to1.in_clk_reset
 
@@ -362,7 +348,11 @@ add_connection reset.out_reset rx_mux.reset
 
 add_connection reset.out_reset xcvr0.reset
 
+add_connection reset.out_reset xcvr0_rx_split.reset
+
 add_connection reset.out_reset xcvr1.reset
+
+add_connection reset.out_reset xcvr1_rx_split.reset
 
 add_connection reset.out_reset xcvr_reconfig.mgmt_rst_reset
 
@@ -372,7 +362,7 @@ add_connection rx_mux_clk.out_clk fc1_rx_cdc.out_clk
 
 add_connection rx_mux_clk.out_clk rx_mux.clk
 
-add_connection xcvr0.avrx fc0.avrx
+add_connection xcvr0.avrx xcvr0_rx_split.in
 
 add_connection xcvr0.reconfig_from_xcvr xcvr_reconfig.ch0_1_from_xcvr
 set_connection_parameter_value xcvr0.reconfig_from_xcvr/xcvr_reconfig.ch0_1_from_xcvr endPort {}
@@ -394,15 +384,19 @@ add_connection xcvr0.rx_clk fc0_256_rx.in_clk_0
 
 add_connection xcvr0.rx_clk fc0_rx_cdc.in_clk
 
-add_connection xcvr0.rx_clk fc0_rx_split.clk
-
 add_connection xcvr0.rx_clk fifo_0to1.in_clk
+
+add_connection xcvr0.rx_clk xcvr0_rx_split.clk
 
 add_connection xcvr0.tx_clk fc0.tx_clk
 
 add_connection xcvr0.tx_clk fifo_1to0.out_clk
 
-add_connection xcvr1.avrx fc1.avrx
+add_connection xcvr0_rx_split.out0 fc0.avrx
+
+add_connection xcvr0_rx_split.out1 fifo_0to1.in
+
+add_connection xcvr1.avrx xcvr1_rx_split.in
 
 add_connection xcvr1.rx_clk fc1.rx_clk
 
@@ -410,13 +404,17 @@ add_connection xcvr1.rx_clk fc1_256_rx.in_clk_0
 
 add_connection xcvr1.rx_clk fc1_rx_cdc.in_clk
 
-add_connection xcvr1.rx_clk fc1_rx_split.clk
-
 add_connection xcvr1.rx_clk fifo_1to0.in_clk
+
+add_connection xcvr1.rx_clk xcvr1_rx_split.clk
 
 add_connection xcvr1.tx_clk fc1.tx_clk
 
 add_connection xcvr1.tx_clk fifo_0to1.out_clk
+
+add_connection xcvr1_rx_split.out0 fc1.avrx
+
+add_connection xcvr1_rx_split.out1 fifo_1to0.in
 
 add_connection xcvr_reconfig.ch2_3_from_xcvr xcvr1.reconfig_from_xcvr
 set_connection_parameter_value xcvr_reconfig.ch2_3_from_xcvr/xcvr1.reconfig_from_xcvr endPort {}

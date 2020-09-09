@@ -136,9 +136,10 @@ add wave -noupdate -group xcvr1 -group PHY /top_tb/tb/tb_inst/xcvr1/phy/rx_runni
 add wave -noupdate -group xcvr1 -label {TX Prim. Counters} /top_tb/tb/tb_inst/xcvr1/tx_primitive_cntrs
 add wave -noupdate -group xcvr1 -label {RX Prim. Counters} /top_tb/tb/tb_inst/xcvr1/rx_primitive_cntrs
 add wave -noupdate -expand -group framer0 /top_tb/tb/tb_inst/framer0/state
+add wave -noupdate -expand -group framer0 /top_tb/tb/tb_inst/framer0/peer_ready
+add wave -noupdate -expand -group framer0 /top_tb/tb/tb_inst/framer0/port_ready
 add wave -noupdate -expand -group framer0 -group userrx /top_tb/tb/tb_inst/framer0/userrx_data
 add wave -noupdate -expand -group framer0 -group userrx /top_tb/tb/tb_inst/framer0/userrx_valid
-add wave -noupdate -expand -group framer0 -group userrx /top_tb/tb/tb_inst/framer0/userrx_ready
 add wave -noupdate -expand -group framer0 -group userrx /top_tb/tb/tb_inst/framer0/userrx_startofpacket
 add wave -noupdate -expand -group framer0 -group userrx /top_tb/tb/tb_inst/framer0/userrx_endofpacket
 add wave -noupdate -expand -group framer0 -expand -group usertx /top_tb/tb/tb_inst/framer0/usertx_data
@@ -147,6 +148,8 @@ add wave -noupdate -expand -group framer0 -expand -group usertx /top_tb/tb/tb_in
 add wave -noupdate -expand -group framer0 -expand -group usertx /top_tb/tb/tb_inst/framer0/usertx_startofpacket
 add wave -noupdate -expand -group framer0 -expand -group usertx /top_tb/tb/tb_inst/framer0/usertx_endofpacket
 add wave -noupdate -expand -group framer1 /top_tb/tb/tb_inst/framer1/state
+add wave -noupdate -expand -group framer1 /top_tb/tb/tb_inst/framer1/peer_ready
+add wave -noupdate -expand -group framer1 /top_tb/tb/tb_inst/framer1/port_ready
 add wave -noupdate -expand -group framer1 -group usertx /top_tb/tb/tb_inst/framer1/usertx_data
 add wave -noupdate -expand -group framer1 -group usertx /top_tb/tb/tb_inst/framer1/usertx_ready
 add wave -noupdate -expand -group framer1 -group usertx /top_tb/tb/tb_inst/framer1/usertx_valid
@@ -154,11 +157,10 @@ add wave -noupdate -expand -group framer1 -group usertx /top_tb/tb/tb_inst/frame
 add wave -noupdate -expand -group framer1 -group usertx /top_tb/tb/tb_inst/framer1/usertx_endofpacket
 add wave -noupdate -expand -group framer1 -expand -group userrx /top_tb/tb/tb_inst/framer1/userrx_data
 add wave -noupdate -expand -group framer1 -expand -group userrx /top_tb/tb/tb_inst/framer1/userrx_valid
-add wave -noupdate -expand -group framer1 -expand -group userrx /top_tb/tb/tb_inst/framer1/userrx_ready
 add wave -noupdate -expand -group framer1 -expand -group userrx /top_tb/tb/tb_inst/framer1/userrx_startofpacket
 add wave -noupdate -expand -group framer1 -expand -group userrx /top_tb/tb/tb_inst/framer1/userrx_endofpacket
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {52 us} 0} {{Cursor 2} {56 us} 0}
+WaveRestoreCursors {{Cursor 1} {101570876 ps} 0} {{Cursor 2} {113450531 ps} 0}
 quietly wave cursor active 1
 configure wave -namecolwidth 237
 configure wave -valuecolwidth 134
@@ -174,4 +176,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ns
 update
-WaveRestoreZoom {52 us} {56 us}
+WaveRestoreZoom {0 ps} {120498578 ps}

@@ -15,7 +15,11 @@ MODULE = test
 # TODO: See https://github.com/cocotb/cocotb/issues/2051 for Verilator freeze bug
 SIM ?= modelsim
 ifeq (verilator,$(SIM))
+COMPILE_ARGS += -GMTU=32
 EXTRA_ARGS += --trace --trace-structs
+endif
+ifeq (modelsim,$(SIM))
+SIM_ARGS += -gMTU=32
 endif
 
 include $(shell cocotb-config --makefiles)/Makefile.sim

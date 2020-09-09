@@ -26,8 +26,8 @@ module top_tb;
     wait(`FRAMER1.state == fc::STATE_AC);
     $sformat(message, "%m: Test passed");
     print(VERBOSITY_INFO, message);
-    // Run one 1 us more for more wave data
-    #1000000
+    // Run one 10 us more for more wave data
+    #10000000
     // Keep at least one assert in here for the simulation script
     assert(1==1);
     $stop();

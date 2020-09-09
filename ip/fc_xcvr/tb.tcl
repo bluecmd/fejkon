@@ -39,22 +39,22 @@ set_instance_parameter_value BtoA {WR_SYNC_DEPTH} {3}
 
 add_instance framer0 fc_framer 1.0
 set_instance_parameter_value framer0 {MTU} {3072}
-set_instance_parameter_value framer0 {OL1_DELAY} {1}
+set_instance_parameter_value framer0 {OL1_DELAY_US} {1}
 set_instance_parameter_value framer0 {WAIT_FOR_PEER} {1}
 
 add_instance framer1 fc_framer 1.0
 set_instance_parameter_value framer1 {MTU} {3072}
-set_instance_parameter_value framer1 {OL1_DELAY} {1}
+set_instance_parameter_value framer1 {OL1_DELAY_US} {1}
 set_instance_parameter_value framer1 {WAIT_FOR_PEER} {1}
 
 add_instance framerA fc_framer 1.0
 set_instance_parameter_value framerA {MTU} {3072}
-set_instance_parameter_value framerA {OL1_DELAY} {1}
+set_instance_parameter_value framerA {OL1_DELAY_US} {1}
 set_instance_parameter_value framerA {WAIT_FOR_PEER} {0}
 
 add_instance framerB fc_framer 1.0
 set_instance_parameter_value framerB {MTU} {3072}
-set_instance_parameter_value framerB {OL1_DELAY} {1}
+set_instance_parameter_value framerB {OL1_DELAY_US} {1}
 set_instance_parameter_value framerB {WAIT_FOR_PEER} {0}
 
 add_instance mgmt_clk clock_source 20.1

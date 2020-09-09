@@ -107,7 +107,6 @@ module fc_framer #(
     state_tx_xfered <= state_tx_cdc2;
   end
 
-  logic is_active;
   logic port_online = 0;
 
   logic peer_ready_cdc1 = 0;
@@ -121,13 +120,17 @@ module fc_framer #(
     end
   end
 
-  fc_state_rx #(106250000 / (1000000 / OL1_DELAY_US)) state_rx (
+  logic rx_active;
+  logic tx_active;
+
+  fc_state_rx #(106250000 * OL1_DELAY_US / 1000000) state_rx (
     .clk(rx_clk),
     .reset(rx_reset_r | ~avrx_valid),
     .data(avrx_data[31:0]),
     .datak(avrx_data[35:32]),
     .state(state),
-    .is_active(is_active),
+    .tx_active(tx_active),
+    .rx_active(rx_active),
     .online(port_online)
   );
 
@@ -146,17 +149,17 @@ module fc_framer #(
 
   assign port_ready = ~rx_reset_r & avrx_valid & (state == fc::STATE_OL1);
 
-  assign active = is_active;
+  assign active = tx_active & rx_active;
 
   // User TX -> Av-TX
-  assign usertx_ready = is_active;
+  assign usertx_ready = tx_active;
 
   logic [3:0] usertx_datak;
   assign usertx_datak = (usertx_startofpacket | usertx_endofpacket) ? 4'b1000 : 4'b0000;
 
   always @(posedge tx_clk) begin
-    tx_data <= (is_active & usertx_valid) ? usertx_data : statetx_data;
-    tx_datak <= (is_active & usertx_valid) ? usertx_datak : statetx_datak;
+    tx_data <= (tx_active & usertx_valid) ? usertx_data : statetx_data;
+    tx_datak <= (tx_active & usertx_valid) ? usertx_datak : statetx_datak;
   end
 
   assign avtx_data = {tx_datak, tx_data};
@@ -187,7 +190,7 @@ module fc_framer #(
       urx_packet_length <= 0;
     end else if (avrx_valid) begin
       urx_data <= rx_data;
-      urx_valid <= avrx_valid & is_active & urx_packet_detect;
+      urx_valid <= avrx_valid & rx_active & urx_packet_detect;
       urx_startofpacket <= 0;
       urx_endofpacket <= 0;
       if (urx_packet_detect) begin
@@ -199,7 +202,7 @@ module fc_framer #(
           urx_packet_length <= urx_packet_length + 4;
         end
       end
-      if (rx_datak == 4'b1000 && is_active) begin
+      if (rx_datak == 4'b1000 && rx_active) begin
         // Any control character will end the packet
         urx_endofpacket <= urx_packet_detect;
         urx_packet_detect <= 0;

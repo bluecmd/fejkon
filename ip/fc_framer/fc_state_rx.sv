@@ -7,7 +7,8 @@ module fc_state_rx #(
     input logic [31:0] data,
     input logic [3:0]  datak,
     output fc::state_t state,
-    output is_active,
+    output tx_active,
+    output rx_active,
     input  online
   );
 
@@ -28,7 +29,7 @@ module fc_state_rx #(
         // down a bit.
         ol1_counter <= OL1_DELAY;
       end
-      if (state == fc::STATE_OL1 && ol1_counter != 0) begin
+      if (state == fc::STATE_OL1 && ol1_counter != 0 && online) begin
         ol1_counter <= ol1_counter - 1;
       end
     end
@@ -37,47 +38,47 @@ module fc_state_rx #(
   // This is Table 22 "FC_Port states" from FC-FS-5 INCITS 545-2019
   always @* begin
     state_next = state_r;
-    case (fc::map_primitive(data))
-      fc::PRIM_OLS: begin
-        // Only allow progressing when the online input is high
-        // TODO: Reset to OL1 if in active and this transitions to 0->1 as
-        // this means a peer port has reset and is waiting to synchronize OL1
-        // states.
-        if ((online && (ol1_counter == 0)) || state != fc::STATE_OL1) begin
+    // Only allow progressing when the online input is high
+    // TODO: Reset to OL1 if in active and this transitions to 0->1 as
+    // this means a peer port has reset and is waiting to synchronize OL1
+    // states.
+    if ((online && (ol1_counter == 0)) || state != fc::STATE_OL1) begin
+      case (fc::map_primitive(data))
+        fc::PRIM_OLS: begin
           state_next = fc::STATE_OL2;
         end
-      end
-      fc::PRIM_NOS: state_next = fc::STATE_LF1;
-      fc::PRIM_LR: begin
-        if (state == fc::STATE_OL3 || state == fc::STATE_LF2)
-          state_next = fc::STATE_LF2;
-        else
-          state_next = fc::STATE_LR2;
-      end
-      fc::PRIM_LRR: begin
-        case (state)
-          fc::STATE_LF1: state_next = fc::STATE_LF1;
-          fc::STATE_LF2: state_next = fc::STATE_LF2;
-          fc::STATE_OL1: state_next = fc::STATE_OL1;
-          fc::STATE_OL3: state_next = fc::STATE_LF2;
-          default: state_next = fc::STATE_LR3;
-        endcase
-      end
-      fc::PRIM_IDLE, fc::PRIM_ARBFF: begin
-        case (state)
-          fc::STATE_AC: state_next = fc::STATE_AC;
-          fc::STATE_LR1: state_next = fc::STATE_LR1;
-          fc::STATE_LR2: state_next = fc::STATE_AC;
-          fc::STATE_LR3: state_next = fc::STATE_AC;
-          fc::STATE_LF1: state_next = fc::STATE_LF1;
-          fc::STATE_LF2: state_next = fc::STATE_LF2;
-          fc::STATE_OL1: state_next = fc::STATE_OL1;
-          fc::STATE_OL2: state_next = fc::STATE_OL2;
-          fc::STATE_OL3: state_next = fc::STATE_OL2;
-        endcase
-      end
-      default: ;
-    endcase
+        fc::PRIM_NOS: state_next = fc::STATE_LF1;
+        fc::PRIM_LR: begin
+          if (state == fc::STATE_OL3 || state == fc::STATE_LF2)
+            state_next = fc::STATE_LF2;
+          else
+            state_next = fc::STATE_LR2;
+        end
+        fc::PRIM_LRR: begin
+          case (state)
+            fc::STATE_LF1: state_next = fc::STATE_LF1;
+            fc::STATE_LF2: state_next = fc::STATE_LF2;
+            fc::STATE_OL1: state_next = fc::STATE_OL1;
+            fc::STATE_OL3: state_next = fc::STATE_LF2;
+            default: state_next = fc::STATE_LR3;
+          endcase
+        end
+        fc::PRIM_IDLE, fc::PRIM_ARBFF: begin
+          case (state)
+            fc::STATE_AC: state_next = fc::STATE_AC;
+            fc::STATE_LR1: state_next = fc::STATE_LR1;
+            fc::STATE_LR2: state_next = fc::STATE_AC;
+            fc::STATE_LR3: state_next = fc::STATE_AC;
+            fc::STATE_LF1: state_next = fc::STATE_LF1;
+            fc::STATE_LF2: state_next = fc::STATE_LF2;
+            fc::STATE_OL1: state_next = fc::STATE_OL1;
+            fc::STATE_OL2: state_next = fc::STATE_OL2;
+            fc::STATE_OL3: state_next = fc::STATE_OL2;
+          endcase
+        end
+        default: ;
+      endcase
+    end
   end
 
   always @(posedge clk) begin
@@ -102,5 +103,6 @@ module fc_state_rx #(
     end
   end
 
-  assign is_active = idle_hold_off == 0;
+  assign rx_active = state_r == fc::STATE_AC;
+  assign tx_active = idle_hold_off == 0;
 endmodule

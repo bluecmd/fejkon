@@ -1,5 +1,7 @@
 QPATH ?= "$(HOME)/intelFPGA/20.1/quartus"
 
+ABS_ROOT_DIR := $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))/
+
 .PHONY: test clean lint defconfig menuconfig edit edit-clean
 
 test: gen gen/altpcied_sv_hwtcl.sv gen/altpcierd_tl_cfg_sample.v gen/altpcierd_hip_rs.v
@@ -36,7 +38,7 @@ svpcie_sim_tb.qsys: .qsys-configured
 	touch $@
 
 .qsys-configured: svpcie_sim_tb.tcl config.tcl
-	make -C $(PWD) .qsys-clean
+	make -C $(ABS_ROOT_DIR) .qsys-clean
 	$(QPATH)/sopc_builder/bin/qsys-script --script=svpcie_apply_config.tcl
 	rm .qsys-clean
 	touch $@

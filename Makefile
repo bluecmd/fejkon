@@ -1,6 +1,6 @@
 QPATH ?= "$(HOME)/intelFPGA/20.1/quartus"
 
-#.DELETE_ON_ERROR:
+ABS_ROOT_DIR := $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))/
 
 .PHONY: all syscon program flash editor defconfig menuconfig test report edit edit-clean test
 
@@ -78,7 +78,7 @@ syscon:
 	$(QPATH)/sopc_builder/bin/system-console --desktop_script=syscon.tcl -debug
 
 ip/altera_fc_phy/fc_phy.qip: ip/altera_fc_phy/fc_phy.v
-	(cd ip/altera_fc_phy; $(QPATH)/bin/qmegawiz  -silent $(PWD)/$<)
+	(cd ip/altera_fc_phy; $(QPATH)/bin/qmegawiz  -silent $(ABS_ROOT_DIR)/$<)
 	touch $@
 
 ip/fejkon_identity/version.sv:
@@ -100,7 +100,7 @@ fejkon.qsys: .qsys-configured
 	touch $@
 
 .qsys-configured: fejkon.tcl $(wildcard fejkon_*.tcl) config.tcl
-	make -C $(PWD) .qsys-clean
+	make -C $(ABS_ROOT_DIR) .qsys-clean
 	$(QPATH)/sopc_builder/bin/qsys-script --script=fejkon_apply_config.tcl
 	rm .qsys-clean
 	touch $@

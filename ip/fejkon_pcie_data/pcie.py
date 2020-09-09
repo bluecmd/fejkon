@@ -545,5 +545,5 @@ if __name__ == '__main__':
     # Read TLP from command line and print it decoded
     if sys.argv[1] == 'intel':
         t = TLP()
-        t.intel_unpack(binascii.unhexlify(''.join(sys.argv[2:])))
+        t.intel_unpack(binascii.unhexlify(''.join(x.replace('0x', '') for x in sys.argv[2:])))
         print(t)

@@ -144,16 +144,12 @@ module fc_8g_xcvr (
      saved_patterndetect == 4'b1000 || saved_patterndetect == 4'b0010);
 
   always @(posedge rx_clk) begin
-    if (reset) begin
-      saved_patterndetect <= 0;
-    end else begin
-      // rx_patterndetect is only valid for K28.5 comma. We need
-      // to store the pattern detect outcome when we see an aligned K28.5
-      if (rx_syncstatus == 4'b1111 &&
-        (rx_patterndetect == 4'b0100 || rx_patterndetect == 4'b0001 ||
-         rx_patterndetect == 4'b1000 || rx_patterndetect == 4'b0010)) begin
-        saved_patterndetect <= rx_patterndetect;
-      end
+    // rx_patterndetect is only valid for K28.5 comma. We need
+    // to store the pattern detect outcome when we see an aligned K28.5
+    if (rx_syncstatus == 4'b1111 &&
+      (rx_patterndetect == 4'b0100 || rx_patterndetect == 4'b0001 ||
+       rx_patterndetect == 4'b1000 || rx_patterndetect == 4'b0010)) begin
+      saved_patterndetect <= rx_patterndetect;
     end
   end
 

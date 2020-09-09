@@ -11,6 +11,7 @@ set_project_property HIDE_FROM_IP_CATALOG {false}
 # (disabled instances are intentionally culled)
 add_instance fc0 fc_framer 1.0
 set_instance_parameter_value fc0 {MTU} {3072}
+set_instance_parameter_value fc0 {OL1_DELAY_US} {5000}
 set_instance_parameter_value fc0 {WAIT_FOR_PEER} {1}
 
 add_instance fc0_256_rx altera_avalon_st_adapter 20.1
@@ -68,6 +69,7 @@ set_instance_parameter_value fc0_rx_split {USE_VALID} {1}
 
 add_instance fc1 fc_framer 1.0
 set_instance_parameter_value fc1 {MTU} {3072}
+set_instance_parameter_value fc1 {OL1_DELAY_US} {5000}
 set_instance_parameter_value fc1 {WAIT_FOR_PEER} {1}
 
 add_instance fc1_256_rx altera_avalon_st_adapter 20.1

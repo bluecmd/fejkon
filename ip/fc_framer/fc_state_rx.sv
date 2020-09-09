@@ -22,7 +22,7 @@ module fc_state_rx #(
     if (reset) begin
       ol1_counter <= OL1_DELAY;
     end else begin
-      if (state_next == fc::STATE_OL1) begin
+      if (state != fc::STATE_OL1) begin
         // "When the FC_Port enters the OL1 State, it shall transmit OLS for a
         // minimum time of 5 ms while ignoring any received data." FC-FS-5.
         // We also use this for the port peer sync so it is good to slow this

@@ -123,7 +123,7 @@ module fc_framer #(
   logic rx_active;
   logic tx_active;
 
-  fc_state_rx #(106250000 * OL1_DELAY_US / 1000000) state_rx (
+  fc_state_rx #((OL1_DELAY_US * 10625) / 100) state_rx (
     .clk(rx_clk),
     .reset(rx_reset_r | ~avrx_valid),
     .data(avrx_data[31:0]),

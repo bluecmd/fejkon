@@ -115,17 +115,22 @@ module fc_8g_xcvr (
     rx_le_data_raw_r <= rx_le_data_raw;
     rx_le_datak_raw_r <= rx_le_datak_raw;
     rx_le_runningdisp_raw_r <= rx_le_runningdisp_raw;
-    if (saved_patterndetect == 4'b0100) begin
-      rx_le_data[15:0] <= rx_le_data_raw_r[31:16];
-      rx_le_data[31:16] <= rx_le_data_raw[15:0];
-      rx_le_datak[1:0] <= rx_le_datak_raw_r[3:2];
-      rx_le_datak[3:2] <= rx_le_datak_raw[1:0];
-      rx_le_runningdisp[1:0] <= rx_le_runningdisp_raw_r[3:2];
-      rx_le_runningdisp[3:2] <= rx_le_runningdisp_raw[1:0];
+    if (saved_patterndetect == 4'b1000) begin
+      rx_le_data <= {rx_le_data_raw[23:0], rx_le_data_raw_r[31:24]};
+      rx_le_datak <= {rx_le_datak_raw[2:0], rx_le_datak_raw_r[3]};
+      rx_le_runningdisp <= {rx_le_runningdisp_raw[2:0], rx_le_runningdisp_raw_r[3]};
+    end else if (saved_patterndetect == 4'b0100) begin
+      rx_le_data <= {rx_le_data_raw[15:0], rx_le_data_raw_r[31:16]};
+      rx_le_datak <= {rx_le_datak_raw[1:0], rx_le_datak_raw_r[3:2]};
+      rx_le_runningdisp <= {rx_le_runningdisp_raw[1:0], rx_le_runningdisp_raw_r[3:2]};
+    end else if (saved_patterndetect == 4'b0010) begin
+      rx_le_data <= {rx_le_data_raw[7:0], rx_le_data_raw_r[31:8]};
+      rx_le_datak <= {rx_le_datak_raw[0], rx_le_datak_raw_r[3:1]};
+      rx_le_runningdisp <= {rx_le_runningdisp_raw[0], rx_le_runningdisp_raw_r[3:1]};
     end else if (saved_patterndetect == 4'b0001) begin
       rx_le_data <= rx_le_data_raw_r;
-      rx_le_datak <= rx_le_datak_raw;
-      rx_le_runningdisp <= rx_le_runningdisp_raw;
+      rx_le_datak <= rx_le_datak_raw_r;
+      rx_le_runningdisp <= rx_le_runningdisp_raw_r;
     end
   end
 
@@ -135,13 +140,15 @@ module fc_8g_xcvr (
   logic is_aligned;
   assign is_aligned_r0 =
     (rx_syncstatus == 4'b1111) &&
-    (saved_patterndetect == 4'b0100 || saved_patterndetect == 4'b0001);
+    (saved_patterndetect == 4'b0100 || saved_patterndetect == 4'b0001 ||
+     saved_patterndetect == 4'b1000 || saved_patterndetect == 4'b0010);
 
   always @(posedge rx_clk) begin
     // rx_patterndetect is only valid for K28.5 comma. We need
     // to store the pattern detect outcome when we see an aligned K28.5
     if (rx_syncstatus == 4'b1111 &&
-      (rx_patterndetect == 4'b0100 || rx_patterndetect == 4'b0001)) begin
+      (rx_patterndetect == 4'b0100 || rx_patterndetect == 4'b0001 ||
+       rx_patterndetect == 4'b1000 || rx_patterndetect == 4'b0010)) begin
       saved_patterndetect <= rx_patterndetect;
     end
   end

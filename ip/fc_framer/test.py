@@ -159,7 +159,7 @@ async def test_simple_frame(dut):
     """Test the FC simple framing."""
     tb = await Thing.new(dut)
     await handshake(dut)
-    tb.expected_output.append(binascii.unhexlify('bcb556560102030405060708090a0b0cbc95d5d5'))
+    tb.expected_output.append(fc.SOFI3 + binascii.unhexlify('0102030405060708090a0b0c') + fc.EOFN_P)
     dut.avrx_data <= with_control(fc.SOFI3)
     await RisingEdge(dut.tx_clk)
     dut.avrx_data <= with_data(binascii.unhexlify('01020304'))
@@ -168,6 +168,66 @@ async def test_simple_frame(dut):
     await RisingEdge(dut.tx_clk)
     dut.avrx_data <= with_data(binascii.unhexlify('090A0B0C'))
     await RisingEdge(dut.tx_clk)
+    dut.avrx_data <= with_control(fc.EOFN_P)
+    await RisingEdge(dut.rx_clk)
+    dut.avrx_data <= with_control(fc.ARBFF)
+    await RisingEdge(dut.rx_clk)
+    await Timer(50, 'us')
+    raise tb.scoreboard.result
+
+
+@cocotb.test()
+async def test_broken_half_frame(dut):
+    """Test ignoring broken frame."""
+    tb = await Thing.new(dut)
+    await handshake(dut)
+    dut.avrx_data <= with_data(binascii.unhexlify('05060708'))
+    await RisingEdge(dut.tx_clk)
+    dut.avrx_data <= with_data(binascii.unhexlify('090A0B0C'))
+    await RisingEdge(dut.tx_clk)
+    dut.avrx_data <= with_control(fc.EOFN_P)
+    await RisingEdge(dut.rx_clk)
+    dut.avrx_data <= with_control(fc.ARBFF)
+    await RisingEdge(dut.rx_clk)
+    await Timer(50, 'us')
+    raise tb.scoreboard.result
+
+
+@cocotb.test()
+async def test_extra_prim_frame(dut):
+    """Test extra control primitives ends frame."""
+    tb = await Thing.new(dut)
+    await handshake(dut)
+    tb.expected_output.append(fc.SOFI3 + binascii.unhexlify('01020304') + fc.R_RDY)
+    dut.avrx_data <= with_control(fc.SOFI3)
+    await RisingEdge(dut.tx_clk)
+    dut.avrx_data <= with_data(binascii.unhexlify('01020304'))
+    await RisingEdge(dut.tx_clk)
+    dut.avrx_data <= with_control(fc.R_RDY)
+    await RisingEdge(dut.tx_clk)
+    dut.avrx_data <= with_data(binascii.unhexlify('05060708'))
+    await RisingEdge(dut.tx_clk)
+    dut.avrx_data <= with_data(binascii.unhexlify('090A0B0C'))
+    await RisingEdge(dut.tx_clk)
+    dut.avrx_data <= with_control(fc.EOFN_P)
+    await RisingEdge(dut.rx_clk)
+    dut.avrx_data <= with_control(fc.ARBFF)
+    await RisingEdge(dut.rx_clk)
+    await Timer(50, 'us')
+    raise tb.scoreboard.result
+
+
+@cocotb.test()
+async def test_runaway_frame(dut):
+    """Test handling of frame that becomes too long."""
+    tb = await Thing.new(dut)
+    await handshake(dut)
+    tb.expected_output.append(fc.SOFI3 + binascii.unhexlify('01020304') * 7)
+    dut.avrx_data <= with_control(fc.SOFI3)
+    await RisingEdge(dut.tx_clk)
+    dut.avrx_data <= with_data(binascii.unhexlify('01020304'))
+    for _ in range(10):
+        await RisingEdge(dut.tx_clk)
     dut.avrx_data <= with_control(fc.EOFN_P)
     await RisingEdge(dut.rx_clk)
     dut.avrx_data <= with_control(fc.ARBFF)

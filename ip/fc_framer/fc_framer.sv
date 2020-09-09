@@ -1,5 +1,7 @@
 `timescale 1 us / 1 us
-module fc_framer (
+module fc_framer #(
+    parameter int MTU = 3072
+  ) (
     output wire [35:0]  avtx_data,                //                   avtx.data
     output wire         avtx_valid,               //                       .valid
     input  wire         avtx_ready,               //                       .ready
@@ -151,6 +153,8 @@ module fc_framer (
   logic        urx_valid = 0;
   logic        urx_startofpacket = 0;
   logic        urx_endofpacket = 0;
+  logic        urx_packet_detect = 0;
+  int          urx_packet_length = 0;
 
   always @(posedge rx_clk) begin
     if (rx_reset_r) begin
@@ -159,27 +163,46 @@ module fc_framer (
       urx_endofpacket <= 0;
       urx_valid <= 0;
       urx_packet_counter <= 0;
+      urx_packet_detect <= 0;
+      urx_packet_length <= 0;
     end else if (avrx_valid) begin
       urx_data <= rx_data;
-      urx_valid <= avrx_valid && is_active;
+      urx_valid <= avrx_valid & is_active & urx_packet_detect;
       urx_startofpacket <= 0;
       urx_endofpacket <= 0;
+      if (urx_packet_detect) begin
+        if (urx_packet_length >= MTU) begin
+          // Run away packet, force it to end
+          urx_endofpacket <= 1;
+          urx_packet_detect <= 0;
+        end else begin
+          urx_packet_length <= urx_packet_length + 4;
+        end
+      end
       if (rx_datak == 4'b1000 && is_active) begin
+        // Any control character will end the packet
+        urx_endofpacket <= urx_packet_detect;
+        urx_packet_detect <= 0;
         case (fc::map_primitive(rx_data))
           fc::PRIM_SOFI2, fc::PRIM_SOFN2, fc::PRIM_SOFI3, fc::PRIM_SOFN3, fc::PRIM_SOFF: begin
             urx_startofpacket <= 1;
+            urx_packet_detect <= 1;
+            urx_packet_length <= 8; // Include SOF and last word
+            // Ignore if we are already in a packet, this shouldn't happen
+            urx_valid <= ~urx_packet_detect;
           end
           fc::PRIM_EOFT, fc::PRIM_EOFA, fc::PRIM_EOFN, fc::PRIM_EOFNI: begin
-            urx_endofpacket <= 1;
             urx_packet_counter <= urx_packet_counter + 1;
           end
           fc::PRIM_IDLE, fc::PRIM_ARBFF: begin
             urx_valid <= 0;
           end
           default: begin
-            urx_startofpacket <= 1;
+            // If we are in a packet, treat this as an EOF
+            urx_startofpacket <= ~urx_packet_detect;
             urx_endofpacket <= 1;
             urx_packet_counter <= urx_packet_counter + 1;
+            urx_valid <= 1;
           end
         endcase
       end

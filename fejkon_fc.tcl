@@ -10,6 +10,8 @@ set_project_property HIDE_FROM_IP_CATALOG {false}
 # Instances and instance parameters
 # (disabled instances are intentionally culled)
 add_instance fc0 fc_framer 1.0
+set_instance_parameter_value fc0 {MTU} {3072}
+set_instance_parameter_value fc0 {WAIT_FOR_PEER} {1}
 
 add_instance fc0_256_rx altera_avalon_st_adapter 20.1
 set_instance_parameter_value fc0_256_rx {inBitsPerSymbol} {8}
@@ -65,6 +67,8 @@ set_instance_parameter_value fc0_rx_split {USE_READY} {1}
 set_instance_parameter_value fc0_rx_split {USE_VALID} {1}
 
 add_instance fc1 fc_framer 1.0
+set_instance_parameter_value fc1 {MTU} {3072}
+set_instance_parameter_value fc1 {WAIT_FOR_PEER} {1}
 
 add_instance fc1_256_rx altera_avalon_st_adapter 20.1
 set_instance_parameter_value fc1_256_rx {inBitsPerSymbol} {8}
@@ -243,6 +247,13 @@ set_interface_property xcvr1_aligned EXPORT_OF xcvr1.aligned
 # connections and connection parameters
 add_connection fc0.avtx xcvr0.avtx
 
+add_connection fc0.port_ready fc1.peer_ready
+set_connection_parameter_value fc0.port_ready/fc1.peer_ready endPort {}
+set_connection_parameter_value fc0.port_ready/fc1.peer_ready endPortLSB {0}
+set_connection_parameter_value fc0.port_ready/fc1.peer_ready startPort {}
+set_connection_parameter_value fc0.port_ready/fc1.peer_ready startPortLSB {0}
+set_connection_parameter_value fc0.port_ready/fc1.peer_ready width {0}
+
 add_connection fc0.userrx fc0_rx_split.in
 
 add_connection fc0_256_rx.out_0 fc0_rx_cdc.in
@@ -254,6 +265,13 @@ add_connection fc0_rx_split.out0 fifo_0to1.in
 add_connection fc0_rx_split.out1 fc0_256_rx.in_0
 
 add_connection fc1.avtx xcvr1.avtx
+
+add_connection fc1.port_ready fc0.peer_ready
+set_connection_parameter_value fc1.port_ready/fc0.peer_ready endPort {}
+set_connection_parameter_value fc1.port_ready/fc0.peer_ready endPortLSB {0}
+set_connection_parameter_value fc1.port_ready/fc0.peer_ready startPort {}
+set_connection_parameter_value fc1.port_ready/fc0.peer_ready startPortLSB {0}
+set_connection_parameter_value fc1.port_ready/fc0.peer_ready width {0}
 
 add_connection fc1.userrx fc1_rx_split.in
 
@@ -279,30 +297,30 @@ add_connection mgmt_clk.out_clk xcvr1.mgmt_clk
 
 add_connection mgmt_clk.out_clk xcvr_reconfig.mgmt_clk_clk
 
-add_connection mm.m0 fc0.tx_mgmt_mm
-set_connection_parameter_value mm.m0/fc0.tx_mgmt_mm arbitrationPriority {1}
-set_connection_parameter_value mm.m0/fc0.tx_mgmt_mm baseAddress {0x1020}
-set_connection_parameter_value mm.m0/fc0.tx_mgmt_mm defaultConnection {0}
-
 add_connection mm.m0 fc0.rx_mgmt_mm
 set_connection_parameter_value mm.m0/fc0.rx_mgmt_mm arbitrationPriority {1}
 set_connection_parameter_value mm.m0/fc0.rx_mgmt_mm baseAddress {0x1000}
 set_connection_parameter_value mm.m0/fc0.rx_mgmt_mm defaultConnection {0}
+
+add_connection mm.m0 fc0.tx_mgmt_mm
+set_connection_parameter_value mm.m0/fc0.tx_mgmt_mm arbitrationPriority {1}
+set_connection_parameter_value mm.m0/fc0.tx_mgmt_mm baseAddress {0x1020}
+set_connection_parameter_value mm.m0/fc0.tx_mgmt_mm defaultConnection {0}
 
 add_connection mm.m0 fc0_rx_cdc.in_csr
 set_connection_parameter_value mm.m0/fc0_rx_cdc.in_csr arbitrationPriority {1}
 set_connection_parameter_value mm.m0/fc0_rx_cdc.in_csr baseAddress {0x1100}
 set_connection_parameter_value mm.m0/fc0_rx_cdc.in_csr defaultConnection {0}
 
-add_connection mm.m0 fc1.tx_mgmt_mm
-set_connection_parameter_value mm.m0/fc1.tx_mgmt_mm arbitrationPriority {1}
-set_connection_parameter_value mm.m0/fc1.tx_mgmt_mm baseAddress {0x3020}
-set_connection_parameter_value mm.m0/fc1.tx_mgmt_mm defaultConnection {0}
-
 add_connection mm.m0 fc1.rx_mgmt_mm
 set_connection_parameter_value mm.m0/fc1.rx_mgmt_mm arbitrationPriority {1}
 set_connection_parameter_value mm.m0/fc1.rx_mgmt_mm baseAddress {0x3000}
 set_connection_parameter_value mm.m0/fc1.rx_mgmt_mm defaultConnection {0}
+
+add_connection mm.m0 fc1.tx_mgmt_mm
+set_connection_parameter_value mm.m0/fc1.tx_mgmt_mm arbitrationPriority {1}
+set_connection_parameter_value mm.m0/fc1.tx_mgmt_mm baseAddress {0x3020}
+set_connection_parameter_value mm.m0/fc1.tx_mgmt_mm defaultConnection {0}
 
 add_connection mm.m0 fc1_rx_cdc.in_csr
 set_connection_parameter_value mm.m0/fc1_rx_cdc.in_csr arbitrationPriority {1}

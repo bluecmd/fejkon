@@ -80,13 +80,13 @@ async def test_reset_tx(dut):
     await Thing.new(dut)
     await RisingEdge(dut.tx_clk)
     assert dut.avtx_valid == 1, 'avtx expected to be valid'
-    assert dut.state == fc.STATE_LF2, 'state expected to be LF2'
+    assert dut.state == fc.STATE_OL1, 'state expected to be OL1'
     assert_symbol(dut.avtx_data, with_control(fc.NOS))
 
 
 @cocotb.test()
-async def test_handshake(dut):
-    """Test the FC link-up handshake."""
+async def test_link_recovery_handshake(dut):
+    """Test the FC link-recovery (fast) handshake."""
     await Thing.new(dut)
     await RisingEdge(dut.tx_clk)
     assert dut.avtx_valid == 1, 'avtx expected to be valid'
@@ -132,7 +132,7 @@ async def test_handshake(dut):
 
 
 async def handshake(dut):
-    """Quietly do the FC handshake."""
+    """Quietly do a link recovery FC handshake."""
     dut.avrx_valid <= 1
     dut.avrx_data <= with_control(fc.NOS)
     await RisingEdge(dut.tx_clk)

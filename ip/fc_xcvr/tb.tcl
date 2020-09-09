@@ -38,12 +38,24 @@ set_instance_parameter_value BtoA {USE_PACKETS} {1}
 set_instance_parameter_value BtoA {WR_SYNC_DEPTH} {3}
 
 add_instance framer0 fc_framer 1.0
+set_instance_parameter_value framer0 {MTU} {3072}
+set_instance_parameter_value framer0 {OL1_DELAY} {1}
+set_instance_parameter_value framer0 {WAIT_FOR_PEER} {1}
 
 add_instance framer1 fc_framer 1.0
+set_instance_parameter_value framer1 {MTU} {3072}
+set_instance_parameter_value framer1 {OL1_DELAY} {1}
+set_instance_parameter_value framer1 {WAIT_FOR_PEER} {1}
 
 add_instance framerA fc_framer 1.0
+set_instance_parameter_value framerA {MTU} {3072}
+set_instance_parameter_value framerA {OL1_DELAY} {1}
+set_instance_parameter_value framerA {WAIT_FOR_PEER} {0}
 
 add_instance framerB fc_framer 1.0
+set_instance_parameter_value framerB {MTU} {3072}
+set_instance_parameter_value framerB {OL1_DELAY} {1}
+set_instance_parameter_value framerB {WAIT_FOR_PEER} {0}
 
 add_instance mgmt_clk clock_source 20.1
 set_instance_parameter_value mgmt_clk {clockFrequency} {50000000.0}
@@ -236,9 +248,37 @@ add_connection BtoA.out framerA.usertx
 
 add_connection framer0.avtx xcvr0.avtx
 
+add_connection framer0.peer_ready framer1.port_ready
+set_connection_parameter_value framer0.peer_ready/framer1.port_ready endPort {}
+set_connection_parameter_value framer0.peer_ready/framer1.port_ready endPortLSB {0}
+set_connection_parameter_value framer0.peer_ready/framer1.port_ready startPort {}
+set_connection_parameter_value framer0.peer_ready/framer1.port_ready startPortLSB {0}
+set_connection_parameter_value framer0.peer_ready/framer1.port_ready width {0}
+
 add_connection framer1.avtx xcvr1.avtx
 
+add_connection framer1.peer_ready framer0.port_ready
+set_connection_parameter_value framer1.peer_ready/framer0.port_ready endPort {}
+set_connection_parameter_value framer1.peer_ready/framer0.port_ready endPortLSB {0}
+set_connection_parameter_value framer1.peer_ready/framer0.port_ready startPort {}
+set_connection_parameter_value framer1.peer_ready/framer0.port_ready startPortLSB {0}
+set_connection_parameter_value framer1.peer_ready/framer0.port_ready width {0}
+
 add_connection framerA.avtx xcvrA.avtx
+
+add_connection framerA.peer_ready framerB.port_ready
+set_connection_parameter_value framerA.peer_ready/framerB.port_ready endPort {}
+set_connection_parameter_value framerA.peer_ready/framerB.port_ready endPortLSB {0}
+set_connection_parameter_value framerA.peer_ready/framerB.port_ready startPort {}
+set_connection_parameter_value framerA.peer_ready/framerB.port_ready startPortLSB {0}
+set_connection_parameter_value framerA.peer_ready/framerB.port_ready width {0}
+
+add_connection framerA.port_ready framerB.peer_ready
+set_connection_parameter_value framerA.port_ready/framerB.peer_ready endPort {}
+set_connection_parameter_value framerA.port_ready/framerB.peer_ready endPortLSB {0}
+set_connection_parameter_value framerA.port_ready/framerB.peer_ready startPort {}
+set_connection_parameter_value framerA.port_ready/framerB.peer_ready startPortLSB {0}
+set_connection_parameter_value framerA.port_ready/framerB.peer_ready width {0}
 
 add_connection framerA.userrx AtoB.in
 

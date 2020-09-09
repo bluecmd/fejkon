@@ -36,7 +36,8 @@ if {$CONFIG_LOOPBACK_01 != "y"} {
   set_instance_property fifo_0to1 ENABLED false
   set_instance_property fifo_1to0 ENABLED false
 } else {
-  # TODO: Disable normal logic when we have it
+  set_instance_parameter_value fc0 {WAIT_FOR_PEER} 0
+  set_instance_parameter_value fc1 {WAIT_FOR_PEER} 0
 }
 
 if {$fc_ports < 2} {

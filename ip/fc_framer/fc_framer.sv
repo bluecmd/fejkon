@@ -1,6 +1,9 @@
 `timescale 1 us / 1 us
 module fc_framer #(
-    parameter int MTU = 3072
+    parameter int MTU = 3072,
+    // Remain in OL1 state until the peer port is in the same state
+    parameter int WAIT_FOR_PEER = 0,
+    parameter int OL1_DELAY_US = 5000 // 5ms
   ) (
     output wire [35:0]  avtx_data,                //                   avtx.data
     output wire         avtx_valid,               //                       .valid
@@ -26,7 +29,9 @@ module fc_framer #(
     output wire [31:0]  rx_mm_readdata,           //                       .readdata
     input  wire         tx_clk,                   //                 tx_clk.clk
     input  wire         rx_clk,                   //                 rx_clk.clk
-    output wire         active                    //                 active.active_led
+    output wire         active,                   //                 active.active_led
+    input  wire         peer_ready,               //             peer_ready.ready
+    output wire         port_ready                //             port_ready.ready
   );
 
   logic rx_reset_cdc1;
@@ -49,9 +54,9 @@ module fc_framer #(
   (* keep *) fc::state_t state;
   fc::state_t state_r;
 
-  fc::state_t state_tx_cdc1 = fc::STATE_LF2;
-  fc::state_t state_tx_cdc2 = fc::STATE_LF2;
-  fc::state_t state_tx_xfered = fc::STATE_LF2;
+  fc::state_t state_tx_cdc1 = fc::STATE_OL1;
+  fc::state_t state_tx_cdc2 = fc::STATE_OL1;
+  fc::state_t state_tx_xfered = fc::STATE_OL1;
 
   logic [31:0] tx_reg_readdata;
   logic [31:0] rx_reg_readdata;
@@ -103,14 +108,27 @@ module fc_framer #(
   end
 
   logic is_active;
+  logic port_online = 0;
 
-  fc_state_rx state_rx (
+  logic peer_ready_cdc1 = 0;
+
+  always @(posedge rx_clk) begin: peer_ready_cdc
+    peer_ready_cdc1 <= peer_ready;
+    if (WAIT_FOR_PEER == 1) begin
+      port_online <= peer_ready_cdc1;
+    end else begin
+      port_online <= 1'b1;
+    end
+  end
+
+  fc_state_rx #(106250000 / (1000000 / OL1_DELAY_US)) state_rx (
     .clk(rx_clk),
     .reset(rx_reset_r | ~avrx_valid),
     .data(avrx_data[31:0]),
     .datak(avrx_data[35:32]),
     .state(state),
-    .is_active(is_active)
+    .is_active(is_active),
+    .online(port_online)
   );
 
   logic [31:0] tx_data;
@@ -125,6 +143,8 @@ module fc_framer #(
     .datak(statetx_datak),
     .state(state_tx_xfered)
   );
+
+  assign port_ready = ~rx_reset_r & avrx_valid & (state == fc::STATE_OL1);
 
   assign active = is_active;
 

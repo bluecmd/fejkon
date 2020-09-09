@@ -81,7 +81,7 @@ async def test_reset_tx(dut):
     await RisingEdge(dut.tx_clk)
     assert dut.avtx_valid == 1, 'avtx expected to be valid'
     assert dut.state == fc.STATE_OL1, 'state expected to be OL1'
-    assert_symbol(dut.avtx_data, with_control(fc.NOS))
+    assert_symbol(dut.avtx_data, with_control(fc.OLS))
 
 
 @cocotb.test()

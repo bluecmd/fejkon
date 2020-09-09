@@ -8,6 +8,8 @@ set TOP_LEVEL_NAME top_tb
 append USER_DEFINED_ELAB_OPTIONS " -voptargs=+acc=rn+top_tb"
 append USER_DEFINED_ELAB_OPTIONS " -voptargs=+acc=rn+top_tb/tb/tb_inst"
 append USER_DEFINED_ELAB_OPTIONS " -voptargs=+acc=rn+fc_framer"
+append USER_DEFINED_ELAB_OPTIONS " -voptargs=+acc=rn+fc_state_rx"
+append USER_DEFINED_ELAB_OPTIONS " -voptargs=+acc=rn+fc_state_tx"
 append USER_DEFINED_ELAB_OPTIONS " -voptargs=+acc=rn+fc_8g_xcvr"
 append USER_DEFINED_ELAB_OPTIONS " -voptargs=+acc=rn+fc_phy"
 append USER_DEFINED_ELAB_OPTIONS " -voptargs=+acc=rn+sv_xcvr_custom_native"

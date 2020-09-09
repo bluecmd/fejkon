@@ -10,7 +10,7 @@ set_project_property HIDE_FROM_IP_CATALOG {false}
 # Instances and instance parameters
 # (disabled instances are intentionally culled)
 add_instance AtoB altera_avalon_dc_fifo 20.1
-set_instance_parameter_value AtoB {BITS_PER_SYMBOL} {8}
+set_instance_parameter_value AtoB {BITS_PER_SYMBOL} {9}
 set_instance_parameter_value AtoB {CHANNEL_WIDTH} {0}
 set_instance_parameter_value AtoB {ENABLE_EXPLICIT_MAXCHANNEL} {0}
 set_instance_parameter_value AtoB {ERROR_WIDTH} {0}
@@ -20,11 +20,11 @@ set_instance_parameter_value AtoB {RD_SYNC_DEPTH} {3}
 set_instance_parameter_value AtoB {SYMBOLS_PER_BEAT} {4}
 set_instance_parameter_value AtoB {USE_IN_FILL_LEVEL} {0}
 set_instance_parameter_value AtoB {USE_OUT_FILL_LEVEL} {0}
-set_instance_parameter_value AtoB {USE_PACKETS} {1}
+set_instance_parameter_value AtoB {USE_PACKETS} {0}
 set_instance_parameter_value AtoB {WR_SYNC_DEPTH} {3}
 
 add_instance BtoA altera_avalon_dc_fifo 20.1
-set_instance_parameter_value BtoA {BITS_PER_SYMBOL} {8}
+set_instance_parameter_value BtoA {BITS_PER_SYMBOL} {9}
 set_instance_parameter_value BtoA {CHANNEL_WIDTH} {0}
 set_instance_parameter_value BtoA {ENABLE_EXPLICIT_MAXCHANNEL} {0}
 set_instance_parameter_value BtoA {ERROR_WIDTH} {0}
@@ -34,16 +34,20 @@ set_instance_parameter_value BtoA {RD_SYNC_DEPTH} {3}
 set_instance_parameter_value BtoA {SYMBOLS_PER_BEAT} {4}
 set_instance_parameter_value BtoA {USE_IN_FILL_LEVEL} {0}
 set_instance_parameter_value BtoA {USE_OUT_FILL_LEVEL} {0}
-set_instance_parameter_value BtoA {USE_PACKETS} {1}
+set_instance_parameter_value BtoA {USE_PACKETS} {0}
 set_instance_parameter_value BtoA {WR_SYNC_DEPTH} {3}
 
 add_instance framer0 fc_framer 1.0
+set_instance_parameter_value framer0 {MTU} {3072}
 
 add_instance framer1 fc_framer 1.0
+set_instance_parameter_value framer1 {MTU} {3072}
 
 add_instance framerA fc_framer 1.0
+set_instance_parameter_value framerA {MTU} {3072}
 
 add_instance framerB fc_framer 1.0
+set_instance_parameter_value framerB {MTU} {3072}
 
 add_instance mgmt_clk clock_source 20.1
 set_instance_parameter_value mgmt_clk {clockFrequency} {50000000.0}
@@ -159,7 +163,41 @@ add_instance xcvr1 fc_8g_xcvr 1.0
 
 add_instance xcvrA fc_8g_xcvr 1.0
 
+add_instance xcvrA_rx_split altera_avalon_st_splitter 20.1
+set_instance_parameter_value xcvrA_rx_split {BITS_PER_SYMBOL} {9}
+set_instance_parameter_value xcvrA_rx_split {CHANNEL_WIDTH} {1}
+set_instance_parameter_value xcvrA_rx_split {DATA_WIDTH} {36}
+set_instance_parameter_value xcvrA_rx_split {ERROR_DESCRIPTOR} {}
+set_instance_parameter_value xcvrA_rx_split {ERROR_WIDTH} {1}
+set_instance_parameter_value xcvrA_rx_split {MAX_CHANNELS} {1}
+set_instance_parameter_value xcvrA_rx_split {NUMBER_OF_OUTPUTS} {2}
+set_instance_parameter_value xcvrA_rx_split {QUALIFY_VALID_OUT} {1}
+set_instance_parameter_value xcvrA_rx_split {READY_LATENCY} {0}
+set_instance_parameter_value xcvrA_rx_split {USE_CHANNEL} {0}
+set_instance_parameter_value xcvrA_rx_split {USE_DATA} {1}
+set_instance_parameter_value xcvrA_rx_split {USE_ERROR} {0}
+set_instance_parameter_value xcvrA_rx_split {USE_PACKETS} {0}
+set_instance_parameter_value xcvrA_rx_split {USE_READY} {0}
+set_instance_parameter_value xcvrA_rx_split {USE_VALID} {1}
+
 add_instance xcvrB fc_8g_xcvr 1.0
+
+add_instance xcvrB_rx_split altera_avalon_st_splitter 20.1
+set_instance_parameter_value xcvrB_rx_split {BITS_PER_SYMBOL} {9}
+set_instance_parameter_value xcvrB_rx_split {CHANNEL_WIDTH} {1}
+set_instance_parameter_value xcvrB_rx_split {DATA_WIDTH} {36}
+set_instance_parameter_value xcvrB_rx_split {ERROR_DESCRIPTOR} {}
+set_instance_parameter_value xcvrB_rx_split {ERROR_WIDTH} {1}
+set_instance_parameter_value xcvrB_rx_split {MAX_CHANNELS} {1}
+set_instance_parameter_value xcvrB_rx_split {NUMBER_OF_OUTPUTS} {2}
+set_instance_parameter_value xcvrB_rx_split {QUALIFY_VALID_OUT} {1}
+set_instance_parameter_value xcvrB_rx_split {READY_LATENCY} {0}
+set_instance_parameter_value xcvrB_rx_split {USE_CHANNEL} {0}
+set_instance_parameter_value xcvrB_rx_split {USE_DATA} {1}
+set_instance_parameter_value xcvrB_rx_split {USE_ERROR} {0}
+set_instance_parameter_value xcvrB_rx_split {USE_PACKETS} {0}
+set_instance_parameter_value xcvrB_rx_split {USE_READY} {0}
+set_instance_parameter_value xcvrB_rx_split {USE_VALID} {1}
 
 # exported interfaces
 add_interface clk clock sink
@@ -230,21 +268,13 @@ add_interface xcvrb_mgmt_mm avalon slave
 set_interface_property xcvrb_mgmt_mm EXPORT_OF xcvrB.mgmt_mm
 
 # connections and connection parameters
-add_connection AtoB.out framerB.usertx
+add_connection AtoB.out xcvrB.avtx
 
-add_connection BtoA.out framerA.usertx
+add_connection BtoA.out xcvrA.avtx
 
 add_connection framer0.avtx xcvr0.avtx
 
 add_connection framer1.avtx xcvr1.avtx
-
-add_connection framerA.avtx xcvrA.avtx
-
-add_connection framerA.userrx AtoB.in
-
-add_connection framerB.avtx xcvrB.avtx
-
-add_connection framerB.userrx BtoA.in
 
 add_connection mgmt_clk.clk mm.m0_clk
 
@@ -354,6 +384,8 @@ add_connection phyA_clk.clk_reset phyA_rst_br.in_reset
 
 add_connection phyA_clk.clk_reset xcvrA.reset
 
+add_connection phyA_clk.clk_reset xcvrA_rx_split.reset
+
 add_connection phyA_rst_src.reset phyA_clk.clk_in_reset
 
 add_connection phyB_clk.clk phyB_rst_br.clk
@@ -367,6 +399,8 @@ add_connection phyB_clk.clk_reset framerB.reset
 add_connection phyB_clk.clk_reset phyB_rst_br.in_reset
 
 add_connection phyB_clk.clk_reset xcvrB.reset
+
+add_connection phyB_clk.clk_reset xcvrB_rx_split.reset
 
 add_connection phyB_rst_src.reset phyB_clk.clk_in_reset
 
@@ -453,7 +487,7 @@ add_connection xcvr1.tx_clk framer1.tx_clk
 
 add_connection xcvr1.tx_clk tx1_clk_bridge.in_clk
 
-add_connection xcvrA.avrx framerA.avrx
+add_connection xcvrA.avrx xcvrA_rx_split.in
 
 add_connection xcvrA.line_td xcvr0.line_rd
 set_connection_parameter_value xcvrA.line_td/xcvr0.line_rd endPort {}
@@ -466,11 +500,17 @@ add_connection xcvrA.rx_clk AtoB.in_clk
 
 add_connection xcvrA.rx_clk framerA.rx_clk
 
+add_connection xcvrA.rx_clk xcvrA_rx_split.clk
+
 add_connection xcvrA.tx_clk BtoA.out_clk
 
 add_connection xcvrA.tx_clk framerA.tx_clk
 
-add_connection xcvrB.avrx framerB.avrx
+add_connection xcvrA_rx_split.out0 AtoB.in
+
+add_connection xcvrA_rx_split.out1 framerA.avrx
+
+add_connection xcvrB.avrx xcvrB_rx_split.in
 
 add_connection xcvrB.line_td xcvr1.line_rd
 set_connection_parameter_value xcvrB.line_td/xcvr1.line_rd endPort {}
@@ -490,9 +530,15 @@ add_connection xcvrB.rx_clk BtoA.in_clk
 
 add_connection xcvrB.rx_clk framerB.rx_clk
 
+add_connection xcvrB.rx_clk xcvrB_rx_split.clk
+
 add_connection xcvrB.tx_clk AtoB.out_clk
 
 add_connection xcvrB.tx_clk framerB.tx_clk
+
+add_connection xcvrB_rx_split.out0 BtoA.in
+
+add_connection xcvrB_rx_split.out1 framerB.avrx
 
 # interconnect requirements
 set_interconnect_requirement {$system} {qsys_mm.clockCrossingAdapter} {HANDSHAKE}

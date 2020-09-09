@@ -188,7 +188,7 @@ async def run_c2h_dma_test(dut, dwords, channel):
 c2h_factory = TestFactory(run_c2h_dma_test)
 # TODO:
 # - Add packet fragmentation
-c2h_factory.add_option('dwords', [3, 8, 15, 16, 100, 512])
+c2h_factory.add_option('dwords', [1, 8, 15, 100, 512])
 c2h_factory.add_option('channel', [0, 3])
 c2h_factory.generate_tests()
 

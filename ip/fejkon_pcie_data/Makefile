@@ -3,7 +3,7 @@ PYLINT ?= pylint3
 
 .PHONY: lint test wave
 
-SRCS := fejkon_pcie_data.sv tl_cfg_module.sv test.sv \
+SRCS := fejkon_pcie_data.sv tl_cfg_module.sv c2h_dma.sv test.sv \
 	../pcie_data_fifo/pcie_data_fifo.v \
 	$(QPATH)/eda/sim_lib/altera_mf.v
 
@@ -18,7 +18,7 @@ lint: $(SRCS)
 	$(PYLINT) --rcfile=pylintrc test.py --exit-zero
 	verilator --lint-only \
 		../pcie_data_fifo/pcie_data_fifo_bb.v \
-		fejkon_pcie_data.sv tl_cfg_module.sv
+		c2h_dma.sv fejkon_pcie_data.sv tl_cfg_module.sv
 	iverilog -g2012 -t null $(VERILOG_SOURCES) \
 		2>&1 | grep -v 'sim_lib/altera_mf.v:' || true
 

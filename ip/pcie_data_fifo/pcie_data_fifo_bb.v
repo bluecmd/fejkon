@@ -32,6 +32,7 @@
 //refer to the applicable agreement for further details, at
 //https://fpgasoftware.intel.com/eula.
 
+`timescale 1 ps / 1 ps
 module pcie_data_fifo (
 	clock,
 	data,

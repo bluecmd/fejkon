@@ -242,6 +242,7 @@ Accesses need to be 4 byte wide.
 | 0x0024 | 4     | Card   | Freq. Gauge   | PCIe effective clock gauge   |
 | 0x0040 | 64    | Card   | FC Dbg & Gen  | Inspect / Inject point       |
 | 0x0080 | 64    | Card   | FC Snooping   | Primitive Snooping           |
+| 0x00C0 | 32    | Card   | RS422 UART    | UART controller              |
 | 0x0100 | 1     | Port 0 | SFP Status    | SFP Status Word (3)          |
 | 0x0140 | 64    | Port 0 | SFP Port I2C  | SFP I2C core (4)             |
 | 0x02x0 | ...   | Port 1 | SFP Port      |                              |

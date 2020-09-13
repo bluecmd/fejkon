@@ -81,8 +81,10 @@ set_instance_parameter_value reset_seqencer {LIST_DSRT_DELAY} {0 0 0 0 0 0 0 0 0
 set_instance_parameter_value reset_seqencer {LIST_DSRT_SEQ} {0 1 2 3 4 5 6 7 8 9}
 set_instance_parameter_value reset_seqencer {MIN_ASRT_TIME} {0}
 set_instance_parameter_value reset_seqencer {NUM_INPUTS} {1}
-set_instance_parameter_value reset_seqencer {NUM_OUTPUTS} {4}
+set_instance_parameter_value reset_seqencer {NUM_OUTPUTS} {5}
 set_instance_parameter_value reset_seqencer {USE_DSRT_QUAL} {0 0 0 0 0 0 0 0 0 0}
+
+add_instance rs422_ctrl rs422_ctrl 1.0
 
 add_instance sfp0 fejkon_sfp 1.0
 
@@ -114,6 +116,21 @@ set_instance_parameter_value temp_sense {SIM_TSDCALO} {0}
 set_instance_parameter_value temp_sense {USER_OFFSET_ENABLE} {off}
 set_instance_parameter_value temp_sense {USE_WYS} {on}
 
+add_instance uart altera_avalon_uart 20.1
+set_instance_parameter_value uart {baud} {115200}
+set_instance_parameter_value uart {dataBits} {8}
+set_instance_parameter_value uart {fixedBaud} {1}
+set_instance_parameter_value uart {parity} {NONE}
+set_instance_parameter_value uart {simCharStream} {}
+set_instance_parameter_value uart {simInteractiveInputEnable} {0}
+set_instance_parameter_value uart {simInteractiveOutputEnable} {0}
+set_instance_parameter_value uart {simTrueBaud} {0}
+set_instance_parameter_value uart {stopBits} {1}
+set_instance_parameter_value uart {syncRegDepth} {2}
+set_instance_parameter_value uart {useCtsRts} {0}
+set_instance_parameter_value uart {useEopRegister} {0}
+set_instance_parameter_value uart {useRelativePathForSimFile} {0}
+
 # exported interfaces
 add_interface clk clock sink
 set_interface_property clk EXPORT_OF ext0.clk_in
@@ -141,6 +158,8 @@ add_interface port1_line_td conduit end
 set_interface_property port1_line_td EXPORT_OF fc.fcport1_line_td
 add_interface reset reset sink
 set_interface_property reset EXPORT_OF ext0.clk_in_reset
+add_interface rs422 conduit end
+set_interface_property rs422 EXPORT_OF rs422_ctrl.rs422
 add_interface sfp0_sfp conduit end
 set_interface_property sfp0_sfp EXPORT_OF sfp0.sfp
 add_interface sfp1_sfp conduit end
@@ -151,6 +170,8 @@ add_interface sfp3_sfp conduit end
 set_interface_property sfp3_sfp EXPORT_OF sfp3.sfp
 add_interface si570_i2c conduit end
 set_interface_property si570_i2c EXPORT_OF si570_ctrl.si570_i2c
+add_interface uart conduit end
+set_interface_property uart EXPORT_OF uart.external_connection
 
 # connections and connection parameters
 add_connection ext0.clk fc.mgmt_clk
@@ -173,6 +194,8 @@ add_connection ext0.clk reset_ctrl.clk
 
 add_connection ext0.clk reset_seqencer.clk
 
+add_connection ext0.clk rs422_ctrl.clk
+
 add_connection ext0.clk sfp0.clk
 
 add_connection ext0.clk sfp1.clk
@@ -186,6 +209,8 @@ add_connection ext0.clk si570_ctrl.clk
 add_connection ext0.clk temp.clk
 
 add_connection ext0.clk temp_sense.clk
+
+add_connection ext0.clk uart.clk
 
 add_connection ext0.clk_reset jtagm.clk_reset
 
@@ -296,6 +321,11 @@ set_connection_parameter_value jtagm.master/temp.temp_mm arbitrationPriority {1}
 set_connection_parameter_value jtagm.master/temp.temp_mm baseAddress {0x0010}
 set_connection_parameter_value jtagm.master/temp.temp_mm defaultConnection {0}
 
+add_connection jtagm.master uart.s1
+set_connection_parameter_value jtagm.master/uart.s1 arbitrationPriority {1}
+set_connection_parameter_value jtagm.master/uart.s1 baseAddress {0x00c0}
+set_connection_parameter_value jtagm.master/uart.s1 defaultConnection {0}
+
 add_connection jtagm.master_reset reset_ctrl.reset_in1
 
 add_connection led.xcvr_reconfig fc.reconfig_busy
@@ -370,6 +400,11 @@ set_connection_parameter_value pcie.bar0_mm/temp.temp_mm arbitrationPriority {1}
 set_connection_parameter_value pcie.bar0_mm/temp.temp_mm baseAddress {0x0010}
 set_connection_parameter_value pcie.bar0_mm/temp.temp_mm defaultConnection {0}
 
+add_connection pcie.bar0_mm uart.s1
+set_connection_parameter_value pcie.bar0_mm/uart.s1 arbitrationPriority {1}
+set_connection_parameter_value pcie.bar0_mm/uart.s1 baseAddress {0x00c0}
+set_connection_parameter_value pcie.bar0_mm/uart.s1 defaultConnection {0}
+
 add_connection pcie.data_clk fc.rx_mux_clk
 
 add_connection pcie.data_clk fc_debug.clk
@@ -427,6 +462,10 @@ add_connection reset_seqencer.reset_out2 fc_debug.reset
 add_connection reset_seqencer.reset_out3 fc.reset
 
 add_connection reset_seqencer.reset_out3 fc_snoop.reset
+
+add_connection reset_seqencer.reset_out4 rs422_ctrl.reset
+
+add_connection reset_seqencer.reset_out4 uart.reset
 
 add_connection si570_ctrl.reset_out reset_ctrl.reset_in2
 

@@ -157,7 +157,27 @@ add_instance rx_mux_clk altera_clock_bridge 20.1
 set_instance_parameter_value rx_mux_clk {EXPLICIT_CLOCK_RATE} {0.0}
 set_instance_parameter_value rx_mux_clk {NUM_CLOCK_OUTPUTS} {1}
 
+add_instance rx_snoop_reset altera_reset_bridge 20.1
+set_instance_parameter_value rx_snoop_reset {ACTIVE_LOW_RESET} {0}
+set_instance_parameter_value rx_snoop_reset {NUM_RESET_OUTPUTS} {1}
+set_instance_parameter_value rx_snoop_reset {SYNCHRONOUS_EDGES} {deassert}
+set_instance_parameter_value rx_snoop_reset {USE_RESET_REQUEST} {0}
+
 add_instance xcvr0 fc_8g_xcvr 1.0
+
+add_instance xcvr0_rx_snoop_cdc altera_avalon_dc_fifo 20.1
+set_instance_parameter_value xcvr0_rx_snoop_cdc {BITS_PER_SYMBOL} {9}
+set_instance_parameter_value xcvr0_rx_snoop_cdc {CHANNEL_WIDTH} {0}
+set_instance_parameter_value xcvr0_rx_snoop_cdc {ENABLE_EXPLICIT_MAXCHANNEL} {0}
+set_instance_parameter_value xcvr0_rx_snoop_cdc {ERROR_WIDTH} {0}
+set_instance_parameter_value xcvr0_rx_snoop_cdc {EXPLICIT_MAXCHANNEL} {0}
+set_instance_parameter_value xcvr0_rx_snoop_cdc {FIFO_DEPTH} {16}
+set_instance_parameter_value xcvr0_rx_snoop_cdc {RD_SYNC_DEPTH} {3}
+set_instance_parameter_value xcvr0_rx_snoop_cdc {SYMBOLS_PER_BEAT} {4}
+set_instance_parameter_value xcvr0_rx_snoop_cdc {USE_IN_FILL_LEVEL} {0}
+set_instance_parameter_value xcvr0_rx_snoop_cdc {USE_OUT_FILL_LEVEL} {0}
+set_instance_parameter_value xcvr0_rx_snoop_cdc {USE_PACKETS} {0}
+set_instance_parameter_value xcvr0_rx_snoop_cdc {WR_SYNC_DEPTH} {3}
 
 add_instance xcvr0_rx_split altera_avalon_st_splitter 20.1
 set_instance_parameter_value xcvr0_rx_split {BITS_PER_SYMBOL} {9}
@@ -166,7 +186,7 @@ set_instance_parameter_value xcvr0_rx_split {DATA_WIDTH} {36}
 set_instance_parameter_value xcvr0_rx_split {ERROR_DESCRIPTOR} {}
 set_instance_parameter_value xcvr0_rx_split {ERROR_WIDTH} {1}
 set_instance_parameter_value xcvr0_rx_split {MAX_CHANNELS} {1}
-set_instance_parameter_value xcvr0_rx_split {NUMBER_OF_OUTPUTS} {2}
+set_instance_parameter_value xcvr0_rx_split {NUMBER_OF_OUTPUTS} {3}
 set_instance_parameter_value xcvr0_rx_split {QUALIFY_VALID_OUT} {1}
 set_instance_parameter_value xcvr0_rx_split {READY_LATENCY} {0}
 set_instance_parameter_value xcvr0_rx_split {USE_CHANNEL} {0}
@@ -178,6 +198,20 @@ set_instance_parameter_value xcvr0_rx_split {USE_VALID} {1}
 
 add_instance xcvr1 fc_8g_xcvr 1.0
 
+add_instance xcvr1_rx_snoop_cdc altera_avalon_dc_fifo 20.1
+set_instance_parameter_value xcvr1_rx_snoop_cdc {BITS_PER_SYMBOL} {9}
+set_instance_parameter_value xcvr1_rx_snoop_cdc {CHANNEL_WIDTH} {0}
+set_instance_parameter_value xcvr1_rx_snoop_cdc {ENABLE_EXPLICIT_MAXCHANNEL} {0}
+set_instance_parameter_value xcvr1_rx_snoop_cdc {ERROR_WIDTH} {0}
+set_instance_parameter_value xcvr1_rx_snoop_cdc {EXPLICIT_MAXCHANNEL} {0}
+set_instance_parameter_value xcvr1_rx_snoop_cdc {FIFO_DEPTH} {16}
+set_instance_parameter_value xcvr1_rx_snoop_cdc {RD_SYNC_DEPTH} {3}
+set_instance_parameter_value xcvr1_rx_snoop_cdc {SYMBOLS_PER_BEAT} {4}
+set_instance_parameter_value xcvr1_rx_snoop_cdc {USE_IN_FILL_LEVEL} {0}
+set_instance_parameter_value xcvr1_rx_snoop_cdc {USE_OUT_FILL_LEVEL} {0}
+set_instance_parameter_value xcvr1_rx_snoop_cdc {USE_PACKETS} {0}
+set_instance_parameter_value xcvr1_rx_snoop_cdc {WR_SYNC_DEPTH} {3}
+
 add_instance xcvr1_rx_split altera_avalon_st_splitter 20.1
 set_instance_parameter_value xcvr1_rx_split {BITS_PER_SYMBOL} {9}
 set_instance_parameter_value xcvr1_rx_split {CHANNEL_WIDTH} {1}
@@ -185,7 +219,7 @@ set_instance_parameter_value xcvr1_rx_split {DATA_WIDTH} {36}
 set_instance_parameter_value xcvr1_rx_split {ERROR_DESCRIPTOR} {}
 set_instance_parameter_value xcvr1_rx_split {ERROR_WIDTH} {1}
 set_instance_parameter_value xcvr1_rx_split {MAX_CHANNELS} {1}
-set_instance_parameter_value xcvr1_rx_split {NUMBER_OF_OUTPUTS} {2}
+set_instance_parameter_value xcvr1_rx_split {NUMBER_OF_OUTPUTS} {3}
 set_instance_parameter_value xcvr1_rx_split {QUALIFY_VALID_OUT} {1}
 set_instance_parameter_value xcvr1_rx_split {READY_LATENCY} {0}
 set_instance_parameter_value xcvr1_rx_split {USE_CHANNEL} {0}
@@ -239,8 +273,14 @@ add_interface rx_mux_clk clock sink
 set_interface_property rx_mux_clk EXPORT_OF rx_mux_clk.in_clk
 add_interface xcvr0_aligned conduit end
 set_interface_property xcvr0_aligned EXPORT_OF xcvr0.aligned
+add_interface xcvr0_rx_snoop avalon_streaming source
+set_interface_property xcvr0_rx_snoop EXPORT_OF xcvr0_rx_snoop_cdc.out
 add_interface xcvr1_aligned conduit end
 set_interface_property xcvr1_aligned EXPORT_OF xcvr1.aligned
+add_interface xcvr1_rx_snoop avalon_streaming source
+set_interface_property xcvr1_rx_snoop EXPORT_OF xcvr1_rx_snoop_cdc.out
+add_interface xcvr_snoop_reset reset sink
+set_interface_property xcvr_snoop_reset EXPORT_OF rx_snoop_reset.in_reset
 
 # connections and connection parameters
 add_connection fc0.avtx xcvr0.avtx
@@ -314,9 +354,15 @@ set_connection_parameter_value mm.m0/xcvr_reconfig.reconfig_mgmt arbitrationPrio
 set_connection_parameter_value mm.m0/xcvr_reconfig.reconfig_mgmt baseAddress {0x7e00}
 set_connection_parameter_value mm.m0/xcvr_reconfig.reconfig_mgmt defaultConnection {0}
 
+add_connection phy_clk.out_clk rx_snoop_reset.clk
+
 add_connection phy_clk.out_clk xcvr0.phy_clk
 
+add_connection phy_clk.out_clk xcvr0_rx_snoop_cdc.out_clk
+
 add_connection phy_clk.out_clk xcvr1.phy_clk
+
+add_connection phy_clk.out_clk xcvr1_rx_snoop_cdc.out_clk
 
 add_connection reset.out_reset fc0.reset
 
@@ -348,9 +394,13 @@ add_connection reset.out_reset rx_mux.reset
 
 add_connection reset.out_reset xcvr0.reset
 
+add_connection reset.out_reset xcvr0_rx_snoop_cdc.in_clk_reset
+
 add_connection reset.out_reset xcvr0_rx_split.reset
 
 add_connection reset.out_reset xcvr1.reset
+
+add_connection reset.out_reset xcvr1_rx_snoop_cdc.in_clk_reset
 
 add_connection reset.out_reset xcvr1_rx_split.reset
 
@@ -361,6 +411,10 @@ add_connection rx_mux_clk.out_clk fc0_rx_cdc.out_clk
 add_connection rx_mux_clk.out_clk fc1_rx_cdc.out_clk
 
 add_connection rx_mux_clk.out_clk rx_mux.clk
+
+add_connection rx_snoop_reset.out_reset xcvr0_rx_snoop_cdc.out_clk_reset
+
+add_connection rx_snoop_reset.out_reset xcvr1_rx_snoop_cdc.out_clk_reset
 
 add_connection xcvr0.avrx xcvr0_rx_split.in
 
@@ -386,6 +440,8 @@ add_connection xcvr0.rx_clk fc0_rx_cdc.in_clk
 
 add_connection xcvr0.rx_clk fifo_0to1.in_clk
 
+add_connection xcvr0.rx_clk xcvr0_rx_snoop_cdc.in_clk
+
 add_connection xcvr0.rx_clk xcvr0_rx_split.clk
 
 add_connection xcvr0.tx_clk fc0.tx_clk
@@ -395,6 +451,8 @@ add_connection xcvr0.tx_clk fifo_1to0.out_clk
 add_connection xcvr0_rx_split.out0 fc0.avrx
 
 add_connection xcvr0_rx_split.out1 fifo_0to1.in
+
+add_connection xcvr0_rx_split.out2 xcvr0_rx_snoop_cdc.in
 
 add_connection xcvr1.avrx xcvr1_rx_split.in
 
@@ -406,6 +464,8 @@ add_connection xcvr1.rx_clk fc1_rx_cdc.in_clk
 
 add_connection xcvr1.rx_clk fifo_1to0.in_clk
 
+add_connection xcvr1.rx_clk xcvr1_rx_snoop_cdc.in_clk
+
 add_connection xcvr1.rx_clk xcvr1_rx_split.clk
 
 add_connection xcvr1.tx_clk fc1.tx_clk
@@ -415,6 +475,8 @@ add_connection xcvr1.tx_clk fifo_0to1.out_clk
 add_connection xcvr1_rx_split.out0 fc1.avrx
 
 add_connection xcvr1_rx_split.out1 fifo_1to0.in
+
+add_connection xcvr1_rx_split.out2 xcvr1_rx_snoop_cdc.in
 
 add_connection xcvr_reconfig.ch2_3_from_xcvr xcvr1.reconfig_from_xcvr
 set_connection_parameter_value xcvr_reconfig.ch2_3_from_xcvr/xcvr1.reconfig_from_xcvr endPort {}

@@ -96,6 +96,7 @@ fejkon.qsys: .qsys-configured
 	$(QPATH)/sopc_builder/bin/qsys-script --script=fejkon_pcie.tcl
 	$(QPATH)/sopc_builder/bin/qsys-script --script=fejkon_fc.tcl
 	$(QPATH)/sopc_builder/bin/qsys-script --script=fejkon_sfp.tcl
+	$(QPATH)/sopc_builder/bin/qsys-script --script=fejkon_snoop.tcl
 	$(QPATH)/sopc_builder/bin/qsys-script --script=fejkon.tcl
 	touch $@
 

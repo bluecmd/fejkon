@@ -241,6 +241,7 @@ Accesses need to be 4 byte wide.
 | 0x0020 | 4     | Card   | Freq. Gauge   | PHY effective clock gauge    |
 | 0x0024 | 4     | Card   | Freq. Gauge   | PCIe effective clock gauge   |
 | 0x0040 | 64    | Card   | FC Dbg & Gen  | Inspect / Inject point       |
+| 0x0080 | 64    | Card   | FC Snooping   | Primitive Snooping           |
 | 0x0100 | 1     | Port 0 | SFP Status    | SFP Status Word (3)          |
 | 0x0140 | 64    | Port 0 | SFP Port I2C  | SFP I2C core (4)             |
 | 0x02x0 | ...   | Port 1 | SFP Port      |                              |
@@ -255,6 +256,8 @@ Accesses need to be 4 byte wide.
 | 0xCxxx | ...   | Port 2 | ...           |                              |
 | 0xExxx | ...   | Port 3 | ...           |                              |
 | 0xFE00 | 512   | Card   | XCVR Reconfig | (Undoc.) xcvr\_reconfig      |
+
+Snoop memory for port 0 is at `0x0020_0000`, port 1 at `0x0021_0000` etc.
 
 1) Details in section below
 2) Details in section below

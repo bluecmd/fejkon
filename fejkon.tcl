@@ -18,6 +18,8 @@ add_instance fc fejkon_fc 1.0
 
 add_instance fc_debug fejkon_fc_debug 1.0
 
+add_instance fc_snoop fejkon_snoop 1.0
+
 add_instance ident fejkon_identity 1.0
 set_instance_parameter_value ident {EthPorts} {2}
 set_instance_parameter_value ident {FcPorts} {2}
@@ -153,6 +155,8 @@ set_interface_property si570_i2c EXPORT_OF si570_ctrl.si570_i2c
 # connections and connection parameters
 add_connection ext0.clk fc.mgmt_clk
 
+add_connection ext0.clk fc_snoop.mgmt_clk
+
 add_connection ext0.clk ident.clk
 
 add_connection ext0.clk jtagm.clk
@@ -212,6 +216,8 @@ set_connection_parameter_value fc.xcvr0_aligned/led.fcport0_aligned startPort {}
 set_connection_parameter_value fc.xcvr0_aligned/led.fcport0_aligned startPortLSB {0}
 set_connection_parameter_value fc.xcvr0_aligned/led.fcport0_aligned width {0}
 
+add_connection fc.xcvr0_rx_snoop fc_snoop.port0_st
+
 add_connection fc.xcvr1_aligned led.fcport1_aligned
 set_connection_parameter_value fc.xcvr1_aligned/led.fcport1_aligned endPort {}
 set_connection_parameter_value fc.xcvr1_aligned/led.fcport1_aligned endPortLSB {0}
@@ -219,7 +225,11 @@ set_connection_parameter_value fc.xcvr1_aligned/led.fcport1_aligned startPort {}
 set_connection_parameter_value fc.xcvr1_aligned/led.fcport1_aligned startPortLSB {0}
 set_connection_parameter_value fc.xcvr1_aligned/led.fcport1_aligned width {0}
 
+add_connection fc.xcvr1_rx_snoop fc_snoop.port1_st
+
 add_connection fc_debug.st_out pcie.data_tx
+
+add_connection fc_snoop.snoop_fifo_reset fc.xcvr_snoop_reset
 
 add_connection jtagm.master fc.mgmt_mm
 set_connection_parameter_value jtagm.master/fc.mgmt_mm arbitrationPriority {1}
@@ -230,6 +240,16 @@ add_connection jtagm.master fc_debug.csr
 set_connection_parameter_value jtagm.master/fc_debug.csr arbitrationPriority {1}
 set_connection_parameter_value jtagm.master/fc_debug.csr baseAddress {0x0040}
 set_connection_parameter_value jtagm.master/fc_debug.csr defaultConnection {0}
+
+add_connection jtagm.master fc_snoop.csr
+set_connection_parameter_value jtagm.master/fc_snoop.csr arbitrationPriority {1}
+set_connection_parameter_value jtagm.master/fc_snoop.csr baseAddress {0x0080}
+set_connection_parameter_value jtagm.master/fc_snoop.csr defaultConnection {0}
+
+add_connection jtagm.master fc_snoop.mm
+set_connection_parameter_value jtagm.master/fc_snoop.mm arbitrationPriority {1}
+set_connection_parameter_value jtagm.master/fc_snoop.mm baseAddress {0x00200000}
+set_connection_parameter_value jtagm.master/fc_snoop.mm defaultConnection {0}
 
 add_connection jtagm.master ident.mm
 set_connection_parameter_value jtagm.master/ident.mm arbitrationPriority {1}
@@ -294,6 +314,16 @@ add_connection pcie.bar0_mm fc_debug.csr
 set_connection_parameter_value pcie.bar0_mm/fc_debug.csr arbitrationPriority {1}
 set_connection_parameter_value pcie.bar0_mm/fc_debug.csr baseAddress {0x0040}
 set_connection_parameter_value pcie.bar0_mm/fc_debug.csr defaultConnection {0}
+
+add_connection pcie.bar0_mm fc_snoop.csr
+set_connection_parameter_value pcie.bar0_mm/fc_snoop.csr arbitrationPriority {1}
+set_connection_parameter_value pcie.bar0_mm/fc_snoop.csr baseAddress {0x0080}
+set_connection_parameter_value pcie.bar0_mm/fc_snoop.csr defaultConnection {0}
+
+add_connection pcie.bar0_mm fc_snoop.mm
+set_connection_parameter_value pcie.bar0_mm/fc_snoop.mm arbitrationPriority {1}
+set_connection_parameter_value pcie.bar0_mm/fc_snoop.mm baseAddress {0x00200000}
+set_connection_parameter_value pcie.bar0_mm/fc_snoop.mm defaultConnection {0}
 
 add_connection pcie.bar0_mm ident.mm
 set_connection_parameter_value pcie.bar0_mm/ident.mm arbitrationPriority {1}
@@ -366,6 +396,8 @@ set_connection_parameter_value pcie.irq/sfp3.i2c_irq irqNumber {6}
 
 add_connection phy_clk.out_clk fc.phy_clk
 
+add_connection phy_clk.out_clk fc_snoop.fc_clk
+
 add_connection phy_clk.out_clk phy_clk_gauge.probe_clk
 
 add_connection phy_clk.out_clk phy_clk_out.in_clk
@@ -393,6 +425,8 @@ add_connection reset_seqencer.reset_out1 pcie.mgmt_rst
 add_connection reset_seqencer.reset_out2 fc_debug.reset
 
 add_connection reset_seqencer.reset_out3 fc.reset
+
+add_connection reset_seqencer.reset_out3 fc_snoop.reset
 
 add_connection si570_ctrl.reset_out reset_ctrl.reset_in2
 

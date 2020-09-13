@@ -11,7 +11,7 @@ set_project_property HIDE_FROM_IP_CATALOG {false}
 # (disabled instances are intentionally culled)
 add_instance bar0_cdc altera_avalon_mm_clock_crossing_bridge 20.1
 set_instance_parameter_value bar0_cdc {ADDRESS_UNITS} {SYMBOLS}
-set_instance_parameter_value bar0_cdc {ADDRESS_WIDTH} {16}
+set_instance_parameter_value bar0_cdc {ADDRESS_WIDTH} {24}
 set_instance_parameter_value bar0_cdc {COMMAND_FIFO_DEPTH} {4}
 set_instance_parameter_value bar0_cdc {DATA_WIDTH} {32}
 set_instance_parameter_value bar0_cdc {MASTER_SYNC_DEPTH} {2}

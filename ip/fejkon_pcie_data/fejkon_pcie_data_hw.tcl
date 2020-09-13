@@ -41,6 +41,7 @@ set_fileset_property QUARTUS_SYNTH ENABLE_RELATIVE_INCLUDE_PATHS false
 set_fileset_property QUARTUS_SYNTH ENABLE_FILE_OVERWRITE_MODE true
 add_fileset_file ../pcie_data_fifo/pcie_data_fifo.v VERILOG PATH ../pcie_data_fifo/pcie_data_fifo.v
 add_fileset_file tl_cfg_module.sv SYSTEM_VERILOG PATH tl_cfg_module.sv
+add_fileset_file c2h_dma.sv SYSTEM_VERILOG PATH c2h_dma.sv
 add_fileset_file fejkon_pcie_data.sv SYSTEM_VERILOG PATH fejkon_pcie_data.sv TOP_LEVEL_FILE
 
 add_fileset SIM_VERILOG SIM_VERILOG "" ""
@@ -49,6 +50,7 @@ set_fileset_property SIM_VERILOG ENABLE_RELATIVE_INCLUDE_PATHS false
 set_fileset_property SIM_VERILOG ENABLE_FILE_OVERWRITE_MODE true
 add_fileset_file ../pcie_data_fifo/pcie_data_fifo.v VERILOG PATH ../pcie_data_fifo/pcie_data_fifo.v
 add_fileset_file tl_cfg_module.sv SYSTEM_VERILOG PATH tl_cfg_module.sv
+add_fileset_file c2h_dma.sv SYSTEM_VERILOG PATH c2h_dma.sv
 add_fileset_file fejkon_pcie_data.sv SYSTEM_VERILOG PATH fejkon_pcie_data.sv TOP_LEVEL_FILE
 
 

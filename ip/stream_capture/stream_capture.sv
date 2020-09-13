@@ -32,7 +32,7 @@ module stream_capture (
 
   assign port1_mem_address = 20'h0;
 
-  assign port1_mem_write = 1'b0;
+  assign port1_mem_write = 1'b1;
 
   assign port1_mem_writedata = {28'hf00b, port1_st_data};
 

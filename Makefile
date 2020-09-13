@@ -61,6 +61,10 @@ report:
 		| grep -- '---' || echo ' [-] \e[32mNo I/O assignment warnings! Awesome!\e[0m\n'
 	@awk '/; I\/O Assignment Warnings/,/^$$/' gen/output_files/fejkon.fit.rpt
 	@echo -n ' [-] '
+	@cat gen/output_files/fejkon.fit.summary | grep 'Logic utilization'
+	@echo -n ' [-] '
+	@cat gen/output_files/fejkon.fit.summary | grep 'Total block memory bits'
+	@echo -n ' [-] '
 	@cat gen/output_files/fejkon.pow.summary | grep 'Total Thermal Power Dissipation'
 	@echo
 	@cat gen/fmax.txt | grep -v Thi

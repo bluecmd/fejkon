@@ -23,18 +23,17 @@ add_instance mgmt_clk altera_clock_bridge 20.1
 set_instance_parameter_value mgmt_clk {EXPLICIT_CLOCK_RATE} {0.0}
 set_instance_parameter_value mgmt_clk {NUM_CLOCK_OUTPUTS} {1}
 
-add_instance mm_bridge altera_avalon_mm_bridge 20.1
+add_instance mm_bridge altera_avalon_mm_clock_crossing_bridge 20.1
 set_instance_parameter_value mm_bridge {ADDRESS_UNITS} {SYMBOLS}
-set_instance_parameter_value mm_bridge {ADDRESS_WIDTH} {10}
+set_instance_parameter_value mm_bridge {ADDRESS_WIDTH} {22}
+set_instance_parameter_value mm_bridge {COMMAND_FIFO_DEPTH} {4}
 set_instance_parameter_value mm_bridge {DATA_WIDTH} {32}
-set_instance_parameter_value mm_bridge {LINEWRAPBURSTS} {0}
+set_instance_parameter_value mm_bridge {MASTER_SYNC_DEPTH} {2}
 set_instance_parameter_value mm_bridge {MAX_BURST_SIZE} {1}
-set_instance_parameter_value mm_bridge {MAX_PENDING_RESPONSES} {4}
-set_instance_parameter_value mm_bridge {PIPELINE_COMMAND} {1}
-set_instance_parameter_value mm_bridge {PIPELINE_RESPONSE} {1}
+set_instance_parameter_value mm_bridge {RESPONSE_FIFO_DEPTH} {4}
+set_instance_parameter_value mm_bridge {SLAVE_SYNC_DEPTH} {2}
 set_instance_parameter_value mm_bridge {SYMBOL_WIDTH} {8}
-set_instance_parameter_value mm_bridge {USE_AUTO_ADDRESS_WIDTH} {1}
-set_instance_parameter_value mm_bridge {USE_RESPONSE} {0}
+set_instance_parameter_value mm_bridge {USE_AUTO_ADDRESS_WIDTH} {0}
 
 add_instance port0_mem altera_avalon_onchip_memory2 20.1
 set_instance_parameter_value port0_mem {allowInSystemMemoryContentEditor} {0}
@@ -54,9 +53,9 @@ set_instance_parameter_value port0_mem {readDuringWriteMode} {DONT_CARE}
 set_instance_parameter_value port0_mem {resetrequest_enabled} {0}
 set_instance_parameter_value port0_mem {simAllowMRAMContentsFile} {0}
 set_instance_parameter_value port0_mem {simMemInitOnlyFilename} {0}
-set_instance_parameter_value port0_mem {singleClockOperation} {0}
+set_instance_parameter_value port0_mem {singleClockOperation} {1}
 set_instance_parameter_value port0_mem {slave1Latency} {1}
-set_instance_parameter_value port0_mem {slave2Latency} {1}
+set_instance_parameter_value port0_mem {slave2Latency} {2}
 set_instance_parameter_value port0_mem {useNonDefaultInitFile} {0}
 set_instance_parameter_value port0_mem {useShallowMemBlocks} {0}
 set_instance_parameter_value port0_mem {writable} {1}
@@ -79,9 +78,9 @@ set_instance_parameter_value port1_mem {readDuringWriteMode} {DONT_CARE}
 set_instance_parameter_value port1_mem {resetrequest_enabled} {0}
 set_instance_parameter_value port1_mem {simAllowMRAMContentsFile} {0}
 set_instance_parameter_value port1_mem {simMemInitOnlyFilename} {0}
-set_instance_parameter_value port1_mem {singleClockOperation} {0}
+set_instance_parameter_value port1_mem {singleClockOperation} {1}
 set_instance_parameter_value port1_mem {slave1Latency} {1}
-set_instance_parameter_value port1_mem {slave2Latency} {1}
+set_instance_parameter_value port1_mem {slave2Latency} {2}
 set_instance_parameter_value port1_mem {useNonDefaultInitFile} {0}
 set_instance_parameter_value port1_mem {useShallowMemBlocks} {0}
 set_instance_parameter_value port1_mem {writable} {1}
@@ -121,6 +120,8 @@ set_interface_property snoop_fifo_reset EXPORT_OF reset_snoop_fifo.out_reset
 # connections and connection parameters
 add_connection fc_clk.out_clk fc_reset.clk
 
+add_connection fc_clk.out_clk mm_bridge.m0_clk
+
 add_connection fc_clk.out_clk port0_mem.clk1
 
 add_connection fc_clk.out_clk port1_mem.clk1
@@ -129,17 +130,15 @@ add_connection fc_clk.out_clk reset_snoop_fifo.clk
 
 add_connection fc_clk.out_clk stream_capture.clk
 
+add_connection fc_reset.out_reset mm_bridge.m0_reset
+
 add_connection fc_reset.out_reset port0_mem.reset1
 
 add_connection fc_reset.out_reset port1_mem.reset1
 
 add_connection fc_reset.out_reset stream_capture.reset
 
-add_connection mgmt_clk.out_clk mm_bridge.clk
-
-add_connection mgmt_clk.out_clk port0_mem.clk2
-
-add_connection mgmt_clk.out_clk port1_mem.clk2
+add_connection mgmt_clk.out_clk mm_bridge.s0_clk
 
 add_connection mgmt_clk.out_clk reset.clk
 
@@ -155,11 +154,7 @@ set_connection_parameter_value mm_bridge.m0/port1_mem.s2 defaultConnection {0}
 
 add_connection reset.out_reset fc_reset.in_reset
 
-add_connection reset.out_reset mm_bridge.reset
-
-add_connection reset.out_reset port0_mem.reset2
-
-add_connection reset.out_reset port1_mem.reset2
+add_connection reset.out_reset mm_bridge.s0_reset
 
 add_connection stream_capture.port0_mem port0_mem.s1
 set_connection_parameter_value stream_capture.port0_mem/port0_mem.s1 arbitrationPriority {1}

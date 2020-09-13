@@ -248,7 +248,7 @@ set_connection_parameter_value jtagm.master/fc_snoop.csr defaultConnection {0}
 
 add_connection jtagm.master fc_snoop.mm
 set_connection_parameter_value jtagm.master/fc_snoop.mm arbitrationPriority {1}
-set_connection_parameter_value jtagm.master/fc_snoop.mm baseAddress {0x00200000}
+set_connection_parameter_value jtagm.master/fc_snoop.mm baseAddress {0x00400000}
 set_connection_parameter_value jtagm.master/fc_snoop.mm defaultConnection {0}
 
 add_connection jtagm.master ident.mm
@@ -322,7 +322,7 @@ set_connection_parameter_value pcie.bar0_mm/fc_snoop.csr defaultConnection {0}
 
 add_connection pcie.bar0_mm fc_snoop.mm
 set_connection_parameter_value pcie.bar0_mm/fc_snoop.mm arbitrationPriority {1}
-set_connection_parameter_value pcie.bar0_mm/fc_snoop.mm baseAddress {0x00200000}
+set_connection_parameter_value pcie.bar0_mm/fc_snoop.mm baseAddress {0x00400000}
 set_connection_parameter_value pcie.bar0_mm/fc_snoop.mm defaultConnection {0}
 
 add_connection pcie.bar0_mm ident.mm
@@ -452,13 +452,17 @@ set_interconnect_requirement {$system} {qsys_mm.enableEccProtection} {FALSE}
 set_interconnect_requirement {$system} {qsys_mm.enableInstrumentation} {TRUE}
 set_interconnect_requirement {$system} {qsys_mm.insertDefaultSlave} {FALSE}
 set_interconnect_requirement {$system} {qsys_mm.maxAdditionalLatency} {1}
-set_interconnect_requirement {fc.mgmt_mm} {qsys_mm.insertPerformanceMonitor} {TRUE}
+set_interconnect_requirement {fc.mgmt_mm} {qsys_mm.insertPerformanceMonitor} {FALSE}
+set_interconnect_requirement {fc_snoop.mm} {qsys_mm.insertPerformanceMonitor} {TRUE}
 set_interconnect_requirement {ident.mm} {qsys_mm.insertPerformanceMonitor} {TRUE}
+set_interconnect_requirement {jtagm.master} {qsys_mm.insertPerformanceMonitor} {TRUE}
 set_interconnect_requirement {pcie.bar0_mm} {qsys_mm.insertPerformanceMonitor} {TRUE}
 set_interconnect_requirement {pcie.csr_mm} {qsys_mm.insertPerformanceMonitor} {TRUE}
-set_interconnect_requirement {phy_clk_gauge.mm} {qsys_mm.insertPerformanceMonitor} {TRUE}
+set_interconnect_requirement {phy_clk_gauge.mm} {qsys_mm.insertPerformanceMonitor} {FALSE}
 set_interconnect_requirement {sfp0.mm} {qsys_mm.insertPerformanceMonitor} {TRUE}
 set_interconnect_requirement {sfp1.mm} {qsys_mm.insertPerformanceMonitor} {TRUE}
-set_interconnect_requirement {temp.temp_mm} {qsys_mm.insertPerformanceMonitor} {TRUE}
+set_interconnect_requirement {sfp2.mm} {qsys_mm.insertPerformanceMonitor} {TRUE}
+set_interconnect_requirement {sfp3.mm} {qsys_mm.insertPerformanceMonitor} {TRUE}
+set_interconnect_requirement {temp.temp_mm} {qsys_mm.insertPerformanceMonitor} {FALSE}
 
 save_system {fejkon.qsys}

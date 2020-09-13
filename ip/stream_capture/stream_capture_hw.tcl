@@ -86,6 +86,7 @@ set_interface_property port0_mem CMSIS_SVD_VARIABLES ""
 set_interface_property port0_mem SVD_ADDRESS_GROUP ""
 
 add_interface_port port0_mem port0_mem_address address Output 20
+add_interface_port port0_mem port0_mem_waitrequest waitrequest Input 1
 add_interface_port port0_mem port0_mem_writedata writedata Output 64
 add_interface_port port0_mem port0_mem_write write Output 1
 
@@ -155,6 +156,7 @@ set_interface_property port1_mem CMSIS_SVD_VARIABLES ""
 set_interface_property port1_mem SVD_ADDRESS_GROUP ""
 
 add_interface_port port1_mem port1_mem_address address Output 20
+add_interface_port port1_mem port1_mem_waitrequest waitrequest Input 1
 add_interface_port port1_mem port1_mem_write write Output 1
 add_interface_port port1_mem port1_mem_writedata writedata Output 64
 

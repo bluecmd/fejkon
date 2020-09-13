@@ -311,3 +311,12 @@ proc generate {pkts} {
   global m
   master_write_32 $m 0x40 $pkts
 }
+
+proc snoopdump {} {
+  global m
+  puts [format " Port 0: %s" [master_read_32 $m 0x400000 4]]
+  puts [format " Port 1: %s" [master_read_32 $m 0x500000 4]]
+  # Enable when other port memories are activated
+  #master_read_32 $m 0x600000 4
+  #master_read_32 $m 0x700000 4
+}

@@ -257,7 +257,7 @@ Accesses need to be 4 byte wide.
 | 0xExxx | ...   | Port 3 | ...           |                              |
 | 0xFE00 | 512   | Card   | XCVR Reconfig | (Undoc.) xcvr\_reconfig      |
 
-Snoop memory for port 0 is at `0x0040_0000`, port 1 at `0x0041_0000` etc.
+Snoop memory for port 0 is at `0x0040_0000`, port 1 at `0x0050_0000` etc.
 
 1) Details in section below
 2) Details in section below

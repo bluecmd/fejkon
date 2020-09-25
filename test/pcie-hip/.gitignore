@@ -1,9 +1,16 @@
 gen/
-libraries/
 svpcie_sim_tb/
 svpcie_sim_tb.qsys
 svpcie_sim_tb.sopcinfo
-transcript
 altpcie_monitor_sv_dlhip_tlp_file_log.log
-vsim.wlf
 .*.sw?
+
+# ModelSim
+libraries/
+transcript
+vsim.wlf
+
+# Aldec
+compile/
+library.cfg
+dataset.asdb

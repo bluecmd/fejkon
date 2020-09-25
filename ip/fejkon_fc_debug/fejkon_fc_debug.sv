@@ -123,6 +123,8 @@ module fejkon_fc_debug (
     end
   end
 
+  logic in_ready = 0;
+
   always @(posedge clk) begin
     if (reset) begin
       in_valid_r <= 0;
@@ -155,8 +157,6 @@ module fejkon_fc_debug (
       out_empty = in_empty_r;
     end
   end
-
-  logic in_ready = 0;
 
   always @(*) begin: ready_driver
     if (reset) begin

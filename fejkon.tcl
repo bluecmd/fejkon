@@ -578,13 +578,13 @@ set_interface_property clk EXPORT_OF ext0.clk_in
 add_interface fan conduit end
 set_interface_property fan EXPORT_OF temp.fan
 add_interface fcport0_line_rd conduit end
-set_interface_property fcport0_line_rd EXPORT_OF xcvr0.line_rd
+set_interface_property port0_line_rd EXPORT_OF xcvr0.line_rd
 add_interface fcport0_line_td conduit end
-set_interface_property fcport0_line_td EXPORT_OF xcvr0.line_td
+set_interface_property port0_line_td EXPORT_OF xcvr0.line_td
 add_interface fcport1_line_rd conduit end
-set_interface_property fcport1_line_rd EXPORT_OF xcvr1.line_rd
+set_interface_property port1_line_rd EXPORT_OF xcvr1.line_rd
 add_interface fcport1_line_td conduit end
-set_interface_property fcport1_line_td EXPORT_OF xcvr1.line_td
+set_interface_property port1_line_td EXPORT_OF xcvr1.line_td
 add_interface led conduit end
 set_interface_property led EXPORT_OF led.led
 add_interface pcie_refclk clock sink
@@ -596,7 +596,7 @@ set_interface_property phy_clk EXPORT_OF phy_clk.in_clk
 add_interface phy_clk_out clock source
 set_interface_property phy_clk_out EXPORT_OF phy_clk_out.out_clk
 add_interface phy_serial conduit end
-set_interface_property phy_serial EXPORT_OF pcie_phy.hip_serial
+set_interface_property pcie_serial EXPORT_OF pcie_phy.hip_serial
 add_interface reset reset sink
 set_interface_property reset EXPORT_OF ext0.clk_in_reset
 add_interface sfp0_sfp conduit end

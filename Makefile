@@ -9,7 +9,7 @@ all: fejkon.sof report
 clean:
 	\rm -f fejkon.sof
 	\rm -fr gen
-	\rm -f fejkon.qsys fejkon_*.qsys
+	\rm -f fejkon.qsys fejkon_sfp.qsys
 	\rm -f config.tcl .config.old .qsys-clean .qsys-configured
 
 fejkon.sof: ip/altera_fc_phy/fc_phy.qip fejkon.qsys de5net.sdc de5net.tcl $(wildcard ip/*/*.sv) fejkon.stp config.tcl
@@ -91,10 +91,7 @@ fejkon.qsys: .qsys-configured
 
 .qsys-clean: ip/fejkon_identity/version.sv
 	# Generate clean platform files
-	rm -f .qsys-configured \
-		fejkon_pcie.qsys fejkon_fc.qsys fejkon_sfp.qsys fejkon.qsys
-	$(QPATH)/sopc_builder/bin/qsys-script --script=fejkon_pcie.tcl
-	$(QPATH)/sopc_builder/bin/qsys-script --script=fejkon_fc.tcl
+	rm -f .qsys-configured fejkon_sfp.qsys fejkon.qsys
 	$(QPATH)/sopc_builder/bin/qsys-script --script=fejkon_sfp.tcl
 	$(QPATH)/sopc_builder/bin/qsys-script --script=fejkon.tcl
 	touch $@

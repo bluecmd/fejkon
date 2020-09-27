@@ -25,8 +25,13 @@ set_global_assignment -name RAPID_RECOMPILE_MODE ON
 set_global_assignment -name TIMEQUEST_REPORT_SCRIPT ../timing.tcl
 if {$CONFIG_AGGRESSIVE_OPT == "y"} {
   set_global_assignment -name OPTIMIZATION_MODE "AGGRESSIVE PERFORMANCE"
+  set_global_assignment -name ROUTER_CLOCKING_TOPOLOGY_ANALYSIS ON
+  set_global_assignment -name PHYSICAL_SYNTHESIS_EFFORT EXTRA
 }
 set_global_assignment -name FLOW_ENABLE_POWER_ANALYZER ON
+# NOTE: These are defaults, might be better values for the DE5-Net?
+set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
+set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
 
 source ../de5net.tcl
 

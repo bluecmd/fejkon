@@ -124,7 +124,7 @@ module fejkon_pcie_data (
 
   logic is_ready;
   // Signal indicating if we are happy to process work
-  assign is_ready = ~reset & my_id_valid;
+  assign is_ready = my_id_valid;
 
   logic tlp_rx_st_ok;
   // Signal indicating if we should process the current RX TLP stream

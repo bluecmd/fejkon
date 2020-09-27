@@ -25,13 +25,11 @@ report:
 	@echo '  ==> Generation report <=='
 	@echo
 	@# 222013 removed because the ch[4] pcie Intel IP bug
-	@# 215044 removed because we have no board thermal model
 	@grep '^Warning (' gen/output_files/*.rpt | \
 		grep -vE '\((10762|170052|15104|332043|35016|12241|276020|14284|20031|18550|12251)\)' | \
 		grep -vE '(sv_xcvr_emsip_adapter.sv|altera_pcie_sv_hip_ast_rs_serdes.sdc)' | \
 		grep -vF 'ch[4].inst_sv_pcs_ch' | \
 		grep -vF '(222013)' | \
-		grep -vF '(215044)' | \
 		grep -v alt_sld_fab_alt_sld_fab | \
 		grep -v alt_xcvr_reconfig_cpu | \
 		grep -v Alt_sld_fab | \

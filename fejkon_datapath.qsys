@@ -1,0 +1,1215 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<system name="$${FILENAME}">
+ <component
+   name="$${FILENAME}"
+   displayName="$${FILENAME}"
+   version="1.0"
+   description=""
+   tags="INTERNAL_COMPONENT=false"
+   categories="System" />
+ <parameter name="bonusData"><![CDATA[bonusData 
+{
+   element data_clk
+   {
+      datum _sortIndex
+      {
+         value = "1";
+         type = "int";
+      }
+   }
+   element data_pipeline
+   {
+      datum _sortIndex
+      {
+         value = "29";
+         type = "int";
+      }
+   }
+   element fc0
+   {
+      datum _sortIndex
+      {
+         value = "4";
+         type = "int";
+      }
+   }
+   element fc0_256_rx
+   {
+      datum _sortIndex
+      {
+         value = "7";
+         type = "int";
+      }
+   }
+   element fc0_avtx
+   {
+      datum _sortIndex
+      {
+         value = "17";
+         type = "int";
+      }
+   }
+   element fc0_rx_cdc
+   {
+      datum _sortIndex
+      {
+         value = "12";
+         type = "int";
+      }
+   }
+   element fc1
+   {
+      datum _sortIndex
+      {
+         value = "6";
+         type = "int";
+      }
+   }
+   element fc1_256_rx
+   {
+      datum _sortIndex
+      {
+         value = "11";
+         type = "int";
+      }
+   }
+   element fc1_avtx
+   {
+      datum _sortIndex
+      {
+         value = "19";
+         type = "int";
+      }
+   }
+   element fc1_rx_cdc
+   {
+      datum _sortIndex
+      {
+         value = "9";
+         type = "int";
+      }
+   }
+   element fc_debug
+   {
+      datum _sortIndex
+      {
+         value = "3";
+         type = "int";
+      }
+   }
+   element fejkon_datapath
+   {
+      datum _originalDeviceFamily
+      {
+         value = "Stratix V";
+         type = "String";
+      }
+   }
+   element fejkon_datapath
+   {
+      datum _originalDeviceFamily
+      {
+         value = "Stratix V";
+         type = "String";
+      }
+   }
+   element fifo_0to1
+   {
+      datum _sortIndex
+      {
+         value = "10";
+         type = "int";
+      }
+   }
+   element fifo_1to0
+   {
+      datum _sortIndex
+      {
+         value = "8";
+         type = "int";
+      }
+   }
+   element mem_req_fifo
+   {
+      datum _sortIndex
+      {
+         value = "22";
+         type = "int";
+      }
+   }
+   element mem_resp_fifo
+   {
+      datum _sortIndex
+      {
+         value = "24";
+         type = "int";
+      }
+   }
+   element mgmt_clk
+   {
+      datum _sortIndex
+      {
+         value = "2";
+         type = "int";
+      }
+   }
+   element pcie_avalon
+   {
+      datum _sortIndex
+      {
+         value = "28";
+         type = "int";
+      }
+   }
+   element pcie_data
+   {
+      datum _sortIndex
+      {
+         value = "23";
+         type = "int";
+      }
+   }
+   element reset
+   {
+      datum _sortIndex
+      {
+         value = "0";
+         type = "int";
+      }
+   }
+   element rx_mux
+   {
+      datum _sortIndex
+      {
+         value = "5";
+         type = "int";
+      }
+   }
+   element tlp_data_fifo
+   {
+      datum _sortIndex
+      {
+         value = "21";
+         type = "int";
+      }
+   }
+   element tlp_instant_fifo
+   {
+      datum _sortIndex
+      {
+         value = "26";
+         type = "int";
+      }
+   }
+   element tlp_response_fifo
+   {
+      datum _sortIndex
+      {
+         value = "27";
+         type = "int";
+      }
+   }
+   element tlp_tx_multiplexer
+   {
+      datum _sortIndex
+      {
+         value = "25";
+         type = "int";
+      }
+   }
+   element xcvr0_rx_clk
+   {
+      datum _sortIndex
+      {
+         value = "13";
+         type = "int";
+      }
+   }
+   element xcvr0_rx_split
+   {
+      datum _sortIndex
+      {
+         value = "18";
+         type = "int";
+      }
+   }
+   element xcvr0_tx_clk
+   {
+      datum _sortIndex
+      {
+         value = "14";
+         type = "int";
+      }
+   }
+   element xcvr1_rx_clk
+   {
+      datum _sortIndex
+      {
+         value = "15";
+         type = "int";
+      }
+   }
+   element xcvr1_rx_split
+   {
+      datum _sortIndex
+      {
+         value = "20";
+         type = "int";
+      }
+   }
+   element xcvr1_tx_clk
+   {
+      datum _sortIndex
+      {
+         value = "16";
+         type = "int";
+      }
+   }
+}
+]]></parameter>
+ <parameter name="clockCrossingAdapter" value="HANDSHAKE" />
+ <parameter name="device" value="5SGXEA7N2F45C2" />
+ <parameter name="deviceFamily" value="Stratix V" />
+ <parameter name="deviceSpeedGrade" value="2_H2" />
+ <parameter name="fabricMode" value="QSYS" />
+ <parameter name="generateLegacySim" value="false" />
+ <parameter name="generationId" value="0" />
+ <parameter name="globalResetBus" value="false" />
+ <parameter name="hdlLanguage" value="VERILOG" />
+ <parameter name="hideFromIPCatalog" value="false" />
+ <parameter name="lockedInterfaceDefinition" value="" />
+ <parameter name="maxAdditionalLatency" value="1" />
+ <parameter name="projectName" value="" />
+ <parameter name="sopcBorderPoints" value="false" />
+ <parameter name="systemHash" value="0" />
+ <parameter name="testBenchDutName" value="" />
+ <parameter name="timeStamp" value="0" />
+ <parameter name="useTestBenchNamingPattern" value="false" />
+ <instanceParameter
+   name="LOOPBACK_01"
+   displayName="Enable Port 0:1 Loopback"
+   type="string"
+   defaultValue="false"
+   legalRanges="true false"
+   description="" />
+ <instanceScript><![CDATA[package require -exact qsys 16.1
+
+set_module_property COMPOSITION_CALLBACK compose
+
+proc compose {} {
+    if {[get_parameter_value LOOPBACK_01] == "true"} {
+      set_instance_parameter_value fc1_avtx SELECTED_PORT 1
+    }
+}]]></instanceScript>
+ <interface name="bar0_mm" internal="pcie_avalon.mm" type="avalon" dir="start" />
+ <interface name="csr_fc0_rx" internal="fc0.rx_mgmt_mm" type="avalon" dir="end" />
+ <interface
+   name="csr_fc0_rx_cdc"
+   internal="fc0_rx_cdc.in_csr"
+   type="avalon"
+   dir="end" />
+ <interface name="csr_fc0_tx" internal="fc0.tx_mgmt_mm" type="avalon" dir="end" />
+ <interface name="csr_fc1_rx" internal="fc1.rx_mgmt_mm" type="avalon" dir="end" />
+ <interface
+   name="csr_fc1_rx_cdc"
+   internal="fc1_rx_cdc.in_csr"
+   type="avalon"
+   dir="end" />
+ <interface name="csr_fc1_tx" internal="fc1.tx_mgmt_mm" type="avalon" dir="end" />
+ <interface name="csr_fc_debug" internal="fc_debug.csr" type="avalon" dir="end" />
+ <interface name="csr_pcie_data" internal="pcie_data.csr" type="avalon" dir="end" />
+ <interface
+   name="csr_tlp_data_fifo"
+   internal="tlp_data_fifo.csr"
+   type="avalon"
+   dir="end" />
+ <interface
+   name="csr_tlp_instant_fifo"
+   internal="tlp_instant_fifo.csr"
+   type="avalon"
+   dir="end" />
+ <interface
+   name="csr_tlp_response_fifo"
+   internal="tlp_response_fifo.csr"
+   type="avalon"
+   dir="end" />
+ <interface name="data_clk" internal="data_clk.in_clk" type="clock" dir="end" />
+ <interface name="fc0_active" internal="fc0.active" type="conduit" dir="end" />
+ <interface name="fc1_active" internal="fc1.active" type="conduit" dir="end" />
+ <interface
+   name="irq_c2h_avail"
+   internal="pcie_data.irq_c2h_avail"
+   type="interrupt"
+   dir="end" />
+ <interface
+   name="irq_c2h_drop"
+   internal="pcie_data.irq_c2h_drop"
+   type="interrupt"
+   dir="end" />
+ <interface name="mgmt_clk" internal="mgmt_clk.in_clk" type="clock" dir="end" />
+ <interface
+   name="pcie_data_config_tl"
+   internal="pcie_data.config_tl"
+   type="conduit"
+   dir="end" />
+ <interface
+   name="pcie_data_rx_bar_be"
+   internal="pcie_data.rx_bar_be"
+   type="conduit"
+   dir="end" />
+ <interface
+   name="pcie_tlp_rx"
+   internal="pcie_data.tlp_rx_st"
+   type="avalon_streaming"
+   dir="end" />
+ <interface
+   name="pcie_tlp_tx"
+   internal="tlp_tx_multiplexer.out"
+   type="avalon_streaming"
+   dir="start" />
+ <interface name="reset" internal="reset.in_reset" type="reset" dir="end" />
+ <interface
+   name="xcvr0_avrx"
+   internal="xcvr0_rx_split.in"
+   type="avalon_streaming"
+   dir="end" />
+ <interface
+   name="xcvr0_avtx"
+   internal="fc0_avtx.out"
+   type="avalon_streaming"
+   dir="start" />
+ <interface
+   name="xcvr0_rx_clk"
+   internal="xcvr0_rx_clk.in_clk"
+   type="clock"
+   dir="end" />
+ <interface
+   name="xcvr0_tx_clk"
+   internal="xcvr0_tx_clk.in_clk"
+   type="clock"
+   dir="end" />
+ <interface
+   name="xcvr1_avrx"
+   internal="xcvr1_rx_split.in"
+   type="avalon_streaming"
+   dir="end" />
+ <interface
+   name="xcvr1_avtx"
+   internal="fc1_avtx.out"
+   type="avalon_streaming"
+   dir="start" />
+ <interface
+   name="xcvr1_rx_clk"
+   internal="xcvr1_rx_clk.in_clk"
+   type="clock"
+   dir="end" />
+ <interface
+   name="xcvr1_tx_clk"
+   internal="xcvr1_tx_clk.in_clk"
+   type="clock"
+   dir="end" />
+ <module name="data_clk" kind="altera_clock_bridge" version="20.1" enabled="1">
+  <parameter name="DERIVED_CLOCK_RATE" value="0" />
+  <parameter name="EXPLICIT_CLOCK_RATE" value="250000000" />
+  <parameter name="NUM_CLOCK_OUTPUTS" value="1" />
+ </module>
+ <module
+   name="data_pipeline"
+   kind="altera_avalon_st_pipeline_stage"
+   version="20.1"
+   enabled="1">
+  <parameter name="BITS_PER_SYMBOL" value="8" />
+  <parameter name="CHANNEL_WIDTH" value="2" />
+  <parameter name="ERROR_WIDTH" value="0" />
+  <parameter name="MAX_CHANNEL" value="0" />
+  <parameter name="PIPELINE_READY" value="1" />
+  <parameter name="SYMBOLS_PER_BEAT" value="32" />
+  <parameter name="USE_EMPTY" value="1" />
+  <parameter name="USE_PACKETS" value="1" />
+ </module>
+ <module name="fc0" kind="fc_framer" version="1.0" enabled="1">
+  <parameter name="MTU" value="3072" />
+ </module>
+ <module
+   name="fc0_256_rx"
+   kind="altera_avalon_st_adapter"
+   version="20.1"
+   enabled="1">
+  <parameter name="AUTO_DEVICE" value="5SGXEA7N2F45C2" />
+  <parameter name="AUTO_DEVICE_FAMILY" value="Stratix V" />
+  <parameter name="AUTO_DEVICE_SPEEDGRADE" value="2_H2" />
+  <parameter name="inBitsPerSymbol" value="8" />
+  <parameter name="inChannelWidth" value="0" />
+  <parameter name="inDataWidth" value="32" />
+  <parameter name="inErrorDescriptor" value="" />
+  <parameter name="inErrorWidth" value="0" />
+  <parameter name="inMaxChannel" value="0" />
+  <parameter name="inReadyLatency" value="0" />
+  <parameter name="inUseEmptyPort" value="1" />
+  <parameter name="inUsePackets" value="1" />
+  <parameter name="inUseReady" value="0" />
+  <parameter name="inUseValid" value="1" />
+  <parameter name="outChannelWidth" value="0" />
+  <parameter name="outDataWidth" value="256" />
+  <parameter name="outErrorDescriptor" value="" />
+  <parameter name="outErrorWidth" value="0" />
+  <parameter name="outMaxChannel" value="0" />
+  <parameter name="outReadyLatency" value="0" />
+  <parameter name="outUseEmptyPort" value="1" />
+  <parameter name="outUseReady" value="1" />
+  <parameter name="outUseValid" value="1" />
+ </module>
+ <module name="fc0_avtx" kind="av_st_fixed_mux" version="1.0" enabled="1">
+  <parameter name="AV_CHANNEL" value="false" />
+  <parameter name="AV_ERROR" value="false" />
+  <parameter name="AV_PACKET" value="false" />
+  <parameter name="BITS_PER_SYMBOL" value="9" />
+  <parameter name="CHAN_WIDTH" value="1" />
+  <parameter name="SELECTED_PORT" value="0" />
+  <parameter name="SYMBOLS_PER_BEAT" value="4" />
+ </module>
+ <module
+   name="fc0_rx_cdc"
+   kind="altera_avalon_dc_fifo"
+   version="20.1"
+   enabled="1">
+  <parameter name="BITS_PER_SYMBOL" value="8" />
+  <parameter name="CHANNEL_WIDTH" value="0" />
+  <parameter name="ENABLE_EXPLICIT_MAXCHANNEL" value="false" />
+  <parameter name="ERROR_WIDTH" value="0" />
+  <parameter name="EXPLICIT_MAXCHANNEL" value="0" />
+  <parameter name="FIFO_DEPTH" value="512" />
+  <parameter name="RD_SYNC_DEPTH" value="3" />
+  <parameter name="SYMBOLS_PER_BEAT" value="32" />
+  <parameter name="USE_IN_FILL_LEVEL" value="1" />
+  <parameter name="USE_OUT_FILL_LEVEL" value="0" />
+  <parameter name="USE_PACKETS" value="1" />
+  <parameter name="WR_SYNC_DEPTH" value="3" />
+ </module>
+ <module name="fc1" kind="fc_framer" version="1.0" enabled="1">
+  <parameter name="MTU" value="3072" />
+ </module>
+ <module
+   name="fc1_256_rx"
+   kind="altera_avalon_st_adapter"
+   version="20.1"
+   enabled="1">
+  <parameter name="AUTO_DEVICE" value="5SGXEA7N2F45C2" />
+  <parameter name="AUTO_DEVICE_FAMILY" value="Stratix V" />
+  <parameter name="AUTO_DEVICE_SPEEDGRADE" value="2_H2" />
+  <parameter name="inBitsPerSymbol" value="8" />
+  <parameter name="inChannelWidth" value="0" />
+  <parameter name="inDataWidth" value="32" />
+  <parameter name="inErrorDescriptor" value="" />
+  <parameter name="inErrorWidth" value="0" />
+  <parameter name="inMaxChannel" value="0" />
+  <parameter name="inReadyLatency" value="0" />
+  <parameter name="inUseEmptyPort" value="1" />
+  <parameter name="inUsePackets" value="1" />
+  <parameter name="inUseReady" value="0" />
+  <parameter name="inUseValid" value="1" />
+  <parameter name="outChannelWidth" value="0" />
+  <parameter name="outDataWidth" value="256" />
+  <parameter name="outErrorDescriptor" value="" />
+  <parameter name="outErrorWidth" value="0" />
+  <parameter name="outMaxChannel" value="0" />
+  <parameter name="outReadyLatency" value="0" />
+  <parameter name="outUseEmptyPort" value="1" />
+  <parameter name="outUseReady" value="1" />
+  <parameter name="outUseValid" value="1" />
+ </module>
+ <module name="fc1_avtx" kind="av_st_fixed_mux" version="1.0" enabled="1">
+  <parameter name="AV_CHANNEL" value="false" />
+  <parameter name="AV_ERROR" value="false" />
+  <parameter name="AV_PACKET" value="false" />
+  <parameter name="BITS_PER_SYMBOL" value="9" />
+  <parameter name="CHAN_WIDTH" value="1" />
+  <parameter name="SELECTED_PORT" value="0" />
+  <parameter name="SYMBOLS_PER_BEAT" value="4" />
+ </module>
+ <module
+   name="fc1_rx_cdc"
+   kind="altera_avalon_dc_fifo"
+   version="20.1"
+   enabled="1">
+  <parameter name="BITS_PER_SYMBOL" value="8" />
+  <parameter name="CHANNEL_WIDTH" value="0" />
+  <parameter name="ENABLE_EXPLICIT_MAXCHANNEL" value="false" />
+  <parameter name="ERROR_WIDTH" value="0" />
+  <parameter name="EXPLICIT_MAXCHANNEL" value="0" />
+  <parameter name="FIFO_DEPTH" value="512" />
+  <parameter name="RD_SYNC_DEPTH" value="3" />
+  <parameter name="SYMBOLS_PER_BEAT" value="32" />
+  <parameter name="USE_IN_FILL_LEVEL" value="1" />
+  <parameter name="USE_OUT_FILL_LEVEL" value="0" />
+  <parameter name="USE_PACKETS" value="1" />
+  <parameter name="WR_SYNC_DEPTH" value="3" />
+ </module>
+ <module name="fc_debug" kind="fejkon_fc_debug" version="1.0" enabled="1" />
+ <module
+   name="fifo_0to1"
+   kind="altera_avalon_dc_fifo"
+   version="20.1"
+   enabled="1">
+  <parameter name="BITS_PER_SYMBOL" value="9" />
+  <parameter name="CHANNEL_WIDTH" value="0" />
+  <parameter name="ENABLE_EXPLICIT_MAXCHANNEL" value="false" />
+  <parameter name="ERROR_WIDTH" value="0" />
+  <parameter name="EXPLICIT_MAXCHANNEL" value="0" />
+  <parameter name="FIFO_DEPTH" value="16" />
+  <parameter name="RD_SYNC_DEPTH" value="3" />
+  <parameter name="SYMBOLS_PER_BEAT" value="4" />
+  <parameter name="USE_IN_FILL_LEVEL" value="0" />
+  <parameter name="USE_OUT_FILL_LEVEL" value="0" />
+  <parameter name="USE_PACKETS" value="0" />
+  <parameter name="WR_SYNC_DEPTH" value="3" />
+ </module>
+ <module
+   name="fifo_1to0"
+   kind="altera_avalon_dc_fifo"
+   version="20.1"
+   enabled="1">
+  <parameter name="BITS_PER_SYMBOL" value="9" />
+  <parameter name="CHANNEL_WIDTH" value="0" />
+  <parameter name="ENABLE_EXPLICIT_MAXCHANNEL" value="false" />
+  <parameter name="ERROR_WIDTH" value="0" />
+  <parameter name="EXPLICIT_MAXCHANNEL" value="0" />
+  <parameter name="FIFO_DEPTH" value="16" />
+  <parameter name="RD_SYNC_DEPTH" value="3" />
+  <parameter name="SYMBOLS_PER_BEAT" value="4" />
+  <parameter name="USE_IN_FILL_LEVEL" value="0" />
+  <parameter name="USE_OUT_FILL_LEVEL" value="0" />
+  <parameter name="USE_PACKETS" value="0" />
+  <parameter name="WR_SYNC_DEPTH" value="3" />
+ </module>
+ <module
+   name="mem_req_fifo"
+   kind="altera_avalon_sc_fifo"
+   version="20.1"
+   enabled="1">
+  <parameter name="BITS_PER_SYMBOL" value="128" />
+  <parameter name="CHANNEL_WIDTH" value="0" />
+  <parameter name="EMPTY_LATENCY" value="3" />
+  <parameter name="ENABLE_EXPLICIT_MAXCHANNEL" value="false" />
+  <parameter name="ERROR_WIDTH" value="0" />
+  <parameter name="EXPLICIT_MAXCHANNEL" value="0" />
+  <parameter name="FIFO_DEPTH" value="64" />
+  <parameter name="SYMBOLS_PER_BEAT" value="1" />
+  <parameter name="USE_ALMOST_EMPTY_IF" value="0" />
+  <parameter name="USE_ALMOST_FULL_IF" value="0" />
+  <parameter name="USE_FILL_LEVEL" value="0" />
+  <parameter name="USE_MEMORY_BLOCKS" value="1" />
+  <parameter name="USE_PACKETS" value="0" />
+  <parameter name="USE_STORE_FORWARD" value="0" />
+ </module>
+ <module
+   name="mem_resp_fifo"
+   kind="altera_avalon_sc_fifo"
+   version="20.1"
+   enabled="1">
+  <parameter name="BITS_PER_SYMBOL" value="128" />
+  <parameter name="CHANNEL_WIDTH" value="0" />
+  <parameter name="EMPTY_LATENCY" value="3" />
+  <parameter name="ENABLE_EXPLICIT_MAXCHANNEL" value="false" />
+  <parameter name="ERROR_WIDTH" value="0" />
+  <parameter name="EXPLICIT_MAXCHANNEL" value="0" />
+  <parameter name="FIFO_DEPTH" value="64" />
+  <parameter name="SYMBOLS_PER_BEAT" value="1" />
+  <parameter name="USE_ALMOST_EMPTY_IF" value="0" />
+  <parameter name="USE_ALMOST_FULL_IF" value="0" />
+  <parameter name="USE_FILL_LEVEL" value="0" />
+  <parameter name="USE_MEMORY_BLOCKS" value="1" />
+  <parameter name="USE_PACKETS" value="0" />
+  <parameter name="USE_STORE_FORWARD" value="0" />
+ </module>
+ <module name="mgmt_clk" kind="altera_clock_bridge" version="20.1" enabled="1">
+  <parameter name="DERIVED_CLOCK_RATE" value="0" />
+  <parameter name="EXPLICIT_CLOCK_RATE" value="0" />
+  <parameter name="NUM_CLOCK_OUTPUTS" value="1" />
+ </module>
+ <module
+   name="pcie_avalon"
+   kind="fejkon_pcie_avalon"
+   version="1.0"
+   enabled="1" />
+ <module name="pcie_data" kind="fejkon_pcie_data" version="1.0" enabled="1" />
+ <module name="reset" kind="altera_reset_bridge" version="20.1" enabled="1">
+  <parameter name="ACTIVE_LOW_RESET" value="0" />
+  <parameter name="AUTO_CLK_CLOCK_RATE" value="0" />
+  <parameter name="NUM_RESET_OUTPUTS" value="1" />
+  <parameter name="SYNCHRONOUS_EDGES" value="both" />
+  <parameter name="USE_RESET_REQUEST" value="0" />
+ </module>
+ <module name="rx_mux" kind="multiplexer" version="20.1" enabled="1">
+  <parameter name="bitsPerSymbol" value="8" />
+  <parameter name="errorWidth" value="0" />
+  <parameter name="numInputInterfaces" value="4" />
+  <parameter name="outChannelWidth" value="2" />
+  <parameter name="packetScheduling" value="true" />
+  <parameter name="schedulingSize" value="2" />
+  <parameter name="symbolsPerBeat" value="32" />
+  <parameter name="useHighBitsOfChannel" value="true" />
+  <parameter name="usePackets" value="true" />
+ </module>
+ <module
+   name="tlp_data_fifo"
+   kind="altera_avalon_sc_fifo"
+   version="20.1"
+   enabled="1">
+  <parameter name="BITS_PER_SYMBOL" value="8" />
+  <parameter name="CHANNEL_WIDTH" value="0" />
+  <parameter name="EMPTY_LATENCY" value="3" />
+  <parameter name="ENABLE_EXPLICIT_MAXCHANNEL" value="false" />
+  <parameter name="ERROR_WIDTH" value="0" />
+  <parameter name="EXPLICIT_MAXCHANNEL" value="0" />
+  <parameter name="FIFO_DEPTH" value="1024" />
+  <parameter name="SYMBOLS_PER_BEAT" value="32" />
+  <parameter name="USE_ALMOST_EMPTY_IF" value="0" />
+  <parameter name="USE_ALMOST_FULL_IF" value="0" />
+  <parameter name="USE_FILL_LEVEL" value="1" />
+  <parameter name="USE_MEMORY_BLOCKS" value="1" />
+  <parameter name="USE_PACKETS" value="1" />
+  <parameter name="USE_STORE_FORWARD" value="0" />
+ </module>
+ <module
+   name="tlp_instant_fifo"
+   kind="altera_avalon_sc_fifo"
+   version="20.1"
+   enabled="1">
+  <parameter name="BITS_PER_SYMBOL" value="8" />
+  <parameter name="CHANNEL_WIDTH" value="0" />
+  <parameter name="EMPTY_LATENCY" value="3" />
+  <parameter name="ENABLE_EXPLICIT_MAXCHANNEL" value="false" />
+  <parameter name="ERROR_WIDTH" value="0" />
+  <parameter name="EXPLICIT_MAXCHANNEL" value="0" />
+  <parameter name="FIFO_DEPTH" value="1024" />
+  <parameter name="SYMBOLS_PER_BEAT" value="32" />
+  <parameter name="USE_ALMOST_EMPTY_IF" value="0" />
+  <parameter name="USE_ALMOST_FULL_IF" value="0" />
+  <parameter name="USE_FILL_LEVEL" value="1" />
+  <parameter name="USE_MEMORY_BLOCKS" value="1" />
+  <parameter name="USE_PACKETS" value="1" />
+  <parameter name="USE_STORE_FORWARD" value="0" />
+ </module>
+ <module
+   name="tlp_response_fifo"
+   kind="altera_avalon_sc_fifo"
+   version="20.1"
+   enabled="1">
+  <parameter name="BITS_PER_SYMBOL" value="8" />
+  <parameter name="CHANNEL_WIDTH" value="0" />
+  <parameter name="EMPTY_LATENCY" value="3" />
+  <parameter name="ENABLE_EXPLICIT_MAXCHANNEL" value="false" />
+  <parameter name="ERROR_WIDTH" value="0" />
+  <parameter name="EXPLICIT_MAXCHANNEL" value="0" />
+  <parameter name="FIFO_DEPTH" value="1024" />
+  <parameter name="SYMBOLS_PER_BEAT" value="32" />
+  <parameter name="USE_ALMOST_EMPTY_IF" value="0" />
+  <parameter name="USE_ALMOST_FULL_IF" value="0" />
+  <parameter name="USE_FILL_LEVEL" value="1" />
+  <parameter name="USE_MEMORY_BLOCKS" value="1" />
+  <parameter name="USE_PACKETS" value="1" />
+  <parameter name="USE_STORE_FORWARD" value="0" />
+ </module>
+ <module
+   name="tlp_tx_multiplexer"
+   kind="multiplexer"
+   version="20.1"
+   enabled="1">
+  <parameter name="bitsPerSymbol" value="8" />
+  <parameter name="errorWidth" value="0" />
+  <parameter name="numInputInterfaces" value="3" />
+  <parameter name="outChannelWidth" value="2" />
+  <parameter name="packetScheduling" value="true" />
+  <parameter name="schedulingSize" value="2" />
+  <parameter name="symbolsPerBeat" value="32" />
+  <parameter name="useHighBitsOfChannel" value="true" />
+  <parameter name="usePackets" value="true" />
+ </module>
+ <module
+   name="xcvr0_rx_clk"
+   kind="altera_clock_bridge"
+   version="20.1"
+   enabled="1">
+  <parameter name="DERIVED_CLOCK_RATE" value="0" />
+  <parameter name="EXPLICIT_CLOCK_RATE" value="106250000" />
+  <parameter name="NUM_CLOCK_OUTPUTS" value="1" />
+ </module>
+ <module
+   name="xcvr0_rx_split"
+   kind="altera_avalon_st_splitter"
+   version="20.1"
+   enabled="1">
+  <parameter name="BITS_PER_SYMBOL" value="9" />
+  <parameter name="CHANNEL_WIDTH" value="1" />
+  <parameter name="DATA_WIDTH" value="36" />
+  <parameter name="ERROR_DESCRIPTOR" value="" />
+  <parameter name="ERROR_WIDTH" value="1" />
+  <parameter name="MAX_CHANNELS" value="1" />
+  <parameter name="NUMBER_OF_OUTPUTS" value="2" />
+  <parameter name="QUALIFY_VALID_OUT" value="1" />
+  <parameter name="READY_LATENCY" value="0" />
+  <parameter name="USE_CHANNEL" value="0" />
+  <parameter name="USE_DATA" value="1" />
+  <parameter name="USE_ERROR" value="0" />
+  <parameter name="USE_PACKETS" value="0" />
+  <parameter name="USE_READY" value="0" />
+  <parameter name="USE_VALID" value="1" />
+ </module>
+ <module
+   name="xcvr0_tx_clk"
+   kind="altera_clock_bridge"
+   version="20.1"
+   enabled="1">
+  <parameter name="DERIVED_CLOCK_RATE" value="0" />
+  <parameter name="EXPLICIT_CLOCK_RATE" value="106250000" />
+  <parameter name="NUM_CLOCK_OUTPUTS" value="1" />
+ </module>
+ <module
+   name="xcvr1_rx_clk"
+   kind="altera_clock_bridge"
+   version="20.1"
+   enabled="1">
+  <parameter name="DERIVED_CLOCK_RATE" value="0" />
+  <parameter name="EXPLICIT_CLOCK_RATE" value="106250000" />
+  <parameter name="NUM_CLOCK_OUTPUTS" value="1" />
+ </module>
+ <module
+   name="xcvr1_rx_split"
+   kind="altera_avalon_st_splitter"
+   version="20.1"
+   enabled="1">
+  <parameter name="BITS_PER_SYMBOL" value="9" />
+  <parameter name="CHANNEL_WIDTH" value="1" />
+  <parameter name="DATA_WIDTH" value="36" />
+  <parameter name="ERROR_DESCRIPTOR" value="" />
+  <parameter name="ERROR_WIDTH" value="1" />
+  <parameter name="MAX_CHANNELS" value="1" />
+  <parameter name="NUMBER_OF_OUTPUTS" value="2" />
+  <parameter name="QUALIFY_VALID_OUT" value="1" />
+  <parameter name="READY_LATENCY" value="0" />
+  <parameter name="USE_CHANNEL" value="0" />
+  <parameter name="USE_DATA" value="1" />
+  <parameter name="USE_ERROR" value="0" />
+  <parameter name="USE_PACKETS" value="0" />
+  <parameter name="USE_READY" value="0" />
+  <parameter name="USE_VALID" value="1" />
+ </module>
+ <module
+   name="xcvr1_tx_clk"
+   kind="altera_clock_bridge"
+   version="20.1"
+   enabled="1">
+  <parameter name="DERIVED_CLOCK_RATE" value="0" />
+  <parameter name="EXPLICIT_CLOCK_RATE" value="106250000" />
+  <parameter name="NUM_CLOCK_OUTPUTS" value="1" />
+ </module>
+ <connection
+   kind="avalon_streaming"
+   version="20.1"
+   start="fc1.avtx"
+   end="fc1_avtx.in0" />
+ <connection
+   kind="avalon_streaming"
+   version="20.1"
+   start="fc0.avtx"
+   end="fc0_avtx.in0" />
+ <connection
+   kind="avalon_streaming"
+   version="20.1"
+   start="pcie_data.mem_access_req"
+   end="mem_req_fifo.in" />
+ <connection
+   kind="avalon_streaming"
+   version="20.1"
+   start="pcie_avalon.mem_access_resp"
+   end="mem_resp_fifo.in" />
+ <connection
+   kind="avalon_streaming"
+   version="20.1"
+   start="fc0_rx_cdc.out"
+   end="rx_mux.in0" />
+ <connection
+   kind="avalon_streaming"
+   version="20.1"
+   start="tlp_data_fifo.out"
+   end="tlp_tx_multiplexer.in0" />
+ <connection
+   kind="avalon_streaming"
+   version="20.1"
+   start="fc1_rx_cdc.out"
+   end="rx_mux.in1" />
+ <connection
+   kind="avalon_streaming"
+   version="20.1"
+   start="fifo_0to1.out"
+   end="fc1_avtx.in1" />
+ <connection
+   kind="avalon_streaming"
+   version="20.1"
+   start="fifo_1to0.out"
+   end="fc0_avtx.in1" />
+ <connection
+   kind="avalon_streaming"
+   version="20.1"
+   start="tlp_response_fifo.out"
+   end="tlp_tx_multiplexer.in1" />
+ <connection
+   kind="avalon_streaming"
+   version="20.1"
+   start="tlp_instant_fifo.out"
+   end="tlp_tx_multiplexer.in2" />
+ <connection
+   kind="avalon_streaming"
+   version="20.1"
+   start="mem_req_fifo.out"
+   end="pcie_avalon.mem_access_req" />
+ <connection
+   kind="avalon_streaming"
+   version="20.1"
+   start="mem_resp_fifo.out"
+   end="pcie_data.mem_access_resp" />
+ <connection
+   kind="avalon_streaming"
+   version="20.1"
+   start="rx_mux.out"
+   end="fc_debug.st_in" />
+ <connection
+   kind="avalon_streaming"
+   version="20.1"
+   start="xcvr0_rx_split.out0"
+   end="fc0.avrx" />
+ <connection
+   kind="avalon_streaming"
+   version="20.1"
+   start="xcvr1_rx_split.out0"
+   end="fc1.avrx" />
+ <connection
+   kind="avalon_streaming"
+   version="20.1"
+   start="xcvr0_rx_split.out1"
+   end="fifo_0to1.in" />
+ <connection
+   kind="avalon_streaming"
+   version="20.1"
+   start="xcvr1_rx_split.out1"
+   end="fifo_1to0.in" />
+ <connection
+   kind="avalon_streaming"
+   version="20.1"
+   start="fc1_256_rx.out_0"
+   end="fc1_rx_cdc.in" />
+ <connection
+   kind="avalon_streaming"
+   version="20.1"
+   start="fc0_256_rx.out_0"
+   end="fc0_rx_cdc.in" />
+ <connection
+   kind="avalon_streaming"
+   version="20.1"
+   start="data_pipeline.source0"
+   end="pcie_data.data_tx" />
+ <connection
+   kind="avalon_streaming"
+   version="20.1"
+   start="fc_debug.st_out"
+   end="data_pipeline.sink0" />
+ <connection
+   kind="avalon_streaming"
+   version="20.1"
+   start="pcie_data.tlp_tx_data_st"
+   end="tlp_data_fifo.in" />
+ <connection
+   kind="avalon_streaming"
+   version="20.1"
+   start="pcie_data.tlp_tx_instant_st"
+   end="tlp_instant_fifo.in" />
+ <connection
+   kind="avalon_streaming"
+   version="20.1"
+   start="pcie_data.tlp_tx_response_st"
+   end="tlp_response_fifo.in" />
+ <connection
+   kind="avalon_streaming"
+   version="20.1"
+   start="fc0.userrx"
+   end="fc0_256_rx.in_0" />
+ <connection
+   kind="avalon_streaming"
+   version="20.1"
+   start="fc1.userrx"
+   end="fc1_256_rx.in_0" />
+ <connection
+   kind="clock"
+   version="20.1"
+   start="xcvr0_rx_clk.out_clk"
+   end="xcvr0_rx_split.clk" />
+ <connection
+   kind="clock"
+   version="20.1"
+   start="xcvr1_rx_clk.out_clk"
+   end="xcvr1_rx_split.clk" />
+ <connection kind="clock" version="20.1" start="mgmt_clk.out_clk" end="reset.clk" />
+ <connection
+   kind="clock"
+   version="20.1"
+   start="data_clk.out_clk"
+   end="fc_debug.clk" />
+ <connection
+   kind="clock"
+   version="20.1"
+   start="xcvr1_tx_clk.out_clk"
+   end="fc1_avtx.clk" />
+ <connection kind="clock" version="20.1" start="data_clk.out_clk" end="rx_mux.clk" />
+ <connection
+   kind="clock"
+   version="20.1"
+   start="xcvr0_tx_clk.out_clk"
+   end="fc0_avtx.clk" />
+ <connection
+   kind="clock"
+   version="20.1"
+   start="data_clk.out_clk"
+   end="tlp_data_fifo.clk" />
+ <connection
+   kind="clock"
+   version="20.1"
+   start="data_clk.out_clk"
+   end="mem_req_fifo.clk" />
+ <connection
+   kind="clock"
+   version="20.1"
+   start="data_clk.out_clk"
+   end="pcie_data.clk" />
+ <connection
+   kind="clock"
+   version="20.1"
+   start="data_clk.out_clk"
+   end="mem_resp_fifo.clk" />
+ <connection
+   kind="clock"
+   version="20.1"
+   start="data_clk.out_clk"
+   end="tlp_tx_multiplexer.clk" />
+ <connection
+   kind="clock"
+   version="20.1"
+   start="data_clk.out_clk"
+   end="tlp_instant_fifo.clk" />
+ <connection
+   kind="clock"
+   version="20.1"
+   start="data_clk.out_clk"
+   end="tlp_response_fifo.clk" />
+ <connection
+   kind="clock"
+   version="20.1"
+   start="data_clk.out_clk"
+   end="pcie_avalon.clk" />
+ <connection
+   kind="clock"
+   version="20.1"
+   start="data_clk.out_clk"
+   end="data_pipeline.cr0" />
+ <connection
+   kind="clock"
+   version="20.1"
+   start="xcvr0_rx_clk.out_clk"
+   end="fifo_0to1.in_clk" />
+ <connection
+   kind="clock"
+   version="20.1"
+   start="xcvr0_rx_clk.out_clk"
+   end="fc0_rx_cdc.in_clk" />
+ <connection
+   kind="clock"
+   version="20.1"
+   start="xcvr1_rx_clk.out_clk"
+   end="fifo_1to0.in_clk" />
+ <connection
+   kind="clock"
+   version="20.1"
+   start="xcvr1_rx_clk.out_clk"
+   end="fc1_rx_cdc.in_clk" />
+ <connection
+   kind="clock"
+   version="20.1"
+   start="xcvr0_rx_clk.out_clk"
+   end="fc0_256_rx.in_clk_0" />
+ <connection
+   kind="clock"
+   version="20.1"
+   start="xcvr1_rx_clk.out_clk"
+   end="fc1_256_rx.in_clk_0" />
+ <connection
+   kind="clock"
+   version="20.1"
+   start="xcvr1_tx_clk.out_clk"
+   end="fifo_0to1.out_clk" />
+ <connection
+   kind="clock"
+   version="20.1"
+   start="data_clk.out_clk"
+   end="fc0_rx_cdc.out_clk" />
+ <connection
+   kind="clock"
+   version="20.1"
+   start="data_clk.out_clk"
+   end="fc1_rx_cdc.out_clk" />
+ <connection
+   kind="clock"
+   version="20.1"
+   start="xcvr0_tx_clk.out_clk"
+   end="fifo_1to0.out_clk" />
+ <connection
+   kind="clock"
+   version="20.1"
+   start="xcvr0_rx_clk.out_clk"
+   end="fc0.rx_clk" />
+ <connection
+   kind="clock"
+   version="20.1"
+   start="xcvr1_rx_clk.out_clk"
+   end="fc1.rx_clk" />
+ <connection
+   kind="clock"
+   version="20.1"
+   start="xcvr0_tx_clk.out_clk"
+   end="fc0.tx_clk" />
+ <connection
+   kind="clock"
+   version="20.1"
+   start="xcvr1_tx_clk.out_clk"
+   end="fc1.tx_clk" />
+ <connection
+   kind="reset"
+   version="20.1"
+   start="reset.out_reset"
+   end="tlp_response_fifo.clk_reset" />
+ <connection
+   kind="reset"
+   version="20.1"
+   start="reset.out_reset"
+   end="mem_resp_fifo.clk_reset" />
+ <connection
+   kind="reset"
+   version="20.1"
+   start="reset.out_reset"
+   end="mem_req_fifo.clk_reset" />
+ <connection
+   kind="reset"
+   version="20.1"
+   start="reset.out_reset"
+   end="tlp_data_fifo.clk_reset" />
+ <connection
+   kind="reset"
+   version="20.1"
+   start="reset.out_reset"
+   end="tlp_instant_fifo.clk_reset" />
+ <connection
+   kind="reset"
+   version="20.1"
+   start="reset.out_reset"
+   end="data_pipeline.cr0_reset" />
+ <connection
+   kind="reset"
+   version="20.1"
+   start="reset.out_reset"
+   end="fc0_rx_cdc.in_clk_reset" />
+ <connection
+   kind="reset"
+   version="20.1"
+   start="reset.out_reset"
+   end="fifo_0to1.in_clk_reset" />
+ <connection
+   kind="reset"
+   version="20.1"
+   start="reset.out_reset"
+   end="fc1_rx_cdc.in_clk_reset" />
+ <connection
+   kind="reset"
+   version="20.1"
+   start="reset.out_reset"
+   end="fifo_1to0.in_clk_reset" />
+ <connection
+   kind="reset"
+   version="20.1"
+   start="reset.out_reset"
+   end="fc0_256_rx.in_rst_0" />
+ <connection
+   kind="reset"
+   version="20.1"
+   start="reset.out_reset"
+   end="fc1_256_rx.in_rst_0" />
+ <connection
+   kind="reset"
+   version="20.1"
+   start="reset.out_reset"
+   end="fc0_rx_cdc.out_clk_reset" />
+ <connection
+   kind="reset"
+   version="20.1"
+   start="reset.out_reset"
+   end="fifo_0to1.out_clk_reset" />
+ <connection
+   kind="reset"
+   version="20.1"
+   start="reset.out_reset"
+   end="fc1_rx_cdc.out_clk_reset" />
+ <connection
+   kind="reset"
+   version="20.1"
+   start="reset.out_reset"
+   end="fifo_1to0.out_clk_reset" />
+ <connection
+   kind="reset"
+   version="20.1"
+   start="reset.out_reset"
+   end="xcvr0_rx_split.reset" />
+ <connection kind="reset" version="20.1" start="reset.out_reset" end="fc1.reset" />
+ <connection
+   kind="reset"
+   version="20.1"
+   start="reset.out_reset"
+   end="rx_mux.reset" />
+ <connection kind="reset" version="20.1" start="reset.out_reset" end="fc0.reset" />
+ <connection
+   kind="reset"
+   version="20.1"
+   start="reset.out_reset"
+   end="fc_debug.reset" />
+ <connection
+   kind="reset"
+   version="20.1"
+   start="reset.out_reset"
+   end="xcvr1_rx_split.reset" />
+ <connection
+   kind="reset"
+   version="20.1"
+   start="reset.out_reset"
+   end="fc1_avtx.reset" />
+ <connection
+   kind="reset"
+   version="20.1"
+   start="reset.out_reset"
+   end="fc0_avtx.reset" />
+ <connection
+   kind="reset"
+   version="20.1"
+   start="reset.out_reset"
+   end="tlp_tx_multiplexer.reset" />
+ <connection
+   kind="reset"
+   version="20.1"
+   start="reset.out_reset"
+   end="pcie_data.reset" />
+ <connection
+   kind="reset"
+   version="20.1"
+   start="reset.out_reset"
+   end="pcie_avalon.reset" />
+ <interconnectRequirement for="$system" name="qsys_mm.clockCrossingAdapter" value="HANDSHAKE" />
+ <interconnectRequirement for="$system" name="qsys_mm.enableEccProtection" value="FALSE" />
+ <interconnectRequirement for="$system" name="qsys_mm.insertDefaultSlave" value="FALSE" />
+ <interconnectRequirement for="$system" name="qsys_mm.maxAdditionalLatency" value="1" />
+</system>

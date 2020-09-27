@@ -1,6 +1,7 @@
 # Editor files
 **/*~
-*.qsys
+fejkon.qsys
+fejkon_sfp.qsys
 **/.*.swp
 **/.*.swo
 .qsys_edit

@@ -9,7 +9,7 @@ all: fejkon.sof report
 clean:
 	\rm -f fejkon.sof
 	\rm -fr gen
-	\rm -f fejkon.qsys fejkon_*.qsys
+	\rm -f fejkon.qsys fejkon_sfp.qsys
 	\rm -f config.tcl .config.old .qsys-clean .qsys-configured
 
 fejkon.sof: ip/altera_fc_phy/fc_phy.qip fejkon.qsys de5net.sdc de5net.tcl $(wildcard ip/*/*.sv) fejkon.stp config.tcl
@@ -25,13 +25,11 @@ report:
 	@echo '  ==> Generation report <=='
 	@echo
 	@# 222013 removed because the ch[4] pcie Intel IP bug
-	@# 215044 removed because we have no board thermal model
 	@grep '^Warning (' gen/output_files/*.rpt | \
-		grep -vE '\((10762|170052|15104|332043|35016|12241|276020|14284|20031|18550|12251)\)' | \
+		grep -vE '\((10762|170052|15104|12241|276020|14284|20031|18550|12251)\)' | \
 		grep -vE '(sv_xcvr_emsip_adapter.sv|altera_pcie_sv_hip_ast_rs_serdes.sdc)' | \
 		grep -vF 'ch[4].inst_sv_pcs_ch' | \
 		grep -vF '(222013)' | \
-		grep -vF '(215044)' | \
 		grep -v alt_sld_fab_alt_sld_fab | \
 		grep -v alt_xcvr_reconfig_cpu | \
 		grep -v Alt_sld_fab | \
@@ -42,9 +40,7 @@ report:
 		grep -v sv_xcvr_avmm | \
 		grep -v  altera_avalon_i2c_csr | \
 		grep -vE '(sv_xcvr_plls|sv_xcvr_pipe_native|altpcie_sv_hip_ast_hwtcl|sv_tx_pma_ch|altpcie_hip_256_pipen1b|sv_rx_pma)' | \
-		grep -v 'Mm_interconnect_0' | \
 		grep -v 'data_format_adapter_[0-9]' | \
-		grep -v 'fejkon_pcie_tlp_inject_fmt' | \
 		grep -v 'timing_adapter_[0-9]' | \
 		grep -v 'alt_xreconf_analog_datactrl' | \
 		grep -vE '(jtagm_timing_adt|jtagm_b2p_adapter)' |\
@@ -89,12 +85,9 @@ config.tcl: .config config.py
 
 fejkon.qsys: .qsys-configured
 
-.qsys-clean: ip/fejkon_identity/version.sv
+.qsys-clean: ip/fejkon_identity/version.sv fejkon.tcl fejkon_sfp.tcl
 	# Generate clean platform files
-	rm -f .qsys-configured \
-		fejkon_pcie.qsys fejkon_fc.qsys fejkon_sfp.qsys fejkon.qsys
-	$(QPATH)/sopc_builder/bin/qsys-script --script=fejkon_pcie.tcl
-	$(QPATH)/sopc_builder/bin/qsys-script --script=fejkon_fc.tcl
+	rm -f .qsys-configured fejkon_sfp.qsys fejkon.qsys
 	$(QPATH)/sopc_builder/bin/qsys-script --script=fejkon_sfp.tcl
 	$(QPATH)/sopc_builder/bin/qsys-script --script=fejkon.tcl
 	touch $@

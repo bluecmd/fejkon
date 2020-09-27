@@ -1,13 +1,13 @@
 `timescale 1 us / 1 us
 module fejkon_fc_debug (
-    input  wire [3:0]   st_in_channel,        //  st_in.channel
+    input  wire [1:0]   st_in_channel,        //  st_in.channel
     input  wire [255:0] st_in_data,           //       .data
     input  wire         st_in_startofpacket,  //       .startofpacket
     input  wire         st_in_endofpacket,    //       .endofpacket
     output wire         st_in_ready,          //       .ready
     input  wire [4:0]   st_in_empty,          //       .empty
     input  wire         st_in_valid,          //       .valid
-    output wire [3:0]   st_out_channel,       // st_out.channel
+    output wire [1:0]   st_out_channel,       // st_out.channel
     output wire [255:0] st_out_data,          //       .data
     output wire         st_out_endofpacket,   //       .endofpacket
     output wire         st_out_startofpacket, //       .startofpacket
@@ -23,21 +23,21 @@ module fejkon_fc_debug (
     output wire [31:0]  csr_readdata          //       .readdata
   );
 
-  logic [3:0]   in_channel_r = 0;
+  logic [1:0]   in_channel_r = 0;
   logic [255:0] in_data_r = 0;
   logic         in_startofpacket_r = 0;
   logic         in_endofpacket_r = 0;
   logic [4:0]   in_empty_r = 0;
   logic         in_valid_r = 0;
 
-  logic [3:0]   out_channel = 0;
+  logic [1:0]   out_channel = 0;
   logic [255:0] out_data = 0;
   logic         out_endofpacket = 0;
   logic         out_startofpacket = 0;
   logic         out_valid = 0;
   logic [4:0]   out_empty = 0;
 
-  logic [3:0]   gen_channel;
+  logic [1:0]   gen_channel;
   logic [255:0] gen_data;
   logic         gen_endofpacket;
   logic         gen_startofpacket;

@@ -1,7 +1,7 @@
 module generator (
     input  wire         clk,
     input  wire         reset,
-    output wire [3:0]   st_out_channel,
+    output wire [1:0]   st_out_channel,
     output wire [255:0] st_out_data,
     output wire         st_out_endofpacket,
     output wire         st_out_startofpacket,
@@ -10,7 +10,7 @@ module generator (
     output wire [4:0]   st_out_empty
   );
 
-  logic [3:0]   gen_channel = 0;
+  logic [1:0]   gen_channel = 0;
   logic [255:0] gen_data = 0;
   logic         gen_endofpacket = 0;
   logic         gen_startofpacket = 0;
@@ -31,7 +31,7 @@ module generator (
         end
       end
       gen_valid <= 1'b1;
-      gen_channel <= 4'h0;
+      gen_channel <= 2'h0;
       gen_empty <= 5'd0;
       gen_startofpacket <= 1'b0;
       gen_endofpacket <= 1'b0;

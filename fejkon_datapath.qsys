@@ -301,11 +301,13 @@ proc compose {} {
    type="avalon"
    dir="end" />
  <interface name="csr_fc0_tx" internal="fc0.tx_mgmt_mm" type="avalon" dir="end" />
+ <interface name="csr_fc1_rx" internal="fc1.rx_mgmt_mm" type="avalon" dir="end" />
  <interface
    name="csr_fc1_rx_cdc"
    internal="fc1_rx_cdc.in_csr"
    type="avalon"
    dir="end" />
+ <interface name="csr_fc1_tx" internal="fc1.tx_mgmt_mm" type="avalon" dir="end" />
  <interface name="csr_fc_debug" internal="fc_debug.csr" type="avalon" dir="end" />
  <interface name="csr_pcie_data" internal="pcie_data.csr" type="avalon" dir="end" />
  <interface
@@ -326,16 +328,6 @@ proc compose {} {
  <interface name="data_clk" internal="data_clk.in_clk" type="clock" dir="end" />
  <interface name="fc0_active" internal="fc0.active" type="conduit" dir="end" />
  <interface name="fc1_active" internal="fc1.active" type="conduit" dir="end" />
- <interface
-   name="fc1_rx_mgmt_mm"
-   internal="fc1.rx_mgmt_mm"
-   type="avalon"
-   dir="end" />
- <interface
-   name="fc1_tx_mgmt_mm"
-   internal="fc1.tx_mgmt_mm"
-   type="avalon"
-   dir="end" />
  <interface
    name="irq_c2h_avail"
    internal="pcie_data.irq_c2h_avail"

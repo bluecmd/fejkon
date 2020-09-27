@@ -577,26 +577,26 @@ add_interface clk clock sink
 set_interface_property clk EXPORT_OF ext0.clk_in
 add_interface fan conduit end
 set_interface_property fan EXPORT_OF temp.fan
-add_interface fcport0_line_rd conduit end
-set_interface_property port0_line_rd EXPORT_OF xcvr0.line_rd
-add_interface fcport0_line_td conduit end
-set_interface_property port0_line_td EXPORT_OF xcvr0.line_td
-add_interface fcport1_line_rd conduit end
-set_interface_property port1_line_rd EXPORT_OF xcvr1.line_rd
-add_interface fcport1_line_td conduit end
-set_interface_property port1_line_td EXPORT_OF xcvr1.line_td
 add_interface led conduit end
 set_interface_property led EXPORT_OF led.led
 add_interface pcie_refclk clock sink
 set_interface_property pcie_refclk EXPORT_OF pcie_phy.refclk
 add_interface pcie_reset_pin conduit end
 set_interface_property pcie_reset_pin EXPORT_OF pcie_reset.pin
+add_interface pcie_serial conduit end
+set_interface_property pcie_serial EXPORT_OF pcie_phy.hip_serial
 add_interface phy_clk clock sink
 set_interface_property phy_clk EXPORT_OF phy_clk.in_clk
 add_interface phy_clk_out clock source
 set_interface_property phy_clk_out EXPORT_OF phy_clk_out.out_clk
-add_interface phy_serial conduit end
-set_interface_property pcie_serial EXPORT_OF pcie_phy.hip_serial
+add_interface port0_line_rd conduit end
+set_interface_property port0_line_rd EXPORT_OF xcvr0.line_rd
+add_interface port0_line_td conduit end
+set_interface_property port0_line_td EXPORT_OF xcvr0.line_td
+add_interface port1_line_rd conduit end
+set_interface_property port1_line_rd EXPORT_OF xcvr1.line_rd
+add_interface port1_line_td conduit end
+set_interface_property port1_line_td EXPORT_OF xcvr1.line_td
 add_interface reset reset sink
 set_interface_property reset EXPORT_OF ext0.clk_in_reset
 add_interface sfp0_sfp conduit end
@@ -632,45 +632,120 @@ set_connection_parameter_value alt_xcvr_reconfig_0.reconfig_to_xcvr/pcie_phy.rec
 set_connection_parameter_value alt_xcvr_reconfig_0.reconfig_to_xcvr/pcie_phy.reconfig_to_xcvr startPortLSB {0}
 set_connection_parameter_value alt_xcvr_reconfig_0.reconfig_to_xcvr/pcie_phy.reconfig_to_xcvr width {0}
 
+add_connection bar0_cdc.m0 datapath.csr_fc0_rx
+set_connection_parameter_value bar0_cdc.m0/datapath.csr_fc0_rx arbitrationPriority {1}
+set_connection_parameter_value bar0_cdc.m0/datapath.csr_fc0_rx baseAddress {0x23e0}
+set_connection_parameter_value bar0_cdc.m0/datapath.csr_fc0_rx defaultConnection {0}
+
+add_connection bar0_cdc.m0 datapath.csr_fc0_rx_cdc
+set_connection_parameter_value bar0_cdc.m0/datapath.csr_fc0_rx_cdc arbitrationPriority {1}
+set_connection_parameter_value bar0_cdc.m0/datapath.csr_fc0_rx_cdc baseAddress {0x2440}
+set_connection_parameter_value bar0_cdc.m0/datapath.csr_fc0_rx_cdc defaultConnection {0}
+
+add_connection bar0_cdc.m0 datapath.csr_fc0_tx
+set_connection_parameter_value bar0_cdc.m0/datapath.csr_fc0_tx arbitrationPriority {1}
+set_connection_parameter_value bar0_cdc.m0/datapath.csr_fc0_tx baseAddress {0x23c0}
+set_connection_parameter_value bar0_cdc.m0/datapath.csr_fc0_tx defaultConnection {0}
+
+add_connection bar0_cdc.m0 datapath.csr_fc1_rx
+set_connection_parameter_value bar0_cdc.m0/datapath.csr_fc1_rx arbitrationPriority {1}
+set_connection_parameter_value bar0_cdc.m0/datapath.csr_fc1_rx baseAddress {0x23a0}
+set_connection_parameter_value bar0_cdc.m0/datapath.csr_fc1_rx defaultConnection {0}
+
+add_connection bar0_cdc.m0 datapath.csr_fc1_rx_cdc
+set_connection_parameter_value bar0_cdc.m0/datapath.csr_fc1_rx_cdc arbitrationPriority {1}
+set_connection_parameter_value bar0_cdc.m0/datapath.csr_fc1_rx_cdc baseAddress {0x2438}
+set_connection_parameter_value bar0_cdc.m0/datapath.csr_fc1_rx_cdc defaultConnection {0}
+
+add_connection bar0_cdc.m0 datapath.csr_fc1_tx
+set_connection_parameter_value bar0_cdc.m0/datapath.csr_fc1_tx arbitrationPriority {1}
+set_connection_parameter_value bar0_cdc.m0/datapath.csr_fc1_tx baseAddress {0x2380}
+set_connection_parameter_value bar0_cdc.m0/datapath.csr_fc1_tx defaultConnection {0}
+
+add_connection bar0_cdc.m0 datapath.csr_fc_debug
+set_connection_parameter_value bar0_cdc.m0/datapath.csr_fc_debug arbitrationPriority {1}
+set_connection_parameter_value bar0_cdc.m0/datapath.csr_fc_debug baseAddress {0x2340}
+set_connection_parameter_value bar0_cdc.m0/datapath.csr_fc_debug defaultConnection {0}
+
+add_connection bar0_cdc.m0 datapath.csr_pcie_data
+set_connection_parameter_value bar0_cdc.m0/datapath.csr_pcie_data arbitrationPriority {1}
+set_connection_parameter_value bar0_cdc.m0/datapath.csr_pcie_data baseAddress {0x2000}
+set_connection_parameter_value bar0_cdc.m0/datapath.csr_pcie_data defaultConnection {0}
+
+add_connection bar0_cdc.m0 datapath.csr_tlp_data_fifo
+set_connection_parameter_value bar0_cdc.m0/datapath.csr_tlp_data_fifo arbitrationPriority {1}
+set_connection_parameter_value bar0_cdc.m0/datapath.csr_tlp_data_fifo baseAddress {0x2420}
+set_connection_parameter_value bar0_cdc.m0/datapath.csr_tlp_data_fifo defaultConnection {0}
+
+add_connection bar0_cdc.m0 datapath.csr_tlp_instant_fifo
+set_connection_parameter_value bar0_cdc.m0/datapath.csr_tlp_instant_fifo arbitrationPriority {1}
+set_connection_parameter_value bar0_cdc.m0/datapath.csr_tlp_instant_fifo baseAddress {0x2410}
+set_connection_parameter_value bar0_cdc.m0/datapath.csr_tlp_instant_fifo defaultConnection {0}
+
+add_connection bar0_cdc.m0 datapath.csr_tlp_response_fifo
+set_connection_parameter_value bar0_cdc.m0/datapath.csr_tlp_response_fifo arbitrationPriority {1}
+set_connection_parameter_value bar0_cdc.m0/datapath.csr_tlp_response_fifo baseAddress {0x2400}
+set_connection_parameter_value bar0_cdc.m0/datapath.csr_tlp_response_fifo defaultConnection {0}
+
 add_connection bar0_cdc.m0 ident.mm
 set_connection_parameter_value bar0_cdc.m0/ident.mm arbitrationPriority {1}
-set_connection_parameter_value bar0_cdc.m0/ident.mm baseAddress {0x0000}
+set_connection_parameter_value bar0_cdc.m0/ident.mm baseAddress {0x2430}
 set_connection_parameter_value bar0_cdc.m0/ident.mm defaultConnection {0}
 
 add_connection bar0_cdc.m0 pcie_clk_gauge.mm
 set_connection_parameter_value bar0_cdc.m0/pcie_clk_gauge.mm arbitrationPriority {1}
-set_connection_parameter_value bar0_cdc.m0/pcie_clk_gauge.mm baseAddress {0x0024}
+set_connection_parameter_value bar0_cdc.m0/pcie_clk_gauge.mm baseAddress {0x244c}
 set_connection_parameter_value bar0_cdc.m0/pcie_clk_gauge.mm defaultConnection {0}
+
+add_connection bar0_cdc.m0 pcie_status.mm
+set_connection_parameter_value bar0_cdc.m0/pcie_status.mm arbitrationPriority {1}
+set_connection_parameter_value bar0_cdc.m0/pcie_status.mm baseAddress {0x2300}
+set_connection_parameter_value bar0_cdc.m0/pcie_status.mm defaultConnection {0}
 
 add_connection bar0_cdc.m0 phy_clk_gauge.mm
 set_connection_parameter_value bar0_cdc.m0/phy_clk_gauge.mm arbitrationPriority {1}
-set_connection_parameter_value bar0_cdc.m0/phy_clk_gauge.mm baseAddress {0x0020}
+set_connection_parameter_value bar0_cdc.m0/phy_clk_gauge.mm baseAddress {0x2448}
 set_connection_parameter_value bar0_cdc.m0/phy_clk_gauge.mm defaultConnection {0}
 
 add_connection bar0_cdc.m0 sfp0.mm
 set_connection_parameter_value bar0_cdc.m0/sfp0.mm arbitrationPriority {1}
-set_connection_parameter_value bar0_cdc.m0/sfp0.mm baseAddress {0x0100}
+set_connection_parameter_value bar0_cdc.m0/sfp0.mm baseAddress {0x2280}
 set_connection_parameter_value bar0_cdc.m0/sfp0.mm defaultConnection {0}
 
 add_connection bar0_cdc.m0 sfp1.mm
 set_connection_parameter_value bar0_cdc.m0/sfp1.mm arbitrationPriority {1}
-set_connection_parameter_value bar0_cdc.m0/sfp1.mm baseAddress {0x0200}
+set_connection_parameter_value bar0_cdc.m0/sfp1.mm baseAddress {0x2200}
 set_connection_parameter_value bar0_cdc.m0/sfp1.mm defaultConnection {0}
 
 add_connection bar0_cdc.m0 sfp2.mm
 set_connection_parameter_value bar0_cdc.m0/sfp2.mm arbitrationPriority {1}
-set_connection_parameter_value bar0_cdc.m0/sfp2.mm baseAddress {0x0300}
+set_connection_parameter_value bar0_cdc.m0/sfp2.mm baseAddress {0x2180}
 set_connection_parameter_value bar0_cdc.m0/sfp2.mm defaultConnection {0}
 
 add_connection bar0_cdc.m0 sfp3.mm
 set_connection_parameter_value bar0_cdc.m0/sfp3.mm arbitrationPriority {1}
-set_connection_parameter_value bar0_cdc.m0/sfp3.mm baseAddress {0x0400}
+set_connection_parameter_value bar0_cdc.m0/sfp3.mm baseAddress {0x2100}
 set_connection_parameter_value bar0_cdc.m0/sfp3.mm defaultConnection {0}
 
 add_connection bar0_cdc.m0 temp.temp_mm
 set_connection_parameter_value bar0_cdc.m0/temp.temp_mm arbitrationPriority {1}
-set_connection_parameter_value bar0_cdc.m0/temp.temp_mm baseAddress {0x0010}
+set_connection_parameter_value bar0_cdc.m0/temp.temp_mm baseAddress {0x2450}
 set_connection_parameter_value bar0_cdc.m0/temp.temp_mm defaultConnection {0}
+
+add_connection bar0_cdc.m0 xcvr0.mgmt_mm
+set_connection_parameter_value bar0_cdc.m0/xcvr0.mgmt_mm arbitrationPriority {1}
+set_connection_parameter_value bar0_cdc.m0/xcvr0.mgmt_mm baseAddress {0x1000}
+set_connection_parameter_value bar0_cdc.m0/xcvr0.mgmt_mm defaultConnection {0}
+
+add_connection bar0_cdc.m0 xcvr1.mgmt_mm
+set_connection_parameter_value bar0_cdc.m0/xcvr1.mgmt_mm arbitrationPriority {1}
+set_connection_parameter_value bar0_cdc.m0/xcvr1.mgmt_mm baseAddress {0x0000}
+set_connection_parameter_value bar0_cdc.m0/xcvr1.mgmt_mm defaultConnection {0}
+
+add_connection datapath.bar0_mm bar0_cdc.s0
+set_connection_parameter_value datapath.bar0_mm/bar0_cdc.s0 arbitrationPriority {1}
+set_connection_parameter_value datapath.bar0_mm/bar0_cdc.s0 baseAddress {0x0000}
+set_connection_parameter_value datapath.bar0_mm/bar0_cdc.s0 defaultConnection {0}
 
 add_connection datapath.fc0_active led.fcport0_active
 set_connection_parameter_value datapath.fc0_active/led.fcport0_active endPort {}
@@ -692,6 +767,8 @@ set_connection_parameter_value datapath.pcie_data_rx_bar_be/pcie_phy.rx_bar_be e
 set_connection_parameter_value datapath.pcie_data_rx_bar_be/pcie_phy.rx_bar_be startPort {}
 set_connection_parameter_value datapath.pcie_data_rx_bar_be/pcie_phy.rx_bar_be startPortLSB {0}
 set_connection_parameter_value datapath.pcie_data_rx_bar_be/pcie_phy.rx_bar_be width {0}
+
+add_connection datapath.pcie_tlp_tx tlp_adapter.tlp_tx_st
 
 add_connection datapath.xcvr0_avtx xcvr0.avtx
 
@@ -749,45 +826,120 @@ add_connection ext0.clk_reset reset_ctrl.reset_in0
 
 add_connection ext0.clk_reset si570_ctrl.reset
 
+add_connection jtagm.master datapath.csr_fc0_rx
+set_connection_parameter_value jtagm.master/datapath.csr_fc0_rx arbitrationPriority {1}
+set_connection_parameter_value jtagm.master/datapath.csr_fc0_rx baseAddress {0x23e0}
+set_connection_parameter_value jtagm.master/datapath.csr_fc0_rx defaultConnection {0}
+
+add_connection jtagm.master datapath.csr_fc0_rx_cdc
+set_connection_parameter_value jtagm.master/datapath.csr_fc0_rx_cdc arbitrationPriority {1}
+set_connection_parameter_value jtagm.master/datapath.csr_fc0_rx_cdc baseAddress {0x2440}
+set_connection_parameter_value jtagm.master/datapath.csr_fc0_rx_cdc defaultConnection {0}
+
+add_connection jtagm.master datapath.csr_fc0_tx
+set_connection_parameter_value jtagm.master/datapath.csr_fc0_tx arbitrationPriority {1}
+set_connection_parameter_value jtagm.master/datapath.csr_fc0_tx baseAddress {0x23c0}
+set_connection_parameter_value jtagm.master/datapath.csr_fc0_tx defaultConnection {0}
+
+add_connection jtagm.master datapath.csr_fc1_rx
+set_connection_parameter_value jtagm.master/datapath.csr_fc1_rx arbitrationPriority {1}
+set_connection_parameter_value jtagm.master/datapath.csr_fc1_rx baseAddress {0x23a0}
+set_connection_parameter_value jtagm.master/datapath.csr_fc1_rx defaultConnection {0}
+
+add_connection jtagm.master datapath.csr_fc1_rx_cdc
+set_connection_parameter_value jtagm.master/datapath.csr_fc1_rx_cdc arbitrationPriority {1}
+set_connection_parameter_value jtagm.master/datapath.csr_fc1_rx_cdc baseAddress {0x2438}
+set_connection_parameter_value jtagm.master/datapath.csr_fc1_rx_cdc defaultConnection {0}
+
+add_connection jtagm.master datapath.csr_fc1_tx
+set_connection_parameter_value jtagm.master/datapath.csr_fc1_tx arbitrationPriority {1}
+set_connection_parameter_value jtagm.master/datapath.csr_fc1_tx baseAddress {0x2380}
+set_connection_parameter_value jtagm.master/datapath.csr_fc1_tx defaultConnection {0}
+
+add_connection jtagm.master datapath.csr_fc_debug
+set_connection_parameter_value jtagm.master/datapath.csr_fc_debug arbitrationPriority {1}
+set_connection_parameter_value jtagm.master/datapath.csr_fc_debug baseAddress {0x2340}
+set_connection_parameter_value jtagm.master/datapath.csr_fc_debug defaultConnection {0}
+
+add_connection jtagm.master datapath.csr_pcie_data
+set_connection_parameter_value jtagm.master/datapath.csr_pcie_data arbitrationPriority {1}
+set_connection_parameter_value jtagm.master/datapath.csr_pcie_data baseAddress {0x2000}
+set_connection_parameter_value jtagm.master/datapath.csr_pcie_data defaultConnection {0}
+
+add_connection jtagm.master datapath.csr_tlp_data_fifo
+set_connection_parameter_value jtagm.master/datapath.csr_tlp_data_fifo arbitrationPriority {1}
+set_connection_parameter_value jtagm.master/datapath.csr_tlp_data_fifo baseAddress {0x2420}
+set_connection_parameter_value jtagm.master/datapath.csr_tlp_data_fifo defaultConnection {0}
+
+add_connection jtagm.master datapath.csr_tlp_instant_fifo
+set_connection_parameter_value jtagm.master/datapath.csr_tlp_instant_fifo arbitrationPriority {1}
+set_connection_parameter_value jtagm.master/datapath.csr_tlp_instant_fifo baseAddress {0x2410}
+set_connection_parameter_value jtagm.master/datapath.csr_tlp_instant_fifo defaultConnection {0}
+
+add_connection jtagm.master datapath.csr_tlp_response_fifo
+set_connection_parameter_value jtagm.master/datapath.csr_tlp_response_fifo arbitrationPriority {1}
+set_connection_parameter_value jtagm.master/datapath.csr_tlp_response_fifo baseAddress {0x2400}
+set_connection_parameter_value jtagm.master/datapath.csr_tlp_response_fifo defaultConnection {0}
+
 add_connection jtagm.master ident.mm
 set_connection_parameter_value jtagm.master/ident.mm arbitrationPriority {1}
-set_connection_parameter_value jtagm.master/ident.mm baseAddress {0x0000}
+set_connection_parameter_value jtagm.master/ident.mm baseAddress {0x2430}
 set_connection_parameter_value jtagm.master/ident.mm defaultConnection {0}
 
 add_connection jtagm.master pcie_clk_gauge.mm
 set_connection_parameter_value jtagm.master/pcie_clk_gauge.mm arbitrationPriority {1}
-set_connection_parameter_value jtagm.master/pcie_clk_gauge.mm baseAddress {0x0024}
+set_connection_parameter_value jtagm.master/pcie_clk_gauge.mm baseAddress {0x244c}
 set_connection_parameter_value jtagm.master/pcie_clk_gauge.mm defaultConnection {0}
+
+add_connection jtagm.master pcie_status.mm
+set_connection_parameter_value jtagm.master/pcie_status.mm arbitrationPriority {1}
+set_connection_parameter_value jtagm.master/pcie_status.mm baseAddress {0x2300}
+set_connection_parameter_value jtagm.master/pcie_status.mm defaultConnection {0}
 
 add_connection jtagm.master phy_clk_gauge.mm
 set_connection_parameter_value jtagm.master/phy_clk_gauge.mm arbitrationPriority {1}
-set_connection_parameter_value jtagm.master/phy_clk_gauge.mm baseAddress {0x0020}
+set_connection_parameter_value jtagm.master/phy_clk_gauge.mm baseAddress {0x2448}
 set_connection_parameter_value jtagm.master/phy_clk_gauge.mm defaultConnection {0}
 
 add_connection jtagm.master sfp0.mm
 set_connection_parameter_value jtagm.master/sfp0.mm arbitrationPriority {1}
-set_connection_parameter_value jtagm.master/sfp0.mm baseAddress {0x0100}
+set_connection_parameter_value jtagm.master/sfp0.mm baseAddress {0x2280}
 set_connection_parameter_value jtagm.master/sfp0.mm defaultConnection {0}
 
 add_connection jtagm.master sfp1.mm
 set_connection_parameter_value jtagm.master/sfp1.mm arbitrationPriority {1}
-set_connection_parameter_value jtagm.master/sfp1.mm baseAddress {0x0200}
+set_connection_parameter_value jtagm.master/sfp1.mm baseAddress {0x2200}
 set_connection_parameter_value jtagm.master/sfp1.mm defaultConnection {0}
 
 add_connection jtagm.master sfp2.mm
 set_connection_parameter_value jtagm.master/sfp2.mm arbitrationPriority {1}
-set_connection_parameter_value jtagm.master/sfp2.mm baseAddress {0x0300}
+set_connection_parameter_value jtagm.master/sfp2.mm baseAddress {0x2180}
 set_connection_parameter_value jtagm.master/sfp2.mm defaultConnection {0}
 
 add_connection jtagm.master sfp3.mm
 set_connection_parameter_value jtagm.master/sfp3.mm arbitrationPriority {1}
-set_connection_parameter_value jtagm.master/sfp3.mm baseAddress {0x0400}
+set_connection_parameter_value jtagm.master/sfp3.mm baseAddress {0x2100}
 set_connection_parameter_value jtagm.master/sfp3.mm defaultConnection {0}
 
 add_connection jtagm.master temp.temp_mm
 set_connection_parameter_value jtagm.master/temp.temp_mm arbitrationPriority {1}
-set_connection_parameter_value jtagm.master/temp.temp_mm baseAddress {0x0010}
+set_connection_parameter_value jtagm.master/temp.temp_mm baseAddress {0x2450}
 set_connection_parameter_value jtagm.master/temp.temp_mm defaultConnection {0}
+
+add_connection jtagm.master xcvr0.mgmt_mm
+set_connection_parameter_value jtagm.master/xcvr0.mgmt_mm arbitrationPriority {1}
+set_connection_parameter_value jtagm.master/xcvr0.mgmt_mm baseAddress {0x1000}
+set_connection_parameter_value jtagm.master/xcvr0.mgmt_mm defaultConnection {0}
+
+add_connection jtagm.master xcvr1.mgmt_mm
+set_connection_parameter_value jtagm.master/xcvr1.mgmt_mm arbitrationPriority {1}
+set_connection_parameter_value jtagm.master/xcvr1.mgmt_mm baseAddress {0x0000}
+set_connection_parameter_value jtagm.master/xcvr1.mgmt_mm defaultConnection {0}
+
+add_connection jtagm.master xcvr_reconfig.reconfig_mgmt
+set_connection_parameter_value jtagm.master/xcvr_reconfig.reconfig_mgmt arbitrationPriority {1}
+set_connection_parameter_value jtagm.master/xcvr_reconfig.reconfig_mgmt baseAddress {0x2600}
+set_connection_parameter_value jtagm.master/xcvr_reconfig.reconfig_mgmt defaultConnection {0}
 
 add_connection jtagm.master_reset reset_ctrl.reset_in1
 
@@ -956,6 +1108,8 @@ set_connection_parameter_value temp_sense.tsdcalo/temp.tsdcalo startPortLSB {0}
 set_connection_parameter_value temp_sense.tsdcalo/temp.tsdcalo width {0}
 
 add_connection tlp_adapter.phy_tx_st pcie_phy.tx_st
+
+add_connection tlp_adapter.tlp_rx_st datapath.pcie_tlp_rx
 
 add_connection xcvr0.avrx datapath.xcvr0_avrx
 

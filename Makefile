@@ -87,7 +87,7 @@ config.tcl: .config config.py
 
 fejkon.qsys: .qsys-configured
 
-.qsys-clean: ip/fejkon_identity/version.sv
+.qsys-clean: ip/fejkon_identity/version.sv fejkon.tcl fejkon_sfp.tcl
 	# Generate clean platform files
 	rm -f .qsys-configured fejkon_sfp.qsys fejkon.qsys
 	$(QPATH)/sopc_builder/bin/qsys-script --script=fejkon_sfp.tcl

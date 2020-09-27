@@ -17,6 +17,14 @@
          type = "int";
       }
    }
+   element data_pipeline
+   {
+      datum _sortIndex
+      {
+         value = "29";
+         type = "int";
+      }
+   }
    element fc0
    {
       datum _sortIndex
@@ -404,6 +412,20 @@ proc compose {} {
   <parameter name="DERIVED_CLOCK_RATE" value="0" />
   <parameter name="EXPLICIT_CLOCK_RATE" value="250000000" />
   <parameter name="NUM_CLOCK_OUTPUTS" value="1" />
+ </module>
+ <module
+   name="data_pipeline"
+   kind="altera_avalon_st_pipeline_stage"
+   version="20.1"
+   enabled="1">
+  <parameter name="BITS_PER_SYMBOL" value="8" />
+  <parameter name="CHANNEL_WIDTH" value="2" />
+  <parameter name="ERROR_WIDTH" value="0" />
+  <parameter name="MAX_CHANNEL" value="0" />
+  <parameter name="PIPELINE_READY" value="1" />
+  <parameter name="SYMBOLS_PER_BEAT" value="32" />
+  <parameter name="USE_EMPTY" value="1" />
+  <parameter name="USE_PACKETS" value="1" />
  </module>
  <module name="fc0" kind="fc_framer" version="1.0" enabled="1">
   <parameter name="MTU" value="3072" />
@@ -885,8 +907,13 @@ proc compose {} {
  <connection
    kind="avalon_streaming"
    version="20.1"
-   start="fc_debug.st_out"
+   start="data_pipeline.source0"
    end="pcie_data.data_tx" />
+ <connection
+   kind="avalon_streaming"
+   version="20.1"
+   start="fc_debug.st_out"
+   end="data_pipeline.sink0" />
  <connection
    kind="avalon_streaming"
    version="20.1"
@@ -982,6 +1009,11 @@ proc compose {} {
  <connection
    kind="clock"
    version="20.1"
+   start="data_clk.out_clk"
+   end="data_pipeline.cr0" />
+ <connection
+   kind="clock"
+   version="20.1"
    start="xcvr0_rx_clk.out_clk"
    end="fifo_0to1.in_clk" />
  <connection
@@ -1074,6 +1106,11 @@ proc compose {} {
    version="20.1"
    start="reset.out_reset"
    end="tlp_instant_fifo.clk_reset" />
+ <connection
+   kind="reset"
+   version="20.1"
+   start="reset.out_reset"
+   end="data_pipeline.cr0_reset" />
  <connection
    kind="reset"
    version="20.1"

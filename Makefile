@@ -26,7 +26,7 @@ report:
 	@echo
 	@# 222013 removed because the ch[4] pcie Intel IP bug
 	@grep '^Warning (' gen/output_files/*.rpt | \
-		grep -vE '\((10762|170052|15104|332043|35016|12241|276020|14284|20031|18550|12251)\)' | \
+		grep -vE '\((10762|170052|15104|12241|276020|14284|20031|18550|12251)\)' | \
 		grep -vE '(sv_xcvr_emsip_adapter.sv|altera_pcie_sv_hip_ast_rs_serdes.sdc)' | \
 		grep -vF 'ch[4].inst_sv_pcs_ch' | \
 		grep -vF '(222013)' | \
@@ -40,9 +40,7 @@ report:
 		grep -v sv_xcvr_avmm | \
 		grep -v  altera_avalon_i2c_csr | \
 		grep -vE '(sv_xcvr_plls|sv_xcvr_pipe_native|altpcie_sv_hip_ast_hwtcl|sv_tx_pma_ch|altpcie_hip_256_pipen1b|sv_rx_pma)' | \
-		grep -v 'Mm_interconnect_0' | \
 		grep -v 'data_format_adapter_[0-9]' | \
-		grep -v 'fejkon_pcie_tlp_inject_fmt' | \
 		grep -v 'timing_adapter_[0-9]' | \
 		grep -v 'alt_xreconf_analog_datactrl' | \
 		grep -vE '(jtagm_timing_adt|jtagm_b2p_adapter)' |\

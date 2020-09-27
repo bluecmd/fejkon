@@ -1548,10 +1548,10 @@ set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp2_sfp_scl              
 set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp2_sfp_sda                   ; # SFPC_MOD2_SDA
 set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp2_sfp_ratesel[0]            ; # SFPC_RATESEL[0]
 set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp2_sfp_ratesel[1]            ; # SFPC_RATESEL[1]
-set_instance_assignment -name IO_STANDARD "1.5-V PCML" -to port2_line_rd_lvds        ; # SFPC_RX_p
+#set_instance_assignment -name IO_STANDARD "1.5-V PCML" -to port2_line_rd_lvds        ; # SFPC_RX_p
 set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp2_sfp_txdis                 ; # SFPC_TXDISABLE
 set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp2_sfp_txfail                ; # SFPC_TXFAULT
-set_instance_assignment -name IO_STANDARD "1.5-V PCML" -to port2_line_td_lvds        ; # SFPC_TX_p
+#set_instance_assignment -name IO_STANDARD "1.5-V PCML" -to port2_line_td_lvds        ; # SFPC_TX_p
 set_location_assignment PIN_L21 -to sfp2_sfp_los                                     ; # SFPC_LOS
 set_location_assignment PIN_J21 -to sfp2_sfp_prsnt_n                                 ; # SFPC_MOD0_PRSNT_n
 set_location_assignment PIN_H21 -to sfp2_sfp_scl                                     ; # SFPC_MOD1_SCL
@@ -1584,10 +1584,10 @@ set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp3_sfp_scl              
 set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp3_sfp_sda                   ; # SFPD_MOD2_SDA
 set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp3_sfp_ratesel[0]            ; # SFPD_RATESEL[0]
 set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp3_sfp_ratesel[1]            ; # SFPD_RATESEL[1]
-set_instance_assignment -name IO_STANDARD "1.5-V PCML" -to port3_line_rd_lvds        ; # SFPD_RX_p
+#set_instance_assignment -name IO_STANDARD "1.5-V PCML" -to port3_line_rd_lvds        ; # SFPD_RX_p
 set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp3_sfp_txdis                 ; # SFPD_TXDISABLE
 set_instance_assignment -name IO_STANDARD "2.5 V" -to sfp3_sfp_txfail                ; # SFPD_TXFAULT
-set_instance_assignment -name IO_STANDARD "1.5-V PCML" -to port3_line_td_lvds        ; # SFPD_TX_p
+#set_instance_assignment -name IO_STANDARD "1.5-V PCML" -to port3_line_td_lvds        ; # SFPD_TX_p
 set_location_assignment PIN_N22 -to sfp3_sfp_los                                     ; # SFPD_LOS
 set_location_assignment PIN_V20 -to sfp3_sfp_prsnt_n                                 ; # SFPD_MOD0_PRSNT_n
 set_location_assignment PIN_U21 -to sfp3_sfp_scl                                     ; # SFPD_MOD1_SCL

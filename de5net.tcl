@@ -1558,10 +1558,10 @@ set_location_assignment PIN_H21 -to sfp2_sfp_scl                                
 set_location_assignment PIN_G20 -to sfp2_sfp_sda                                     ; # SFPC_MOD2_SDA
 set_location_assignment PIN_J22 -to sfp2_sfp_ratesel[0]                              ; # SFPC_RATESEL[0]
 set_location_assignment PIN_P21 -to sfp2_sfp_ratesel[1]                              ; # SFPC_RATESEL[1]
-set_location_assignment PIN_AW4 -to port2_line_rd_lvds                               ; # SFPC_RX_p
+#set_location_assignment PIN_AW4 -to port2_line_rd_lvds                               ; # SFPC_RX_p
 set_location_assignment PIN_F21 -to sfp2_sfp_txdis                                   ; # SFPC_TXDISABLE
 set_location_assignment PIN_F20 -to sfp2_sfp_txfail                                  ; # SFPC_TXFAULT
-set_location_assignment PIN_AT6 -to port2_line_td_lvds                               ; # SFPC_TX_p
+#set_location_assignment PIN_AT6 -to port2_line_td_lvds                               ; # SFPC_TX_p
 set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to sfp2_sfp_scl
 set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to sfp2_sfp_sda
 set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to sfp2_sfp_ratesel[0]
@@ -1594,10 +1594,10 @@ set_location_assignment PIN_U21 -to sfp3_sfp_scl                                
 set_location_assignment PIN_V19 -to sfp3_sfp_sda                                     ; # SFPD_MOD2_SDA
 set_location_assignment PIN_V21 -to sfp3_sfp_ratesel[0]                              ; # SFPD_RATESEL[0]
 set_location_assignment PIN_M22 -to sfp3_sfp_ratesel[1]                              ; # SFPD_RATESEL[1]
-set_location_assignment PIN_BB2 -to port3_line_rd_lvds                               ; # SFPD_RX_p
+#set_location_assignment PIN_BB2 -to port3_line_rd_lvds                               ; # SFPD_RX_p
 set_location_assignment PIN_U20 -to sfp3_sfp_txdis                                   ; # SFPD_TXDISABLE
 set_location_assignment PIN_T21 -to sfp3_sfp_txfail                                  ; # SFPD_TXFAULT
-set_location_assignment PIN_AY6 -to port3_line_td_lvds                               ; # SFPD_TX_p
+#set_location_assignment PIN_AY6 -to port3_line_td_lvds                               ; # SFPD_TX_p
 set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to sfp3_sfp_scl
 set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to sfp3_sfp_sda
 set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to sfp3_sfp_ratesel[0]

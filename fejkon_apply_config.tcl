@@ -12,56 +12,44 @@ set eth_ports 0
 
 if {$CONFIG_PORT1_FC == "y"} {
   set fc_ports [expr $fc_ports + 1]
-} else {
-  # TODO: This fails due to no clock given to datapath
-  # set_instance_property xcvr1 ENABLED false
 }
+# TODO: Add terminator/dummy IP cores instead of xcvrX when port disabled?
 
 if {$CONFIG_PORT2_FC == "y"} {
   set fc_ports [expr $fc_ports + 1]
-} else {
-  # TODO
 }
 
 if {$CONFIG_PORT3_FC == "y"} {
   set fc_ports [expr $fc_ports + 1]
-} else {
-  # TODO
 }
 
-# TODO: Set datapath parameter based on $CONFIG_LOOPBACK_01 == "y"
+if {$CONFIG_LOOPBACK_01 == "y"} {
+  set_instance_parameter_value datapath {LOOPBACK_01} {true}
+} else {
+  set_instance_parameter_value datapath {LOOPBACK_01} {false}
+}
 
 if {$CONFIG_PORT2_ETHERNET == "y"} {
   set eth_ports [expr $eth_ports + 1]
-} else {
-  # TODO
 }
 
 if {$CONFIG_PORT3_ETHERNET == "y"} {
   set eth_ports [expr $eth_ports + 1]
-} else {
-  # TODO
 }
 
-if {$CONFIG_PORT1_DISABLED != "n"} {
+if {$CONFIG_PORT1_DISABLED == "y"} {
   set_instance_property sfp1 ENABLED false
 }
 
-if {$CONFIG_PORT2_DISABLED != "n"} {
+if {$CONFIG_PORT2_DISABLED == "y"} {
   set_instance_property sfp2 ENABLED false
 }
 
-if {$CONFIG_PORT3_DISABLED != "n"} {
+if {$CONFIG_PORT3_DISABLED == "y"} {
   set_instance_property sfp3 ENABLED false
 }
 
 set_instance_parameter_value ident {FcPorts} $fc_ports
 set_instance_parameter_value ident {EthPorts} $eth_ports
-
-# TODO:
-#if {$CONFIG_PORT1_FC != "y"} {
-#  remove_connection datapath.fc1_active/led.fcport1_active
-#  remove_connection xcvr1.aligned/led.fcport1_aligned
-#}
 
 save_system {fejkon.qsys}

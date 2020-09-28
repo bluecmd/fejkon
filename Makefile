@@ -126,3 +126,7 @@ test-%: ip/%
 
 test-pcie-hip:
 	make QPATH=${QPATH} -C test/pcie-hip test
+
+presubmit:
+	utils/lint.sh
+	utils/presubmit.sh

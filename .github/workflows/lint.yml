@@ -1,0 +1,28 @@
+name: Lint
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+
+  build:
+    name: Check
+    runs-on: ubuntu-latest
+    steps:
+    - name: Fetch verible
+      run: wget https://github.com/google/verible/releases/download/v0.0-633-gded8ad5/verible-v0.0-633-gded8ad5-Ubuntu-18.04-bionic-x86_64.tar.gz
+    - name: Install verible
+      run: |
+        tar -xvf verible-v0.0-633-gded8ad5-Ubuntu-18.04-bionic-x86_64.tar.gz
+        sudo mv verible-v0.0-633-gded8ad5 /usr/local/verible
+        /usr/local/verible/bin/verible-verilog-lint --version
+        echo "::add-path::/usr/local/verible/bin"
+    - name: Check out code
+      uses: actions/checkout@v2
+    - name: Environment
+      run: env
+    - name: Lint
+      run: ./utils/lint.sh

@@ -16,7 +16,9 @@ jobs:
     - name: Install simulators
       run: sudo apt-get install iverilog verilator python3-pip
     - name: Install cocotb
-      run: pip3 install cocotb
+      run: |
+        pip3 install cocotb
+        echo "::add-path::${HOME}/.local/bin"
     - name: Check out code
       uses: actions/checkout@v2
     - name: Test

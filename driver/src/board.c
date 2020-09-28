@@ -545,16 +545,26 @@ static int probe(struct pci_dev *pcidev, const struct pci_device_id *id)
     goto error_request_region;
   }
 
-  ret = pci_set_dma_mask(pcidev, DMA_BIT_MASK(64));
+  ret = pci_set_dma_mask(pcidev, DMA_BIT_MASK(32));
   if (ret < 0) {
     dev_err(&pcidev->dev, "pci_set_dma_mask\n");
     goto error_set_dma_mask;
   }
 
-  pci_set_master(pcidev);
-
+  ret = pci_set_consistent_dma_mask(pcidev, DMA_BIT_MASK(32));
+  if (ret < 0) {
+    dev_err(&pcidev->dev, "pci_set_consistent_dma_mask\n");
+    goto error_set_dma_mask;
+  }
   card->pci = pcidev;
   card->bar0 = pci_iomap(pcidev, 0 /* bar */, 0);
+
+  // Ensure DMA is cleared
+  iowrite32(0, card->bar0 + 0x8A0);
+  iowrite32(0, card->bar0 + 0x8C0);
+  iowrite32(0, card->bar0 + 0x8A8);
+
+  pci_set_master(pcidev);
 
   version = ioread32(card->bar0 + 0x0);
   if ((version & 0xffff) != 0x0de5) {
@@ -713,6 +723,7 @@ static void remove(struct pci_dev *pcidev)
   // Disable buffers
   iowrite32(0, card->bar0 + 0x8A0);
   iowrite32(0, card->bar0 + 0x8C0);
+  iowrite32(0, card->bar0 + 0x8A8);
   pci_clear_master(pcidev);
   // TODO: dma_free_coherent
   rtnl_lock();

@@ -21,5 +21,16 @@ jobs:
         echo "::add-path::${HOME}/.local/bin"
     - name: Check out code
       uses: actions/checkout@v2
+      with:
+        path: main
+    - name: Check out non-free
+      uses: actions/checkout@v2
+      with:
+        repository: bluecmd/fejkon-non-free
+        token: ${{ secrets.BOT_PAT }}
+        path: non-free
     - name: Test
-      run: ./utils/presubmit-test.sh
+      run: |
+        export QPATH="${PWD}/non-free/quartus/"
+        cd main
+        ./utils/presubmit-test.sh

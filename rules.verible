@@ -1,0 +1,5 @@
+endif-comment
+one-module-per-file
+proper-parameter-declaration
+signal-name-style
+-line-length

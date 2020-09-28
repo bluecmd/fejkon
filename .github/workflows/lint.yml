@@ -22,7 +22,5 @@ jobs:
         echo "::add-path::/usr/local/verible/bin"
     - name: Check out code
       uses: actions/checkout@v2
-    - name: Environment
-      run: env
     - name: Lint
       run: ./utils/lint.sh

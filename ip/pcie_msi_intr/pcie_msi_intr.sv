@@ -95,6 +95,6 @@ module pcie_msi_intr (
     $dumpvars(0, pcie_msi_intr);
     #1;
   end
-`endif
+`endif  // COCOTB_SIM
 
 endmodule

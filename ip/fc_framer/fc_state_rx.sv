@@ -44,6 +44,7 @@ module fc_state_rx (
           fc::STATE_OL1: state_next = fc::STATE_OL1;
           fc::STATE_OL2: state_next = fc::STATE_OL2;
           fc::STATE_OL3: state_next = fc::STATE_OL2;
+          default: ;
         endcase
       end
       default: ;

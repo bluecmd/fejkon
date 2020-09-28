@@ -2,8 +2,8 @@
 `include "version.sv"
 
 module fejkon_identity #(
-    parameter FcPorts,
-    parameter EthPorts
+    parameter logic [3:0] FcPorts  = 2,
+    parameter logic [3:0] EthPorts = 2
   ) (
     output wire [31:0] mm_readdata, //    mm.readdata
     input  wire  [0:0] mm_address,  //    mm.address

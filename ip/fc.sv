@@ -1,7 +1,7 @@
 `timescale 1 us / 1 us
 package fc;
 
-  function bit [7:0] D(input int X, input int Y);
+  function automatic bit [7:0] D(input int X, input int Y);
     return {Y[2:0], X[4:0]};
   endfunction
 
@@ -69,7 +69,7 @@ package fc;
     STATE_OL3
   } state_t;
 
-  function primitives_t map_primitive(input logic [31:0] data);
+  function automatic primitives_t map_primitive(input logic [31:0] data);
     if (data[31:16] == {D(28,5), D(21,7)}) begin
       return PRIM_VC_RDY;
     end

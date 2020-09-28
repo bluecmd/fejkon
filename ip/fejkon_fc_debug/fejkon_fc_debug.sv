@@ -180,5 +180,5 @@ module fejkon_fc_debug (
     $dumpvars(0, fejkon_fc_debug);
     #1;
   end
-`endif
+`endif  // COCOTB_SIM
 endmodule

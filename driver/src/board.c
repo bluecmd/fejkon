@@ -87,7 +87,7 @@ static int poll(struct napi_struct *napi, int budget)
     struct fejkon_port *port;
     struct packet_meta *meta;
     if (work_done >= budget)
-      return work_done;
+      break;
 
     // See explaination in net_tx for what format is used
     meta = card->rx_buf_read;
@@ -129,14 +129,14 @@ static int poll(struct napi_struct *napi, int budget)
     }
   }
 
+  // Update read pointer
+  iowrite32(
+      card->rx_buf_start_dma + (card->rx_buf_read - card->rx_buf_start),
+      card->bar0 + 0x8A8);
   dev_dbg(&card->pci->dev, "poll budget = %d, processed = %d",
       budget, work_done);
   if (work_done < budget) {
     napi_complete(napi);
-    // Update read pointer and re-enable IRQ
-    iowrite32(
-        card->rx_buf_start_dma + (card->rx_buf_read - card->rx_buf_start),
-        card->bar0 + 0x8A8);
   }
   return work_done;
 }

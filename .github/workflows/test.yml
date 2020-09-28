@@ -14,7 +14,9 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
     - name: Install simulators
-      run: sudo apt-get install iverilog verilator
+      run: sudo apt-get install iverilog verilator python3-pip
+    - name: Install cocotb
+      run: pip3 install cocotb
     - name: Check out code
       uses: actions/checkout@v2
     - name: Test

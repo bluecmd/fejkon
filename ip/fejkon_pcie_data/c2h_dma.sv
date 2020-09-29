@@ -8,6 +8,8 @@
 //           |       |      metadata      |       |
 //           +-------+                    +-------+
 
+// TODO: Remove use of blocking assignments
+// verilog_lint: waive-start always-ff-non-blocking
 `timescale 1 ps / 1 ps
 module c2h_dma (
     input  wire         clk,                              //                clk.clk
@@ -311,3 +313,4 @@ module c2h_dma (
   assign staging_done_strobe = staging_done;
   assign dma_done_strobe = dma_done;
 endmodule
+// verilog_lint: waive-stop always-ff-non-blocking

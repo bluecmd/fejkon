@@ -298,7 +298,7 @@ set_module_property COMPOSITION_CALLBACK compose
 
 proc compose {} {
     if {[get_parameter_value LOOPBACK_01] == "true"} {
-      set_instance_parameter_value fc1_avtx SELECTED_PORT 1
+      set_instance_parameter_value fc1_avtx SelectedPort 1
     }
 }]]></instanceScript>
  <interface name="bar0_mm" internal="pcie_avalon.mm" type="avalon" dir="start" />
@@ -460,13 +460,13 @@ proc compose {} {
   <parameter name="outUseValid" value="1" />
  </module>
  <module name="fc0_avtx" kind="av_st_fixed_mux" version="1.0" enabled="1">
-  <parameter name="AV_CHANNEL" value="false" />
-  <parameter name="AV_ERROR" value="false" />
-  <parameter name="AV_PACKET" value="false" />
-  <parameter name="BITS_PER_SYMBOL" value="9" />
-  <parameter name="CHAN_WIDTH" value="1" />
-  <parameter name="SELECTED_PORT" value="0" />
-  <parameter name="SYMBOLS_PER_BEAT" value="4" />
+  <parameter name="AvChannel" value="false" />
+  <parameter name="AvError" value="false" />
+  <parameter name="AvPacket" value="false" />
+  <parameter name="BitsPerSymbol" value="9" />
+  <parameter name="ChanWidth" value="1" />
+  <parameter name="SelectedPort" value="0" />
+  <parameter name="SymbolsPerBeat" value="4" />
  </module>
  <module
    name="fc0_rx_cdc"
@@ -519,13 +519,13 @@ proc compose {} {
   <parameter name="outUseValid" value="1" />
  </module>
  <module name="fc1_avtx" kind="av_st_fixed_mux" version="1.0" enabled="1">
-  <parameter name="AV_CHANNEL" value="false" />
-  <parameter name="AV_ERROR" value="false" />
-  <parameter name="AV_PACKET" value="false" />
-  <parameter name="BITS_PER_SYMBOL" value="9" />
-  <parameter name="CHAN_WIDTH" value="1" />
-  <parameter name="SELECTED_PORT" value="0" />
-  <parameter name="SYMBOLS_PER_BEAT" value="4" />
+  <parameter name="AvChannel" value="false" />
+  <parameter name="AvError" value="false" />
+  <parameter name="AvPacket" value="false" />
+  <parameter name="BitsPerSymbol" value="9" />
+  <parameter name="ChanWidth" value="1" />
+  <parameter name="SelectedPort" value="0" />
+  <parameter name="SymbolsPerBeat" value="4" />
  </module>
  <module
    name="fc1_rx_cdc"

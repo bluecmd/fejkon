@@ -83,7 +83,7 @@ module top_tb;
       detect <= ~sda;
       // Mark a new transaction when we see START
       if (~sda)
-        detect_flip_flop = ~detect_flip_flop;
+        detect_flip_flop <= ~detect_flip_flop;
       if (~sda && ~reset)
         $info("I2C START");
       else
@@ -97,7 +97,7 @@ module top_tb;
     end else if (~dut.scl_o) begin
       if (cntr_flip_flop != detect_flip_flop) begin
         cntr <= 0;
-        cntr_flip_flop = detect_flip_flop;
+        cntr_flip_flop <= detect_flip_flop;
       end else begin
         cntr <= cntr + 1;
       end
@@ -121,7 +121,9 @@ module top_tb;
   end
 
   // Read on positive edge (cntr is +1 from negedge)
-  always_ff @(posedge dut.scl_o) begin
+  // NOTE: This one needs to use blocking assignments as ModelSim complains
+  // if we do non-blocking assignments. As such, do not use always_ff.
+  always @(posedge dut.scl_o) begin
     if (reset) begin
       // Settings from an example in the datasheet
       regs[7] = {3'b000, 5'h1};

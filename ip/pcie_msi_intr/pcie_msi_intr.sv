@@ -1,4 +1,6 @@
 `timescale 1 us / 1 us
+// TODO: Remove use of blocking assignments
+// verilog_lint: waive-start always-ff-non-blocking
 module pcie_msi_intr (
     output wire        app_int_sts,    // int_msi.app_int_sts
     output wire [4:0]  app_msi_num,    //        .app_msi_num
@@ -98,3 +100,4 @@ module pcie_msi_intr (
 `endif  // COCOTB_SIM
 
 endmodule
+// verilog_lint: waive-stop always-ff-non-blocking

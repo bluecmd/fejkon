@@ -1,5 +1,5 @@
 module freq_gauge #(
-    parameter ReferenceClock = 50000000
+    parameter int ReferenceClock = 50000000
   ) (
     input wire         reset,
     input wire         ref_clk,
@@ -13,10 +13,10 @@ module freq_gauge #(
   // The reason why a full 1 ms (eternity!) is spent on this is making the
   // clock-domain crossing super-simple.
 
-  localparam MeasurementTime = ReferenceClock / 100;
-  localparam ProcessingTime = ReferenceClock / 1000;
+  localparam int MeasurementTime = ReferenceClock / 100;
+  localparam int ProcessingTime = ReferenceClock / 1000;
 
-  int countdown = MeasurementTime;
+  logic [31:0] countdown = MeasurementTime;
 
   logic measure = 1;
   logic measure_cdc1 = 0;

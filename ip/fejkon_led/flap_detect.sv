@@ -1,6 +1,6 @@
 module flap_detect #(
-    parameter Cooloff,
-    parameter MaxStrikes = 3
+    parameter logic [31:0] Cooloff,
+    parameter logic [3:0] MaxStrikes = 4'd3
   ) (
     input  wire clk,
     input  wire in,
@@ -10,8 +10,8 @@ module flap_detect #(
   logic in_r = 0;
 
   logic flapped = 0;
-  int flap_reset = 0;
-  int flap_strikes_left = MaxStrikes;
+  logic [31:0] flap_reset = 0;
+  logic [31:0] flap_strikes_left = MaxStrikes;
 
   assign flap = flapped && (flap_strikes_left == 0);
 

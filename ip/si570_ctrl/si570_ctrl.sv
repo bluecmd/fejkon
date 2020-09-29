@@ -1,9 +1,9 @@
 `timescale 1 ps / 1 ps
 module si570_ctrl #(
-    parameter InputClock      = 50000000,
-    parameter RecallFrequency = 100000000,
-    parameter TargetFrequency = 125000000,
-    parameter I2CAddress      = 0
+    parameter int          InputClock      = 50000000,
+    parameter int          RecallFrequency = 100000000,
+    parameter int          TargetFrequency = 125000000,
+    parameter logic [7:0]  I2CAddress      = '0
   ) (
     input  wire  clk,       //       clk.clk
     input  wire  reset,     //     reset.reset
@@ -171,7 +171,7 @@ module si570_ctrl #(
     .remain()
   );
 
-  int div_delay_cntr = 0;
+  logic [7:0] div_delay_cntr = 0;
   always_ff @(posedge clk) begin
     // Handle the division latency of 62 clock cycles
     if (reset || startup) begin
@@ -198,8 +198,8 @@ module si570_ctrl #(
   end
 
   // The Si570 datasheets says it can take 10 ms to power up the unit
-  localparam PowerUpCycles = InputClock / 100;
-  int power_up_cntr = PowerUpCycles;
+  localparam logic [31:0] PowerUpCycles = InputClock / 100;
+  logic [31:0] power_up_cntr = PowerUpCycles;
 
   always_ff @(posedge clk) begin
     if (reset) begin
@@ -212,7 +212,7 @@ module si570_ctrl #(
   logic powered_up;
   assign powered_up = power_up_cntr == 0;
 
-  int instr = 0, instr_next;
+  logic [31:0] instr = 0, instr_next;
 
   always_comb begin
     // Advance if I2C is marked as done and we are not computing configuration

@@ -51,85 +51,85 @@ add_fileset_file av_st_fixed_mux.sv SYSTEM_VERILOG PATH av_st_fixed_mux.sv
 #
 # parameters
 #
-add_parameter SELECTED_PORT POSITIVE 1 ""
-set_parameter_property SELECTED_PORT DEFAULT_VALUE 0
-set_parameter_property SELECTED_PORT DISPLAY_NAME "Selected port"
-set_parameter_property SELECTED_PORT WIDTH ""
-set_parameter_property SELECTED_PORT TYPE INTEGER
-set_parameter_property SELECTED_PORT UNITS None
-set_parameter_property SELECTED_PORT ALLOWED_RANGES 0:1
-set_parameter_property SELECTED_PORT DESCRIPTION ""
-set_parameter_property SELECTED_PORT AFFECTS_GENERATION false
-set_parameter_property SELECTED_PORT HDL_PARAMETER true
+add_parameter SelectedPort POSITIVE 1 ""
+set_parameter_property SelectedPort DEFAULT_VALUE 0
+set_parameter_property SelectedPort DISPLAY_NAME "Selected port"
+set_parameter_property SelectedPort WIDTH ""
+set_parameter_property SelectedPort TYPE INTEGER
+set_parameter_property SelectedPort UNITS None
+set_parameter_property SelectedPort ALLOWED_RANGES 0:1
+set_parameter_property SelectedPort DESCRIPTION ""
+set_parameter_property SelectedPort AFFECTS_GENERATION false
+set_parameter_property SelectedPort HDL_PARAMETER true
 
-add_parameter BITS_PER_SYMBOL POSITIVE 1 ""
-set_parameter_property BITS_PER_SYMBOL DEFAULT_VALUE 8
-set_parameter_property BITS_PER_SYMBOL DISPLAY_NAME "Bits per symbol"
-set_parameter_property BITS_PER_SYMBOL WIDTH ""
-set_parameter_property BITS_PER_SYMBOL TYPE INTEGER
-set_parameter_property BITS_PER_SYMBOL UNITS BITS
-set_parameter_property BITS_PER_SYMBOL ALLOWED_RANGES 1:128
-set_parameter_property BITS_PER_SYMBOL DESCRIPTION ""
-set_parameter_property BITS_PER_SYMBOL AFFECTS_GENERATION false
-set_parameter_property BITS_PER_SYMBOL HDL_PARAMETER true
+add_parameter BitsPerSymbol POSITIVE 1 ""
+set_parameter_property BitsPerSymbol DEFAULT_VALUE 8
+set_parameter_property BitsPerSymbol DISPLAY_NAME "Bits per symbol"
+set_parameter_property BitsPerSymbol WIDTH ""
+set_parameter_property BitsPerSymbol TYPE INTEGER
+set_parameter_property BitsPerSymbol UNITS BITS
+set_parameter_property BitsPerSymbol ALLOWED_RANGES 1:128
+set_parameter_property BitsPerSymbol DESCRIPTION ""
+set_parameter_property BitsPerSymbol AFFECTS_GENERATION false
+set_parameter_property BitsPerSymbol HDL_PARAMETER true
 
-add_parameter SYMBOLS_PER_BEAT POSITIVE 1 ""
-set_parameter_property SYMBOLS_PER_BEAT DEFAULT_VALUE 4
-set_parameter_property SYMBOLS_PER_BEAT DISPLAY_NAME "Symbols per beat"
-set_parameter_property SYMBOLS_PER_BEAT WIDTH ""
-set_parameter_property SYMBOLS_PER_BEAT TYPE INTEGER
-set_parameter_property SYMBOLS_PER_BEAT UNITS None
-set_parameter_property SYMBOLS_PER_BEAT ALLOWED_RANGES 1:128
-set_parameter_property SYMBOLS_PER_BEAT DESCRIPTION ""
-set_parameter_property SYMBOLS_PER_BEAT AFFECTS_GENERATION false
-set_parameter_property SYMBOLS_PER_BEAT HDL_PARAMETER true
+add_parameter SymbolsPerBeat POSITIVE 1 ""
+set_parameter_property SymbolsPerBeat DEFAULT_VALUE 4
+set_parameter_property SymbolsPerBeat DISPLAY_NAME "Symbols per beat"
+set_parameter_property SymbolsPerBeat WIDTH ""
+set_parameter_property SymbolsPerBeat TYPE INTEGER
+set_parameter_property SymbolsPerBeat UNITS None
+set_parameter_property SymbolsPerBeat ALLOWED_RANGES 1:128
+set_parameter_property SymbolsPerBeat DESCRIPTION ""
+set_parameter_property SymbolsPerBeat AFFECTS_GENERATION false
+set_parameter_property SymbolsPerBeat HDL_PARAMETER true
 
-add_parameter AV_CHANNEL POSITIVE 1 ""
-set_parameter_property AV_CHANNEL DEFAULT_VALUE false
-set_parameter_property AV_CHANNEL DISPLAY_NAME "Use channels"
-set_parameter_property AV_CHANNEL WIDTH ""
-set_parameter_property AV_CHANNEL TYPE BOOLEAN
-set_parameter_property AV_CHANNEL UNITS None
-set_parameter_property AV_CHANNEL DESCRIPTION ""
-set_parameter_property AV_CHANNEL AFFECTS_ELABORATION true
-set_parameter_property AV_CHANNEL HDL_PARAMETER false
+add_parameter AvChannel POSITIVE 1 ""
+set_parameter_property AvChannel DEFAULT_VALUE false
+set_parameter_property AvChannel DISPLAY_NAME "Use channels"
+set_parameter_property AvChannel WIDTH ""
+set_parameter_property AvChannel TYPE BOOLEAN
+set_parameter_property AvChannel UNITS None
+set_parameter_property AvChannel DESCRIPTION ""
+set_parameter_property AvChannel AFFECTS_ELABORATION true
+set_parameter_property AvChannel HDL_PARAMETER false
 
-add_parameter CHAN_WIDTH POSITIVE 1 ""
-set_parameter_property CHAN_WIDTH DEFAULT_VALUE 2
-set_parameter_property CHAN_WIDTH DISPLAY_NAME "Channel width"
-set_parameter_property CHAN_WIDTH WIDTH ""
-set_parameter_property CHAN_WIDTH TYPE INTEGER
-set_parameter_property CHAN_WIDTH UNITS BITS
-set_parameter_property CHAN_WIDTH ALLOWED_RANGES 1:128
-set_parameter_property CHAN_WIDTH DESCRIPTION ""
-set_parameter_property CHAN_WIDTH AFFECTS_GENERATION false
-set_parameter_property CHAN_WIDTH HDL_PARAMETER true
+add_parameter ChanWidth POSITIVE 1 ""
+set_parameter_property ChanWidth DEFAULT_VALUE 2
+set_parameter_property ChanWidth DISPLAY_NAME "Channel width"
+set_parameter_property ChanWidth WIDTH ""
+set_parameter_property ChanWidth TYPE INTEGER
+set_parameter_property ChanWidth UNITS BITS
+set_parameter_property ChanWidth ALLOWED_RANGES 1:128
+set_parameter_property ChanWidth DESCRIPTION ""
+set_parameter_property ChanWidth AFFECTS_GENERATION false
+set_parameter_property ChanWidth HDL_PARAMETER true
 
-add_parameter AV_PACKET POSITIVE 1 ""
-set_parameter_property AV_PACKET DEFAULT_VALUE false
-set_parameter_property AV_PACKET DISPLAY_NAME "Avalon-ST Packet"
-set_parameter_property AV_PACKET WIDTH ""
-set_parameter_property AV_PACKET TYPE BOOLEAN
-set_parameter_property AV_PACKET UNITS None
-set_parameter_property AV_PACKET DESCRIPTION ""
-set_parameter_property AV_PACKET AFFECTS_ELABORATION true
-set_parameter_property AV_PACKET HDL_PARAMETER false
+add_parameter AvPacket POSITIVE 1 ""
+set_parameter_property AvPacket DEFAULT_VALUE false
+set_parameter_property AvPacket DISPLAY_NAME "Avalon-ST Packet"
+set_parameter_property AvPacket WIDTH ""
+set_parameter_property AvPacket TYPE BOOLEAN
+set_parameter_property AvPacket UNITS None
+set_parameter_property AvPacket DESCRIPTION ""
+set_parameter_property AvPacket AFFECTS_ELABORATION true
+set_parameter_property AvPacket HDL_PARAMETER false
 
-add_parameter AV_ERROR POSITIVE 1 ""
-set_parameter_property AV_ERROR DEFAULT_VALUE false
-set_parameter_property AV_ERROR DISPLAY_NAME "Use error"
-set_parameter_property AV_ERROR WIDTH ""
-set_parameter_property AV_ERROR TYPE BOOLEAN
-set_parameter_property AV_ERROR UNITS None
-set_parameter_property AV_ERROR DESCRIPTION ""
-set_parameter_property AV_ERROR AFFECTS_ELABORATION true
-set_parameter_property AV_ERROR HDL_PARAMETER false
+add_parameter AvError POSITIVE 1 ""
+set_parameter_property AvError DEFAULT_VALUE false
+set_parameter_property AvError DISPLAY_NAME "Use error"
+set_parameter_property AvError WIDTH ""
+set_parameter_property AvError TYPE BOOLEAN
+set_parameter_property AvError UNITS None
+set_parameter_property AvError DESCRIPTION ""
+set_parameter_property AvError AFFECTS_ELABORATION true
+set_parameter_property AvError HDL_PARAMETER false
 
 proc elaborate {} {
-  set dps [get_parameter_value BITS_PER_SYMBOL]
-  set dataw [expr [get_parameter_value BITS_PER_SYMBOL] * [get_parameter_value SYMBOLS_PER_BEAT]]
-  set emptyw [expr int(log([get_parameter_value SYMBOLS_PER_BEAT])/log(2))]
-  set chanw [get_parameter_value CHAN_WIDTH]
+  set dps [get_parameter_value BitsPerSymbol]
+  set dataw [expr [get_parameter_value BitsPerSymbol] * [get_parameter_value SymbolsPerBeat]]
+  set emptyw [expr int(log([get_parameter_value SymbolsPerBeat])/log(2))]
+  set chanw [get_parameter_value ChanWidth]
 
   add_interface out avalon_streaming start
   set_interface_property out associatedClock clk
@@ -200,7 +200,7 @@ proc elaborate {} {
   add_interface_port in1 in1_endofpacket endofpacket Input 1
   add_interface_port in1 in1_startofpacket startofpacket Input 1
 
-  if {[get_parameter_value AV_ERROR] == "false"} {
+  if {[get_parameter_value AvError] == "false"} {
     set_port_property out_error termination true
     set_port_property in0_error termination true
     set_port_property in0_error termination_value 0
@@ -208,7 +208,7 @@ proc elaborate {} {
     set_port_property in1_error termination_value 0
   }
 
-  if {[get_parameter_value AV_CHANNEL] == "false"} {
+  if {[get_parameter_value AvChannel] == "false"} {
     set_port_property out_channel termination true
     set_port_property in0_channel termination true
     set_port_property in0_channel termination_value 0
@@ -216,7 +216,7 @@ proc elaborate {} {
     set_port_property in1_channel termination_value 0
   }
 
-  if {[get_parameter_value AV_PACKET] == "false"} {
+  if {[get_parameter_value AvPacket] == "false"} {
     set_port_property out_empty         termination true
     set_port_property out_endofpacket   termination true
     set_port_property out_startofpacket termination true

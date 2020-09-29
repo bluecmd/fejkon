@@ -51,7 +51,7 @@ package i2c_util;
     bus.data_in_valid = 0;
   endfunction
 
-  function automatic logic [7:0] si570_bus_read(ref i2c_bus_t bus, input int address);
+  function automatic logic [7:0] si570_bus_read(ref i2c_bus_t bus, input logic [7:0] address);
     // State 0: Start write address byte
     // State 1: Start read data byte
     // State 2: Wait for complete
@@ -63,7 +63,7 @@ package i2c_util;
       bus.state = 0;
     end else if (bus.state == 0) begin
       _new_tx(bus);
-      _start_write(bus, address[7:0]);
+      _start_write(bus, address);
       bus.data_out_saved = 8'b0;
       bus.delay = 2;
       bus.done = 0;
@@ -92,7 +92,7 @@ package i2c_util;
     return bus.data_out_saved;
   endfunction
 
-  function automatic void si570_bus_write(ref i2c_bus_t bus, input int address, input logic [7:0] data);
+  function automatic void si570_bus_write(ref i2c_bus_t bus, input logic [7:0] address, input logic [7:0] data);
     // State 0: Start write address byte
     // State 1: Start write data byte
     // State 2: Wait for complete
@@ -104,7 +104,7 @@ package i2c_util;
       bus.state = 0;
     end else if (bus.state == 0) begin
       _new_tx(bus);
-      _start_write(bus, address[7:0]);
+      _start_write(bus, address);
       bus.delay = 2;
       bus.done = 0;
       bus.err = 0;

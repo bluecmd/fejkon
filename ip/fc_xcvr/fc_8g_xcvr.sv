@@ -192,7 +192,7 @@ module fc_8g_xcvr (
     if (tx_be_datak == 4'b1000)
       tx_prim <= fc::map_primitive(tx_be_data);
     if (tx_be_datak_r == 4'b1000)
-      tx_primitive_cntrs[rx_prim] <= tx_primitive_cntrs[rx_prim] + 1;
+      tx_primitive_cntrs[tx_prim] <= tx_primitive_cntrs[tx_prim] + 1;
   end
 
   logic [31:0] reg_readdata;

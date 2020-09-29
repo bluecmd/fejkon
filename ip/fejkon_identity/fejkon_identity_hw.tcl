@@ -39,15 +39,15 @@ add_fileset QUARTUS_SYNTH QUARTUS_SYNTH "" ""
 set_fileset_property QUARTUS_SYNTH TOP_LEVEL fejkon_identity
 set_fileset_property QUARTUS_SYNTH ENABLE_RELATIVE_INCLUDE_PATHS false
 set_fileset_property QUARTUS_SYNTH ENABLE_FILE_OVERWRITE_MODE true
-add_fileset_file fejkon_identity.sv VERILOG PATH fejkon_identity.sv TOP_LEVEL_FILE
-add_fileset_file version.sv VERILOG PATH version.sv
+add_fileset_file fejkon_identity.sv SYSTEM_VERILOG PATH fejkon_identity.sv TOP_LEVEL_FILE
+add_fileset_file version.sv SYSTEM_VERILOG PATH version.sv
 
 add_fileset SIM_VERILOG SIM_VERILOG "" ""
 set_fileset_property SIM_VERILOG TOP_LEVEL fejkon_identity
 set_fileset_property SIM_VERILOG ENABLE_RELATIVE_INCLUDE_PATHS false
 set_fileset_property SIM_VERILOG ENABLE_FILE_OVERWRITE_MODE true
-add_fileset_file fejkon_identity.sv VERILOG PATH fejkon_identity.sv
-add_fileset_file version.sv VERILOG PATH version.sv
+add_fileset_file fejkon_identity.sv SYSTEM_VERILOG PATH fejkon_identity.sv
+add_fileset_file version.sv SYSTEM_VERILOG PATH version.sv
 
 
 # 

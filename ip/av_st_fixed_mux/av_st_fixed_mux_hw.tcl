@@ -45,7 +45,7 @@ add_fileset SIM_VERILOG SIM_VERILOG "" ""
 set_fileset_property SIM_VERILOG TOP_LEVEL av_st_fixed_mux
 set_fileset_property SIM_VERILOG ENABLE_RELATIVE_INCLUDE_PATHS false
 set_fileset_property SIM_VERILOG ENABLE_FILE_OVERWRITE_MODE false
-add_fileset_file av_st_fixed_mux.sv VERILOG PATH av_st_fixed_mux.sv
+add_fileset_file av_st_fixed_mux.sv SYSTEM_VERILOG PATH av_st_fixed_mux.sv
 
 
 #

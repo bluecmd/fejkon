@@ -188,7 +188,7 @@ module si570_ctrl #(
       end
     end else if (calc_fxtal) begin
       if (~fxtal_valid)
-        div_delay_cntr <= div_delay_cntr + 1;
+        div_delay_cntr <= div_delay_cntr + 8'd1;
       if (div_delay_cntr > 8'd61) begin
         fxtal <= fxtal_div_q;
         fxtal_valid <= '1;

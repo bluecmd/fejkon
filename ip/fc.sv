@@ -1,7 +1,7 @@
 `timescale 1 us / 1 us
 package fc;
 
-  function automatic bit [7:0] D(input int X, input int Y);
+  function automatic logic [7:0] D(input logic [4:0] X, input logic [2:0] Y);
     return {Y[2:0], X[4:0]};
   endfunction
 

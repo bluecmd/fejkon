@@ -17,7 +17,8 @@ module fc_state_tx (
       fc::STATE_OL1: data = fc::OLS;
       fc::STATE_OL2: data = fc::LR;
       fc::STATE_OL3: data = fc::NOS;
-      default: ;
+      // TODO: Add assert
+      default: data = fc::LR;
     endcase
   end
 

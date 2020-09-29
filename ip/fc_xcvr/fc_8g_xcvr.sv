@@ -161,8 +161,8 @@ module fc_8g_xcvr (
   end
 
   // This is best-effort to mgmt clock domain, do not depend on accuracy
-  int tx_primitive_cntrs [fc::PRIM_MAX];
-  int rx_primitive_cntrs [fc::PRIM_MAX];
+  logic [31:0] tx_primitive_cntrs [fc::PRIM_MAX];
+  logic [31:0] rx_primitive_cntrs [fc::PRIM_MAX];
 
   fc::primitives_t tx_prim = fc::PRIM_UNKNOWN, rx_prim = fc::PRIM_UNKNOWN;
 
@@ -184,7 +184,7 @@ module fc_8g_xcvr (
     if (rx_be_datak == 4'b1000)
       rx_prim <= fc::map_primitive(rx_be_data);
     if (rx_be_datak_r == 4'b1000 && is_aligned)
-      rx_primitive_cntrs[rx_prim]++;
+      rx_primitive_cntrs[rx_prim] <= rx_primitive_cntrs[rx_prim] + 1;
   end
 
   always_ff @(posedge tx_clk) begin
@@ -192,7 +192,7 @@ module fc_8g_xcvr (
     if (tx_be_datak == 4'b1000)
       tx_prim <= fc::map_primitive(tx_be_data);
     if (tx_be_datak_r == 4'b1000)
-      tx_primitive_cntrs[tx_prim]++;
+      tx_primitive_cntrs[rx_prim] <= tx_primitive_cntrs[rx_prim] + 1;
   end
 
   logic [31:0] reg_readdata;

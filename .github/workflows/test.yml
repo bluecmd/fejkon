@@ -14,7 +14,10 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
     - name: Install simulators
-      run: sudo apt-get install iverilog verilator python3-pip
+      run: |
+        # TODO: Replace when iverilog is updated upstream
+        wget https://storage.googleapis.com/bluecmd/iverilog_11.0-0_amd64.deb
+        sudo apt-get install verilator python3-pip ./iverilog_11.0-0_amd64.deb
     - name: Install cocotb
       run: |
         pip3 install cocotb

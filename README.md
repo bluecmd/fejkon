@@ -165,10 +165,11 @@ Finally review any changes to the \*.tcl files and commit them if they look reas
 To run the tests first install the dependencies:
 
 ```
-$ sudo apt install iverilog gtkwave verilator myhdl-cosimulation python3-myhdl
-$ cd /usr/share/myhdl/cosimulation/icarus
-$ sudo make
-$ sudo cp myhdl.vpi /usr/lib/x86_64-linux-gnu/ivl/
+# NOTE: You need Icarus Verilog 11.0 or newer, or always_* constructs will
+# not be accepted.
+$ sudo apt install iverilog gtkwave verilator
+$ sudo apt install python3-pip
+$ pip3 install cocotb
 ```
 
 Then to execute all tests run:

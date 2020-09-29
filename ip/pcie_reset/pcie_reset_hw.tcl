@@ -39,14 +39,14 @@ add_fileset QUARTUS_SYNTH QUARTUS_SYNTH "" ""
 set_fileset_property QUARTUS_SYNTH TOP_LEVEL pcie_reset
 set_fileset_property QUARTUS_SYNTH ENABLE_RELATIVE_INCLUDE_PATHS false
 set_fileset_property QUARTUS_SYNTH ENABLE_FILE_OVERWRITE_MODE true
-add_fileset_file pcie_reset.sv VERILOG PATH pcie_reset.sv TOP_LEVEL_FILE
+add_fileset_file pcie_reset.sv SYSTEM_VERILOG PATH pcie_reset.sv TOP_LEVEL_FILE
 add_fileset_file pcie_reset.sdc SDC PATH pcie_reset.sdc
 
 add_fileset SIM_VERILOG SIM_VERILOG "" ""
 set_fileset_property SIM_VERILOG TOP_LEVEL pcie_reset
 set_fileset_property SIM_VERILOG ENABLE_RELATIVE_INCLUDE_PATHS false
 set_fileset_property SIM_VERILOG ENABLE_FILE_OVERWRITE_MODE true
-add_fileset_file pcie_reset.sv VERILOG PATH pcie_reset.sv
+add_fileset_file pcie_reset.sv SYSTEM_VERILOG PATH pcie_reset.sv
 
 
 # 

@@ -123,7 +123,7 @@ module fejkon_pcie_tlp_tx_multiplexer (
    // ---------------------------------------------------------------------
    //| Input Mapping
    // ---------------------------------------------------------------------
-   always @* begin
+   always_comb begin
      in0_payload = {in0_data,in0_startofpacket,in0_endofpacket,in0_empty};
      in1_payload = {in1_data,in1_startofpacket,in1_endofpacket,in1_empty};
      in2_payload = {in2_data,in2_startofpacket,in2_endofpacket,in2_empty};
@@ -132,7 +132,7 @@ module fejkon_pcie_tlp_tx_multiplexer (
    // ---------------------------------------------------------------------
    //| Scheduling Algorithm
    // ---------------------------------------------------------------------
-   always @* begin
+   always_comb begin
          
       decision = 0;
       case(select) 
@@ -162,7 +162,7 @@ module fejkon_pcie_tlp_tx_multiplexer (
    // ---------------------------------------------------------------------
    //| Capture Decision
    // ---------------------------------------------------------------------
-   always @ (negedge reset_n, posedge clk) begin
+   always_ff @ (negedge reset_n, posedge clk) begin
       if (!reset_n) begin
          select <= 0;
          packet_in_progress <= 0;
@@ -184,7 +184,7 @@ module fejkon_pcie_tlp_tx_multiplexer (
    // ---------------------------------------------------------------------
    //| Mux
    // ---------------------------------------------------------------------
-   always @* begin
+   always_comb begin
       case(select) 
          0 : begin
             selected_payload = in0_payload;         
@@ -213,7 +213,7 @@ module fejkon_pcie_tlp_tx_multiplexer (
    // ---------------------------------------------------------------------
    //| Back Pressure
    // ---------------------------------------------------------------------
-   always @* begin
+   always_comb begin
       in0_ready <= ~in0_valid;
       in1_ready <= ~in1_valid;
       in2_ready <= ~in2_valid;
@@ -224,7 +224,7 @@ module fejkon_pcie_tlp_tx_multiplexer (
       default : in0_ready <= selected_ready;
 
 endcase // case (select)
-end // always @ *
+end // always_ff @ *
 
    // ---------------------------------------------------------------------
    //| output Pipeline
@@ -243,7 +243,7 @@ end // always @ *
    // ---------------------------------------------------------------------
    //| Output Mapping
    // ---------------------------------------------------------------------
-   always @* begin
+   always_comb begin
       out_valid   = out_valid_wire;
       out_channel[2-1:0] = out_select;
       {out_data,out_startofpacket,out_endofpacket,out_empty} = out_payload;
@@ -267,13 +267,13 @@ module fejkon_pcie_tlp_tx_multiplexer_1stage_pipeline
    reg                                  in_ready1;
 
 
-   always @* begin
+   always_comb begin
       in_ready = out_ready || ~out_valid;
       //     in_ready = in_ready1;
       //     if (!out_ready)
       //       in_ready = 0;
    end
-   always @ (negedge reset_n, posedge clk) begin
+   always_ff @ (negedge reset_n, posedge clk) begin
       if (!reset_n) begin
          in_ready1 <= 0;
          out_valid <= 0;
@@ -289,7 +289,7 @@ module fejkon_pcie_tlp_tx_multiplexer_1stage_pipeline
             out_payload <= in_payload;
          end
       end // else: !if(!reset_n)
-   end // always @ (negedge reset_n, posedge clk)
+   end // always_ff @ (negedge reset_n, posedge clk)
 
 endmodule //
 

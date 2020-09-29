@@ -13,7 +13,7 @@ module fc_state_rx (
   assign state = state_r;
 
   // This is Table 22 "FC_Port states" from FC-FS-5 INCITS 545-2019
-  always @* begin
+  always_comb begin
     state_next = state_r;
     case (fc::map_primitive(data))
       fc::PRIM_OLS: state_next = fc::STATE_OL2;
@@ -44,13 +44,14 @@ module fc_state_rx (
           fc::STATE_OL1: state_next = fc::STATE_OL1;
           fc::STATE_OL2: state_next = fc::STATE_OL2;
           fc::STATE_OL3: state_next = fc::STATE_OL2;
+          default: ;
         endcase
       end
       default: ;
     endcase
   end
 
-  always @(posedge clk) begin
+  always_ff @(posedge clk) begin
     if (reset) begin
       state_r <= fc::STATE_LF2;
     end else if (datak == 4'b1000) begin
@@ -62,7 +63,7 @@ module fc_state_rx (
   // transmit a minimum of 6 IDLES before transmitting other Transmission Words
   int idle_hold_off = 6;
 
-  always @(posedge clk) begin
+  always_ff @(posedge clk) begin
     if (reset) begin
       idle_hold_off <= 6;
     end else if (state_r != fc::STATE_AC) begin

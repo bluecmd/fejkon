@@ -1,6 +1,6 @@
 `timescale 1 ps / 1 ps
 module fejkon_led #(
-    parameter ReferenceClock = 50000000
+    parameter int ReferenceClock = 50000000
   ) (
     input  wire       clk,             //           clk.clk
     input  wire       fcport0_aligned, //       fcport0.aligned
@@ -20,7 +20,7 @@ module fejkon_led #(
   logic [7:0] in_cdc1 = 8'b0;
   logic [7:0] in = 8'b0;
 
-  always @(posedge clk) begin
+  always_ff @(posedge clk) begin
     in_cdc1[0] <= fcport0_aligned;
     in_cdc1[1] <= fcport1_aligned;
     in_cdc1[2] <= fcport2_aligned;
@@ -36,10 +36,10 @@ module fejkon_led #(
   logic [7:0] led = 8'b0;
 
   // Require the signal to be stable for 500 ms
-  localparam Cooloff = ReferenceClock / 2;
+  localparam int Cooloff = ReferenceClock / 2;
 
   // Blink in 100 Hz
-  localparam BlinkHz = ReferenceClock / 10;
+  localparam int BlinkHz = ReferenceClock / 10;
   logic blink = 1;
 
   flap_detect #(
@@ -50,7 +50,7 @@ module fejkon_led #(
     .flap(flap)
   );
 
-  always @(posedge clk) begin
+  always_ff @(posedge clk) begin
     led[0] <= flap[0] ? blink : in[0];
     led[1] <= flap[1] ? blink : in[1];
     led[2] <= flap[2] ? blink : in[2];
@@ -61,9 +61,9 @@ module fejkon_led #(
     led[7] <= flap[7] ? blink : in[7];
   end
 
-  int blinker = BlinkHz;
+  logic [31:0] blinker = 32'(BlinkHz);
 
-  always @(posedge clk) begin
+  always_ff @(posedge clk) begin
     if (blinker == 0) begin
       blink <= ~blink;
       blinker <= BlinkHz;

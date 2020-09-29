@@ -1,4 +1,6 @@
 `timescale 1 us / 1 us
+// TODO: Remove use of blocking assignments
+// verilog_lint: waive-start always-ff-non-blocking
 module pcie_msi_intr (
     output wire        app_int_sts,    // int_msi.app_int_sts
     output wire [4:0]  app_msi_num,    //        .app_msi_num
@@ -17,7 +19,7 @@ module pcie_msi_intr (
   assign app_msi_tc = 3'b000;
 
   // Controls legacy interrupts. We do not support falling back to non-MSI
-  // so this is always low.
+  // so this is always_ff low.
   assign app_int_sts = 1'b0;
 
 
@@ -37,7 +39,7 @@ module pcie_msi_intr (
   // We just have to be sure that when the driver is loaded, all IRQs are let
   // down before MSI is re-enabled so the host doesn't get swamped by old
   // IRQs it cannot yet handle (or that it knows to ignore them).
-  always @(posedge clk) begin: irq_one_shot
+  always_ff @(posedge clk) begin: irq_one_shot
     if (reset) begin
       irq_r <= 0;
     end else begin
@@ -45,7 +47,7 @@ module pcie_msi_intr (
     end
   end
 
-  always @(posedge clk) begin: irq_buffer
+  always_ff @(posedge clk) begin: irq_buffer
     if (reset) begin
       irq_pending <= 0;
     end else begin
@@ -56,7 +58,7 @@ module pcie_msi_intr (
   logic       msi_req = 0;
   logic [4:0] msi_num = 0;
 
-  always @(posedge clk) begin: msi_tx
+  always_ff @(posedge clk) begin: msi_tx
     if (reset) begin
       msi_req = 0;
       msi_num = 0;
@@ -95,6 +97,7 @@ module pcie_msi_intr (
     $dumpvars(0, pcie_msi_intr);
     #1;
   end
-`endif
+`endif  // COCOTB_SIM
 
 endmodule
+// verilog_lint: waive-stop always-ff-non-blocking

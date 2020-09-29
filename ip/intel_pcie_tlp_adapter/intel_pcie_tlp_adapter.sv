@@ -1,4 +1,3 @@
-`timescale 1 ps / 1 ps
 module intel_pcie_tlp_adapter (
     input  wire         clk,                     //       clk.clk
     input  wire         reset,                   //     reset.reset
@@ -37,12 +36,15 @@ module intel_pcie_tlp_adapter (
     input  wire         tlp_tx_st_valid          //          .valid
   );
 
+  timeunit      1ns;
+  timeprecision 1ns;
+
   logic [1:0] phy_tx_st_empty_out;
   logic [2:0] tlp_rx_st_empty_out;
 
   // Map Intel PCIe custom "empty" signal to Avalon-ST standard for 32-bit
   // words
-  always @(*) begin
+  always_comb begin
     case (tlp_tx_st_empty[4:2])
       3'h0: phy_tx_st_empty_out = 2'h0;
       3'h1: phy_tx_st_empty_out = 2'h0;
@@ -52,15 +54,19 @@ module intel_pcie_tlp_adapter (
       3'h5: phy_tx_st_empty_out = 2'h2;
       3'h6: phy_tx_st_empty_out = 2'h3;
       3'h7: phy_tx_st_empty_out = 2'h3;
+      // TODO: Add assert on default case
+      default: phy_tx_st_empty_out = 2'h0;
     endcase
   end
 
-  always @(*) begin
+  always_comb begin
     case (phy_rx_st_empty)
       2'h0: tlp_rx_st_empty_out = 3'h0;
       2'h1: tlp_rx_st_empty_out = 3'h2;
       2'h2: tlp_rx_st_empty_out = 3'h4;
       2'h3: tlp_rx_st_empty_out = 3'h6;
+      // TODO: Add assert on default case
+      default: tlp_rx_st_empty_out = 3'h0;
     endcase
   end
 

@@ -65,7 +65,7 @@ module fejkon_fc_debug (
 
   assign csr_readdata = readdata;
 
-  always @(posedge clk) begin: csr_wr
+  always_ff @(posedge clk) begin: csr_wr
     if (reset) begin
       enable_generator <= 0;
     end else begin
@@ -80,7 +80,7 @@ module fejkon_fc_debug (
     end
   end
 
-  always @(posedge clk) begin: csr_rd
+  always_ff @(posedge clk) begin: csr_rd
     if (reset) begin
       readdata <= 0;
     end else begin
@@ -93,7 +93,7 @@ module fejkon_fc_debug (
     end
   end
 
-  always @(posedge clk) begin: arbiter
+  always_ff @(posedge clk) begin: arbiter
     if (reset) begin
       source_generator <= 0;
     end else begin
@@ -112,7 +112,7 @@ module fejkon_fc_debug (
     end
   end
 
-  always @(posedge clk) begin: decr_gen
+  always_ff @(posedge clk) begin: decr_gen
     if (reset) begin
       decr_generator <= 0;
     end else begin
@@ -125,7 +125,7 @@ module fejkon_fc_debug (
 
   logic in_ready = 0;
 
-  always @(posedge clk) begin
+  always_ff @(posedge clk) begin
     if (reset) begin
       in_valid_r <= 0;
     end else begin
@@ -140,7 +140,7 @@ module fejkon_fc_debug (
     end
   end
 
-  always @(*) begin: out_driver
+  always_comb begin: out_driver
     if (source_generator) begin
       out_valid = gen_valid;
       out_data = gen_data;
@@ -158,7 +158,7 @@ module fejkon_fc_debug (
     end
   end
 
-  always @(*) begin: ready_driver
+  always_comb begin: ready_driver
     if (reset) begin
       in_ready = 0;
     end else begin
@@ -180,5 +180,5 @@ module fejkon_fc_debug (
     $dumpvars(0, fejkon_fc_debug);
     #1;
   end
-`endif
+`endif  // COCOTB_SIM
 endmodule

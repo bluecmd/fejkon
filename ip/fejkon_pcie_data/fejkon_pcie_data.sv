@@ -151,7 +151,7 @@ module fejkon_pcie_data (
   assign tlp_rx_st_len      = tlp_rx_st_dword[0][9:0];
   assign tlp_rx_st_is_4dw   = tlp_rx_st_fmt[0];
 
-  always @(*) begin: tlp_rx_st_type_driver
+  always_comb begin: tlp_rx_st_type_driver
     case ({tlp_rx_st_fmt[1], tlp_rx_st_raw_type})
       6'b000000: tlp_rx_st_type = TLP_MRD;
       6'b000001: tlp_rx_st_type = TLP_MRDLK;
@@ -185,7 +185,7 @@ module fejkon_pcie_data (
   // Process incoming TLP
   // This process converts from the Avalon-ST (rx_st_*) to the internal
   // registers for the current frame (rx_frm_*)
-  always @(posedge clk) begin: process_incoming_tlp
+  always_ff @(posedge clk) begin: process_incoming_tlp
     tlp_rx_frm_is_start <= 1'b0;
     if (is_ready && tlp_rx_st_valid && tlp_rx_st_startofpacket) begin
       tlp_rx_frm_is_start <= 1'b1;
@@ -220,13 +220,13 @@ module fejkon_pcie_data (
   end
 
   // Masked address calculation
-  always @(*) begin: masked_address_driver
+  always_comb begin: masked_address_driver
     // TODO(bluecmd): Hard-coded to 64 KiB region
     tlp_rx_frm_masked_address = tlp_rx_frm_address & 64'h000000000000ffff;
   end
 
   // Posted/Non-posted Request classification
-  always @(posedge clk) begin: npr_driver
+  always_ff @(posedge clk) begin: npr_driver
     // A NPR requires a completion to be sent, a PR does not.
     // We want to figure out what we are handling to make sure we send
     // a completion if we need to, and to account the request correctly.
@@ -245,7 +245,7 @@ module fejkon_pcie_data (
   end
 
   // Total byte count calculation
-  always @(posedge clk) begin: total_byte_driver
+  always_ff @(posedge clk) begin: total_byte_driver
     if (tlp_rx_st_valid && tlp_rx_st_startofpacket &&
       (tlp_rx_st_type == TLP_MRD || tlp_rx_st_type == TLP_MWR)) begin
       casez ({tlp_rx_st_dword[1][3:0], tlp_rx_st_dword[1][7:4]})
@@ -285,7 +285,7 @@ module fejkon_pcie_data (
 
   // A NPR requires a completion to be sent, a PR does not.
   // Signal unsupported requests
-  always @(*) begin: tlp_unsupported_driver
+  always_comb begin: tlp_unsupported_driver
     tlp_rx_frm_unsupported = 1'b0;
     if (tlp_rx_frm_type == TLP_UNKNOWN)
       tlp_rx_frm_unsupported = 1'b1; // Unknwon TLP type
@@ -304,7 +304,7 @@ module fejkon_pcie_data (
   logic        mem_access_out_valid = 0;
   logic [94:0] mem_access_out = 0;
   // Post incoming access to outgoing FIFO
-  always @(posedge clk) begin: mem_access_driver
+  always_ff @(posedge clk) begin: mem_access_driver
     mem_access_out_valid <= 1'b0;
     // TODO(bluecmd): mem_access_req_ready is not handled currently. It should
     // not overflow however, given the number of pending tags are the same as
@@ -361,7 +361,7 @@ module fejkon_pcie_data (
   logic [7:0] [31:0] tlp_tx_response_frm_dword = 0;
 
   // Instant sender (UR and zero-length reads)
-  always @(posedge clk) begin: instant_tlp_sender
+  always_ff @(posedge clk) begin: instant_tlp_sender
     tlp_tx_instant_frm_valid <= 1'b0;
     tlp_tx_instant_frm_startofpacket <= 1'b0;
     tlp_tx_instant_frm_endofpacket <= 1'b0;
@@ -405,7 +405,7 @@ module fejkon_pcie_data (
   end
 
   // Successful completion sender
-  always @(posedge clk) begin: response_tlp_sender
+  always_ff @(posedge clk) begin: response_tlp_sender
     tlp_tx_response_frm_valid <= 1'b0;
     tlp_tx_response_frm_startofpacket <= 1'b0;
     tlp_tx_response_frm_endofpacket <= 1'b0;
@@ -491,7 +491,7 @@ module fejkon_pcie_data (
   );
 
   logic c2h_dma_pkt_available = 0;
-  always @(posedge clk) begin: c2h_dma_pkt_avail_driver
+  always_ff @(posedge clk) begin: c2h_dma_pkt_avail_driver
     if (reset) begin
       c2h_dma_pkt_available <= 0;
     end else begin
@@ -499,7 +499,7 @@ module fejkon_pcie_data (
     end
   end
 
-  always @(posedge clk) begin: c2h_dma_address
+  always_ff @(posedge clk) begin: c2h_dma_address
     if (reset) begin
       c2h_dma_card_write_ptr <= 0;
     end else begin
@@ -533,7 +533,7 @@ module fejkon_pcie_data (
   logic [7:0] [31:0] csr_tx_response_tlp = 256'b0;
 
   // Process internal statistics bookkeeping
-  always @(posedge clk) begin: internal_statistics
+  always_ff @(posedge clk) begin: internal_statistics
     if (reset) begin
       csr_rx_tlp_counter <= 0;
       csr_rx_unsupported_tlp_counter <= 0;
@@ -624,7 +624,7 @@ module fejkon_pcie_data (
 
   // Process Control Status Register (CSR) accesses
   // This handles reading statistics and control the DMA engine
-  always @(posedge clk) begin
+  always_ff @(posedge clk) begin
     if (csr_read) begin
       casez (csr_address)
         6'h0: csr_readdata_reg <= {14'b0, reset, my_id_valid, my_id};
@@ -648,7 +648,7 @@ module fejkon_pcie_data (
     end
   end
 
-  always @(posedge clk) begin
+  always_ff @(posedge clk) begin
     c2h_dma_buf_reset_write <= 0;
     if (reset) begin
       c2h_dma_buf_start_addr <= 0;

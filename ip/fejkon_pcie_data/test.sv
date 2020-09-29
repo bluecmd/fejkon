@@ -188,7 +188,7 @@ module test;
     .irq_c2h_drop(irq_c2h_drop)
   );
 
-  always @(posedge clk) begin
+  always_ff @(posedge clk) begin
     if (reset) begin
       tl_cfg_add <= 0;
     end else begin
@@ -365,7 +365,7 @@ module test;
   assign mem_access_resp_valid = compl_valid;
   assign mem_access_req_ready = 1'b1;
 
-  always @(posedge clk) begin
+  always_ff @(posedge clk) begin
     compl_valid <= 1'b0;
     if (mem_access_req_valid) begin
       if (mem_access_req_data[0]) begin
@@ -390,7 +390,7 @@ module test;
   end
 
   int setup = 0;
-  always @(posedge clk) begin
+  always_ff @(posedge clk) begin
     if (reset) begin
       setup <= 0;
     end else begin

@@ -8,6 +8,8 @@
 //           |       |      metadata      |       |
 //           +-------+                    +-------+
 
+// TODO: Remove use of blocking assignments
+// verilog_lint: waive-start always-ff-non-blocking
 `timescale 1 ps / 1 ps
 module c2h_dma (
     input  wire         clk,                              //                clk.clk
@@ -77,7 +79,7 @@ module c2h_dma (
   // Staging streams in the acquired data at the same time as the previous
   // packet is being transmitted. Maximum 1 packet pressure though to keep
   // logic simple.
-  always @(*) begin
+  always_comb begin
     staging_start_next = 0;
     if (reset) begin
       staging_start_next = 1;
@@ -91,7 +93,7 @@ module c2h_dma (
   end
 
   // Staging ingest block
-  always @(posedge clk) begin: staging_ingest
+  always_ff @(posedge clk) begin: staging_ingest
     if (reset) begin
       staging_offset <= 0;
     end else begin
@@ -111,7 +113,7 @@ module c2h_dma (
     end
   end
 
-  always @(posedge clk) begin: staging_enqueue_cntr
+  always_ff @(posedge clk) begin: staging_enqueue_cntr
     if (reset) begin
       staging_enqueued = 0;
       staging_done <= 1'b0;
@@ -147,7 +149,7 @@ module c2h_dma (
 
   assign dma_tlp_tx_busy = tx_running;
 
-  always @(posedge clk) begin: dma_tlp_sender
+  always_ff @(posedge clk) begin: dma_tlp_sender
     if (reset) begin
       tx_running <= 0;
       tx_fragment_left <= 0;
@@ -289,7 +291,7 @@ module c2h_dma (
   // Signal done on the same cycle as the TLP EOP is being produced.
   // This allows the DMA write pointer to be updated and for a new TLP to be
   // started in the next cycle.
-  always @(*) begin: dma_done_strobe_driver
+  always_comb begin: dma_done_strobe_driver
     if (reset) begin
       dma_done = 0;
     end else begin
@@ -311,3 +313,4 @@ module c2h_dma (
   assign staging_done_strobe = staging_done;
   assign dma_done_strobe = dma_done;
 endmodule
+// verilog_lint: waive-stop always-ff-non-blocking

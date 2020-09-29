@@ -61,7 +61,7 @@ module intel_pcie_status (
 
   reg [31:0] readdata_r = ~0;
 
-  always @(posedge clk) begin
+  always_ff @(posedge clk) begin
     if (reset) begin
       readdata_r <= ~0;
     end else begin

@@ -32,7 +32,7 @@ module fc_framer #(
   logic rx_reset_cdc1;
   logic rx_reset_r;
 
-  always @(posedge rx_clk) begin
+  always_ff @(posedge rx_clk) begin
     rx_reset_cdc1 <= reset;
     rx_reset_r <= rx_reset_cdc1;
   end
@@ -40,7 +40,7 @@ module fc_framer #(
   logic tx_reset_cdc1;
   logic tx_reset_r;
 
-  always @(posedge tx_clk) begin
+  always_ff @(posedge tx_clk) begin
     tx_reset_cdc1 <= reset;
     tx_reset_r <= tx_reset_cdc1;
   end
@@ -58,7 +58,7 @@ module fc_framer #(
   assign tx_mm_readdata = tx_reg_readdata;
   assign rx_mm_readdata = rx_reg_readdata;
 
-  always @(posedge tx_clk) begin
+  always_ff @(posedge tx_clk) begin
     if (tx_reset_r) begin
       tx_reg_readdata <= 0;
     end else if (tx_mm_read) begin
@@ -72,7 +72,7 @@ module fc_framer #(
   int ac_transition_counter = 0;
   int urx_packet_counter = 0;
 
-  always @(posedge rx_clk) begin
+  always_ff @(posedge rx_clk) begin
     if (rx_reset_r) begin
       rx_reg_readdata <= 0;
     end else if (rx_mm_read) begin
@@ -85,7 +85,7 @@ module fc_framer #(
     end
   end
 
-  always @(posedge rx_clk) begin
+  always_ff @(posedge rx_clk) begin
     state_r <= state;
     if (rx_reset_r) begin
       ac_transition_counter <= 0;
@@ -96,7 +96,7 @@ module fc_framer #(
 
   // This type of CDC is probably OK since both RX and TX will have very
   // similar clocks.
-  always @(posedge tx_clk) begin
+  always_ff @(posedge tx_clk) begin
     state_tx_cdc1 <= state;
     state_tx_cdc2 <= state_tx_cdc1;
     state_tx_xfered <= state_tx_cdc2;
@@ -134,7 +134,7 @@ module fc_framer #(
   logic [3:0] usertx_datak;
   assign usertx_datak = (usertx_startofpacket | usertx_endofpacket) ? 4'b1000 : 4'b0000;
 
-  always @(posedge tx_clk) begin
+  always_ff @(posedge tx_clk) begin
     tx_data <= (is_active & usertx_valid) ? usertx_data : statetx_data;
     tx_datak <= (is_active & usertx_valid) ? usertx_datak : statetx_datak;
   end
@@ -156,7 +156,7 @@ module fc_framer #(
   logic        urx_packet_detect = 0;
   int          urx_packet_length = 0;
 
-  always @(posedge rx_clk) begin
+  always_ff @(posedge rx_clk) begin
     if (rx_reset_r) begin
       urx_data <= 0;
       urx_startofpacket <= 0;

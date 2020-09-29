@@ -124,7 +124,7 @@ module top_tb;
 
   // Used to manually reference tick/tocks on the serial XCVR lines
   // Double-edge clocked
-  always @(edge ref_8g_clk) begin
+  always_ff @(edge ref_8g_clk) begin
     symbol_r[0] <= `PHY0.tx_serial_data;
     symbol_r[9:1] <= symbol_r[8:0];
     bit_cntr <= bit_cntr + 1;

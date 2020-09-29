@@ -12,20 +12,20 @@ module tb;
 
   `include "./gen/simulation/submodules/altpcietb_g3bfm_constants.v"
   // Copied from altpcietb_bfm_rp_gen3_x8.v
-  localparam SHMEM_SIZE = 2 ** SHMEM_ADDR_WIDTH;
-  localparam BAR_TABLE_SIZE = 64;
-  localparam BAR_TABLE_POINTER = SHMEM_SIZE - BAR_TABLE_SIZE;
+  localparam int ShmemSize = 2 ** SHMEM_ADDR_WIDTH;
+  localparam int BarTableSize = 64;
+  localparam int BarTablePointer = ShmemSize - BarTableSize;
 
   import verbosity_pkg::*;
 
-  task barwrite32 (
+  task automatic barwrite32 (
     input integer bar_addr,
     input logic [31:0] data
     );
     begin
       `DRVR.shmem_write(0, data, 4);
       `DRVR.ebfm_barwr(
-        BAR_TABLE_POINTER,
+        BarTablePointer,
         0 /* bar num */,
         bar_addr,
         0 /* shmem_addr */,
@@ -34,13 +34,13 @@ module tb;
     end
   endtask
 
-  task barread32 (
+  task automatic barread32 (
     input integer bar_addr,
     output logic [31:0] data
     );
     begin
       `DRVR.ebfm_barrd_wait(
-        BAR_TABLE_POINTER,
+        BarTablePointer,
         0 /* bar num */,
         bar_addr,
         4 /* shmem_addr */,
@@ -50,7 +50,7 @@ module tb;
     end
   endtask
 
-  task flush;
+  task automatic flush;
     begin
       logic [31:0] res;
       // Normally these things are what a zero-length read is for, but it
@@ -78,7 +78,7 @@ module tb;
     wait(`PCIE_DATA.cpl_err_ur_p == 1);
     assert(`PCIE_DATA.cpl_err_ur_np == 0);
     `DRVR.ebfm_barrd_nowt(
-      BAR_TABLE_POINTER, 0 /* bar num */, 14 /* bar addr */,
+      BarTablePointer, 0 /* bar num */, 14 /* bar addr */,
       4 /* shmem addr */, 4 /* length */, 0 /* tclass */);
     wait(`PCIE_DATA.cpl_err_ur_np == 1);
     assert(`PCIE_DATA.cpl_err_ur_p == 0);
@@ -103,7 +103,7 @@ module tb;
     for (int i = 0; i < 31; i++)
     begin
       `DRVR.ebfm_barrd_nowt(
-        BAR_TABLE_POINTER, 0 /* bar num */, i * 4 /* bar addr */,
+        BarTablePointer, 0 /* bar num */, i * 4 /* bar addr */,
         1024 + i * 4 /* shmem addr */, 4 /* length */, 0 /* tclass */);
     end
 

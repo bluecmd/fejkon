@@ -103,7 +103,7 @@ module fc_8g_xcvr (
   logic [31:0] status_word_mgmt_cdc2 = 0;
   logic [31:0] status_word_mgmt_xfered = 0;
 
-  always @(posedge mgmt_clk) begin
+  always_ff @(posedge mgmt_clk) begin
     status_word_mgmt_cdc1 <= status_word;
     status_word_mgmt_cdc2 <= status_word_mgmt_cdc1;
     status_word_mgmt_xfered <= status_word_mgmt_cdc2;
@@ -111,7 +111,7 @@ module fc_8g_xcvr (
 
   // Align
   // TODO: Test this in testbench
-  always @(posedge rx_clk) begin
+  always_ff @(posedge rx_clk) begin
     rx_le_data_raw_r <= rx_le_data_raw;
     rx_le_datak_raw_r <= rx_le_datak_raw;
     rx_le_runningdisp_raw_r <= rx_le_runningdisp_raw;
@@ -143,7 +143,7 @@ module fc_8g_xcvr (
     (saved_patterndetect == 4'b0100 || saved_patterndetect == 4'b0001 ||
      saved_patterndetect == 4'b1000 || saved_patterndetect == 4'b0010);
 
-  always @(posedge rx_clk) begin
+  always_ff @(posedge rx_clk) begin
     // rx_patterndetect is only valid for K28.5 comma. We need
     // to store the pattern detect outcome when we see an aligned K28.5
     if (rx_syncstatus == 4'b1111 &&
@@ -153,7 +153,7 @@ module fc_8g_xcvr (
     end
   end
 
-  always @(posedge rx_clk) begin
+  always_ff @(posedge rx_clk) begin
     // Match latency of rx_be_data*
     is_aligned_r1 <= is_aligned_r0; // Latency from alignment     (aligned with rx_le_data_raw_r)
     is_aligned_r2 <= is_aligned_r1; // Latency from alignment     (aligned with rx_le_data)
@@ -161,15 +161,15 @@ module fc_8g_xcvr (
   end
 
   // This is best-effort to mgmt clock domain, do not depend on accuracy
-  int tx_primitive_cntrs [fc::PRIM_MAX];
-  int rx_primitive_cntrs [fc::PRIM_MAX];
+  logic [31:0] tx_primitive_cntrs [fc::PRIM_MAX];
+  logic [31:0] rx_primitive_cntrs [fc::PRIM_MAX];
 
   fc::primitives_t tx_prim = fc::PRIM_UNKNOWN, rx_prim = fc::PRIM_UNKNOWN;
 
   // Signal used for trigging debug traces
   (* noprune *) logic rx_unknown_prim;
   logic [31:0] rx_last_unknown;
-  always @(posedge rx_clk) begin
+  always_ff @(posedge rx_clk) begin
     // Sample unknown primitives for debugging
     if (tx_be_datak_r == 4'b1000 && is_aligned) begin
       rx_unknown_prim <= rx_prim == fc::PRIM_UNKNOWN;
@@ -178,21 +178,21 @@ module fc_8g_xcvr (
     end
   end
 
-  always @(posedge rx_clk) begin
+  always_ff @(posedge rx_clk) begin
     rx_be_datak_r <= rx_be_datak;
     rx_be_data_r <= rx_be_data;
     if (rx_be_datak == 4'b1000)
       rx_prim <= fc::map_primitive(rx_be_data);
     if (rx_be_datak_r == 4'b1000 && is_aligned)
-      rx_primitive_cntrs[rx_prim]++;
+      rx_primitive_cntrs[rx_prim] <= rx_primitive_cntrs[rx_prim] + 1;
   end
 
-  always @(posedge tx_clk) begin
+  always_ff @(posedge tx_clk) begin
     tx_be_datak_r <= tx_be_datak;
     if (tx_be_datak == 4'b1000)
       tx_prim <= fc::map_primitive(tx_be_data);
     if (tx_be_datak_r == 4'b1000)
-      tx_primitive_cntrs[tx_prim]++;
+      tx_primitive_cntrs[tx_prim] <= tx_primitive_cntrs[tx_prim] + 1;
   end
 
   logic [31:0] reg_readdata;
@@ -209,7 +209,7 @@ module fc_8g_xcvr (
   logic valid_prim_addr;
   assign valid_prim_addr = fc::primitives_t'(prim_addr) < fc::PRIM_MAX;
 
-  always @* begin
+  always_comb begin
     case (mm_address[8:5])
       4'h0: begin
         case (mm_address[4:0])
@@ -239,7 +239,7 @@ module fc_8g_xcvr (
   // while it makes much more sense to write logic using big-endian.
   // Thus, we convert it before shipping it of to the XCVR.
 
-  always @(posedge tx_clk) begin
+  always_ff @(posedge tx_clk) begin
     tx_le_data[7:0]   <= tx_be_data[31:24];
     tx_le_data[15:8]  <= tx_be_data[23:16];
     tx_le_data[23:16] <= tx_be_data[15:8];
@@ -247,7 +247,7 @@ module fc_8g_xcvr (
     tx_le_datak <= {tx_be_datak[0], tx_be_datak[1], tx_be_datak[2], tx_be_datak[3]};
   end
 
-  always @(posedge rx_clk) begin
+  always_ff @(posedge rx_clk) begin
     rx_be_data[7:0]   <= rx_le_data[31:24];
     rx_be_data[15:8]  <= rx_le_data[23:16];
     rx_be_data[23:16] <= rx_le_data[15:8];
@@ -266,7 +266,7 @@ module fc_8g_xcvr (
   assign tx_be_data  = avtx_valid ? avtx_data[31:0] : fc::NOS;
   assign tx_be_datak = avtx_valid ? avtx_data[35:32] : 4'b1000;
 
-  always @(posedge mgmt_clk) begin
+  always_ff @(posedge mgmt_clk) begin
     tx_xcvr_ready <= tx_xcvr_ready_raw;
   end
 
@@ -274,7 +274,7 @@ module fc_8g_xcvr (
   logic tx_xcvr_ready_cdc2 = 1'b0;
   logic tx_xcvr_ready_xfered = 1'b0;
 
-  always @(posedge tx_clk) begin
+  always_ff @(posedge tx_clk) begin
     tx_xcvr_ready_cdc1 <= tx_xcvr_ready;
     tx_xcvr_ready_cdc2 <= tx_xcvr_ready_cdc1;
     tx_xcvr_ready_xfered <= tx_xcvr_ready_cdc2;

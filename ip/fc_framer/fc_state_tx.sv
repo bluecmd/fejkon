@@ -6,7 +6,7 @@ module fc_state_tx (
     input  fc::state_t  state
   );
 
-  always @* begin
+  always_comb begin
     case (state)
       fc::STATE_AC:  data = fc::ARBFF;
       fc::STATE_LR1: data = fc::LR;
@@ -17,6 +17,8 @@ module fc_state_tx (
       fc::STATE_OL1: data = fc::OLS;
       fc::STATE_OL2: data = fc::LR;
       fc::STATE_OL3: data = fc::NOS;
+      // TODO: Add assert
+      default: data = fc::LR;
     endcase
   end
 

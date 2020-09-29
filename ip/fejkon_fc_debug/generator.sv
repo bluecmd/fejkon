@@ -1,3 +1,5 @@
+// TODO: Remove use of blocking assignments
+// verilog_lint: waive-start always-ff-non-blocking
 module generator (
     input  wire         clk,
     input  wire         reset,
@@ -19,7 +21,7 @@ module generator (
 
   int gen_idx = 0;
 
-  always @(posedge clk) begin: gen_driver
+  always_ff @(posedge clk) begin: gen_driver
     if (reset) begin
       gen_valid <= 0;
       gen_idx = 0;
@@ -53,3 +55,4 @@ module generator (
   assign st_out_empty = gen_empty;
 
 endmodule
+// verilog_lint: waive-stop always-ff-non-blocking

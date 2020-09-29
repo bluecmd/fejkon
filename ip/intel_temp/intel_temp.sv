@@ -21,7 +21,7 @@ module intel_temp #(
   // reset. It is meant to be a protection in our case, not an every-day thing.
   reg fan_r = '0;
 
-  always @(posedge clk) begin
+  always_ff @(posedge clk) begin
     if (reset) begin
       readdata_r <= '0;
       clr_r <= 1'b1;

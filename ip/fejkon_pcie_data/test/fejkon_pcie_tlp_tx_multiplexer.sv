@@ -162,7 +162,7 @@ module fejkon_pcie_tlp_tx_multiplexer (
    // ---------------------------------------------------------------------
    //| Capture Decision
    // ---------------------------------------------------------------------
-   always @ (negedge reset_n, posedge clk) begin
+   always_ff @ (negedge reset_n, posedge clk) begin
       if (!reset_n) begin
          select <= 0;
          packet_in_progress <= 0;
@@ -224,7 +224,7 @@ module fejkon_pcie_tlp_tx_multiplexer (
       default : in0_ready <= selected_ready;
 
 endcase // case (select)
-end // always @ *
+end // always_ff @ *
 
    // ---------------------------------------------------------------------
    //| output Pipeline
@@ -273,7 +273,7 @@ module fejkon_pcie_tlp_tx_multiplexer_1stage_pipeline
       //     if (!out_ready)
       //       in_ready = 0;
    end
-   always @ (negedge reset_n, posedge clk) begin
+   always_ff @ (negedge reset_n, posedge clk) begin
       if (!reset_n) begin
          in_ready1 <= 0;
          out_valid <= 0;
@@ -289,7 +289,7 @@ module fejkon_pcie_tlp_tx_multiplexer_1stage_pipeline
             out_payload <= in_payload;
          end
       end // else: !if(!reset_n)
-   end // always @ (negedge reset_n, posedge clk)
+   end // always_ff @ (negedge reset_n, posedge clk)
 
 endmodule //
 

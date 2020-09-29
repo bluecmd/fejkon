@@ -29,7 +29,7 @@ module tl_cfg_module (
   logic tl_cfg_add_reg = 0;
   logic tl_cfg_add_reg2 = 0;
 
-  always @(posedge clk) begin
+  always_ff @(posedge clk) begin
     tl_cfg_add_reg <= tl_cfg_add[0];
     tl_cfg_add_reg2 <= tl_cfg_add_reg;
   end
@@ -38,13 +38,13 @@ module tl_cfg_module (
   logic cfgctl_addr_change2;
   logic capture_config_strobe;
 
-  always @(posedge clk) begin
+  always_ff @(posedge clk) begin
     cfgctl_addr_change <= tl_cfg_add_reg2 != tl_cfg_add_reg;
     cfgctl_addr_change2 <= cfgctl_addr_change;
     capture_config_strobe <= cfgctl_addr_change2;
   end
 
-  always @(posedge clk) begin
+  always_ff @(posedge clk) begin
     // This should happen every 8 clock cycles according to the datasheet.
     // tl_cfg_* cycles through all addresses, so this is basically a game
     // of capturing the values we want.
@@ -54,7 +54,7 @@ module tl_cfg_module (
     end
   end
 
-  always @(posedge clk) begin
+  always_ff @(posedge clk) begin
     if (reset) begin
       cfg_bus <= 0;
       cfg_dev <= 0;

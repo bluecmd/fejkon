@@ -39,17 +39,17 @@ module freq_gauge #(
   logic reset_ref_r0 = 0;
   logic reset_ref = 0;
 
-  always @(posedge ref_clk) begin
+  always_ff @(posedge ref_clk) begin
     reset_ref_r0 <= reset;
     reset_ref <= reset_ref_r0;
   end
 
-  always @(posedge probe_clk) begin
+  always_ff @(posedge probe_clk) begin
     reset_probe_r0 <= reset;
     reset_probe <= reset_probe_r0;
   end
 
-  always @(posedge ref_clk) begin
+  always_ff @(posedge ref_clk) begin
     if (reset_ref) begin
       countdown <= MeasurementTime;
       measure <= 1;
@@ -67,7 +67,7 @@ module freq_gauge #(
   end
 
   // Measure signal CDC transfer (ref_clk -> probe_clk)
-  always @(posedge probe_clk) begin
+  always_ff @(posedge probe_clk) begin
     measure_cdc1 <= measure;
     measure_cdc2 <= measure_cdc1;
     probe_measure <= measure_cdc2;
@@ -75,7 +75,7 @@ module freq_gauge #(
 
   // Counter CDC transfer (probe_clk -> ref_clk)
   // During processing stage the counter will be mostly stable
-  always @(posedge ref_clk) begin
+  always_ff @(posedge ref_clk) begin
     if (process) begin
       counter_cdc1 <= counter;
       counter_cdc2 <= counter_cdc1;
@@ -85,7 +85,7 @@ module freq_gauge #(
 
   logic probe_measure_r = 0;
 
-  always @(posedge probe_clk) begin
+  always_ff @(posedge probe_clk) begin
     if (reset_probe) begin
       counter <= 0;
       probe_measure_r <= 0;

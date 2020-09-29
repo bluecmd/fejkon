@@ -55,7 +55,7 @@ module sfp_port (
   assign rd_response = mm_address == 4'h0 ? 2'b00 : 2'b11;
 
   // Writer
-  always @(posedge clk or posedge reset)
+  always_ff @(posedge clk or posedge reset)
   begin
     if (reset)
       begin
@@ -80,7 +80,7 @@ module sfp_port (
     end
   end
 
-  always @(posedge clk)
+  always_ff @(posedge clk)
   begin
     mod0_prsnt_n_r <= mod0_prsnt_n;
   end

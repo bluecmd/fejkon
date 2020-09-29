@@ -20,7 +20,7 @@ module fejkon_led #(
   logic [7:0] in_cdc1 = 8'b0;
   logic [7:0] in = 8'b0;
 
-  always @(posedge clk) begin
+  always_ff @(posedge clk) begin
     in_cdc1[0] <= fcport0_aligned;
     in_cdc1[1] <= fcport1_aligned;
     in_cdc1[2] <= fcport2_aligned;
@@ -50,7 +50,7 @@ module fejkon_led #(
     .flap(flap)
   );
 
-  always @(posedge clk) begin
+  always_ff @(posedge clk) begin
     led[0] <= flap[0] ? blink : in[0];
     led[1] <= flap[1] ? blink : in[1];
     led[2] <= flap[2] ? blink : in[2];
@@ -63,7 +63,7 @@ module fejkon_led #(
 
   int blinker = BlinkHz;
 
-  always @(posedge clk) begin
+  always_ff @(posedge clk) begin
     if (blinker == 0) begin
       blink <= ~blink;
       blinker <= BlinkHz;

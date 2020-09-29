@@ -14,7 +14,7 @@ module pcie_reset (
   assign rst = perst_n & ~reset;
 
   // Logic from Terasic reference design
-  always @(posedge clk or negedge rst)
+  always_ff @(posedge clk or negedge rst)
     begin
       if (rst == 0)
         begin

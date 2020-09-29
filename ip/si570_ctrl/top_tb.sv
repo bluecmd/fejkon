@@ -29,18 +29,6 @@ module top_tb;
   logic [7:0] regs[integer];
 
   initial begin
-    // Settings from an example in the datasheet
-    regs[7] = {3'b000, 5'h1};
-    regs[8] = {2'h3, 6'h2};
-    regs[9] = 8'hbc;
-    regs[10] = 8'h01;
-    regs[11] = 8'h1e;
-    regs[12] = 8'hb8;
-    regs[135] = 8'bxxxxxxxx;
-    regs[137] = 8'bxxxxxxxx;
-  end
-
-  initial begin
     // Values taken from example from datasheet
     wait(dut.fxtal_valid);
     assert(dut.orig_hs_div == 'd4);
@@ -89,7 +77,7 @@ module top_tb;
   logic [7:0] data_out = 8'h55;
 
   // I2C frame counter
-  always @(edge sda) begin
+  always_ff @(edge sda) begin
     if (scl && ~reset) begin
       // Detect start and stop condition
       detect <= ~sda;
@@ -103,7 +91,7 @@ module top_tb;
     end
   end
 
-  always @(negedge dut.scl_o or reset) begin
+  always_ff @(negedge dut.scl_o or reset) begin
     if (reset) begin
       cntr <= -1;
     end else if (~dut.scl_o) begin
@@ -117,7 +105,7 @@ module top_tb;
   end
 
   // Drive on negative edge
-  always @(negedge dut.scl_o) begin
+  always_ff @(negedge dut.scl_o) begin
     sda_oe <= 1'b0;
     if (cntr == 7) begin
       sda_oe <= 1'b1; // Ack device presence
@@ -133,7 +121,18 @@ module top_tb;
   end
 
   // Read on positive edge (cntr is +1 from negedge)
-  always @(posedge dut.scl_o) begin
+  always_ff @(posedge dut.scl_o) begin
+    if (reset) begin
+      // Settings from an example in the datasheet
+      regs[7] = {3'b000, 5'h1};
+      regs[8] = {2'h3, 6'h2};
+      regs[9] = 8'hbc;
+      regs[10] = 8'h01;
+      regs[11] = 8'h1e;
+      regs[12] = 8'hb8;
+      regs[135] = 8'bxxxxxxxx;
+      regs[137] = 8'bxxxxxxxx;
+    end
     if (cntr == 7) begin
       writing <= ~dut.sda_o;
     end else if (writing && (cntr > 8 && cntr < 17)) begin

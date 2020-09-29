@@ -91,7 +91,7 @@ module c2h_dma (
   end
 
   // Staging ingest block
-  always @(posedge clk) begin: staging_ingest
+  always_ff @(posedge clk) begin: staging_ingest
     if (reset) begin
       staging_offset <= 0;
     end else begin
@@ -111,7 +111,7 @@ module c2h_dma (
     end
   end
 
-  always @(posedge clk) begin: staging_enqueue_cntr
+  always_ff @(posedge clk) begin: staging_enqueue_cntr
     if (reset) begin
       staging_enqueued = 0;
       staging_done <= 1'b0;
@@ -147,7 +147,7 @@ module c2h_dma (
 
   assign dma_tlp_tx_busy = tx_running;
 
-  always @(posedge clk) begin: dma_tlp_sender
+  always_ff @(posedge clk) begin: dma_tlp_sender
     if (reset) begin
       tx_running <= 0;
       tx_fragment_left <= 0;

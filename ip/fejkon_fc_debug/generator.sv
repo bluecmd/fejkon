@@ -19,7 +19,7 @@ module generator (
 
   int gen_idx = 0;
 
-  always @(posedge clk) begin: gen_driver
+  always_ff @(posedge clk) begin: gen_driver
     if (reset) begin
       gen_valid <= 0;
       gen_idx = 0;

@@ -130,7 +130,7 @@ module si570_ctrl #(
   assign fdco_too_high = new_fdco > 34'd5670000000;
   assign config_valid = fxtal_valid && ~fdco_too_high && ~fdco_too_low;
 
-  always @(posedge clk) begin
+  always_ff @(posedge clk) begin
     if (reset) begin
       new_hs_div <= 4;
       new_n1 <= 0;
@@ -172,7 +172,7 @@ module si570_ctrl #(
   );
 
   int div_delay_cntr = 0;
-  always @(posedge clk) begin
+  always_ff @(posedge clk) begin
     // Handle the division latency of 62 clock cycles
     if (reset || startup) begin
       fxtal_valid <= 0;
@@ -201,7 +201,7 @@ module si570_ctrl #(
   localparam PowerUpCycles = InputClock / 100;
   int power_up_cntr = PowerUpCycles;
 
-  always @(posedge clk) begin
+  always_ff @(posedge clk) begin
     if (reset) begin
       power_up_cntr <= PowerUpCycles;
     end else begin
@@ -226,7 +226,7 @@ module si570_ctrl #(
       instr_next = bus.done ? instr + 1 : instr;
   end
 
-  always @(posedge clk) begin
+  always_ff @(posedge clk) begin
     if (reset || startup) begin
       instr <= 0;
       startup <= 0;

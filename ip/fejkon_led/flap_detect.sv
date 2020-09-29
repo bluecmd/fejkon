@@ -15,7 +15,7 @@ module flap_detect #(
 
   assign flap = flapped && (flap_strikes_left == 0);
 
-  always @(posedge clk) begin
+  always_ff @(posedge clk) begin
     in_r <= in;
     if (flapped) begin
       if (in != in_r && (flap_strikes_left != 0)) begin

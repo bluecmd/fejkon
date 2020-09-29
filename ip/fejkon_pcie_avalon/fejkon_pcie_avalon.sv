@@ -36,7 +36,7 @@ module fejkon_pcie_avalon (
   logic [31:0] m_writedata = 0;
   logic        m_busy = 0;
 
-  always @(posedge clk) begin
+  always_ff @(posedge clk) begin
     // Read finished
     if (mm_readdatavalid) begin
       compl_valid <= 1'b1;

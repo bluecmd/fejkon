@@ -44,7 +44,7 @@ module intel_pcie_tlp_adapter (
 
   // Map Intel PCIe custom "empty" signal to Avalon-ST standard for 32-bit
   // words
-  always @(*) begin
+  always_comb begin
     case (tlp_tx_st_empty[4:2])
       3'h0: phy_tx_st_empty_out = 2'h0;
       3'h1: phy_tx_st_empty_out = 2'h0;
@@ -59,7 +59,7 @@ module intel_pcie_tlp_adapter (
     endcase
   end
 
-  always @(*) begin
+  always_comb begin
     case (phy_rx_st_empty)
       2'h0: tlp_rx_st_empty_out = 3'h0;
       2'h1: tlp_rx_st_empty_out = 3'h2;

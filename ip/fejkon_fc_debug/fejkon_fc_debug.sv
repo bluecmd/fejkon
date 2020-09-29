@@ -140,7 +140,7 @@ module fejkon_fc_debug (
     end
   end
 
-  always @(*) begin: out_driver
+  always_comb begin: out_driver
     if (source_generator) begin
       out_valid = gen_valid;
       out_data = gen_data;
@@ -158,7 +158,7 @@ module fejkon_fc_debug (
     end
   end
 
-  always @(*) begin: ready_driver
+  always_comb begin: ready_driver
     if (reset) begin
       in_ready = 0;
     end else begin

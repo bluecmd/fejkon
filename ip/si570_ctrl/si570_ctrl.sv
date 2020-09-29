@@ -68,7 +68,7 @@ module si570_ctrl #(
   logic [37:0] orig_rfreq;
   logic [33:0] orig_fdco;
 
-  always @* begin
+  always_comb begin
     // Map from datasheet
     case (raw_hs_div)
       0: orig_hs_div = 4;
@@ -87,7 +87,7 @@ module si570_ctrl #(
 
   logic [61:0] fxtal;
 
-  always @* begin
+  always_comb begin
     orig_fdco = RecallFrequency * orig_hs_div * orig_n1;
   end
 
@@ -99,7 +99,7 @@ module si570_ctrl #(
   logic [6:0]  out_n1;
   logic [37:0] out_rfreq;
 
-  always @* begin
+  always_comb begin
     // Map from datasheet
     case (new_hs_div)
       4:  out_hs_div = 0;
@@ -214,7 +214,7 @@ module si570_ctrl #(
 
   int instr = 0, instr_next;
 
-  always @* begin
+  always_comb begin
     // Advance if I2C is marked as done and we are not computing configuration
     if (instr == 0)
       instr_next = powered_up ? instr + 1 : instr;

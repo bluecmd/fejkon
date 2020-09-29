@@ -209,7 +209,7 @@ module fc_8g_xcvr (
   logic valid_prim_addr;
   assign valid_prim_addr = fc::primitives_t'(prim_addr) < fc::PRIM_MAX;
 
-  always @* begin
+  always_comb begin
     case (mm_address[8:5])
       4'h0: begin
         case (mm_address[4:0])

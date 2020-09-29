@@ -77,7 +77,7 @@ module c2h_dma (
   // Staging streams in the acquired data at the same time as the previous
   // packet is being transmitted. Maximum 1 packet pressure though to keep
   // logic simple.
-  always @(*) begin
+  always_comb begin
     staging_start_next = 0;
     if (reset) begin
       staging_start_next = 1;
@@ -289,7 +289,7 @@ module c2h_dma (
   // Signal done on the same cycle as the TLP EOP is being produced.
   // This allows the DMA write pointer to be updated and for a new TLP to be
   // started in the next cycle.
-  always @(*) begin: dma_done_strobe_driver
+  always_comb begin: dma_done_strobe_driver
     if (reset) begin
       dma_done = 0;
     end else begin

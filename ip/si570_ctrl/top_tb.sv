@@ -151,23 +151,23 @@ module top_tb;
     end
   end
 
-  always @* begin
+  always_comb begin
     case (cntr)
-      -1: section <= "Reset      ";
-      0: section  <= "Address    ";
-      7: section  <= "Read/Write ";
-      8: section  <= "ACK        ";
-      9: section  <= "Register   ";
-      17: section <= "ACK        ";
-      18: section <= "Data       ";
+      -1: section = "Reset      ";
+      0: section  = "Address    ";
+      7: section  = "Read/Write ";
+      8: section  = "ACK        ";
+      9: section  = "Register   ";
+      17: section = "ACK        ";
+      18: section = "Data       ";
       // We only expect two operations per I2C activity
-      26: section <= "ACK        ";
-      27: section <= "STOP       ";
+      26: section = "ACK        ";
+      27: section = "STOP       ";
       28: begin
-        section <= "--INVALID--";
+        section = "--INVALID--";
         $error("Reached unknown I2C section");
       end
-      default: section <= section;
+      default: section = section;
     endcase
   end
 endmodule

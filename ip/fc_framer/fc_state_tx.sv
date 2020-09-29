@@ -6,7 +6,7 @@ module fc_state_tx (
     input  fc::state_t  state
   );
 
-  always @* begin
+  always_comb begin
     case (state)
       fc::STATE_AC:  data = fc::ARBFF;
       fc::STATE_LR1: data = fc::LR;

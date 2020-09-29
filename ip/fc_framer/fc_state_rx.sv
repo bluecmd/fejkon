@@ -13,7 +13,7 @@ module fc_state_rx (
   assign state = state_r;
 
   // This is Table 22 "FC_Port states" from FC-FS-5 INCITS 545-2019
-  always @* begin
+  always_comb begin
     state_next = state_r;
     case (fc::map_primitive(data))
       fc::PRIM_OLS: state_next = fc::STATE_OL2;

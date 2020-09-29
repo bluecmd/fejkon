@@ -151,7 +151,7 @@ module fejkon_pcie_data (
   assign tlp_rx_st_len      = tlp_rx_st_dword[0][9:0];
   assign tlp_rx_st_is_4dw   = tlp_rx_st_fmt[0];
 
-  always @(*) begin: tlp_rx_st_type_driver
+  always_comb begin: tlp_rx_st_type_driver
     case ({tlp_rx_st_fmt[1], tlp_rx_st_raw_type})
       6'b000000: tlp_rx_st_type = TLP_MRD;
       6'b000001: tlp_rx_st_type = TLP_MRDLK;
@@ -220,7 +220,7 @@ module fejkon_pcie_data (
   end
 
   // Masked address calculation
-  always @(*) begin: masked_address_driver
+  always_comb begin: masked_address_driver
     // TODO(bluecmd): Hard-coded to 64 KiB region
     tlp_rx_frm_masked_address = tlp_rx_frm_address & 64'h000000000000ffff;
   end
@@ -285,7 +285,7 @@ module fejkon_pcie_data (
 
   // A NPR requires a completion to be sent, a PR does not.
   // Signal unsupported requests
-  always @(*) begin: tlp_unsupported_driver
+  always_comb begin: tlp_unsupported_driver
     tlp_rx_frm_unsupported = 1'b0;
     if (tlp_rx_frm_type == TLP_UNKNOWN)
       tlp_rx_frm_unsupported = 1'b1; // Unknwon TLP type

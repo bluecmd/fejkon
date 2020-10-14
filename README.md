@@ -468,11 +468,9 @@ Operating Temp Range (°C): -40 to +85
 There are some known issues for running under Windows Subsystem for Linux (WSL)
 and ChromeOS Crostini (external reports).
 
-For WSL, using Ubuntu 18.04 (LTS) seems to work the best and require no workarounds.
-
 #### realloc(): invalid pointer
 
-This seems to happen on Ubuntu 19.04 and newer, including 20.04 LTS.
+This seems to happen on Ubuntu 18.04 and newer, including 20.04 LTS.
 When starting Quartus or some other tools they will crash with the following error message:
 
 ```

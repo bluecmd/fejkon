@@ -1,5 +1,7 @@
 # fejkon
 
+**Status: Sleeping ([#72](https://github.com/bluecmd/fejkon/issues/72)).**
+
 fejkon is a basic host bus adapter (HBA) for Fibre Channel (and thus, FICON) implemented on the DE5-Net board.
 The aim is to provide easy access to add or consume Fibre Channel services, such as FCP or FICON
 from an ordinary server.
